@@ -46,3 +46,10 @@ The initial bootstrap report remains historical. Read this report and ADR 0003 f
 Complete native-device and Compose/CI verification, configure approved notification delivery and production security/operations, then close Milestone 1. Plan CMS/public as the next major milestone only after foundation gates pass. Unknown business/privacy/content policies remain in the open-questions register.
 
 Final review: all documentation links resolve; CI/Compose YAML parses and carries required BFF configuration; runtime/development Python dependency pins agree; ignored local environment files are excluded from Git candidate files. This is not a substitute for the pending Gitleaks/container scan and remote CI runs.
+
+
+## CI follow-up (2026-09-18)
+
+Initial remote run: https://github.com/viviztech/edp-digital/actions/runs/35366293976 (commit c44dd32). Web, mobile, browser-auth, secrets and Compose passed. Compose established PostgreSQL 17 / Redis 7 readiness and a real Celery queue round-trip. These supersede the earlier unexecuted remote/Compose/secret-scan notes above. Native-device/iOS and production gates remain open.
+
+Backend migrations, lint and typing passed, but pytest collection failed with `ModuleNotFoundError: app`; later contract/audit steps were skipped. Reproduced using the pytest executable without an editable package install. The API pytest configuration now explicitly adds its project root to the test import path, independent of shell PYTHONPATH and invocation directory. No runtime, API contract, permission or database changes. Regression verification uses the existing 25-test suite and direct console entry point; Ruff lint/format passed. Full remote CI remains pending for the fix. Rollback: revert the pytest pythonpath setting.

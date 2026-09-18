@@ -39,3 +39,5 @@ Performance: obtain volume assumptions; build realistic synthetic distribution; 
 ## Foundation execution
 
 Set AUTH_TEST_DATABASE_URL to a dedicated migrated edp_auth_test/edp_test database; tests deliberately truncate synthetic fixtures and reject any other database name. Current identity suite covers concurrency and real PostgreSQL constraints. `scripts/run-foundation-browser-test.py` uses separate edp_foundation_e2e/edp_test, spawns owned API and standalone web processes on loopback 8100/3100, generates ephemeral test keys and runs actual Chrome/Chromium UI acceptance. No live messaging. Playwright defaults to bundled Chromium; PLAYWRIGHT_CHANNEL=chrome selects locally installed Chrome. All test evidence/status is in the foundation continuation report; remote CI must still run.
+
+Backend test discovery: `pytest -q` from apps/api and `pytest -q apps/api/tests` from the repository root both use the explicit API-root pythonpath in pyproject.toml. Integration tests still require the dedicated migrated AUTH_TEST_DATABASE_URL. Remote CI evidence and remaining gates are recorded in the foundation continuation report.
