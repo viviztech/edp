@@ -24,3 +24,11 @@ Apply migrations, then from apps/api run `python -m app.modules.identity.cli see
 Provision initial administrator with `python -m app.modules.identity.cli bootstrap-admin --email admin@example.com --name "Synthetic Admin" --organization "Synthetic Organization"`; password is prompted invisibly and never passed on command line. This creates a new account and organization, refuses existing accounts. Use `grant-role` / `revoke-role` with --email, --organization-id and --role for existing accounts; each changed binding is audited. No default administrator password.
 
 Run backend integration tests only with AUTH_TEST_DATABASE_URL pointing to dedicated edp_auth_test or edp_test, migrated to head. They truncate fixture tables and refuse other database names. Browser acceptance uses edp_foundation_e2e or edp_test, prebuilt Next.js, and `python scripts/run-foundation-browser-test.py`. Set PLAYWRIGHT_CHANNEL=chrome to use installed Chrome locally; CI installs bundled Chromium. Runner owns temporary ports 8100/3100 and cleans its child processes. No production data.
+
+## CMS pages
+
+Apply migration 2b3fcc875606, rerun the trusted `identity.cli seed` command to add CMS permissions, and grant Content Manager in the intended organization. Existing role grants acquire only their explicit seeded catalog. Set `PUBLIC_ORGANIZATION_ID` to that organization's UUID in the web environment (and root Compose .env); restart the web process. Flutter requires `--dart-define=PUBLIC_ORGANIZATION_ID=UUID` alongside API_BASE_URL. Missing configuration shows content unavailable; no arbitrary organization is auto-selected.
+
+Staff authoring: /en/admin/pages or /ta/admin/pages; public list: /en/pages or /ta/pages; detail: /{locale}/pages/{slug}. CMS body is plain text in this first slice. Save before preview/publish. Published content stays unchanged until another publish. After stale-write conflict, reload the page from the page list and reconcile edits. Archive removes only the selected locale; restore creates an unpublished draft.
+
+Rollback code without dropping published data. Schema downgrade is destructive and for disposable tests only; production disposal needs backup and approval.

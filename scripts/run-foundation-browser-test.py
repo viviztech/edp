@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 import time
+from uuid import uuid4
 from pathlib import Path
 from urllib.request import urlopen
 
@@ -17,7 +18,7 @@ assert make_url(os.environ["DATABASE_URL"]).database in {"edp_foundation_e2e", "
 env = dict(os.environ)
 env.update(APP_ENV="local", AUTH_DELIVERY_KEY=Fernet.generate_key().decode(), BFF_KEY=secrets.token_urlsafe(32),
            PYTHONPATH=str(root / "apps/api"), API_INTERNAL_URL="http://127.0.0.1:8100", WEB_ORIGIN="http://127.0.0.1:3100",
-           COOKIE_SECURE="false", HOSTNAME="127.0.0.1", PORT="3100")
+           COOKIE_SECURE="false", HOSTNAME="127.0.0.1", PORT="3100", PUBLIC_ORGANIZATION_ID=str(uuid4()))
 shutil.copytree(root / "apps/web/.next/static", root / "apps/web/.next/standalone/.next/static", dirs_exist_ok=True)
 cache = root / ".tool-cache"
 cache.mkdir(exist_ok=True)

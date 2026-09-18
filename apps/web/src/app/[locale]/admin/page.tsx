@@ -5,6 +5,7 @@ import { authMessages } from "../../../lib/auth-messages";
 import { isLocale } from "../../../lib/messages";
 import { serverApi } from "../../../lib/server-api";
 import Audit from "./view";
+import { cmsMessages } from "../../../lib/cms-messages";
 
 export default async function AdminShell({ params, searchParams }: {
   params: Promise<{ locale: string }>; searchParams: Promise<{ organization?: string }>;
@@ -27,6 +28,7 @@ export default async function AdminShell({ params, searchParams }: {
   if (!access.ok) return <main id="main"><p>{text.denied}</p></main>;
   return <main id="main"><h1>{text.staff}</h1><p>{grant.organization_name}</p>
     <Link href={"/" + locale + "/account"}>{text.back}</Link>
+    {grant.permissions.includes("cms.page.view") && <p><Link href={`/${locale}/admin/pages?organization=${grant.organization_id}`}>{cmsMessages[locale].workspace}</Link></p>}
     {grant.permissions.includes("audit.view") && <Audit organization={grant.organization_id} text={text} />}
   </main>;
 }

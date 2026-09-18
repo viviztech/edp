@@ -51,7 +51,10 @@ ROLE_NAMES = [
     "Support Executive",
     "Participant",
 ]
-PERMISSIONS = ["system.access", "audit.view"]
+CMS_PERMISSIONS = [
+    "cms.page." + action for action in ("view", "create", "update", "publish", "archive")
+]
+PERMISSIONS = ["system.access", "audit.view", *CMS_PERMISSIONS]
 
 
 def audit(
@@ -382,7 +385,11 @@ def seed_roles(db: Session) -> None:
         codes = (
             PERMISSIONS
             if name == "Super Admin"
-            else (["system.access"] if name != "Participant" else [])
+            else (
+                ["system.access", *CMS_PERMISSIONS]
+                if name == "Content Manager"
+                else (["system.access"] if name != "Participant" else [])
+            )
         )
         for code in codes:
             if not db.get(RolePermission, (role.id, code)):

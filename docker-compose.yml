@@ -65,6 +65,7 @@ services:
   web:
     environment:
       API_INTERNAL_URL: http://api:8000
+      PUBLIC_ORGANIZATION_ID: ${PUBLIC_ORGANIZATION_ID:-}
       WEB_ORIGIN: http://localhost:3000
       BFF_KEY: ${BFF_KEY:?Generate a server-only BFF key in .env}
       COOKIE_SECURE: "false"

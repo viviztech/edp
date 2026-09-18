@@ -131,4 +131,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authNext => 'Next';
+
+  @override
+  String get cmsPages => 'Pages';
+
+  @override
+  String get cmsEmpty => 'No pages yet.';
+
+  @override
+  String get cmsError =>
+      'Unable to complete the request. Retry or sign in again.';
+
+  @override
+  String get cmsLoading => 'Loading';
+
+  @override
+  String get cmsMore => 'Load more';
+
+  @override
+  String get cmsBack => 'Back';
+
+  @override
+  String get cmsUnavailable => 'This page is unavailable.';
+
+  @override
+  String get cmsRetry => 'Retry';
 }

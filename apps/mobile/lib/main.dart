@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'l10n/app_localizations.dart';
 import 'features/identity/account_page.dart';
+import 'features/cms/public_pages.dart';
 
 final localeProvider = NotifierProvider<LocaleController, Locale>(
   LocaleController.new,
@@ -22,6 +23,11 @@ final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     routes: [
       GoRoute(path: '/', builder: (_, _) => const PublicHome()),
+      GoRoute(path: '/pages', builder: (_, _) => const PublicPages()),
+      GoRoute(
+        path: '/pages/:slug',
+        builder: (_, state) => PublicPages(slug: state.pathParameters['slug']),
+      ),
       GoRoute(path: '/account', builder: (_, _) => const AccountPage()),
     ],
   );
@@ -68,6 +74,10 @@ class PublicHome extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(text.availability),
+            TextButton(
+              onPressed: () => context.push('/pages'),
+              child: Text(text.cmsPages),
+            ),
             TextButton(
               onPressed: () => context.push('/account'),
               child: Text(text.authTitle),

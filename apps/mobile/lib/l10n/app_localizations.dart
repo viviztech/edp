@@ -331,6 +331,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next'**
   String get authNext;
+
+  /// No description provided for @cmsPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get cmsPages;
+
+  /// No description provided for @cmsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No pages yet.'**
+  String get cmsEmpty;
+
+  /// No description provided for @cmsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to complete the request. Retry or sign in again.'**
+  String get cmsError;
+
+  /// No description provided for @cmsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get cmsLoading;
+
+  /// No description provided for @cmsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get cmsMore;
+
+  /// No description provided for @cmsBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get cmsBack;
+
+  /// No description provided for @cmsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This page is unavailable.'**
+  String get cmsUnavailable;
+
+  /// No description provided for @cmsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get cmsRetry;
 }
 
 class _AppLocalizationsDelegate

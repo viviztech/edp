@@ -18,6 +18,7 @@ from starlette.exceptions import HTTPException
 from app.core.config import get_settings
 from app.core.database import create_engine
 from app.core.logging import configure_logging
+from app.modules.cms.routes import router as cms_router
 from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
 
@@ -74,6 +75,7 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json" if docs_enabled else None,
     )
     app.include_router(identity_router)
+    app.include_router(cms_router)
 
     @app.exception_handler(AuthError)
     async def auth_error(request: Request, exc: AuthError) -> JSONResponse:
@@ -106,6 +108,23 @@ def create_app() -> FastAPI:
         structlog.contextvars.clear_contextvars()
         structlog.contextvars.bind_contextvars(request_id=request_id)
         try:
+            if request.url.path.startswith("/api/v1/cms/") and request.method in {"POST", "PATCH"}:
+                body = bytearray()
+                async for chunk in request.stream():
+                    body.extend(chunk)
+                    if len(body) > 262144:
+                        return JSONResponse(
+                            status_code=413,
+                            content={
+                                "error": {
+                                    "code": "body_too_large",
+                                    "message": "Request too large",
+                                    "request_id": request_id,
+                                }
+                            },
+                            headers={"Cache-Control": "no-store", "X-Request-ID": request_id},
+                        )
+                request._body = bytes(body)
             response = await call_next(request)
         except Exception as exc:
             log.error("request_failed", error_type=type(exc).__name__)
@@ -121,7 +140,7 @@ def create_app() -> FastAPI:
             )
         response.headers["X-Request-ID"] = request_id
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["Cache-Control"] = "no-store"
+        response.headers.setdefault("Cache-Control", "no-store")
         log.info("request_completed", method=request.method, status=response.status_code)
         structlog.contextvars.clear_contextvars()
         return response

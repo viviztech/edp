@@ -130,4 +130,28 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get authNext => 'அடுத்து';
+
+  @override
+  String get cmsPages => 'பக்கங்கள்';
+
+  @override
+  String get cmsEmpty => 'பக்கங்கள் இல்லை.';
+
+  @override
+  String get cmsError => 'கோரிக்கை தோல்வி. மீண்டும் முயற்சிக்கவும்.';
+
+  @override
+  String get cmsLoading => 'ஏற்றுகிறது';
+
+  @override
+  String get cmsMore => 'மேலும்';
+
+  @override
+  String get cmsBack => 'பின்னால்';
+
+  @override
+  String get cmsUnavailable => 'பக்கம் கிடைக்கவில்லை.';
+
+  @override
+  String get cmsRetry => 'மீண்டும் முயல்';
 }

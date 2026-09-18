@@ -144,3 +144,7 @@ class AuditLog(Record, Base):
     action: Mapped[str] = mapped_column(String(80), index=True)
     resource_id: Mapped[UUID | None] = mapped_column(index=True)
     request_id: Mapped[str] = mapped_column(String(80))
+
+    resource_version: Mapped[int | None] = mapped_column(Integer)
+    reason: Mapped[str | None] = mapped_column(String(500))
+    changed_fields: Mapped[str | None] = mapped_column(String(200))

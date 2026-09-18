@@ -221,3 +221,5 @@ ADR 0003: email-only login initially (master allows email and/or mobile); Person
 ## CMS first-slice refinement
 
 The planned page/translation/immutable-revision model, scope-preserving composite foreign keys, constraints and indexes are specified in [CMS page design](../architecture/cms-page-design.md). No CMS tables are implemented yet; add only this subset with C01.1.
+
+C01.1 implementation: migration 2b3fcc875606 now creates cms_pages, cms_page_translations and cms_page_revisions, plus nullable AuditLog resource_version/reason/changed_fields. Publication timestamp is Revision.created_at. Revision numbers follow the translation version at publication (gaps are intentional after edits). Staff pagination uses stable UUID cursors; translations are batched to avoid N+1 reads.

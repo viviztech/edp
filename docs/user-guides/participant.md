@@ -5,3 +5,5 @@ Choose Your account, then Create account. Supply name, email and a 12?128 charac
 Forgot password requests a reset message without revealing whether an email is registered. Reset password consumes its code and signs out all existing sessions. Account shows active devices; sign out one device or all devices. An expired/revoked session requires sign-in again. After a network failure, reconnect before assuming remote device revocation succeeded.
 
 Program applications and student learning are not yet available. Do not submit real personal data or documents during foundation testing.
+
+Public information: use Pages on web or the mobile home screen to browse published information in the selected language. Missing translations are unavailable; drafts and archived content are never shown. No sign-in is needed.

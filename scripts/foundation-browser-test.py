@@ -3,7 +3,7 @@ import json
 import os
 import secrets
 from pathlib import Path
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from cryptography.fernet import Fernet
 from playwright.sync_api import expect, sync_playwright
@@ -77,7 +77,7 @@ with sync_playwright() as playwright:
         seed_roles(db)
         user = db.scalar(select(User).where(User.email == email))
         role = db.scalar(select(Role).where(Role.name == "Super Admin"))
-        organization = Organization(name="Synthetic E2E Organization")
+        organization = Organization(id=UUID(os.environ["PUBLIC_ORGANIZATION_ID"]), name="Synthetic E2E Organization")
         db.add(organization); db.flush()
         db.add(UserRole(user_id=user.id, role_id=role.id, organization_id=organization.id))
         audit(db, "system.role_granted", "synthetic-e2e", resource=user.id, organization=organization.id)
@@ -88,6 +88,47 @@ with sync_playwright() as playwright:
     expect(page.get_by_role("heading", name="Staff workspace")).to_be_visible()
     expect(page.get_by_text("system.role_granted", exact=False)).to_be_visible()
     assert page.request.get(base + "/api/session/staff/" + str(uuid4())).status == 403
+    page.goto(base + "/en/admin/pages")
+    expect(page.get_by_role("heading", name="Publishing workspace")).to_be_visible()
+    page.get_by_label("Page address", exact=True).fill("eligibility")
+    page.get_by_label("Title", exact=True).fill("Who can apply")
+    page.get_by_label("Content", exact=True).fill("Synthetic eligibility <script>alert(1)</script>")
+    page.get_by_role("button", name="Save draft", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Saved")
+    assert page.request.get(os.environ["API_INTERNAL_URL"]+"/api/v1/public/organizations/"+str(organization_id)+"/pages/eligibility?locale=en").status == 404
+    page.get_by_role("button",name="Preview saved draft",exact=True).click()
+    expect(page.locator(".cms-preview")).to_contain_text("<script>alert(1)</script>")
+    page.get_by_role("button",name="Publish saved draft",exact=True).click()
+    expect(page.locator(".cms-state")).to_contain_text("Published")
+    public = browser.new_page()
+    public.goto(base+"/en/pages/eligibility")
+    expect(public.get_by_role("heading",name="Who can apply")).to_be_visible()
+    expect(public.locator(".cms-body")).to_contain_text("<script>alert(1)</script>")
+    page.screenshot(path=str(evidence/"cms-debug.png"),full_page=True)
+    page.get_by_label("Content",exact=True).fill("Unpublished change")
+    page.get_by_role("button",name="Save draft",exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Saved")
+    public.reload()
+    expect(public.locator(".cms-body")).not_to_contain_text("Unpublished change")
+    page.get_by_label("Content language").select_option("ta")
+    page.get_by_label("Title",exact=True).fill("Tamil synthetic title")
+    page.get_by_label("Content",exact=True).fill("Tamil synthetic content")
+    page.get_by_role("button",name="Add translation",exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Saved")
+    assert page.request.get(os.environ["API_INTERNAL_URL"]+"/api/v1/public/organizations/"+str(organization_id)+"/pages/eligibility?locale=ta").status == 404
+    page.get_by_role("button",name="Publish saved draft",exact=True).click()
+    expect(page.locator(".cms-state")).to_contain_text("Published")
+    public.goto(base+"/ta/pages/eligibility")
+    expect(public.get_by_role("heading",name="Tamil synthetic title")).to_be_visible()
+    page.get_by_label("Archive reason").fill("Synthetic archive")
+    page.get_by_role("button",name="Archive",exact=True).click()
+    expect(page.locator(".cms-state")).to_contain_text("Archived")
+    assert page.request.get(os.environ["API_INTERNAL_URL"]+"/api/v1/public/organizations/"+str(organization_id)+"/pages/eligibility?locale=ta").status == 404
+    page.set_viewport_size({"width":390,"height":844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.screenshot(path=str(evidence/"cms-mobile.png"),full_page=True)
+    page.set_viewport_size({"width":1280,"height":900})
+    public.close()
     page.goto(base + "/en/admin?organization=" + str(uuid4()))
     expect(page.get_by_text("You do not have access to this workspace.")).to_be_visible()
     page.goto(base + "/en/account"); page.wait_for_load_state("domcontentloaded")
