@@ -1,0 +1,219 @@
+# PostgreSQL logical ERD
+
+Logical target design plus implemented foundation subset. Revision 0001_bootstrap is schema-neutral; revision 1de5e104c2f7 implements people, users, organizations, roles, permissions, role_permissions, user_roles, refresh_sessions, refresh_tokens, verification_tokens, auth_deliveries, auth_throttles and audit_logs. Other domain tables remain unimplemented. UUID PKs unless noted; `created_at/updated_at timestamptz` in UTC; `created_by/updated_by` where justified. `version int NOT NULL DEFAULT 1` on editable workflows. Financial amounts use numeric plus currency, never floats. Statuses constrained and changed through services. All FK columns indexed unless already the leading column of a suitable index.
+
+## Identity and organization
+
+```mermaid
+erDiagram
+  ORGANIZATION ||--o{ TRAINING_CENTER : contains
+  PERSON ||--o| USER : login
+  USER ||--o{ USER_ROLE : assigned
+  ROLE ||--o{ USER_ROLE : grants
+  ORGANIZATION ||--o{ USER_ROLE : scopes
+  ROLE ||--o{ ROLE_PERMISSION : contains
+  PERMISSION ||--o{ ROLE_PERMISSION : permits
+  USER ||--o{ REFRESH_SESSION : authenticates
+  REFRESH_SESSION ||--o{ REFRESH_TOKEN : rotates
+  USER ||--o{ VERIFICATION_TOKEN : verifies
+  USER ||--o{ AUDIT_LOG : acts
+  ORGANIZATION ||--o{ INTEGRATION_CONFIG : configures
+  ORGANIZATION ||--o{ SYSTEM_SETTING : configures
+  PERSON {
+    uuid id PK
+    text display_name
+    text locale
+  }
+  USER {
+    uuid id PK
+    uuid person_id FK
+    text email_normalized UK
+    text phone_normalized UK
+    text password_hash
+    text status
+  }
+  USER_ROLE {
+    uuid id PK
+    uuid user_id FK
+    uuid role_id FK
+    uuid organization_id FK
+    uuid program_id FK
+    uuid center_id FK
+  }
+  REFRESH_TOKEN {
+    uuid id PK
+    uuid session_id FK
+    text token_hash UK
+    timestamptz used_at
+    timestamptz expires_at
+  }
+```
+
+Person is the master user profile (maps UserProfile in Section 36); optional PersonContact stores normalized, verification-stamped contacts without duplicating profile across lifecycle tables. User requires at least one login identifier; unique partial indexes on non-null normalized email/phone. Shared prospect contacts may be candidate duplicates; no auto-merge. User.person_id unique. Role key and Permission.code unique; role_permission(role_id,permission_id) PK. Scoped user_role uniqueness uses PostgreSQL NULLS NOT DISTINCT across user/role/org/program/center; services and composite scope FKs ensure program/center belong to org. RefreshSession stores family/device/revoked_at/absolute expiry; each RefreshToken is single-use hash, linked replacement and expiry. VerificationToken purpose/hash/expiry/consumed_at; hash unique. Audit actor may be null for system; preserve actor pseudonym when account anonymized. IntegrationConfig holds references, not secrets. Settings unique(org,key), typed validated value.
+
+## Acquisition, application and selection
+
+```mermaid
+erDiagram
+  PERSON ||--o{ LEAD : identified
+  LEAD_SOURCE ||--o{ LEAD : sources
+  CAMPAIGN ||--o{ LEAD : attributes
+  LEAD ||--o{ LEAD_ACTIVITY : records
+  LEAD ||--o{ LEAD_NOTE : annotates
+  LEAD ||--o{ LEAD_ASSIGNMENT : assigns
+  LEAD ||--o{ FOLLOW_UP : schedules
+  LEAD ||--o{ LEAD_TAG_LINK : categorizes
+  LEAD_TAG ||--o{ LEAD_TAG_LINK : labels
+  PERSON ||--o{ APPLICATION : applies
+  LEAD o|--o{ APPLICATION : originates
+  PROGRAM ||--o{ SELECTION_CYCLE : opens
+  SELECTION_CYCLE ||--o{ APPLICATION : receives
+  APPLICATION ||--|{ APPLICATION_VERSION : versions
+  APPLICATION_VERSION ||--o{ APPLICATION_SECTION : contains
+  APPLICATION_VERSION ||--o{ APPLICATION_DOCUMENT : attaches
+  APPLICATION_VERSION ||--o{ ELIGIBILITY_RESPONSE : answers
+  APPLICATION ||--o{ APPLICATION_STATUS_HISTORY : transitions
+  PERSON ||--o{ CONSENT : agrees
+  SELECTION_CYCLE ||--o{ SELECTION_CRITERION : defines
+  APPLICATION_VERSION ||--o{ REVIEW_ASSIGNMENT : reviewed
+  REVIEW_ASSIGNMENT ||--o{ APPLICATION_SCORE : scores
+  SELECTION_CRITERION ||--o{ APPLICATION_SCORE : weights
+  APPLICATION ||--o{ INTERVIEW : schedules
+  INTERVIEW ||--o{ INTERVIEW_PANEL_MEMBER : includes
+  APPLICATION ||--o{ SELECTION_DECISION : decides
+```
+
+Lead has source/campaign/adset/ad/form IDs/names, UTMs, landing/referral and received_at; provider+meta_lead_id unique when present. Person FK optional until identity resolved. Contact candidates indexed, not globally unique in CRM. Application unique(person,cycle), application_number unique, optional source_lead_id, current_version_id and version. ApplicationVersion unique(application,revision); typed relational ApplicationSection values (definition/version, typed text/number/date/choice), not arbitrary JSON blobs. Submitted revisions immutable; documents reference MediaAsset. Rubric criteria versioned/frozen once scoring starts; positive weights and valid score range. Unique(review_assignment,criterion), unique(application_version,reviewer) and unique(interview,user) panel. Decisions/history append-only with actor/reason/from/to/time. Concurrent finalization uses row locking and version check. Consent captures policy version, purpose, timestamp and withdrawal, never a bare boolean only.
+
+## Programs and learning
+
+```mermaid
+erDiagram
+  ORGANIZATION ||--o{ PROGRAM : operates
+  PROGRAM ||--o{ COHORT : groups
+  TRAINING_CENTER ||--o{ COHORT : hosts
+  COHORT ||--o{ PROGRAM_SESSION : schedules
+  PERSON ||--o| PARTICIPANT_PROFILE : participates
+  PERSON ||--o| TRAINER_PROFILE : trains
+  PARTICIPANT_PROFILE ||--o{ PARTICIPANT_STATUS_HISTORY : changes
+  PARTICIPANT_PROFILE ||--o{ ENROLLMENT : joins
+  COHORT ||--o{ ENROLLMENT : admits
+  APPLICATION ||--o| ENROLLMENT : converts
+  COURSE ||--o{ COURSE_MODULE : orders
+  COURSE_MODULE ||--o{ LESSON : contains
+  LESSON ||--o{ LESSON_MATERIAL : provides
+  ENROLLMENT ||--o{ COURSE_ENROLLMENT : learns
+  COURSE ||--o{ COURSE_ENROLLMENT : delivers
+  COURSE_ENROLLMENT ||--o{ LESSON_PROGRESS : tracks
+  LESSON ||--o{ LESSON_PROGRESS : completes
+  COURSE ||--o{ ASSIGNMENT : requires
+  ASSIGNMENT ||--o{ SUBMISSION : receives
+  COURSE_ENROLLMENT ||--o{ SUBMISSION : submits
+  COURSE ||--o{ QUIZ : tests
+  QUIZ ||--o{ QUESTION : asks
+  QUESTION ||--o{ CHOICE : offers
+  QUIZ ||--o{ QUIZ_ATTEMPT : attempts
+  COURSE_ENROLLMENT ||--o{ QUIZ_ATTEMPT : makes
+  QUIZ_ATTEMPT ||--o{ ATTEMPT_ANSWER : records
+  QUESTION ||--o{ ATTEMPT_ANSWER : answers
+  ASSESSMENT ||--o{ GRADE : evaluates
+  COURSE_ENROLLMENT ||--o{ GRADE : earns
+  CERTIFICATE_TEMPLATE ||--o{ CERTIFICATE : renders
+  COURSE_ENROLLMENT ||--o{ CERTIFICATE : certifies
+  PROGRAM_SESSION ||--o| ATTENDANCE_SESSION : opens
+  ATTENDANCE_SESSION ||--o{ ATTENDANCE_RECORD : marks
+  ENROLLMENT ||--o{ ATTENDANCE_RECORD : attends
+  ATTENDANCE_RECORD ||--o{ ATTENDANCE_CORRECTION : corrects
+```
+
+Enrollment unique(participant,cohort) and application_id unique. Only selected application can create enrollment, participant link, audit and outbox in one transaction. ProgramCalendar is a projection of ProgramSession, not duplicate schedule data. CourseEnrollment unique(enrollment,course). CourseProgress is a derived projection from progress/assessment rules. LessonProgress unique(course_enrollment,lesson); module/lesson ordering unique(parent,position). Attempts unique(quiz,course_enrollment,attempt_number); answers preserve graded question version. Assignment submissions versioned unique(assignment,course_enrollment,revision). Grade unique(assessment,course_enrollment,revision); immutable finalized grades. Certificate verification identifier unique; issuance unique(course_enrollment,template,rule_version) with revoked_at. Attendance unique(session,enrollment); nonce hash unique, expiry/window enforced server-side. Corrections append reason/actor/previous/new status. TrainerSession and CohortCourse joins model many-to-many assignments explicitly.
+
+## Content and knowledge
+
+```mermaid
+erDiagram
+  PAGE ||--|{ PAGE_TRANSLATION : localizes
+  MENU ||--o{ MENU_ITEM : orders
+  MEDIA_ASSET ||--o{ LESSON_MATERIAL : referenced
+  MEDIA_ASSET ||--o{ APPLICATION_DOCUMENT : stores
+  FUNDING_AGENCY ||--o{ FUNDING_PROGRAM : offers
+  PARTICIPANT_PROFILE ||--o{ PARTICIPANT_FUNDING_CASE : tracks
+  FUNDING_PROGRAM ||--o{ PARTICIPANT_FUNDING_CASE : funds
+  PARTICIPANT_FUNDING_CASE ||--o{ FUNDING_STATUS_HISTORY : changes
+  PERSON ||--o{ SAVED_ITEM : saves
+  SCHEME o|--o{ SAVED_ITEM : references
+  FUNDING_PROGRAM o|--o{ SAVED_ITEM : references
+  OPPORTUNITY o|--o{ SAVED_ITEM : references
+```
+
+PageTranslation unique(page,locale) and unique(org,locale,slug). NewsArticle/Event/FAQ/Testimonial/Banner/Resource have localized child rows using same pattern; no JSON for translations. CMS status, publication timestamp, SEO title/description/canonical; public queries index(status,published_at). MenuItem self-parent FK validated for cycles. MediaAsset storage key unique, private visibility default, MIME/size/hash/scan status/owner recorded. ContactSubmission private and throttled. Schemes/funding/opportunities include official source, last_verified_at, opening/closing dates and visibility; relational tags/geography joins. SavedItem has exactly one non-null scheme/funding_program/opportunity FK (CHECK num_nonnulls=1), partial unique(person,target) per type; avoid unvalidated polymorphic ID. Funding case history append-only; service prohibits rejected→disbursed.
+
+## Mentoring, business and support
+
+```mermaid
+erDiagram
+  PERSON ||--o| MENTOR_PROFILE : mentors
+  MENTOR_PROFILE ||--o{ MENTOR_EXPERTISE : specializes
+  MENTOR_PROFILE ||--o{ MENTOR_AVAILABILITY : offers
+  MENTOR_PROFILE ||--o{ MENTOR_ASSIGNMENT : assigned
+  PARTICIPANT_PROFILE ||--o{ MENTOR_ASSIGNMENT : receives
+  MENTOR_ASSIGNMENT ||--o{ MENTORING_SESSION : meets
+  MENTORING_SESSION ||--o{ MENTORING_NOTE : records
+  MENTOR_ASSIGNMENT ||--o{ GOAL : targets
+  GOAL ||--o{ ACTION_ITEM : advances
+  PARTICIPANT_PROFILE ||--o{ BUSINESS_PLAN : drafts
+  BUSINESS_PLAN ||--o{ BUSINESS_PLAN_VERSION : versions
+  BUSINESS_PLAN_VERSION ||--o{ BUSINESS_PLAN_SECTION : structures
+  BUSINESS_PLAN_VERSION ||--o{ MENTOR_REVIEW : reviews
+  PARTICIPANT_PROFILE ||--o{ BUSINESS_PROFILE : owns
+  BUSINESS_PROFILE ||--o{ BUSINESS_PRODUCT_SERVICE : offers
+  BUSINESS_PROFILE ||--o{ BUSINESS_PROGRESS_SNAPSHOT : measures
+  BUSINESS_PROFILE ||--o{ BUSINESS_SUPPORT_NEED : requests
+  PERSON ||--o{ TICKET : opens
+  TICKET_CATEGORY ||--o{ TICKET : groups
+  TICKET ||--o{ TICKET_MESSAGE : discusses
+  TICKET_MESSAGE ||--o{ TICKET_ATTACHMENT : attaches
+  TICKET ||--o{ TICKET_ASSIGNMENT : routes
+  TICKET ||--o{ TICKET_STATUS_HISTORY : transitions
+```
+
+MentorAssignment includes program and validity dates; unique active participant/mentor/program relationship via partial index. Note has constrained visibility (staff_private/shared_with_participant); query/DTO enforce. Business plan/profile tables P1; section keys/revisions unique, snapshot unique(business,period_end,revision). Revenue bands preferred. Ticket number unique; message internal flag never returned in participant DTO; attachments reference MediaAsset; ticket history append-only, index(assignee,status,updated_at). SLA policy stored as configuration once agreed.
+
+## Communications, reliability and impact
+
+```mermaid
+erDiagram
+  PERSON ||--o{ COMMUNICATION_PREFERENCE : chooses
+  NOTIFICATION_TEMPLATE ||--o{ NOTIFICATION : renders
+  PERSON ||--o{ NOTIFICATION : receives
+  NOTIFICATION ||--o{ DELIVERY_ATTEMPT : attempts
+  AUTOMATION_RULE ||--o{ AUTOMATION_EXECUTION : runs
+  OUTBOX_EVENT ||--o{ AUTOMATION_EXECUTION : triggers
+  OUTBOX_EVENT ||--o{ NOTIFICATION : causes
+  INTEGRATION_CONFIG ||--o{ WEBHOOK_INBOX : receives
+  PARTICIPANT_PROFILE ||--o{ PARTICIPANT_IMPACT_RECORD : measures
+  IMPACT_INDICATOR ||--o{ PARTICIPANT_IMPACT_RECORD : defines
+  COHORT ||--o{ COHORT_IMPACT_SNAPSHOT : aggregates
+```
+
+Notification unique(event,recipient,channel,template_version); DeliveryAttempt unique(notification,attempt_number), optional provider ID indexed. CommunicationLog references delivery record rather than duplicating recipient/payload. Preference unique(person,purpose,channel). AutomationExecution unique(rule_version,event). WebhookInbox unique(provider,event_id). Outbox stores event type/entity ID, minimal versioned payload JSONB, attempts/next_attempt/dispatched_at; partial pending index(next_attempt,id). JSONB limited to validated dynamic integration metadata/settings/event payload. IdempotencyRecord unique(actor,operation,key) with request digest and result reference. ImpactIndicator version/unit/definition; impact record unique(participant,indicator_version,period,revision), includes source/evidence and approved fields. Minimal business-started/active/jobs-created outcome records do not require P1 BusinessProfile. Cohort snapshots record numerator/denominator/filter/version and period for reproducibility.
+
+## Referential integrity, lifecycle and retention
+
+| Entity group | Delete behavior / archive | Retention |
+|---|---|---|
+| Person/User/Organization/Program/Cohort | RESTRICT business FKs; archive; controlled anonymization service | Approved policy pending |
+| Roles/permissions/bindings | RESTRICT roles in use; explicit binding revocation; join cleanup allowed | Preserve audit of changes |
+| Sessions/tokens | RESTRICT parent while active; explicit expiry purge | Security retention configurable, approval pending |
+| Applications/selection/enrollment/grades/certificates | RESTRICT parent deletion; immutable submitted/finalized history; revoke/archive | Program/decision retention pending |
+| CMS translations/menu/tag joins | CASCADE only owned non-evidence children on authorized hard delete; archive published content | Content policy pending |
+| Media/documents | RESTRICT referenced assets; lifecycle job removes object after approved record disposal | Document-specific policy pending |
+| Mentoring/tickets/business/impact | RESTRICT evidence; archive; selective anonymization | Approved policy pending |
+| Audit/status history/delivery evidence | Append-only; no parent cascade; actor SET NULL only with pseudonymized reference | Independent approved security schedule |
+| Outbox/inbox/idempotency | Explicit retention cleanup after dedupe/replay window | Integration policy must precede ingestion |
+
+Index high-use lists `(program_id,status,created_at,id)`, `(cohort_id,status,id)`, assigned-owner/status/time and timeline `(entity_id,created_at,id)` as applicable. Use EXPLAIN with realistic data before extra indexes. No uncontrolled cascade from person deletion. Unknown retention means no production data ingestion, not invented duration. Schema-level scope consistency (composite FKs), check constraints, partial unique indexes and concurrency tests are part of each future migration acceptance.
+
+## Foundation implementation refinements
+
+ADR 0003: email-only login initially (master allows email and/or mobile); Person holds name/locale, User holds unique normalized login email. UserRole grants exact organization scope only. RefreshSession stores mutually exclusive channel-specific browser/CSRF or access-token hashes, maximum expiry and revocation; refresh token rows retained for replay detection. AuthDelivery holds Fernet-encrypted development message payload tied to challenge; production delivery disabled. Throttle keys hash identifier + operation + fixed time window; atomic PostgreSQL upsert. Audit mutation trigger is installed/dropped by migration. Never use metadata.create_all for deployed schema changes.

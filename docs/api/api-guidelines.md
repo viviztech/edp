@@ -1,0 +1,23 @@
+# API conventions
+
+Base `/api/v1`; FastAPI Pydantic v2 request/response schemas, UUID IDs and UTC RFC3339 timestamps. OpenAPI is authoritative. Health `/health` and readiness `/ready` are infrastructure exceptions; probes expose only status.
+
+Resources use plural nouns; explicit actions for consequential transitions, e.g. `POST /applications/{id}/submit`, not arbitrary status PATCH. Master Section 24 defines module route groups. Authorization runs before object serialization and before all writes. Return minimal public DTOs rather than model dumping.
+
+Success: resource object, or `{items, next_cursor}` for lists; default limit 25, maximum 100. Allowlisted sort/filter fields with stable ID tie-breaker; opaque cursor validated. No unbounded export endpoints: authorized jobs plus short-lived download URLs and audit. Aggregates specify cohort/period/timezone.
+
+Errors: `{error: {code, message, request_id, details?}}`; details contain field paths and codes, never submitted secrets. Clients localize by stable code. 201 create, 204 deletion/logout where appropriate, 400 malformed command, 401 unauthenticated, 403 permission denied, 404 absent or deliberately concealed out-of-scope object, 409 transition/version/idempotency conflict, 413 oversized, 415 unsupported media, 422 validation, 429 throttled with Retry-After, 503 dependency unavailable. No stack traces in responses.
+
+Server-generated UUID `X-Request-ID` propagated to logs/jobs; do not trust arbitrary incoming strings. For mutable workflow commands require version/If-Match; lock and compare inside transaction. Avoid retrying non-idempotent commands automatically.
+
+Idempotency-Key required for submissions/imports and retryable commands: scoped unique `(actor, operation, key)`, request digest, state, response/resource reference and expiry. Same body returns prior response; differing body returns 409. Concurrent requests serialize via constraint/lock. Expiry policy documented per feature. Webhook inbox unique `(provider,event_id)` and provider lead IDs additionally unique where available.
+
+Browser auth is same-origin BFF; secure cookie plus Origin/CSRF checks. Mobile uses Authorization bearer. CORS explicit trusted origins only, never wildcard credentialed requests. Auth throttling, upload quotas and request-size limits are endpoint-sensitive. Signed private upload/download URLs require ownership checks, MIME/signature/size validation, quarantine and scan status; arbitrary server URL fetching disallowed.
+
+OpenAPI export to `packages/api-contracts/openapi.json`; TypeScript generated types and Dart generator evaluated before auth integration. Check schema diffs in CI; generated files never manually edited. Breaking changes require `/api/v2` or an explicitly coordinated deprecation. No fabricated contract for unimplemented routes.
+
+## Implemented foundation routes
+
+POST /auth/register (202 generic), /auth/login, /auth/refresh, /auth/request-verification (202), /auth/verify, /auth/request-reset (202), /auth/reset, /auth/logout, /auth/logout-all, /auth/sessions/{id}/revoke. GET /auth/me, /auth/sessions (bounded 100), /system/organizations/{id}/access and /system/organizations/{id}/audit (limit 1?100, offset 0?10000). Current list contracts are bounded arrays; pagination envelope remains the convention for future domain collections.
+
+Mobile uses opaque bearer access; refresh request field is token. Browser internal login is hidden from public OpenAPI and requires BFF key. Next.js /api/session proxy has a fixed route allowlist, no client-supplied upstream URL, 8 KiB JSON body cap, configured Origin and CSRF validation. Browser response contains no access/refresh/session credentials. CSRF token is fetched separately into page memory. Errors expose stable codes (invalid_credentials, invalid_session, invalid_token, rate_limited, forbidden, delivery_unavailable, csrf_failed). No reset/verification token in public responses.

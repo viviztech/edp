@@ -1,0 +1,11 @@
+.git
+**/.env
+**/.env.*
+**/node_modules
+**/.next
+**/__pycache__
+.venv
+.tool-cache
+apps/mobile
+docs
+**/*.log

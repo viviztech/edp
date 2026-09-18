@@ -1,0 +1,82 @@
+name: edp-local
+x-api: &api
+  build:
+    context: .
+    dockerfile: infra/docker/api.Dockerfile
+  environment: &api-env
+    APP_ENV: local
+    BFF_KEY: ${BFF_KEY:?Generate a server-only BFF key in .env}
+    AUTH_DELIVERY_KEY: ${AUTH_DELIVERY_KEY:-}
+    DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-edp_dev}:${POSTGRES_PASSWORD:?Set a random URL-safe local password in .env}@postgres:5432/${POSTGRES_DB:-edp_dev}
+    REDIS_URL: redis://redis:6379/0
+    CORS_ORIGINS: '["http://localhost:3000"]'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-edp_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-edp_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a random URL-safe local password in .env}
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["127.0.0.1:6379:6379"]
+    volumes: ["redis_data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  migrate:
+    <<: *api
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres: {condition: service_healthy}
+  api:
+    <<: *api
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=5)"]
+      interval: 10s
+      timeout: 6s
+      retries: 10
+  worker:
+    <<: *api
+    command: ["celery", "-A", "app.workers.celery_app:celery_app", "worker", "--loglevel=INFO"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.workers.celery_app:celery_app inspect ping -d celery@$$HOSTNAME --timeout=5"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  web:
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      WEB_ORIGIN: http://localhost:3000
+      BFF_KEY: ${BFF_KEY:?Generate a server-only BFF key in .env}
+      COOKIE_SECURE: "false"
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+    ports: ["127.0.0.1:3000:3000"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/en').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+volumes:
+  postgres_data:
+  redis_data:
