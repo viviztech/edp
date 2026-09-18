@@ -64,3 +64,8 @@ Sandbox restrictions initially blocked package caches and build writes; rerun wi
 Review architecture and unresolved policies; complete F02/F03 as the next Milestone 1 vertical slice with migrations, web BFF/mobile secure sessions, scoped authorization, audit and negative tests. Run Compose/CI and device gates, record manual evidence, then close Milestone 1. Only afterward plan CMS/public vertical slices. Stop here before the next major milestone.
 
 Final static review: documentation relative links resolve; Compose YAML parses with six expected services (not runtime validation); runtime/development Python pins agree. Temporary PostgreSQL, Redis and web smoke processes stopped.
+
+
+## CI verification update (2026-09-18)
+
+Foundation fix commit 53f354b passed backend, web, mobile, Compose, browser-auth and secrets in [GitHub Actions run 35370249112](https://github.com/viviztech/edp-digital/actions/runs/35370249112). This closes the remote CI and Compose/Redis 7/Celery verification gaps for that revision. Backend pytest collection now works independently of invocation directory. See [foundation continuation report](foundation-auth-report.md) for implemented authentication scope and remaining native-device/iOS and operational gates. Milestone 1 remains open; no domain module or production deployment was started.
