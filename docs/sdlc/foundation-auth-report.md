@@ -53,3 +53,10 @@ Final review: all documentation links resolve; CI/Compose YAML parses and carrie
 Initial remote run: https://github.com/viviztech/edp-digital/actions/runs/35366293976 (commit c44dd32). Web, mobile, browser-auth, secrets and Compose passed. Compose established PostgreSQL 17 / Redis 7 readiness and a real Celery queue round-trip. These supersede the earlier unexecuted remote/Compose/secret-scan notes above. Native-device/iOS and production gates remain open.
 
 Backend migrations, lint and typing passed, but pytest collection failed with `ModuleNotFoundError: app`; later contract/audit steps were skipped. Reproduced using the pytest executable without an editable package install. The API pytest configuration now explicitly adds its project root to the test import path, independent of shell PYTHONPATH and invocation directory. No runtime, API contract, permission or database changes. Regression verification uses the existing 25-test suite and direct console entry point; Ruff lint/format passed. Fix commit 53f354b passed all six remote CI jobs: https://github.com/viviztech/edp-digital/actions/runs/35370249112. Local verification also passed all 25 PostgreSQL-backed tests, Ruff lint/format, and MyPy (17 source files). Rollback: revert the pytest pythonpath setting.
+
+
+## Native acceptance preparation (2026-09-18)
+
+The reviewed fix branch was merged into main at f28459c after its complete CI run passed: https://github.com/viviztech/edp-digital/actions/runs/35370524936. Native storage integration coverage and a [device acceptance checklist](../testing/native-session-acceptance.md) are prepared separately. No Android device/emulator is currently available; iOS requires a macOS runner. These runtime gates remain open.
+
+Native-test preparation validation passed Flutter analysis, 5 existing mobile tests and Android integration-test APK compilation. Actual plugin runtime and lifecycle acceptance remain pending a device. No database migration or application behavior changed.
