@@ -47,3 +47,7 @@ Every row inherits the [Definition of Done](sdlc/definition-of-done.md). Backlog
 P0 is the launch scope, not Milestone 1. P1 is conditional on contract/time. P2 is deferred. Do not trade security, backup, tests or workflow integrity for optional modules. No payments, biometric/location tracking, custom video/chat, accounting compliance, marketplace, Kubernetes/Kafka or automated funding decisions at launch.
 
 Product owner confirms policies/content and UAT; technical owner owns architecture/security evidence; operations owner owns restore/monitoring readiness. Named owners remain open. Section 45's complete 21-step journey is the final product acceptance, never a bootstrap acceptance claim.
+
+## Milestone 2 acceptance detail
+
+See [Milestone 2 plan](sdlc/milestone-02-plan.md) for C01.1-C01.6 public/CMS stories, channels and measurable acceptance. Initial publishing uses independent English/Tamil drafts and immutable live revisions; media, enquiry, navigation and structured content follow as separate slices.

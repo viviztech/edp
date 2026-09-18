@@ -60,3 +60,6 @@ Backend migrations, lint and typing passed, but pytest collection failed with `M
 The reviewed fix branch was merged into main at f28459c after its complete CI run passed: https://github.com/viviztech/edp-digital/actions/runs/35370524936. Native storage integration coverage and a [device acceptance checklist](../testing/native-session-acceptance.md) are prepared separately. No Android device/emulator is currently available; iOS requires a macOS runner. These runtime gates remain open.
 
 Native-test preparation validation passed Flutter analysis, 5 existing mobile tests and Android integration-test APK compilation. Actual plugin runtime and lifecycle acceptance remain pending a device. No database migration or application behavior changed.
+
+
+Sequencing update: native runtime checks are explicitly deferred until macOS migration under [ADR 0004](../architecture/adr/0004-native-verification-deferral.md). Their incompleteness no longer blocks CMS development; it still prevents an unconditional DoD/release claim.

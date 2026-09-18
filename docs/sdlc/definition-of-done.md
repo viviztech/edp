@@ -18,3 +18,5 @@ Binding gate for every feature, from master Section 35. A scaffold, endpoint, or
 - [ ] Manual smoke of the product workflow recorded with environment and result.
 
 Mark each gate passed, failed, blocked or justified N/A with evidence. Missing prerequisites are blockers, not passes. No completed milestone label until all in-scope gates pass. Documentation/design can be delivered while implementation remains incomplete.
+
+Native-runtime sequencing exception: [ADR 0004](../architecture/adr/0004-native-verification-deferral.md) permits further development before macOS migration. Report native checks as deferred, not passed; execute them before release. Other DoD requirements remain binding.

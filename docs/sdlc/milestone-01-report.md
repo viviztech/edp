@@ -69,3 +69,8 @@ Final static review: documentation relative links resolve; Compose YAML parses w
 ## CI verification update (2026-09-18)
 
 Foundation fix commit 53f354b passed backend, web, mobile, Compose, browser-auth and secrets in [GitHub Actions run 35370249112](https://github.com/viviztech/edp-digital/actions/runs/35370249112). This closes the remote CI and Compose/Redis 7/Celery verification gaps for that revision. Backend pytest collection now works independently of invocation directory. See [foundation continuation report](foundation-auth-report.md) for implemented authentication scope and remaining native-device/iOS and operational gates. Milestone 1 remains open; no domain module or production deployment was started.
+
+
+## Authorized development transition
+
+User explicitly deferred native Android/iOS verification until macOS migration. [ADR 0004](../architecture/adr/0004-native-verification-deferral.md) records the exception: Milestone 2 may start, while native and production release gates remain open. Native preparation commit 654ac1c passed all six CI jobs and is merged into main. Milestone 1 is not unconditionally DoD-complete.

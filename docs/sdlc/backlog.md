@@ -32,3 +32,8 @@ Status: F01/F04 bootstrap and F02/F03 local foundation implementation delivered;
 | X03 | Scale/offline: as operator I address measured limits | Evidence justifies BI warehouse/services; offline conflict/security tests | Load studies; architecture ADR; offline content policy | Production evidence | P2 / XL |
 
 P0 minimal business outcomes satisfy R13; B02 adds the full Section 16 profile and follow-up engine. Funding tracker is retained in K01 to cover master testing journey 9. Mentor mobile access and final business-tool scope require owner decisions. No new AI, integration or marketplace work in Milestone 1.
+
+
+## Milestone 2 refinement
+
+C01 is decomposed into C01.1-C01.6 in [Milestone 2](milestone-02-plan.md). Native runtime verification is deferred by explicit user direction under [ADR 0004](../architecture/adr/0004-native-verification-deferral.md), permitting CMS development without marking deferred gates passed. All CMS stories remain planned.

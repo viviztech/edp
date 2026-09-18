@@ -217,3 +217,7 @@ Index high-use lists `(program_id,status,created_at,id)`, `(cohort_id,status,id)
 ## Foundation implementation refinements
 
 ADR 0003: email-only login initially (master allows email and/or mobile); Person holds name/locale, User holds unique normalized login email. UserRole grants exact organization scope only. RefreshSession stores mutually exclusive channel-specific browser/CSRF or access-token hashes, maximum expiry and revocation; refresh token rows retained for replay detection. AuthDelivery holds Fernet-encrypted development message payload tied to challenge; production delivery disabled. Throttle keys hash identifier + operation + fixed time window; atomic PostgreSQL upsert. Audit mutation trigger is installed/dropped by migration. Never use metadata.create_all for deployed schema changes.
+
+## CMS first-slice refinement
+
+The planned page/translation/immutable-revision model, scope-preserving composite foreign keys, constraints and indexes are specified in [CMS page design](../architecture/cms-page-design.md). No CMS tables are implemented yet; add only this subset with C01.1.
