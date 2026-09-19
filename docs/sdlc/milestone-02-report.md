@@ -27,3 +27,8 @@ Added organization-scoped asset metadata with allowlisted MIME types, a 10 MiB s
 
 
 C01.4 follow-up adds an authenticated scanner callback, scanner-key configuration, rejection of non-clean assets at publication, and an object-storage protocol boundary for S3-compatible adapters. The repository still requires deployment-specific object-storage and malware-scanner implementations before production media uploads are enabled.
+
+
+## C01.5 ? Privacy-safe enquiries
+
+Added a minimal organization-scoped enquiry table and API. Submission requires the configured privacy notice version, validates bounded contact fields, stores a dedupe hash, returns a generic 202 receipt for new and duplicate submissions, and records only allowlisted audit metadata. Staff reads require the separately granted `enquiry.view` permission; enquiry data is excluded from public CMS DTOs and logs. Rate limiting and retention execution remain deployment gates.
