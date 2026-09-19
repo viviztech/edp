@@ -1,17 +1,19 @@
 import hashlib
+from datetime import timedelta
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.modules.crm.models import DuplicateReview, Lead, LeadActivity
+from app.modules.crm.models import DuplicateReview, ExportJob, Lead, LeadActivity
 from app.modules.crm.schemas import (
     ActivityCreate,
     ActivityView,
     DuplicateResolve,
     DuplicateReviewCreate,
     DuplicateReviewView,
+    ExportJobView,
     LeadCreate,
     LeadEdit,
     LeadView,
@@ -19,6 +21,7 @@ from app.modules.crm.schemas import (
 from app.modules.identity.models import AuditLog, User, UserRole, now
 from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
+from app.workers.celery_app import celery_app
 
 
 def view(x: Lead) -> LeadView:
@@ -274,3 +277,86 @@ def resolve_duplicate_review(
     )
     db.commit()
     return duplicate_view(review)
+
+
+def export_view(job: ExportJob) -> ExportJobView:
+    return ExportJobView(
+        id=job.id,
+        status=job.status,
+        row_count=job.row_count,
+        error_code=job.error_code,
+        completed_at=job.completed_at,
+        expires_at=job.expires_at,
+    )
+
+
+def request_export(db: Session, org: UUID, actor: User, request_id: str) -> ExportJobView:
+    require_permission(db, actor, org, "crm.lead.export")
+    job = ExportJob(
+        organization_id=org,
+        requested_by_id=actor.id,
+        expires_at=now() + timedelta(hours=24),
+    )
+    db.add(job)
+    db.flush()
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=job.id,
+            action="crm.lead.export_requested",
+            request_id=request_id,
+            resource_version=1,
+            changed_fields="status",
+        )
+    )
+    db.commit()
+    try:
+        celery_app.send_task("edp.crm.export_leads", args=[str(job.id)])
+    except Exception as exc:
+        job.status = "failed"
+        job.error_code = "queue_unavailable"
+        job.completed_at = now()
+        db.commit()
+        raise AuthError("export_unavailable", 503) from exc
+    return export_view(job)
+
+
+def get_export(db: Session, org: UUID, job_id: UUID, actor: User) -> ExportJob:
+    require_permission(db, actor, org, "crm.lead.export")
+    job = db.scalar(
+        select(ExportJob).where(
+            ExportJob.id == job_id,
+            ExportJob.organization_id == org,
+            ExportJob.requested_by_id == actor.id,
+        )
+    )
+    if not job:
+        raise AuthError("not_found", 404)
+    if job.expires_at <= now():
+        if job.csv_content is not None:
+            job.csv_content = None
+            job.status = "failed"
+            job.error_code = "expired"
+            db.commit()
+        raise AuthError("not_found", 404)
+    return job
+
+
+def download_export(db: Session, org: UUID, job_id: UUID, actor: User, request_id: str) -> str:
+    job = get_export(db, org, job_id, actor)
+    if job.status != "completed" or job.csv_content is None:
+        raise AuthError("export_not_ready", 409)
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=job.id,
+            action="crm.lead.export_downloaded",
+            request_id=request_id,
+            resource_version=1,
+            changed_fields=None,
+        )
+    )
+    db.commit()
+    return job.csv_content

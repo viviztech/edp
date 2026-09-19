@@ -61,6 +61,7 @@ class LeadActivity(Record, Base):
     note: Mapped[str] = mapped_column(Text)
     due_at: Mapped[datetime | None] = mapped_column(nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    expires_at: Mapped[datetime] = mapped_column(index=True)
     __table_args__ = (
         CheckConstraint(
             "activity_type IN ('call','email','meeting','task','note')", name="crm_activity_type"
@@ -91,4 +92,32 @@ class DuplicateReview(Record, Base):
         UniqueConstraint("organization_id", "lead_a_id", "lead_b_id"),
         CheckConstraint("lead_a_id <> lead_b_id", name="crm_duplicate_distinct"),
         CheckConstraint("state IN ('pending','merged','rejected')", name="crm_duplicate_state"),
+    )
+
+
+class ExportJob(Record, Base):
+    __tablename__ = "crm_export_jobs"
+    organization_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="RESTRICT"), index=True
+    )
+    requested_by_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), index=True
+    )
+    status: Mapped[str] = mapped_column(String(16), default="queued")
+    row_count: Mapped[int] = mapped_column(Integer, default=0)
+    csv_content: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error_code: Mapped[str] = mapped_column(String(40), default="")
+    completed_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    expires_at: Mapped[datetime] = mapped_column(index=True)
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('queued','running','completed','failed')",
+            name="crm_export_status",
+        ),
+        CheckConstraint(
+            "(status = 'completed' AND csv_content IS NOT NULL) OR "
+            "(status <> 'completed' AND csv_content IS NULL)",
+            name="crm_export_content_state",
+        ),
+        Index("ix_crm_export_owner", "organization_id", "requested_by_id", "created_at"),
     )

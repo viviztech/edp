@@ -97,3 +97,12 @@ class DuplicateReviewView(BaseModel):
 class DuplicateReviewList(BaseModel):
     items: list[DuplicateReviewView]
     next_cursor: UUID | None
+
+
+class ExportJobView(BaseModel):
+    id: UUID
+    status: Literal["queued", "running", "completed", "failed"]
+    row_count: int
+    error_code: str
+    completed_at: datetime | None
+    expires_at: datetime

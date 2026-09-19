@@ -742,6 +742,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/crm/organizations/{org}/exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request Export */
+        post: operations["request_export_api_v1_crm_organizations__org__exports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/exports/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Status */
+        get: operations["export_status_api_v1_crm_organizations__org__exports__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/exports/{job_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Download */
+        get: operations["export_download_api_v1_crm_organizations__org__exports__job_id__download_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1186,6 +1237,30 @@ export interface components {
              * @enum {string}
              */
             status: "new" | "reviewed" | "closed";
+        };
+        /** ExportJobView */
+        ExportJobView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "completed" | "failed";
+            /** Row Count */
+            row_count: number;
+            /** Error Code */
+            error_code: string;
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
         };
         /** Grant */
         Grant: {
@@ -3291,6 +3366,101 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DuplicateReviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_export_api_v1_crm_organizations__org__exports_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_status_api_v1_crm_organizations__org__exports__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_download_api_v1_crm_organizations__org__exports__job_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

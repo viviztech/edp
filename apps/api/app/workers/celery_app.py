@@ -20,6 +20,7 @@ celery_app.conf.update(
     result_expires=300,
     task_soft_time_limit=25,
     task_time_limit=30,
+    imports=("app.workers.crm_exports",),
 )
 
 

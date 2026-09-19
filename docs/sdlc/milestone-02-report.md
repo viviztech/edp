@@ -52,3 +52,8 @@ Added append-oriented lead follow-up activities for calls, email, meetings, task
 ## C02 duplicate review and controlled merge
 
 Added organization-scoped duplicate-review cases with canonical lead-pair ordering, explicit merge/reject commands, optimistic versions, mandatory reasons, row locks, and audit records. A merge preserves both leads and their activities: the duplicate becomes `merged` and points to the survivor. Generic lead edits cannot create a merged state. Assignment changes require `crm.lead.assign`, and assignees must hold a role in the same organization. OpenAPI and TypeScript contracts were regenerated.
+
+
+## C02 permissioned CRM export
+
+Added asynchronous CSV export jobs backed by Celery, bounded to 10,000 organization-scoped leads. Requests require `crm.lead.export`; status and download are restricted to the requesting user. CSV cells with spreadsheet formula prefixes are escaped. Request, completion, failure and download events are audited without logging export contents. Generated CSV is private/no-store and expires after 24 hours, with expired content cleared on access. OpenAPI and TypeScript contracts were regenerated; focused Ruff, MyPy, TypeScript and CSV-safety tests passed.

@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Query, Request, Response
 from sqlalchemy import select
 
 from app.modules.crm import service
@@ -14,6 +14,7 @@ from app.modules.crm.schemas import (
     DuplicateReviewCreate,
     DuplicateReviewList,
     DuplicateReviewView,
+    ExportJobView,
     LeadCreate,
     LeadEdit,
     LeadList,
@@ -109,4 +110,29 @@ def resolve_duplicate_review(
 ) -> DuplicateReviewView:
     return service.resolve_duplicate_review(
         db, org, review_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.post("/crm/organizations/{org}/exports", response_model=ExportJobView, status_code=202)
+def request_export(org: UUID, request: Request, db: DB, identity: Principal) -> ExportJobView:
+    return service.request_export(db, org, identity[0], request.state.request_id)
+
+
+@router.get("/crm/organizations/{org}/exports/{job_id}", response_model=ExportJobView)
+def export_status(org: UUID, job_id: UUID, db: DB, identity: Principal) -> ExportJobView:
+    return service.export_view(service.get_export(db, org, job_id, identity[0]))
+
+
+@router.get("/crm/organizations/{org}/exports/{job_id}/download")
+def export_download(
+    org: UUID, job_id: UUID, request: Request, db: DB, identity: Principal
+) -> Response:
+    content = service.download_export(db, org, job_id, identity[0], request.state.request_id)
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="crm-leads-{job_id}.csv"',
+            "Cache-Control": "private, no-store",
+        },
     )
