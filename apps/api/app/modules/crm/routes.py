@@ -15,6 +15,8 @@ from app.modules.crm.schemas import (
     DuplicateReviewList,
     DuplicateReviewView,
     ExportJobView,
+    LeadConversionCreate,
+    LeadConversionView,
     LeadCreate,
     LeadEdit,
     LeadList,
@@ -136,3 +138,27 @@ def export_download(
             "Cache-Control": "private, no-store",
         },
     )
+
+
+@router.post(
+    "/crm/organizations/{org}/leads/{lead_id}/registration-link",
+    response_model=LeadConversionView,
+    status_code=201,
+)
+def link_registration(
+    org: UUID,
+    lead_id: UUID,
+    data: LeadConversionCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> LeadConversionView:
+    return service.link_registration(db, org, lead_id, identity[0], data, request.state.request_id)
+
+
+@router.get(
+    "/crm/organizations/{org}/leads/{lead_id}/registration-link",
+    response_model=LeadConversionView,
+)
+def registration_link(org: UUID, lead_id: UUID, db: DB, identity: Principal) -> LeadConversionView:
+    return service.get_registration_link(db, org, lead_id, identity[0])

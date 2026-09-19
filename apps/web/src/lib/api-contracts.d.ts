@@ -793,6 +793,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/crm/organizations/{org}/leads/{lead_id}/registration-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Registration Link */
+        get: operations["registration_link_api_v1_crm_organizations__org__leads__lead_id__registration_link_get"];
+        put?: never;
+        /** Link Registration */
+        post: operations["link_registration_api_v1_crm_organizations__org__leads__lead_id__registration_link_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1285,6 +1303,49 @@ export interface components {
             items: components["schemas"]["PublicPage"][];
             /** Next Cursor */
             next_cursor: string | null;
+        };
+        /** LeadConversionCreate */
+        LeadConversionCreate: {
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** LeadConversionView */
+        LeadConversionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Lead Id
+             * Format: uuid
+             */
+            lead_id: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Source */
+            source: string;
+            /** Campaign */
+            campaign: string;
+            /** Lead Version */
+            lead_version: number;
+            /** Reason */
+            reason: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** LeadCreate */
         LeadCreate: {
@@ -3461,6 +3522,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    registration_link_api_v1_crm_organizations__org__leads__lead_id__registration_link_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                lead_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadConversionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    link_registration_api_v1_crm_organizations__org__leads__lead_id__registration_link_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                lead_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadConversionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadConversionView"];
                 };
             };
             /** @description Validation Error */

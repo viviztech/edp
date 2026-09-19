@@ -6,7 +6,13 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.modules.crm.models import DuplicateReview, ExportJob, Lead, LeadActivity
+from app.modules.crm.models import (
+    DuplicateReview,
+    ExportJob,
+    Lead,
+    LeadActivity,
+    LeadConversion,
+)
 from app.modules.crm.schemas import (
     ActivityCreate,
     ActivityView,
@@ -14,11 +20,13 @@ from app.modules.crm.schemas import (
     DuplicateReviewCreate,
     DuplicateReviewView,
     ExportJobView,
+    LeadConversionCreate,
+    LeadConversionView,
     LeadCreate,
     LeadEdit,
     LeadView,
 )
-from app.modules.identity.models import AuditLog, User, UserRole, now
+from app.modules.identity.models import AuditLog, Person, User, UserRole, now
 from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
 from app.workers.celery_app import celery_app
@@ -76,7 +84,7 @@ def mutate(
         raise AuthError("not_found", 404)
     if x.version != d.expected_version:
         raise AuthError("version_conflict", 409)
-    if d.status == "merged" or x.status == "merged":
+    if d.status in {"merged", "converted"} or x.status in {"merged", "converted"}:
         raise AuthError("invalid_transition", 409)
     if d.assigned_user_id != x.assigned_user_id:
         require_permission(db, actor, org, "crm.lead.assign")
@@ -360,3 +368,81 @@ def download_export(db: Session, org: UUID, job_id: UUID, actor: User, request_i
     )
     db.commit()
     return job.csv_content
+
+
+def conversion_view(link: LeadConversion) -> LeadConversionView:
+    return LeadConversionView(
+        id=link.id,
+        lead_id=link.lead_id,
+        person_id=link.person_id,
+        source=link.source,
+        campaign=link.campaign,
+        lead_version=link.lead_version,
+        reason=link.reason,
+        created_at=link.created_at,
+    )
+
+
+def link_registration(
+    db: Session,
+    org: UUID,
+    lead_id: UUID,
+    actor: User,
+    data: LeadConversionCreate,
+    request_id: str,
+) -> LeadConversionView:
+    require_permission(db, actor, org, "crm.lead.convert")
+    lead = db.scalar(
+        select(Lead).where(Lead.id == lead_id, Lead.organization_id == org).with_for_update()
+    )
+    if not lead:
+        raise AuthError("not_found", 404)
+    if lead.version != data.expected_version:
+        raise AuthError("version_conflict", 409)
+    if lead.status in {"merged", "converted", "not_interested"}:
+        raise AuthError("invalid_transition", 409)
+    if not db.get(Person, data.person_id):
+        raise AuthError("not_found", 404)
+    if db.scalar(select(LeadConversion.id).where(LeadConversion.lead_id == lead.id)):
+        raise AuthError("conversion_exists", 409)
+    lead.status = "registration_started"
+    lead.version += 1
+    lead.updated_at = now()
+    link = LeadConversion(
+        organization_id=org,
+        lead_id=lead.id,
+        person_id=data.person_id,
+        actor_user_id=actor.id,
+        source=lead.source,
+        campaign=lead.campaign,
+        lead_version=lead.version,
+        reason=data.reason,
+    )
+    db.add(link)
+    db.flush()
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=lead.id,
+            action="crm.lead.registration_linked",
+            request_id=request_id,
+            resource_version=lead.version,
+            reason=data.reason,
+            changed_fields="status,person_id",
+        )
+    )
+    db.commit()
+    return conversion_view(link)
+
+
+def get_registration_link(db: Session, org: UUID, lead_id: UUID, actor: User) -> LeadConversionView:
+    require_permission(db, actor, org, "crm.lead.view")
+    link = db.scalar(
+        select(LeadConversion).where(
+            LeadConversion.lead_id == lead_id, LeadConversion.organization_id == org
+        )
+    )
+    if not link:
+        raise AuthError("not_found", 404)
+    return conversion_view(link)

@@ -57,12 +57,19 @@ CMS_PERMISSIONS = [
 CMS_PERMISSIONS += [
     "cms.editorial." + action for action in ("view", "create", "update", "publish", "archive")
 ]
-CMS_PERMISSIONS += [
-    "cms.asset." + action for action in ("view", "create", "publish")
-]
+CMS_PERMISSIONS += ["cms.asset." + action for action in ("view", "create", "publish")]
 ENQUIRY_PERMISSIONS = ["enquiry.view"]
-CRM_PERMISSIONS = ["crm.lead." + action for action in ("view", "create", "update", "assign", "merge", "export")] + ["crm.activity." + action for action in ("view", "create") ]
-PERMISSIONS = ["system.access", "audit.view", *CMS_PERMISSIONS, *ENQUIRY_PERMISSIONS, *CRM_PERMISSIONS]
+CRM_PERMISSIONS = [
+    "crm.lead." + action
+    for action in ("view", "create", "update", "assign", "merge", "convert", "export")
+] + ["crm.activity." + action for action in ("view", "create")]
+PERMISSIONS = [
+    "system.access",
+    "audit.view",
+    *CMS_PERMISSIONS,
+    *ENQUIRY_PERMISSIONS,
+    *CRM_PERMISSIONS,
+]
 
 
 def audit(

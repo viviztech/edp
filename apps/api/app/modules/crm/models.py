@@ -61,7 +61,6 @@ class LeadActivity(Record, Base):
     note: Mapped[str] = mapped_column(Text)
     due_at: Mapped[datetime | None] = mapped_column(nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(nullable=True)
-    expires_at: Mapped[datetime] = mapped_column(index=True)
     __table_args__ = (
         CheckConstraint(
             "activity_type IN ('call','email','meeting','task','note')", name="crm_activity_type"
@@ -120,4 +119,28 @@ class ExportJob(Record, Base):
             name="crm_export_content_state",
         ),
         Index("ix_crm_export_owner", "organization_id", "requested_by_id", "created_at"),
+    )
+
+
+class LeadConversion(Record, Base):
+    __tablename__ = "crm_lead_conversions"
+    organization_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="RESTRICT"), index=True
+    )
+    lead_id: Mapped[UUID] = mapped_column(
+        ForeignKey("crm_leads.id", ondelete="RESTRICT"), unique=True
+    )
+    person_id: Mapped[UUID] = mapped_column(
+        ForeignKey("people.id", ondelete="RESTRICT"), index=True
+    )
+    actor_user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), index=True
+    )
+    source: Mapped[str] = mapped_column(String(80))
+    campaign: Mapped[str] = mapped_column(String(120))
+    lead_version: Mapped[int] = mapped_column(Integer)
+    reason: Mapped[str] = mapped_column(String(500))
+    __table_args__ = (
+        CheckConstraint("lead_version > 0", name="crm_conversion_version"),
+        CheckConstraint("length(trim(reason)) BETWEEN 1 AND 500", name="crm_conversion_reason"),
     )

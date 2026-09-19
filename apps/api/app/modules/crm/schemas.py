@@ -106,3 +106,21 @@ class ExportJobView(BaseModel):
     error_code: str
     completed_at: datetime | None
     expires_at: datetime
+
+
+class LeadConversionCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    person_id: UUID
+    expected_version: int = Field(ge=1)
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class LeadConversionView(BaseModel):
+    id: UUID
+    lead_id: UUID
+    person_id: UUID
+    source: str
+    campaign: str
+    lead_version: int
+    reason: str
+    created_at: datetime
