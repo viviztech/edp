@@ -12,8 +12,11 @@ from app.modules.crm.models import (
     Lead,
     LeadActivity,
     LeadConversion,
+    LeadTag,
+    Tag,
 )
 from app.modules.crm.schemas import (
+    ActivityComplete,
     ActivityCreate,
     ActivityView,
     DuplicateResolve,
@@ -25,6 +28,8 @@ from app.modules.crm.schemas import (
     LeadCreate,
     LeadEdit,
     LeadView,
+    TagCreate,
+    TagView,
 )
 from app.modules.identity.models import AuditLog, Person, User, UserRole, now
 from app.modules.identity.security import AuthError
@@ -121,6 +126,7 @@ def activity_view(a: LeadActivity) -> ActivityView:
         note=a.note,
         due_at=a.due_at,
         completed_at=a.completed_at,
+        version=a.version,
     )
 
 
@@ -173,6 +179,182 @@ def activities(
             .limit(limit)
         )
     ]
+
+
+def complete_activity(
+    db: Session,
+    org: UUID,
+    lead_id: UUID,
+    activity_id: UUID,
+    actor: User,
+    data: ActivityComplete,
+    request_id: str,
+) -> ActivityView:
+    require_permission(db, actor, org, "crm.activity.update")
+    activity = db.scalar(
+        select(LeadActivity)
+        .where(
+            LeadActivity.id == activity_id,
+            LeadActivity.lead_id == lead_id,
+            LeadActivity.organization_id == org,
+        )
+        .with_for_update()
+    )
+    if not activity:
+        raise AuthError("not_found", 404)
+    if activity.version != data.expected_version:
+        raise AuthError("version_conflict", 409)
+    if activity.completed_at is not None:
+        raise AuthError("invalid_transition", 409)
+    activity.completed_at = now()
+    activity.version += 1
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=activity.id,
+            action="crm.lead.activity_completed",
+            request_id=request_id,
+            resource_version=activity.version,
+            changed_fields="completed_at",
+        )
+    )
+    db.commit()
+    return activity_view(activity)
+
+
+def normalize_tag_name(value: str) -> str:
+    return " ".join(value.casefold().split())
+
+
+def tag_view(tag: Tag) -> TagView:
+    return TagView(id=tag.id, name=tag.name)
+
+
+def create_tag(db: Session, org: UUID, actor: User, data: TagCreate, request_id: str) -> TagView:
+    require_permission(db, actor, org, "crm.tag.manage")
+    tag = Tag(
+        organization_id=org,
+        name=" ".join(data.name.split()),
+        normalized_name=normalize_tag_name(data.name),
+    )
+    db.add(tag)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("tag_exists", 409) from exc
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=tag.id,
+            action="crm.tag.created",
+            request_id=request_id,
+            resource_version=1,
+            changed_fields="name",
+        )
+    )
+    db.commit()
+    return tag_view(tag)
+
+
+def tags(db: Session, org: UUID, actor: User) -> list[TagView]:
+    require_permission(db, actor, org, "crm.tag.view")
+    return [
+        tag_view(tag)
+        for tag in db.scalars(
+            select(Tag).where(Tag.organization_id == org).order_by(Tag.normalized_name)
+        )
+    ]
+
+
+def lead_tags(db: Session, org: UUID, lead_id: UUID, actor: User) -> list[TagView]:
+    require_permission(db, actor, org, "crm.tag.view")
+    if not db.scalar(select(Lead.id).where(Lead.id == lead_id, Lead.organization_id == org)):
+        raise AuthError("not_found", 404)
+    return [
+        tag_view(tag)
+        for tag in db.scalars(
+            select(Tag)
+            .join(LeadTag, LeadTag.tag_id == Tag.id)
+            .where(
+                LeadTag.organization_id == org,
+                LeadTag.lead_id == lead_id,
+                Tag.organization_id == org,
+            )
+            .order_by(Tag.normalized_name)
+        )
+    ]
+
+
+def attach_tag(
+    db: Session,
+    org: UUID,
+    lead_id: UUID,
+    tag_id: UUID,
+    actor: User,
+    request_id: str,
+) -> TagView:
+    require_permission(db, actor, org, "crm.tag.manage")
+    lead = db.scalar(select(Lead).where(Lead.id == lead_id, Lead.organization_id == org))
+    tag = db.scalar(select(Tag).where(Tag.id == tag_id, Tag.organization_id == org))
+    if not lead or not tag:
+        raise AuthError("not_found", 404)
+    link = LeadTag(organization_id=org, lead_id=lead_id, tag_id=tag_id)
+    db.add(link)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("tag_already_attached", 409) from exc
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=lead_id,
+            action="crm.lead.tag_attached",
+            request_id=request_id,
+            resource_version=lead.version,
+            changed_fields="tags",
+        )
+    )
+    db.commit()
+    return tag_view(tag)
+
+
+def detach_tag(
+    db: Session,
+    org: UUID,
+    lead_id: UUID,
+    tag_id: UUID,
+    actor: User,
+    request_id: str,
+) -> None:
+    require_permission(db, actor, org, "crm.tag.manage")
+    lead = db.scalar(select(Lead).where(Lead.id == lead_id, Lead.organization_id == org))
+    link = db.scalar(
+        select(LeadTag).where(
+            LeadTag.organization_id == org,
+            LeadTag.lead_id == lead_id,
+            LeadTag.tag_id == tag_id,
+        )
+    )
+    if not lead or not link:
+        raise AuthError("not_found", 404)
+    db.delete(link)
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=lead_id,
+            action="crm.lead.tag_detached",
+            request_id=request_id,
+            resource_version=lead.version,
+            changed_fields="tags",
+        )
+    )
+    db.commit()
 
 
 def duplicate_view(review: DuplicateReview) -> DuplicateReviewView:

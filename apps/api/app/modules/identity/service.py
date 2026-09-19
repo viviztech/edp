@@ -59,10 +59,14 @@ CMS_PERMISSIONS += [
 ]
 CMS_PERMISSIONS += ["cms.asset." + action for action in ("view", "create", "publish")]
 ENQUIRY_PERMISSIONS = ["enquiry.view"]
-CRM_PERMISSIONS = [
-    "crm.lead." + action
-    for action in ("view", "create", "update", "assign", "merge", "convert", "export")
-] + ["crm.activity." + action for action in ("view", "create")]
+CRM_PERMISSIONS = (
+    [
+        "crm.lead." + action
+        for action in ("view", "create", "update", "assign", "merge", "convert", "export")
+    ]
+    + ["crm.activity." + action for action in ("view", "create", "update")]
+    + ["crm.tag." + action for action in ("view", "manage")]
+)
 PERMISSIONS = [
     "system.access",
     "audit.view",

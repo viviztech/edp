@@ -35,6 +35,11 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
       if (!/^[0-9a-f-]{36}$/i.test(cursor)) return fail("invalid_request", 400);
       query.set("cursor", cursor);
     }
+    const overdue = request.nextUrl.searchParams.get("overdue");
+    if (overdue !== null) {
+      if (overdue !== "true" && overdue !== "false") return fail("invalid_request", 400);
+      query.set("overdue", overdue);
+    }
     query.set("limit", "25");
     const response = await fetch(config.api + "/api/v1" + path + (request.method === "GET" && query.size ? `?${query}` : ""), {
       method: request.method, body, cache: "no-store", signal: AbortSignal.timeout(15000),

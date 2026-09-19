@@ -64,10 +64,30 @@ class ActivityView(ActivityCreate):
     lead_id: UUID
     actor_user_id: UUID
     completed_at: datetime | None
+    version: int
+
+
+class ActivityComplete(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_version: int = Field(ge=1)
 
 
 class ActivityList(BaseModel):
     items: list[ActivityView]
+
+
+class TagCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    name: str = Field(min_length=1, max_length=40)
+
+
+class TagView(BaseModel):
+    id: UUID
+    name: str
+
+
+class TagList(BaseModel):
+    items: list[TagView]
 
 
 class DuplicateReviewCreate(BaseModel):

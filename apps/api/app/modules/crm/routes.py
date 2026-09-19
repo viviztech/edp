@@ -5,8 +5,9 @@ from fastapi import APIRouter, Query, Request, Response
 from sqlalchemy import select
 
 from app.modules.crm import service
-from app.modules.crm.models import DuplicateReview, Lead
+from app.modules.crm.models import DuplicateReview, Lead, LeadActivity
 from app.modules.crm.schemas import (
+    ActivityComplete,
     ActivityCreate,
     ActivityList,
     ActivityView,
@@ -21,7 +22,11 @@ from app.modules.crm.schemas import (
     LeadEdit,
     LeadList,
     LeadView,
+    TagCreate,
+    TagList,
+    TagView,
 )
+from app.modules.identity.models import now
 from app.modules.identity.routes import DB, Principal
 from app.modules.identity.service import require_permission
 
@@ -36,10 +41,26 @@ def create(org: UUID, data: LeadCreate, request: Request, db: DB, identity: Prin
 
 @router.get("/crm/organizations/{org}/leads", response_model=LeadList)
 def list_leads(
-    org: UUID, db: DB, identity: Principal, cursor: UUID | None = None, limit: Limit = 25
+    org: UUID,
+    db: DB,
+    identity: Principal,
+    cursor: UUID | None = None,
+    limit: Limit = 25,
+    overdue: bool = False,
 ) -> LeadList:
     require_permission(db, identity[0], org, "crm.lead.view")
     q = select(Lead).where(Lead.organization_id == org)
+    if overdue:
+        q = q.where(
+            select(LeadActivity.id)
+            .where(
+                LeadActivity.lead_id == Lead.id,
+                LeadActivity.organization_id == org,
+                LeadActivity.due_at < now(),
+                LeadActivity.completed_at.is_(None),
+            )
+            .exists()
+        )
     q = q.where(Lead.id > cursor) if cursor else q
     rows = list(db.scalars(q.order_by(Lead.id).limit(limit + 1)))
     return LeadList(
@@ -71,6 +92,75 @@ def list_activities(
     org: UUID, lead_id: UUID, db: DB, identity: Principal, limit: Limit = 25
 ) -> ActivityList:
     return ActivityList(items=service.activities(db, org, lead_id, identity[0], limit))
+
+
+@router.post(
+    "/crm/organizations/{org}/leads/{lead_id}/activities/{activity_id}/complete",
+    response_model=ActivityView,
+)
+def complete_activity(
+    org: UUID,
+    lead_id: UUID,
+    activity_id: UUID,
+    data: ActivityComplete,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> ActivityView:
+    return service.complete_activity(
+        db, org, lead_id, activity_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.post("/crm/organizations/{org}/tags", response_model=TagView, status_code=201)
+def create_tag(
+    org: UUID, data: TagCreate, request: Request, db: DB, identity: Principal
+) -> TagView:
+    return service.create_tag(db, org, identity[0], data, request.state.request_id)
+
+
+@router.get("/crm/organizations/{org}/tags", response_model=TagList)
+def list_tags(org: UUID, db: DB, identity: Principal) -> TagList:
+    return TagList(items=service.tags(db, org, identity[0]))
+
+
+@router.get(
+    "/crm/organizations/{org}/leads/{lead_id}/tags",
+    response_model=TagList,
+)
+def list_lead_tags(org: UUID, lead_id: UUID, db: DB, identity: Principal) -> TagList:
+    return TagList(items=service.lead_tags(db, org, lead_id, identity[0]))
+
+
+@router.post(
+    "/crm/organizations/{org}/leads/{lead_id}/tags/{tag_id}/attach",
+    response_model=TagView,
+)
+def attach_tag(
+    org: UUID,
+    lead_id: UUID,
+    tag_id: UUID,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> TagView:
+    return service.attach_tag(db, org, lead_id, tag_id, identity[0], request.state.request_id)
+
+
+@router.post(
+    "/crm/organizations/{org}/leads/{lead_id}/tags/{tag_id}/detach",
+    status_code=204,
+)
+def detach_tag(
+    org: UUID,
+    lead_id: UUID,
+    tag_id: UUID,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> Response:
+    service.detach_tag(db, org, lead_id, tag_id, identity[0], request.state.request_id)
+    return Response(status_code=204)
 
 
 @router.post(

@@ -9,6 +9,7 @@ type Activity = components["schemas"]["ActivityView"];
 type Review = components["schemas"]["DuplicateReviewView"];
 type ExportJob = components["schemas"]["ExportJobView"];
 type RegistrationLink = components["schemas"]["LeadConversionView"];
+type Tag = components["schemas"]["TagView"];
 type LeadStatus = Lead["status"];
 const statuses: LeadStatus[] = ["new", "contacted", "interested", "registration_started", "not_interested"];
 const uuidPattern = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
@@ -22,6 +23,11 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
   const [activities, setActivities] = useState<Activity[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [registration, setRegistration] = useState<RegistrationLink | null>(null);
+  const [orgTags, setOrgTags] = useState<Tag[]>([]);
+  const [leadTags, setLeadTags] = useState<Tag[]>([]);
+  const [overdueOnly, setOverdueOnly] = useState(false);
+  const [newTag, setNewTag] = useState("");
+  const [tagChoice, setTagChoice] = useState("");
   const [exportJob, setExportJob] = useState<ExportJob | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -33,6 +39,7 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
   const [person, setPerson] = useState({ id: "", reason: "" });
   const allowed = (permission: string) => permissions.includes(permission);
   const canMerge = permissions.includes("crm.lead.merge");
+  const canViewTags = permissions.includes("crm.tag.view");
 
   const api = useCallback(async <T,>(path: string, method = "GET", data?: unknown): Promise<T> => {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -43,6 +50,7 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
     }
     const response = await fetch(path, { method, headers, body: data === undefined ? undefined : JSON.stringify(data), cache: "no-store" });
     if (!response.ok) throw new Error(response.status === 409 ? text.conflict : text.error);
+    if (response.status === 204) return undefined as T;
     return response.json();
   }, [text.conflict, text.error]);
 
@@ -52,8 +60,11 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
     try { await work(); } catch (error) { setMessage(error instanceof Error ? error.message : text.error); } finally { setBusy(false); }
   }
 
-  async function loadQueue(more = false) {
-    const page = await api<components["schemas"]["LeadList"]>(`${root}/leads${more && cursor ? `?cursor=${cursor}` : ""}`);
+  async function loadQueue(more = false, overdue = overdueOnly) {
+    const query = new URLSearchParams();
+    if (more && cursor) query.set("cursor", cursor);
+    if (overdue) query.set("overdue", "true");
+    const page = await api<components["schemas"]["LeadList"]>(`${root}/leads${query.size ? `?${query}` : ""}`);
     setItems((current) => more ? [...current, ...page.items] : page.items);
     setCursor(page.next_cursor ?? null);
   }
@@ -66,11 +77,15 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
 
   useEffect(() => {
     let active = true;
-    Promise.all([api<components["schemas"]["LeadList"]>(`${root}/leads`), canMerge ? api<components["schemas"]["DuplicateReviewList"]>(`${root}/duplicate-reviews`) : Promise.resolve({ items: [], next_cursor: null })])
-      .then(([leadPage, reviewPage]) => { if (active) { setItems(leadPage.items); setCursor(leadPage.next_cursor ?? null); setReviews(reviewPage.items); } })
+    Promise.all([
+      api<components["schemas"]["LeadList"]>(`${root}/leads`),
+      canMerge ? api<components["schemas"]["DuplicateReviewList"]>(`${root}/duplicate-reviews`) : Promise.resolve({ items: [], next_cursor: null }),
+      canViewTags ? api<components["schemas"]["TagList"]>(`${root}/tags`) : Promise.resolve({ items: [] }),
+    ])
+      .then(([leadPage, reviewPage, tagPage]) => { if (active) { setItems(leadPage.items); setCursor(leadPage.next_cursor ?? null); setReviews(reviewPage.items); setOrgTags(tagPage.items); } })
       .catch(() => { if (active) setMessage(text.error); });
     return () => { active = false; };
-  }, [api, canMerge, root, text.error]);
+  }, [api, canMerge, canViewTags, root, text.error]);
 
   async function choose(lead: Lead) {
     setSelected(lead);
@@ -79,9 +94,14 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
     setPerson({ id: "", reason: "" });
     const activityPromise = api<components["schemas"]["ActivityList"]>(`${root}/leads/${lead.id}/activities`);
     const registrationPromise = fetch(`${root}/leads/${lead.id}/registration-link`, { cache: "no-store" }).then(async (response) => response.status === 404 ? null : response.ok ? response.json() as Promise<RegistrationLink> : Promise.reject(new Error(text.error)));
-    const [activityPage, link] = await Promise.all([activityPromise, registrationPromise]);
+    const tagsPromise = canViewTags
+      ? api<components["schemas"]["TagList"]>(`${root}/leads/${lead.id}/tags`)
+      : Promise.resolve({ items: [] });
+    const [activityPage, link, tagPage] = await Promise.all([activityPromise, registrationPromise, tagsPromise]);
     setActivities(activityPage.items);
     setRegistration(link);
+    setLeadTags(tagPage.items);
+    setTagChoice("");
   }
 
   function replaceLead(lead: Lead) {
@@ -93,7 +113,7 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
 
   return <div className="crm-workspace" aria-busy={busy}>
     <aside className="crm-queue">
-      <div className="crm-section-title"><div><p className="eyebrow">{text.queue}</p><strong>{items.length}</strong></div><div className="actions"><button disabled={busy || !allowed("crm.lead.create")} onClick={() => setCreating(true)}>{text.newLead}</button><button disabled={busy} onClick={() => run(() => loadQueue())}>{text.refresh}</button></div></div>
+      <div className="crm-section-title"><div><p className="eyebrow">{text.queue}</p><strong>{items.length}</strong></div><div className="actions"><button aria-pressed={overdueOnly} disabled={busy} onClick={() => { const next = !overdueOnly; setOverdueOnly(next); run(() => loadQueue(false, next)); }}>{overdueOnly ? text.allLeads : text.overdueOnly}</button><button disabled={busy || !allowed("crm.lead.create")} onClick={() => setCreating(true)}>{text.newLead}</button><button disabled={busy} onClick={() => run(() => loadQueue())}>{text.refresh}</button></div></div>
       {creating ? <form className="crm-create" onSubmit={(event) => { event.preventDefault(); run(async () => { const lead = await api<Lead>(`${root}/leads`, "POST", newLead); setItems((current) => [lead, ...current]); setCreating(false); setNewLead({ name: "", email: "", phone: "", source: "manual", campaign: "", notes: "" }); await choose(lead); }); }}>
         <label>{text.name}<input required maxLength={120} value={newLead.name} onChange={(event) => setNewLead({ ...newLead, name: event.target.value })} /></label>
         <label>{text.email}<input type="email" maxLength={320} value={newLead.email} onChange={(event) => setNewLead({ ...newLead, email: event.target.value })} /></label>
@@ -118,13 +138,19 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
             <button disabled={busy || !allowed("crm.lead.update") || selected.status === "merged" || selected.status === "converted"}>{text.save}</button>
           </form></section>
 
+          {canViewTags ? <section className="crm-panel crm-tags-panel"><h3>{text.tags}</h3>
+            {leadTags.length === 0 ? <p>{text.noTags}</p> : <ul className="crm-tags">{leadTags.map((tag) => <li key={tag.id}><span>{tag.name}</span>{allowed("crm.tag.manage") ? <button aria-label={`${text.removeTag} ${tag.name}`} disabled={busy} onClick={() => run(async () => { await api(`${root}/leads/${selected.id}/tags/${tag.id}/detach`, "POST", {}); setLeadTags((current) => current.filter((item) => item.id !== tag.id)); })}>×</button> : null}</li>)}</ul>}
+            {allowed("crm.tag.manage") ? <><form className="crm-form crm-tag-form" onSubmit={(event) => { event.preventDefault(); run(async () => { const tag = await api<Tag>(`${root}/tags`, "POST", { name: newTag }); setOrgTags((current) => [...current, tag].sort((a, b) => a.name.localeCompare(b.name))); setNewTag(""); }); }}><label>{text.tagName}<input required maxLength={40} value={newTag} onChange={(event) => setNewTag(event.target.value)} /></label><button disabled={busy}>{text.addTag}</button></form>
+            <form className="crm-form crm-tag-form" onSubmit={(event) => { event.preventDefault(); run(async () => { const tag = await api<Tag>(`${root}/leads/${selected.id}/tags/${tagChoice}/attach`, "POST", {}); setLeadTags((current) => [...current, tag].sort((a, b) => a.name.localeCompare(b.name))); setTagChoice(""); }); }}><label>{text.tags}<select required value={tagChoice} onChange={(event) => setTagChoice(event.target.value)}><option value="">—</option>{orgTags.filter((tag) => !leadTags.some((item) => item.id === tag.id)).map((tag) => <option key={tag.id} value={tag.id}>{tag.name}</option>)}</select></label><button disabled={busy || !tagChoice}>{text.attachTag}</button></form></> : null}
+          </section> : null}
+
           <section className="crm-panel"><h3>{text.activities}</h3><form className="crm-form" onSubmit={(event) => { event.preventDefault(); run(async () => { const item = await api<Activity>(`${root}/leads/${selected.id}/activities`, "POST", { activity_type: activity.activity_type, note: activity.note, due_at: activity.due_at ? new Date(activity.due_at).toISOString() : null }); setActivities((current) => [item, ...current]); setActivity({ activity_type: "call", note: "", due_at: "" }); }); }}>
             <label>{text.activityType}<select value={activity.activity_type} onChange={(event) => setActivity({ ...activity, activity_type: event.target.value })}>{["call", "email", "meeting", "task", "note"].map((type) => <option key={type} value={type}>{type === "email" ? text.email : text[type as keyof typeof text]}</option>)}</select></label>
             <label>{text.activityNote}<textarea required rows={3} maxLength={5000} value={activity.note} onChange={(event) => setActivity({ ...activity, note: event.target.value })} /></label>
             <label>{text.due}<input type="datetime-local" value={activity.due_at} onChange={(event) => setActivity({ ...activity, due_at: event.target.value })} /></label>
             <button disabled={busy || !allowed("crm.activity.create")}>{text.addActivity}</button>
           </form>
-          {activities.length === 0 ? <p>{text.noActivities}</p> : <ol className="crm-timeline">{activities.map((item) => <li key={item.id}><span>{item.activity_type}</span><p>{item.note}</p>{item.due_at ? <time dateTime={item.due_at}>{new Date(item.due_at).toLocaleString(locale)}</time> : null}</li>)}</ol>}</section>
+          {activities.length === 0 ? <p>{text.noActivities}</p> : <ol className="crm-timeline">{activities.map((item) => <li key={item.id}><span>{item.activity_type}</span><p>{item.note}</p>{item.due_at ? <time dateTime={item.due_at}>{new Date(item.due_at).toLocaleString(locale)}</time> : null}{item.completed_at ? <strong className="crm-completed">{text.completed}</strong> : allowed("crm.activity.update") ? <button disabled={busy} onClick={() => run(async () => { const updated = await api<Activity>(`${root}/leads/${selected.id}/activities/${item.id}/complete`, "POST", { expected_version: item.version }); setActivities((current) => current.map((entry) => entry.id === updated.id ? updated : entry)); })}>{text.complete}</button> : null}</li>)}</ol>}</section>
 
           {allowed("crm.lead.convert") ? <section className="crm-panel"><h3>{text.registration}</h3>{registration ? <p className="crm-success">{text.linked}<br /><code>{registration.person_id}</code></p> : <form className="crm-form" onSubmit={(event) => { event.preventDefault(); run(async () => { const link = await api<RegistrationLink>(`${root}/leads/${selected.id}/registration-link`, "POST", { person_id: person.id, reason: person.reason, expected_version: selected.version }); setRegistration(link); replaceLead({ ...selected, status: "registration_started", version: selected.version + 1 }); }); }}>
             <label>{text.person}<input required pattern={uuidPattern} value={person.id} onChange={(event) => setPerson({ ...person, id: event.target.value })} /></label>

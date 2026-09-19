@@ -9,6 +9,9 @@ describe("crmPath", () => {
     expect(crmPath(["organizations", id, "leads", id, "activities"], "POST")).toContain("/crm/");
     expect(crmPath(["organizations", id, "duplicate-reviews", id, "resolve"], "POST")).toContain("/crm/");
     expect(crmPath(["organizations", id, "exports", id, "download"], "GET")).toContain("/crm/");
+    expect(crmPath(["organizations", id, "tags"], "GET")).toContain("/crm/");
+    expect(crmPath(["organizations", id, "leads", id, "tags", id, "attach"], "POST")).toContain("/crm/");
+    expect(crmPath(["organizations", id, "leads", id, "activities", id, "complete"], "POST")).toContain("/crm/");
   });
 
   it("rejects arbitrary upstream paths and methods", () => {

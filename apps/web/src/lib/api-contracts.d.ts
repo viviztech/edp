@@ -707,6 +707,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/crm/organizations/{org}/leads/{lead_id}/activities/{activity_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Activity */
+        post: operations["complete_activity_api_v1_crm_organizations__org__leads__lead_id__activities__activity_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Tags */
+        get: operations["list_tags_api_v1_crm_organizations__org__tags_get"];
+        put?: never;
+        /** Create Tag */
+        post: operations["create_tag_api_v1_crm_organizations__org__tags_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/leads/{lead_id}/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Lead Tags */
+        get: operations["list_lead_tags_api_v1_crm_organizations__org__leads__lead_id__tags_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/leads/{lead_id}/tags/{tag_id}/attach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Attach Tag */
+        post: operations["attach_tag_api_v1_crm_organizations__org__leads__lead_id__tags__tag_id__attach_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/leads/{lead_id}/tags/{tag_id}/detach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Detach Tag */
+        post: operations["detach_tag_api_v1_crm_organizations__org__leads__lead_id__tags__tag_id__detach_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/crm/organizations/{org}/duplicate-reviews": {
         parameters: {
             query?: never;
@@ -849,6 +935,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActivityComplete */
+        ActivityComplete: {
+            /** Expected Version */
+            expected_version: number;
+        };
         /** ActivityCreate */
         ActivityCreate: {
             /**
@@ -894,6 +985,8 @@ export interface components {
             actor_user_id: string;
             /** Completed At */
             completed_at: string | null;
+            /** Version */
+            version: number;
         };
         /** AssetCreate */
         AssetCreate: {
@@ -1685,6 +1778,26 @@ export interface components {
             organization_id: string;
             /** Organization Name */
             organization_name: string;
+        };
+        /** TagCreate */
+        TagCreate: {
+            /** Name */
+            name: string;
+        };
+        /** TagList */
+        TagList: {
+            /** Items */
+            items: components["schemas"]["TagView"][];
+        };
+        /** TagView */
+        TagView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
         };
         /** TokenInput */
         TokenInput: {
@@ -3165,6 +3278,7 @@ export interface operations {
             query?: {
                 cursor?: string | null;
                 limit?: number;
+                overdue?: boolean;
             };
             header?: never;
             path: {
@@ -3323,6 +3437,205 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ActivityView"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_activity_api_v1_crm_organizations__org__leads__lead_id__activities__activity_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                lead_id: string;
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivityComplete"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_tags_api_v1_crm_organizations__org__tags_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_tag_api_v1_crm_organizations__org__tags_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TagCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_lead_tags_api_v1_crm_organizations__org__leads__lead_id__tags_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                lead_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    attach_tag_api_v1_crm_organizations__org__leads__lead_id__tags__tag_id__attach_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                lead_id: string;
+                tag_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detach_tag_api_v1_crm_organizations__org__leads__lead_id__tags__tag_id__detach_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                lead_id: string;
+                tag_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

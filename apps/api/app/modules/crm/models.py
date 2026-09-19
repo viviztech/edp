@@ -61,13 +61,40 @@ class LeadActivity(Record, Base):
     note: Mapped[str] = mapped_column(Text)
     due_at: Mapped[datetime | None] = mapped_column(nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
     __table_args__ = (
         CheckConstraint(
             "activity_type IN ('call','email','meeting','task','note')", name="crm_activity_type"
         ),
         CheckConstraint("length(trim(note)) BETWEEN 1 AND 5000", name="crm_activity_note"),
+        CheckConstraint("version > 0", name="crm_activity_version"),
         Index("ix_crm_activity_queue", "organization_id", "lead_id", "due_at"),
     )
+
+
+class Tag(Record, Base):
+    __tablename__ = "crm_tags"
+    organization_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="RESTRICT"), index=True
+    )
+    name: Mapped[str] = mapped_column(String(40))
+    normalized_name: Mapped[str] = mapped_column(String(40))
+    __table_args__ = (
+        UniqueConstraint("organization_id", "normalized_name"),
+        CheckConstraint("length(trim(name)) BETWEEN 1 AND 40", name="crm_tag_name"),
+    )
+
+
+class LeadTag(Record, Base):
+    __tablename__ = "crm_lead_tags"
+    organization_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="RESTRICT"), index=True
+    )
+    lead_id: Mapped[UUID] = mapped_column(
+        ForeignKey("crm_leads.id", ondelete="CASCADE"), index=True
+    )
+    tag_id: Mapped[UUID] = mapped_column(ForeignKey("crm_tags.id", ondelete="CASCADE"), index=True)
+    __table_args__ = (UniqueConstraint("organization_id", "lead_id", "tag_id"),)
 
 
 class DuplicateReview(Record, Base):
