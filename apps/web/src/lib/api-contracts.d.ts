@@ -430,6 +430,318 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cms/organizations/{org}/editorial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Editorial List */
+        get: operations["editorial_list_api_v1_cms_organizations__org__editorial_get"];
+        put?: never;
+        /** Editorial Create */
+        post: operations["editorial_create_api_v1_cms_organizations__org__editorial_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/editorial/{entry_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Editorial Detail */
+        get: operations["editorial_detail_api_v1_cms_organizations__org__editorial__entry_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Editorial Edit */
+        patch: operations["editorial_edit_api_v1_cms_organizations__org__editorial__entry_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/editorial/{entry_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Editorial Publish */
+        post: operations["editorial_publish_api_v1_cms_organizations__org__editorial__entry_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/editorial/{entry_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Editorial Archive */
+        post: operations["editorial_archive_api_v1_cms_organizations__org__editorial__entry_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/editorial/{entry_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Editorial Restore */
+        post: operations["editorial_restore_api_v1_cms_organizations__org__editorial__entry_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/organizations/{org}/editorial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Editorial Public List */
+        get: operations["editorial_public_list_api_v1_public_organizations__org__editorial_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/organizations/{org}/editorial/{kind}/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Editorial Public Detail */
+        get: operations["editorial_public_detail_api_v1_public_organizations__org__editorial__kind___slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Asset List */
+        get: operations["asset_list_api_v1_cms_organizations__org__assets_get"];
+        put?: never;
+        /** Asset Create */
+        post: operations["asset_create_api_v1_cms_organizations__org__assets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets/{asset_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Asset Publish */
+        post: operations["asset_publish_api_v1_cms_organizations__org__assets__asset_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/organizations/{org}/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Asset Public */
+        get: operations["asset_public_api_v1_public_organizations__org__assets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/cms/organizations/{org}/assets/{asset_id}/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Asset Scan */
+        post: operations["asset_scan_api_v1_internal_cms_organizations__org__assets__asset_id__scan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/organizations/{org}/enquiries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enquiry Create */
+        post: operations["enquiry_create_api_v1_public_organizations__org__enquiries_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/enquiries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Enquiry List */
+        get: operations["enquiry_list_api_v1_cms_organizations__org__enquiries_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Leads */
+        get: operations["list_leads_api_v1_crm_organizations__org__leads_get"];
+        put?: never;
+        /** Create */
+        post: operations["create_api_v1_crm_organizations__org__leads_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/leads/{lead_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit */
+        patch: operations["edit_api_v1_crm_organizations__org__leads__lead_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/leads/{lead_id}/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Activities */
+        get: operations["list_activities_api_v1_crm_organizations__org__leads__lead_id__activities_get"];
+        put?: never;
+        /** Add Activity */
+        post: operations["add_activity_api_v1_crm_organizations__org__leads__lead_id__activities_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/duplicate-reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Duplicate Reviews */
+        get: operations["list_duplicate_reviews_api_v1_crm_organizations__org__duplicate_reviews_get"];
+        put?: never;
+        /** Create Duplicate Review */
+        post: operations["create_duplicate_review_api_v1_crm_organizations__org__duplicate_reviews_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crm/organizations/{org}/duplicate-reviews/{review_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve Duplicate Review */
+        post: operations["resolve_duplicate_review_api_v1_crm_organizations__org__duplicate_reviews__review_id__resolve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -468,6 +780,111 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActivityCreate */
+        ActivityCreate: {
+            /**
+             * Activity Type
+             * @enum {string}
+             */
+            activity_type: "call" | "email" | "meeting" | "task" | "note";
+            /** Note */
+            note: string;
+            /** Due At */
+            due_at?: string | null;
+        };
+        /** ActivityList */
+        ActivityList: {
+            /** Items */
+            items: components["schemas"]["ActivityView"][];
+        };
+        /** ActivityView */
+        ActivityView: {
+            /**
+             * Activity Type
+             * @enum {string}
+             */
+            activity_type: "call" | "email" | "meeting" | "task" | "note";
+            /** Note */
+            note: string;
+            /** Due At */
+            due_at?: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Lead Id
+             * Format: uuid
+             */
+            lead_id: string;
+            /**
+             * Actor User Id
+             * Format: uuid
+             */
+            actor_user_id: string;
+            /** Completed At */
+            completed_at: string | null;
+        };
+        /** AssetCreate */
+        AssetCreate: {
+            /** Filename */
+            filename: string;
+            /**
+             * Media Type
+             * @enum {string}
+             */
+            media_type: "image/jpeg" | "image/png" | "image/webp" | "application/pdf";
+            /** Byte Size */
+            byte_size: number;
+            /** Title */
+            title: string;
+        };
+        /** AssetList */
+        AssetList: {
+            /** Items */
+            items: components["schemas"]["AssetView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** AssetScanResult */
+        AssetScanResult: {
+            /** Clean */
+            clean: boolean;
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
+        };
+        /** AssetView */
+        AssetView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Filename */
+            filename: string;
+            /** Media Type */
+            media_type: string;
+            /** Byte Size */
+            byte_size: number;
+            /** Title */
+            title: string;
+            /**
+             * Scan Status
+             * @enum {string}
+             */
+            scan_status: "pending" | "clean" | "infected" | "rejected";
+            /**
+             * Visibility
+             * @enum {string}
+             */
+            visibility: "private" | "public";
+            /** Public Url */
+            public_url: string | null;
+        };
         /** AuditView */
         AuditView: {
             /**
@@ -523,6 +940,69 @@ export interface components {
             /** Slug */
             slug: string;
         };
+        /** DuplicateResolve */
+        DuplicateResolve: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "merge" | "reject";
+            /** Survivor Id */
+            survivor_id?: string | null;
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** DuplicateReviewCreate */
+        DuplicateReviewCreate: {
+            /**
+             * Lead A Id
+             * Format: uuid
+             */
+            lead_a_id: string;
+            /**
+             * Lead B Id
+             * Format: uuid
+             */
+            lead_b_id: string;
+        };
+        /** DuplicateReviewList */
+        DuplicateReviewList: {
+            /** Items */
+            items: components["schemas"]["DuplicateReviewView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** DuplicateReviewView */
+        DuplicateReviewView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Lead A Id
+             * Format: uuid
+             */
+            lead_a_id: string;
+            /**
+             * Lead B Id
+             * Format: uuid
+             */
+            lead_b_id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "pending" | "merged" | "rejected";
+            /** Version */
+            version: number;
+            /** Reason */
+            reason: string;
+            /** Resolved By Id */
+            resolved_by_id: string | null;
+        };
         /** Edit */
         Edit: {
             /** Title */
@@ -542,6 +1022,111 @@ export interface components {
             /** Expected Version */
             expected_version: number;
         };
+        /** EditorialCommand */
+        EditorialCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
+        };
+        /** EditorialDraft */
+        EditorialDraft: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "news" | "event" | "faq" | "testimonial";
+            /** Slug */
+            slug: string;
+            /**
+             * Locale
+             * @enum {string}
+             */
+            locale: "en" | "ta";
+            /** Title */
+            title: string;
+            /** Body */
+            body: string;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+        };
+        /** EditorialEdit */
+        EditorialEdit: {
+            /** Title */
+            title: string;
+            /** Body */
+            body: string;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** EditorialList */
+        EditorialList: {
+            /** Items */
+            items: components["schemas"]["EditorialView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** EditorialView */
+        EditorialView: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "news" | "event" | "faq" | "testimonial";
+            /** Slug */
+            slug: string;
+            /**
+             * Locale
+             * @enum {string}
+             */
+            locale: "en" | "ta";
+            /** Title */
+            title: string;
+            /** Body */
+            body: string;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "published" | "archived";
+            /** Version */
+            version: number;
+            /** Published At */
+            published_at: string | null;
+        };
         /** EmailInput */
         EmailInput: {
             /**
@@ -549,6 +1134,58 @@ export interface components {
              * Format: email
              */
             email: string;
+        };
+        /** EnquiryCreate */
+        EnquiryCreate: {
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /** Message */
+            message: string;
+            /** Consent Version */
+            consent_version: string;
+        };
+        /** EnquiryReceipt */
+        EnquiryReceipt: {
+            /**
+             * Accepted
+             * @constant
+             */
+            accepted: true;
+            /**
+             * Reference
+             * Format: uuid
+             */
+            reference: string;
+        };
+        /** EnquiryView */
+        EnquiryView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /** Phone */
+            phone: string;
+            /** Message */
+            message: string;
+            /** Consent Version */
+            consent_version: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "new" | "reviewed" | "closed";
         };
         /** Grant */
         Grant: {
@@ -573,6 +1210,91 @@ export interface components {
             items: components["schemas"]["PublicPage"][];
             /** Next Cursor */
             next_cursor: string | null;
+        };
+        /** LeadCreate */
+        LeadCreate: {
+            /** Name */
+            name: string;
+            /**
+             * Email
+             * @default
+             */
+            email: string;
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Source
+             * @default manual
+             */
+            source: string;
+            /**
+             * Campaign
+             * @default
+             */
+            campaign: string;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+        };
+        /** LeadEdit */
+        LeadEdit: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "new" | "contacted" | "interested" | "registration_started" | "converted" | "not_interested" | "merged";
+            /** Assigned User Id */
+            assigned_user_id?: string | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** LeadList */
+        LeadList: {
+            /** Items */
+            items: components["schemas"]["LeadView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** LeadView */
+        LeadView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /** Phone */
+            phone: string;
+            /** Source */
+            source: string;
+            /** Campaign */
+            campaign: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "new" | "contacted" | "interested" | "registration_started" | "converted" | "not_interested" | "merged";
+            /** Assigned User Id */
+            assigned_user_id: string | null;
+            /** Merged Into Id */
+            merged_into_id: string | null;
+            /** Notes */
+            notes: string;
+            /** Version */
+            version: number;
         };
         /** Login */
         Login: {
@@ -664,6 +1386,55 @@ export interface components {
             locale: string;
             /** Grants */
             grants: components["schemas"]["Grant"][];
+        };
+        /** PublicEditorial */
+        PublicEditorial: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "news" | "event" | "faq" | "testimonial";
+            /** Slug */
+            slug: string;
+            /**
+             * Locale
+             * @enum {string}
+             */
+            locale: "en" | "ta";
+            /** Title */
+            title: string;
+            /** Body */
+            body: string;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "published" | "archived";
+            /** Version */
+            version: number;
+            /** Published At */
+            published_at: string | null;
+        };
+        /** PublicEditorialList */
+        PublicEditorialList: {
+            /** Items */
+            items: components["schemas"]["PublicEditorial"][];
+            /** Next Cursor */
+            next_cursor: string | null;
         };
         /** PublicList */
         PublicList: {
@@ -1684,6 +2455,843 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    editorial_list_api_v1_cms_organizations__org__editorial_get: {
+        parameters: {
+            query?: {
+                kind?: ("news" | "event" | "faq" | "testimonial") | null;
+                locale?: ("en" | "ta") | null;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    editorial_create_api_v1_cms_organizations__org__editorial_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditorialDraft"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    editorial_detail_api_v1_cms_organizations__org__editorial__entry_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    editorial_edit_api_v1_cms_organizations__org__editorial__entry_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditorialEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    editorial_publish_api_v1_cms_organizations__org__editorial__entry_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditorialCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    editorial_archive_api_v1_cms_organizations__org__editorial__entry_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditorialCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    editorial_restore_api_v1_cms_organizations__org__editorial__entry_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditorialCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    editorial_public_list_api_v1_public_organizations__org__editorial_get: {
+        parameters: {
+            query: {
+                kind: "news" | "event" | "faq" | "testimonial";
+                locale?: "en" | "ta";
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicEditorialList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    editorial_public_detail_api_v1_public_organizations__org__editorial__kind___slug__get: {
+        parameters: {
+            query?: {
+                locale?: "en" | "ta";
+            };
+            header?: never;
+            path: {
+                org: string;
+                kind: "news" | "event" | "faq" | "testimonial";
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    asset_list_api_v1_cms_organizations__org__assets_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    asset_create_api_v1_cms_organizations__org__assets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssetCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    asset_publish_api_v1_cms_organizations__org__assets__asset_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    asset_public_api_v1_public_organizations__org__assets_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    asset_scan_api_v1_internal_cms_organizations__org__assets__asset_id__scan_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssetScanResult"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enquiry_create_api_v1_public_organizations__org__enquiries_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnquiryCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnquiryReceipt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enquiry_list_api_v1_cms_organizations__org__enquiries_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnquiryView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_leads_api_v1_crm_organizations__org__leads_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_api_v1_crm_organizations__org__leads_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_api_v1_crm_organizations__org__leads__lead_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                lead_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_activities_api_v1_crm_organizations__org__leads__lead_id__activities_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+                lead_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_activity_api_v1_crm_organizations__org__leads__lead_id__activities_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                lead_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivityCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_duplicate_reviews_api_v1_crm_organizations__org__duplicate_reviews_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DuplicateReviewList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_duplicate_review_api_v1_crm_organizations__org__duplicate_reviews_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DuplicateReviewCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DuplicateReviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolve_duplicate_review_api_v1_crm_organizations__org__duplicate_reviews__review_id__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                review_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DuplicateResolve"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DuplicateReviewView"];
+                };
             };
             /** @description Validation Error */
             422: {

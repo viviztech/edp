@@ -47,3 +47,8 @@ Started the CRM vertical with organization-scoped leads, normalized duplicate pr
 ## C02 follow-up activities
 
 Added append-oriented lead follow-up activities for calls, email, meetings, tasks, and notes with organization checks, separate CRM activity permissions, due dates, actor attribution, and audit metadata.
+
+
+## C02 duplicate review and controlled merge
+
+Added organization-scoped duplicate-review cases with canonical lead-pair ordering, explicit merge/reject commands, optimistic versions, mandatory reasons, row locks, and audit records. A merge preserves both leads and their activities: the duplicate becomes `merged` and points to the survivor. Generic lead edits cannot create a merged state. Assignment changes require `crm.lead.assign`, and assignees must hold a role in the same organization. OpenAPI and TypeScript contracts were regenerated.

@@ -61,7 +61,7 @@ CMS_PERMISSIONS += [
     "cms.asset." + action for action in ("view", "create", "publish")
 ]
 ENQUIRY_PERMISSIONS = ["enquiry.view"]
-CRM_PERMISSIONS = ["crm.lead." + action for action in ("view", "create", "update", "assign", "export")] + ["crm.activity." + action for action in ("view", "create") ]
+CRM_PERMISSIONS = ["crm.lead." + action for action in ("view", "create", "update", "assign", "merge", "export")] + ["crm.activity." + action for action in ("view", "create") ]
 PERMISSIONS = ["system.access", "audit.view", *CMS_PERMISSIONS, *ENQUIRY_PERMISSIONS, *CRM_PERMISSIONS]
 
 
