@@ -42,3 +42,8 @@ Added localized sitemap and robots routes, canonical metadata, English/Tamil lan
 ## C02 foundation ? CRM leads
 
 Started the CRM vertical with organization-scoped leads, normalized duplicate protection, attributed source/campaign fields, explicit lifecycle states, assignment/version checks, audited create/update operations, CRM Executive permissions, and a PostgreSQL migration. Follow-up activities, CSV export, merge review, Meta ingestion, and application conversion remain separate slices.
+
+
+## C02 follow-up activities
+
+Added append-oriented lead follow-up activities for calls, email, meetings, tasks, and notes with organization checks, separate CRM activity permissions, due dates, actor attribution, and audit metadata.
