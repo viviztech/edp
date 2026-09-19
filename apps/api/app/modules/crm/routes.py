@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter,Query,Request
 from sqlalchemy import select
 from app.modules.crm.models import Lead
-from app.modules.crm.schemas import LeadCreate,LeadEdit,LeadList,LeadView,ActivityCreate,ActivityList
+from app.modules.crm.schemas import LeadCreate,LeadEdit,LeadList,LeadView,ActivityCreate,ActivityList,ActivityView
 from app.modules.crm import service
 from app.modules.identity.routes import DB,Principal
 from app.modules.identity.service import require_permission
