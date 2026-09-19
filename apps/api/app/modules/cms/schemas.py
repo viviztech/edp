@@ -112,3 +112,25 @@ class PublicEditorial(EditorialView):
 class PublicEditorialList(BaseModel):
     items: list[PublicEditorial]
     next_cursor: UUID | None
+
+
+class AssetCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    filename: str = Field(min_length=1, max_length=255)
+    media_type: Literal["image/jpeg", "image/png", "image/webp", "application/pdf"]
+    byte_size: int = Field(ge=1, le=10485760)
+    title: str = Field(min_length=1, max_length=200)
+
+class AssetView(BaseModel):
+    id: UUID
+    filename: str
+    media_type: str
+    byte_size: int
+    title: str
+    scan_status: Literal["pending", "clean", "infected", "rejected"]
+    visibility: Literal["private", "public"]
+    public_url: str | None
+
+class AssetList(BaseModel):
+    items: list[AssetView]
+    next_cursor: UUID | None

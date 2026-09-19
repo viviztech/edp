@@ -126,3 +126,22 @@ class EditorialEntry(Record, Base):
         CheckConstraint("length(trim(title)) > 0 AND length(body) BETWEEN 1 AND 50000", name="cms_editorial_content"),
         Index("ix_cms_editorial_public", "organization_id", "kind", "locale", "state", "sort_order"),
     )
+
+
+class Asset(Record, Base):
+    __tablename__ = "cms_assets"
+    organization_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="RESTRICT"), index=True)
+    storage_key: Mapped[str] = mapped_column(String(500), unique=True)
+    filename: Mapped[str] = mapped_column(String(255))
+    media_type: Mapped[str] = mapped_column(String(100))
+    byte_size: Mapped[int] = mapped_column(Integer)
+    scan_status: Mapped[str] = mapped_column(String(16), default="pending")
+    visibility: Mapped[str] = mapped_column(String(16), default="private")
+    title: Mapped[str] = mapped_column(String(200))
+    __table_args__ = (
+        CheckConstraint("scan_status IN ('pending','clean','infected','rejected')", name="cms_asset_scan"),
+        CheckConstraint("visibility IN ('private','public')", name="cms_asset_visibility"),
+        CheckConstraint("byte_size BETWEEN 1 AND 10485760", name="cms_asset_size"),
+        CheckConstraint("media_type IN ('image/jpeg','image/png','image/webp','application/pdf')", name="cms_asset_type"),
+        Index("ix_cms_assets_public", "organization_id", "visibility", "scan_status"),
+    )

@@ -57,6 +57,9 @@ CMS_PERMISSIONS = [
 CMS_PERMISSIONS += [
     "cms.editorial." + action for action in ("view", "create", "update", "publish", "archive")
 ]
+CMS_PERMISSIONS += [
+    "cms.asset." + action for action in ("view", "create", "publish")
+]
 PERMISSIONS = ["system.access", "audit.view", *CMS_PERMISSIONS]
 
 

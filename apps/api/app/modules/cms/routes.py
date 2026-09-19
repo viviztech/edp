@@ -264,3 +264,18 @@ def editorial_public_detail(org: UUID, kind: EditorialKind, slug: str, db: DB, l
     e=db.scalar(select(EditorialEntry).where(EditorialEntry.organization_id==org,EditorialEntry.kind==kind,EditorialEntry.slug==slug,EditorialEntry.locale==locale,EditorialEntry.state=="published"))
     if not e: raise AuthError("not_found",404)
     return editorial_service.view(e)
+from app.modules.cms.asset_service import create as create_asset, publish as publish_asset, view as asset_view
+from app.modules.cms.models import Asset
+from app.modules.cms.schemas import AssetCreate, AssetList, AssetView
+ASSET_STAFF="/cms/organizations/{org}/assets"
+ASSET_PUBLIC="/public/organizations/{org}/assets"
+@router.post(ASSET_STAFF,response_model=AssetView,status_code=201)
+def asset_create(org:UUID,data:AssetCreate,request:Request,db:DB,identity:Principal): return create_asset(db,org,identity[0],data,request.state.request_id)
+@router.get(ASSET_STAFF,response_model=AssetList)
+def asset_list(org:UUID,db:DB,identity:Principal,cursor:UUID|None=None,limit:Limit=25):
+ require_permission(db,identity[0],org,"cms.asset.view"); q=select(Asset).where(Asset.organization_id==org); q=q.where(Asset.id>cursor) if cursor else q; rows=list(db.scalars(q.order_by(Asset.id).limit(limit+1))); return AssetList(items=[asset_view(a) for a in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
+@router.post(ASSET_STAFF+"/{asset_id}/publish",response_model=AssetView)
+def asset_publish(org:UUID,asset_id:UUID,request:Request,db:DB,identity:Principal): return publish_asset(db,org,asset_id,identity[0],request.state.request_id)
+@router.get(ASSET_PUBLIC,response_model=AssetList)
+def asset_public(org:UUID,db:DB,cursor:UUID|None=None,limit:Limit=25):
+ q=select(Asset).where(Asset.organization_id==org,Asset.visibility=="public",Asset.scan_status=="clean"); q=q.where(Asset.id>cursor) if cursor else q; rows=list(db.scalars(q.order_by(Asset.id).limit(limit+1))); return AssetList(items=[asset_view(a) for a in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
