@@ -37,3 +37,8 @@ Added a minimal organization-scoped enquiry table and API. Submission requires t
 ## C01.6 ? SEO foundation
 
 Added localized sitemap and robots routes, canonical metadata, English/Tamil language alternates, and public editorial metadata. Web lint, strict typecheck, and production build passed.
+
+
+## C02 foundation ? CRM leads
+
+Started the CRM vertical with organization-scoped leads, normalized duplicate protection, attributed source/campaign fields, explicit lifecycle states, assignment/version checks, audited create/update operations, CRM Executive permissions, and a PostgreSQL migration. Follow-up activities, CSV export, merge review, Meta ingestion, and application conversion remain separate slices.

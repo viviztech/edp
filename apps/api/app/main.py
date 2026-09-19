@@ -19,6 +19,7 @@ from app.core.config import get_settings
 from app.core.database import create_engine
 from app.core.logging import configure_logging
 from app.modules.cms.routes import router as cms_router
+from app.modules.crm.routes import router as crm_router
 from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
 
@@ -76,6 +77,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(identity_router)
     app.include_router(cms_router)
+    app.include_router(crm_router)
 
     @app.exception_handler(AuthError)
     async def auth_error(request: Request, exc: AuthError) -> JSONResponse:

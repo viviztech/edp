@@ -61,7 +61,8 @@ CMS_PERMISSIONS += [
     "cms.asset." + action for action in ("view", "create", "publish")
 ]
 ENQUIRY_PERMISSIONS = ["enquiry.view"]
-PERMISSIONS = ["system.access", "audit.view", *CMS_PERMISSIONS, *ENQUIRY_PERMISSIONS]
+CRM_PERMISSIONS = ["crm.lead." + action for action in ("view", "create", "update", "assign", "export")]
+PERMISSIONS = ["system.access", "audit.view", *CMS_PERMISSIONS, *ENQUIRY_PERMISSIONS, *CRM_PERMISSIONS]
 
 
 def audit(
@@ -389,15 +390,16 @@ def seed_roles(db: Session) -> None:
             role = Role(name=name)
             db.add(role)
             db.flush()
-        codes = (
-            PERMISSIONS
-            if name == "Super Admin"
-            else (
-                ["system.access", *CMS_PERMISSIONS]
-                if name == "Content Manager"
-                else (["system.access"] if name != "Participant" else [])
-            )
-        )
+        if name == "Super Admin":
+            codes = PERMISSIONS
+        elif name == "Content Manager":
+            codes = ["system.access", *CMS_PERMISSIONS]
+        elif name == "CRM Executive":
+            codes = ["system.access", *CRM_PERMISSIONS]
+        elif name == "Participant":
+            codes = []
+        else:
+            codes = ["system.access"]
         for code in codes:
             if not db.get(RolePermission, (role.id, code)):
                 db.add(RolePermission(role_id=role.id, permission_code=code))
