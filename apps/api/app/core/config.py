@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     bff_key: SecretStr | None = Field(default=None, min_length=32)
     auth_delivery_key: SecretStr | None = None
     asset_scanner_key: SecretStr | None = Field(default=None, min_length=16)
+    contact_privacy_version: str = Field(default="v1", min_length=1, max_length=40)
     access_token_seconds: int = Field(default=600, ge=60, le=1800)
     session_seconds: int = Field(default=1209600, ge=3600, le=2592000)
     cors_origins: list[str] = Field(default_factory=list)

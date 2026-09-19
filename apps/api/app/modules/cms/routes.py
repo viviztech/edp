@@ -292,3 +292,13 @@ def asset_scan(org: UUID, asset_id: UUID, data: AssetScanResult, request: Reques
     if not configured or not compare_digest(supplied, configured.get_secret_value()):
         raise AuthError("invalid_client", 403)
     return asset_scan_result(db, org, asset_id, data.clean, data.reason, request.state.request_id)
+
+
+from app.modules.cms.enquiry_service import create as create_enquiry, list_staff as list_enquiries
+from app.modules.cms.schemas import EnquiryCreate, EnquiryReceipt, EnquiryView
+@router.post("/public/organizations/{org}/enquiries", response_model=EnquiryReceipt, status_code=202)
+def enquiry_create(org: UUID, data: EnquiryCreate, request: Request, db: DB):
+    return create_enquiry(db, org, data, request.state.request_id)
+@router.get("/cms/organizations/{org}/enquiries", response_model=list[EnquiryView])
+def enquiry_list(org: UUID, db: DB, identity: Principal, limit: Limit=25):
+    return list_enquiries(db, org, identity[0], limit)

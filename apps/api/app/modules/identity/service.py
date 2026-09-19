@@ -60,7 +60,8 @@ CMS_PERMISSIONS += [
 CMS_PERMISSIONS += [
     "cms.asset." + action for action in ("view", "create", "publish")
 ]
-PERMISSIONS = ["system.access", "audit.view", *CMS_PERMISSIONS]
+ENQUIRY_PERMISSIONS = ["enquiry.view"]
+PERMISSIONS = ["system.access", "audit.view", *CMS_PERMISSIONS, *ENQUIRY_PERMISSIONS]
 
 
 def audit(

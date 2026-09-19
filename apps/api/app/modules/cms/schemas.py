@@ -140,3 +140,25 @@ class AssetScanResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
     clean: bool
     reason: str = Field(default="", max_length=200)
+
+
+class EnquiryCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    name: str = Field(min_length=1, max_length=120)
+    email: str = Field(min_length=3, max_length=320)
+    phone: str = Field(default="", max_length=32)
+    message: str = Field(min_length=1, max_length=5000)
+    consent_version: str = Field(min_length=1, max_length=40)
+
+class EnquiryReceipt(BaseModel):
+    accepted: Literal[True]
+    reference: UUID
+
+class EnquiryView(BaseModel):
+    id: UUID
+    name: str
+    email: str
+    phone: str
+    message: str
+    consent_version: str
+    status: Literal["new", "reviewed", "closed"]

@@ -145,3 +145,21 @@ class Asset(Record, Base):
         CheckConstraint("media_type IN ('image/jpeg','image/png','image/webp','application/pdf')", name="cms_asset_type"),
         Index("ix_cms_assets_public", "organization_id", "visibility", "scan_status"),
     )
+
+
+class Enquiry(Record, Base):
+    __tablename__ = "contact_enquiries"
+    organization_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="RESTRICT"), index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    email: Mapped[str] = mapped_column(String(320))
+    phone: Mapped[str] = mapped_column(String(32), default="")
+    message: Mapped[str] = mapped_column(Text)
+    consent_version: Mapped[str] = mapped_column(String(40))
+    dedupe_hash: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(16), default="new")
+    __table_args__ = (
+        UniqueConstraint("organization_id", "dedupe_hash"),
+        ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="RESTRICT"),
+        CheckConstraint("status IN ('new','reviewed','closed')", name="enquiry_status"),
+        CheckConstraint("length(trim(name)) BETWEEN 1 AND 120 AND length(message) BETWEEN 1 AND 5000", name="enquiry_content"),
+    )
