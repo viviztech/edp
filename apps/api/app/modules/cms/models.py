@@ -101,3 +101,28 @@ class Revision(Record, Base):
         UniqueConstraint("id", "translation_id", "organization_id"),
         CheckConstraint("revision_number > 0", name="cms_revision_positive"),
     )
+
+
+class EditorialEntry(Record, Base):
+    __tablename__ = "cms_editorial_entries"
+    organization_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="RESTRICT"), index=True)
+    kind: Mapped[str] = mapped_column(String(20))
+    slug: Mapped[str] = mapped_column(String(120))
+    locale: Mapped[str] = mapped_column(String(2))
+    state: Mapped[str] = mapped_column(String(16), default="draft")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(Text)
+    starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
+    __table_args__ = (
+        UniqueConstraint("organization_id", "kind", "slug", "locale"),
+        CheckConstraint("kind IN ('news','event','faq','testimonial')", name="cms_editorial_kind"),
+        CheckConstraint("locale IN ('en','ta')", name="cms_editorial_locale"),
+        CheckConstraint("state IN ('draft','published','archived')", name="cms_editorial_state"),
+        CheckConstraint("length(trim(title)) > 0 AND length(body) BETWEEN 1 AND 50000", name="cms_editorial_content"),
+        Index("ix_cms_editorial_public", "organization_id", "kind", "locale", "state", "sort_order"),
+    )

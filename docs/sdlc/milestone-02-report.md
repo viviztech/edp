@@ -14,3 +14,8 @@ Validation: Ruff, Ruff format, MyPy, web lint/typecheck/Vitest, Flutter analyze/
 ## C01.2 navigation update
 
 C01.2 implementation is ready on the CMS feature branch. The web shell now derives navigation from the published CMS list and an explicit informational slug allowlist, preserving Home, Pages, Account and language controls even when CMS is unavailable. The public home has a responsive discovery grid and a localized Applications link; content titles remain CMS-owned. No unpublished page becomes navigable. Web validation passed lint, strict typecheck, six Vitest tests and the Next production build. Flutter public page routing from C01.1 remains available for guest/mobile navigation.
+
+
+## C01.3 ? Editorial content
+
+Implemented localized News, Events, FAQ, and Testimonials with bounded public listing/detail APIs, explicit draft/publish/archive/restore transitions, event dates and deterministic ordering, organization-scoped editorial permissions, audit records, and public Next.js and Flutter views. Validation: web lint/typecheck, Flutter analyze, Python compileall, and `git diff --check` passed. Native runtime tests remain deferred to macOS migration per ADR 0004.

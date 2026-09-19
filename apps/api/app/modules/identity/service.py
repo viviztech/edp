@@ -54,6 +54,9 @@ ROLE_NAMES = [
 CMS_PERMISSIONS = [
     "cms.page." + action for action in ("view", "create", "update", "publish", "archive")
 ]
+CMS_PERMISSIONS += [
+    "cms.editorial." + action for action in ("view", "create", "update", "publish", "archive")
+]
 PERMISSIONS = ["system.access", "audit.view", *CMS_PERMISSIONS]
 
 

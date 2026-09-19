@@ -223,3 +223,44 @@ def public_page(
         return Response(status_code=304, headers=headers)
     response.headers.update(headers)
     return data
+from app.modules.cms import editorial_service
+from app.modules.cms.models import EditorialEntry
+from app.modules.cms.schemas import EditorialDraft, EditorialEdit, EditorialCommand, EditorialKind, EditorialList, EditorialView, PublicEditorialList
+EDITORIAL_STAFF = "/cms/organizations/{org}/editorial"
+EDITORIAL_PUBLIC = "/public/organizations/{org}/editorial"
+@router.post(EDITORIAL_STAFF, response_model=EditorialView, status_code=201)
+def editorial_create(org: UUID, data: EditorialDraft, request: Request, db: DB, identity: Principal):
+    return editorial_service.create(db, org, identity[0], data, request.state.request_id)
+@router.get(EDITORIAL_STAFF, response_model=EditorialList)
+def editorial_list(org: UUID, db: DB, identity: Principal, kind: EditorialKind|None=None, locale: Locale|None=None, cursor: UUID|None=None, limit: Limit=25):
+    require_permission(db, identity[0], org, "cms.editorial.view")
+    q=select(EditorialEntry).where(EditorialEntry.organization_id==org)
+    if kind: q=q.where(EditorialEntry.kind==kind)
+    if locale: q=q.where(EditorialEntry.locale==locale)
+    if cursor: q=q.where(EditorialEntry.id>cursor)
+    rows=list(db.scalars(q.order_by(EditorialEntry.id).limit(limit+1)))
+    return EditorialList(items=[editorial_service.view(e) for e in rows[:limit]], next_cursor=rows[limit-1].id if len(rows)>limit else None)
+@router.get(EDITORIAL_STAFF+"/{entry_id}", response_model=EditorialView)
+def editorial_detail(org: UUID, entry_id: UUID, db: DB, identity: Principal):
+    require_permission(db, identity[0], org, "cms.editorial.view"); return editorial_service.view(editorial_service.get(db,org,entry_id))
+@router.patch(EDITORIAL_STAFF+"/{entry_id}", response_model=EditorialView)
+def editorial_edit(org: UUID, entry_id: UUID, data: EditorialEdit, request: Request, db: DB, identity: Principal):
+    return editorial_service.mutate(db,org,entry_id,identity[0],data,"update",request.state.request_id)
+@router.post(EDITORIAL_STAFF+"/{entry_id}/publish", response_model=EditorialView)
+def editorial_publish(org: UUID, entry_id: UUID, data: EditorialCommand, request: Request, db: DB, identity: Principal):
+    return editorial_service.mutate(db,org,entry_id,identity[0],data,"publish",request.state.request_id)
+@router.post(EDITORIAL_STAFF+"/{entry_id}/archive", response_model=EditorialView)
+def editorial_archive(org: UUID, entry_id: UUID, data: EditorialCommand, request: Request, db: DB, identity: Principal):
+    return editorial_service.mutate(db,org,entry_id,identity[0],data,"archive",request.state.request_id)
+@router.post(EDITORIAL_STAFF+"/{entry_id}/restore", response_model=EditorialView)
+def editorial_restore(org: UUID, entry_id: UUID, data: EditorialCommand, request: Request, db: DB, identity: Principal):
+    return editorial_service.mutate(db,org,entry_id,identity[0],data,"restore",request.state.request_id)
+@router.get(EDITORIAL_PUBLIC, response_model=PublicEditorialList)
+def editorial_public_list(org: UUID, db: DB, kind: EditorialKind, locale: Locale="en", cursor: UUID|None=None, limit: Limit=25):
+    rows=editorial_service.public(db,org,kind,locale,cursor,limit)
+    return PublicEditorialList(items=[editorial_service.view(e) for e in rows[:limit]], next_cursor=rows[limit-1].id if len(rows)>limit else None)
+@router.get(EDITORIAL_PUBLIC+"/{kind}/{slug}", response_model=EditorialView)
+def editorial_public_detail(org: UUID, kind: EditorialKind, slug: str, db: DB, locale: Locale="en"):
+    e=db.scalar(select(EditorialEntry).where(EditorialEntry.organization_id==org,EditorialEntry.kind==kind,EditorialEntry.slug==slug,EditorialEntry.locale==locale,EditorialEntry.state=="published"))
+    if not e: raise AuthError("not_found",404)
+    return editorial_service.view(e)

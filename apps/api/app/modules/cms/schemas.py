@@ -68,3 +68,47 @@ class PublicList(BaseModel):
 class History(BaseModel):
     items: list[PublicPage]
     next_cursor: UUID | None
+
+
+EditorialKind = Literal["news", "event", "faq", "testimonial"]
+
+class EditorialDraft(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    kind: EditorialKind
+    slug: str = Field(min_length=1, max_length=120, pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$")
+    locale: Locale
+    title: str = Field(min_length=1, max_length=200)
+    body: str = Field(min_length=1, max_length=50000)
+    starts_at: datetime | None = None
+    ends_at: datetime | None = None
+    sort_order: int = Field(default=0, ge=0, le=100000)
+
+class EditorialEdit(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    title: str = Field(min_length=1, max_length=200)
+    body: str = Field(min_length=1, max_length=50000)
+    starts_at: datetime | None = None
+    ends_at: datetime | None = None
+    sort_order: int = Field(default=0, ge=0, le=100000)
+    expected_version: int = Field(ge=1)
+
+class EditorialCommand(BaseModel):
+    expected_version: int = Field(ge=1)
+    reason: str = Field(default="", max_length=500)
+
+class EditorialView(EditorialDraft):
+    id: UUID
+    state: Literal["draft", "published", "archived"]
+    version: int
+    published_at: datetime | None
+
+class EditorialList(BaseModel):
+    items: list[EditorialView]
+    next_cursor: UUID | None
+
+class PublicEditorial(EditorialView):
+    pass
+
+class PublicEditorialList(BaseModel):
+    items: list[PublicEditorial]
+    next_cursor: UUID | None

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'l10n/app_localizations.dart';
 import 'features/identity/account_page.dart';
 import 'features/cms/public_pages.dart';
+import 'features/cms/public_editorial.dart';
 
 final localeProvider = NotifierProvider<LocaleController, Locale>(
   LocaleController.new,
@@ -27,6 +28,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pages/:slug',
         builder: (_, state) => PublicPages(slug: state.pathParameters['slug']),
+      ),
+      GoRoute(
+        path: '/news',
+        builder: (_, _) => const PublicEditorial(kind: 'news'),
+      ),
+      GoRoute(
+        path: '/events',
+        builder: (_, _) => const PublicEditorial(kind: 'event'),
+      ),
+      GoRoute(
+        path: '/faq',
+        builder: (_, _) => const PublicEditorial(kind: 'faq'),
+      ),
+      GoRoute(
+        path: '/testimonials',
+        builder: (_, _) => const PublicEditorial(kind: 'testimonial'),
       ),
       GoRoute(path: '/account', builder: (_, _) => const AccountPage()),
     ],
