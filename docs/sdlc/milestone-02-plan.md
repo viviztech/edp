@@ -37,4 +37,4 @@ Manual/browser smoke: staff creates English/Tamil drafts, previews, publishes En
 
 Engineering owns implementation, authorization and test evidence. Client/content owner must supply approved branding, copy/translations, testimonial consent and public resource rights before launch. Operations must choose production domain/object storage/scanning and deployment policy before their live slices. Privacy owner must approve contact notice/retention before real enquiries. Existing launch gates remain unchanged. No new input is required to begin C01.1 using synthetic content.
 
-Next authorized implementation: C01.1 localized publishing vertical slice. This planning change adds no runtime routes or migrations.
+C01.1 is implemented and CI-verified on feature/cms-pages. Next authorized implementation: C01.2 public navigation and informational pages.
