@@ -17,3 +17,13 @@ def publish(db,org,id,actor,request_id):
  if not a: raise AuthError("not_found",404)
  if a.scan_status!="clean": raise AuthError("asset_not_clean",409)
  a.visibility="public"; db.add(AuditLog(actor_id=actor.id,organization_id=org,resource_id=a.id,action="cms.asset.published",request_id=request_id,resource_version=1,changed_fields="visibility")); db.commit(); return view(a)
+
+
+def scan_result(db: Session, org: UUID, asset_id: UUID, clean: bool, reason: str, request_id: str):
+    a = db.scalar(select(Asset).where(Asset.id == asset_id, Asset.organization_id == org).with_for_update())
+    if not a: raise AuthError("not_found", 404)
+    a.scan_status = "clean" if clean else "infected"
+    a.visibility = "private"
+    db.add(AuditLog(actor_id=None, organization_id=org, resource_id=a.id, action="cms.asset.scan_completed", request_id=request_id, resource_version=1, reason=reason or None, changed_fields="scan_status,visibility"))
+    db.commit()
+    return view(a)

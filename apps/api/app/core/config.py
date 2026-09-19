@@ -14,11 +14,12 @@ class Settings(BaseSettings):
     redis_url: SecretStr
     bff_key: SecretStr | None = Field(default=None, min_length=32)
     auth_delivery_key: SecretStr | None = None
+    asset_scanner_key: SecretStr | None = Field(default=None, min_length=16)
     access_token_seconds: int = Field(default=600, ge=60, le=1800)
     session_seconds: int = Field(default=1209600, ge=3600, le=2592000)
     cors_origins: list[str] = Field(default_factory=list)
 
-    @field_validator("bff_key", "auth_delivery_key", mode="before")
+    @field_validator("bff_key", "auth_delivery_key", "asset_scanner_key", mode="before")
     @classmethod
     def empty_secret(cls, value: object) -> object:
         return None if value == "" else value

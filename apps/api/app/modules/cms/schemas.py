@@ -134,3 +134,9 @@ class AssetView(BaseModel):
 class AssetList(BaseModel):
     items: list[AssetView]
     next_cursor: UUID | None
+
+
+class AssetScanResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    clean: bool
+    reason: str = Field(default="", max_length=200)

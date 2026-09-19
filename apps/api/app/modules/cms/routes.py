@@ -279,3 +279,16 @@ def asset_publish(org:UUID,asset_id:UUID,request:Request,db:DB,identity:Principa
 @router.get(ASSET_PUBLIC,response_model=AssetList)
 def asset_public(org:UUID,db:DB,cursor:UUID|None=None,limit:Limit=25):
  q=select(Asset).where(Asset.organization_id==org,Asset.visibility=="public",Asset.scan_status=="clean"); q=q.where(Asset.id>cursor) if cursor else q; rows=list(db.scalars(q.order_by(Asset.id).limit(limit+1))); return AssetList(items=[asset_view(a) for a in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
+
+
+from app.core.config import get_settings
+from app.modules.cms.asset_service import scan_result as asset_scan_result
+from app.modules.cms.schemas import AssetScanResult
+from secrets import compare_digest
+@router.post("/internal/cms/organizations/{org}/assets/{asset_id}/scan", response_model=AssetView)
+def asset_scan(org: UUID, asset_id: UUID, data: AssetScanResult, request: Request, db: DB):
+    configured = get_settings().asset_scanner_key
+    supplied = request.headers.get("X-Asset-Scanner-Key", "")
+    if not configured or not compare_digest(supplied, configured.get_secret_value()):
+        raise AuthError("invalid_client", 403)
+    return asset_scan_result(db, org, asset_id, data.clean, data.reason, request.state.request_id)
