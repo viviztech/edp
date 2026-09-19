@@ -19,3 +19,8 @@ C01.2 implementation is ready on the CMS feature branch. The web shell now deriv
 ## C01.3 ? Editorial content
 
 Implemented localized News, Events, FAQ, and Testimonials with bounded public listing/detail APIs, explicit draft/publish/archive/restore transitions, event dates and deterministic ordering, organization-scoped editorial permissions, audit records, and public Next.js and Flutter views. Validation: web lint/typecheck, Flutter analyze, Python compileall, and `git diff --check` passed. Native runtime tests remain deferred to macOS migration per ADR 0004.
+
+
+## C01.4 ? Asset quarantine foundation
+
+Added organization-scoped asset metadata with allowlisted MIME types, a 10 MiB size limit, quarantine scan states, explicit public approval, bounded staff/public listing APIs, audit events, and a PostgreSQL migration. The current slice intentionally keeps uploads quarantined until the object-storage and malware-scanning adapters are connected; no asset can become public while its scan status is pending.
