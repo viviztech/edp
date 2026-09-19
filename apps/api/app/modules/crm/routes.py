@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter,Query,Request
 from sqlalchemy import select
 from app.modules.crm.models import Lead
-from app.modules.crm.schemas import LeadCreate,LeadEdit,LeadList,LeadView
+from app.modules.crm.schemas import LeadCreate,LeadEdit,LeadList,LeadView,ActivityCreate,ActivityList
 from app.modules.crm import service
 from app.modules.identity.routes import DB,Principal
 from app.modules.identity.service import require_permission
@@ -16,3 +16,8 @@ def list_leads(org:UUID,db:DB,identity:Principal,cursor:UUID|None=None,limit:Lim
  require_permission(db,identity[0],org,"crm.lead.view"); q=select(Lead).where(Lead.organization_id==org); q=q.where(Lead.id>cursor) if cursor else q; rows=list(db.scalars(q.order_by(Lead.id).limit(limit+1))); return LeadList(items=[service.view(x) for x in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
 @router.patch("/crm/organizations/{org}/leads/{lead_id}",response_model=LeadView)
 def edit(org:UUID,lead_id:UUID,data:LeadEdit,request:Request,db:DB,identity:Principal): return service.mutate(db,org,lead_id,identity[0],data,request.state.request_id)
+
+@router.post("/crm/organizations/{org}/leads/{lead_id}/activities",response_model=ActivityView,status_code=201)
+def add_activity(org:UUID,lead_id:UUID,data:ActivityCreate,request:Request,db:DB,identity:Principal): return service.add_activity(db,org,lead_id,identity[0],data,request.state.request_id)
+@router.get("/crm/organizations/{org}/leads/{lead_id}/activities",response_model=ActivityList)
+def list_activities(org:UUID,lead_id:UUID,db:DB,identity:Principal,limit:Limit=25): return ActivityList(items=service.activities(db,org,lead_id,identity[0],limit))

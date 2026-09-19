@@ -1,4 +1,5 @@
 from typing import Literal
+from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 LeadStatus=Literal["new","contacted","interested","registration_started","converted","not_interested"]
@@ -12,3 +13,12 @@ class LeadView(BaseModel):
  id:UUID; name:str; email:str; phone:str; source:str; campaign:str; status:LeadStatus; assigned_user_id:UUID|None; notes:str; version:int
 class LeadList(BaseModel):
  items:list[LeadView]; next_cursor:UUID|None
+
+
+class ActivityCreate(BaseModel):
+ model_config=ConfigDict(extra="forbid",str_strip_whitespace=True)
+ activity_type:Literal["call","email","meeting","task","note"]; note:str=Field(min_length=1,max_length=5000); due_at:datetime|None=None
+class ActivityView(ActivityCreate):
+ id:UUID; lead_id:UUID; actor_user_id:UUID; completed_at:datetime|None
+class ActivityList(BaseModel):
+ items:list[ActivityView]

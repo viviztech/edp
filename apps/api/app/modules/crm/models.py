@@ -19,3 +19,15 @@ class Lead(Record, Base):
     notes: Mapped[str]=mapped_column(Text,default="")
     updated_at: Mapped[datetime]=mapped_column(default=now,onupdate=now)
     __table_args__=(UniqueConstraint("organization_id","dedupe_hash"),CheckConstraint("status IN ('new','contacted','interested','registration_started','converted','not_interested')",name="crm_lead_status"),CheckConstraint("length(trim(name)) BETWEEN 1 AND 120",name="crm_lead_name"),Index("ix_crm_lead_queue","organization_id","status","assigned_user_id"))
+
+
+class LeadActivity(Record, Base):
+    __tablename__="crm_lead_activities"
+    lead_id: Mapped[UUID]=mapped_column(ForeignKey("crm_leads.id",ondelete="CASCADE"),index=True)
+    organization_id: Mapped[UUID]=mapped_column(ForeignKey("organizations.id",ondelete="RESTRICT"),index=True)
+    actor_user_id: Mapped[UUID]=mapped_column(ForeignKey("users.id",ondelete="RESTRICT"),index=True)
+    activity_type: Mapped[str]=mapped_column(String(24))
+    note: Mapped[str]=mapped_column(Text)
+    due_at: Mapped[datetime|None]=mapped_column(nullable=True)
+    completed_at: Mapped[datetime|None]=mapped_column(nullable=True)
+    __table_args__=(CheckConstraint("activity_type IN ('call','email','meeting','task','note')",name="crm_activity_type"),CheckConstraint("length(trim(note)) BETWEEN 1 AND 5000",name="crm_activity_note"),Index("ix_crm_activity_queue","organization_id","lead_id","due_at"))
