@@ -32,3 +32,8 @@ C01.4 follow-up adds an authenticated scanner callback, scanner-key configuratio
 ## C01.5 ? Privacy-safe enquiries
 
 Added a minimal organization-scoped enquiry table and API. Submission requires the configured privacy notice version, validates bounded contact fields, stores a dedupe hash, returns a generic 202 receipt for new and duplicate submissions, and records only allowlisted audit metadata. Staff reads require the separately granted `enquiry.view` permission; enquiry data is excluded from public CMS DTOs and logs. Rate limiting and retention execution remain deployment gates.
+
+
+## C01.6 ? SEO foundation
+
+Added localized sitemap and robots routes, canonical metadata, English/Tamil language alternates, and public editorial metadata. Web lint, strict typecheck, and production build passed.
