@@ -24,3 +24,6 @@ Implemented localized News, Events, FAQ, and Testimonials with bounded public li
 ## C01.4 ? Asset quarantine foundation
 
 Added organization-scoped asset metadata with allowlisted MIME types, a 10 MiB size limit, quarantine scan states, explicit public approval, bounded staff/public listing APIs, audit events, and a PostgreSQL migration. The current slice intentionally keeps uploads quarantined until the object-storage and malware-scanning adapters are connected; no asset can become public while its scan status is pending.
+
+
+C01.4 follow-up adds an authenticated scanner callback, scanner-key configuration, rejection of non-clean assets at publication, and an object-storage protocol boundary for S3-compatible adapters. The repository still requires deployment-specific object-storage and malware-scanner implementations before production media uploads are enabled.
