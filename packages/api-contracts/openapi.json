@@ -5712,6 +5712,10 @@
           "completed": {
             "type": "integer",
             "title": "Completed"
+          },
+          "expired": {
+            "type": "integer",
+            "title": "Expired"
           }
         },
         "type": "object",
@@ -5722,7 +5726,8 @@
           "processing",
           "retrying",
           "failed",
-          "completed"
+          "completed",
+          "expired"
         ],
         "title": "HealthView"
       },

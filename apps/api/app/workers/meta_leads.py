@@ -74,7 +74,7 @@ def process_event(self: Any, event_id: str) -> dict[str, object]:
         event = db.scalar(
             select(MetaWebhookEvent).where(MetaWebhookEvent.id == identifier).with_for_update()
         )
-        if not event or event.state != "queued":
+        if not event or event.state != "queued" or event.retention_expires_at <= now():
             return {"status": "ignored"}
         if event.attempt_count >= MAX_ATTEMPTS:
             event.state = "failed"
@@ -155,7 +155,12 @@ def process_event(self: Any, event_id: str) -> dict[str, object]:
         event = db.scalar(
             select(MetaWebhookEvent).where(MetaWebhookEvent.id == identifier).with_for_update()
         )
-        if not event or event.state != "processing" or event.attempt_count != attempt:
+        if (
+            not event
+            or event.state != "processing"
+            or event.attempt_count != attempt
+            or event.retention_expires_at <= now()
+        ):
             return {"status": "ignored"}
         dedupe_hash = hashlib.sha256(
             f"meta|{event.integration_id}|{event.meta_lead_id}".encode()
@@ -200,6 +205,9 @@ def process_event(self: Any, event_id: str) -> dict[str, object]:
                 changed_fields="state,lead_id,processed_at",
             )
         )
+        if event.retention_expires_at <= now():
+            db.rollback()
+            return {"status": "ignored"}
         db.commit()
         return {"status": "completed", "lead_id": str(lead.id)}
 
@@ -213,6 +221,7 @@ def recover_events() -> dict[str, int]:
                 select(MetaWebhookEvent)
                 .where(
                     MetaWebhookEvent.attempt_count < MAX_ATTEMPTS,
+                    MetaWebhookEvent.retention_expires_at > current,
                     or_(
                         and_(
                             MetaWebhookEvent.state.in_(("queued", "retrying")),
@@ -238,3 +247,35 @@ def recover_events() -> dict[str, int]:
         for event_id in ids:
             dispatch_event(db, event_id)
         return {"dispatched": len(ids)}
+
+
+@celery_app.task(name="edp.meta.purge_expired_events")  # type: ignore[untyped-decorator]
+def purge_expired_events() -> dict[str, int]:
+    """Dispose of expired provider metadata without removing attributed CRM leads."""
+    current = now()
+    with Session(engine) as db:
+        rows = list(
+            db.scalars(
+                select(MetaWebhookEvent)
+                .where(MetaWebhookEvent.retention_expires_at <= current)
+                .order_by(MetaWebhookEvent.retention_expires_at, MetaWebhookEvent.id)
+                .limit(100)
+                .with_for_update(skip_locked=True)
+            )
+        )
+        for event in rows:
+            db.add(
+                AuditLog(
+                    actor_id=None,
+                    organization_id=event.organization_id,
+                    resource_id=event.id,
+                    action="meta.event.retention_purged",
+                    request_id=f"retention:{event.id}",
+                    resource_version=event.version,
+                    reason="Configured Meta event retention expired",
+                    changed_fields="event_deleted",
+                )
+            )
+            db.delete(event)
+        db.commit()
+        return {"purged": len(rows)}

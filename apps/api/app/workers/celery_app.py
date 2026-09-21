@@ -26,6 +26,10 @@ celery_app.conf.update(
             "task": "edp.meta.recover_events",
             "schedule": 60.0,
         },
+        "purge-expired-meta-events": {
+            "task": "edp.meta.purge_expired_events",
+            "schedule": 60.0,
+        },
     },
 )
 

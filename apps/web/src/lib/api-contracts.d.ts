@@ -1617,6 +1617,8 @@ export interface components {
             failed: number;
             /** Completed */
             completed: number;
+            /** Expired */
+            expired: number;
         };
         /** History */
         History: {

@@ -259,6 +259,21 @@ def test_versioned_configuration_and_scoped_replay(meta_db) -> None:
                 "test-request",
             )
         assert repeated.value.status == 409
+        event = db.get(MetaWebhookEvent, event_id)
+        assert event is not None
+        event.retention_expires_at = now() - timedelta(seconds=1)
+        event.state = "failed"
+        db.commit()
+        with pytest.raises(AuthError) as expired:
+            service.replay_event(
+                db,
+                org_id,
+                event_id,
+                actor,
+                EventReplay(expected_version=event.version, reason="Too late"),
+                "test-request",
+            )
+        assert expired.value.code == "retention_expired"
         assert (
             db.scalar(
                 select(func.count())
@@ -267,3 +282,154 @@ def test_versioned_configuration_and_scoped_replay(meta_db) -> None:
             )
             == 1
         )
+
+
+def test_retention_purge_preserves_lead_and_later_delivery_dedupes(meta_db, monkeypatch) -> None:
+    engine, org_id, integration_id, mapping_id = meta_db
+    body, signature = signed_payload()
+    with Session(engine) as db:
+        assert service.ingest(
+            db, integration_id, body, json.loads(body), signature, "test-request"
+        ) == (1, 0)
+        expired = db.scalar(select(MetaWebhookEvent))
+        assert expired is not None
+        lead = Lead(
+            organization_id=org_id,
+            name="Ada Lovelace",
+            source="meta",
+            dedupe_hash=hashlib.sha256(
+                f"meta|{integration_id}|provider-lead-1".encode()
+            ).hexdigest(),
+        )
+        db.add(lead)
+        db.flush()
+        expired.lead_id = lead.id
+        expired.state = "completed"
+        expired.next_attempt_at = None
+        expired.retention_expires_at = now() - timedelta(seconds=1)
+        fresh = MetaWebhookEvent(
+            organization_id=org_id,
+            integration_id=integration_id,
+            mapping_id=mapping_id,
+            provider_event_id="fresh-lead",
+            meta_lead_id="fresh-lead",
+            page_id="page-1",
+            form_id="form-1",
+            state="failed",
+            metadata_json={},
+            retention_expires_at=now() + timedelta(days=1),
+        )
+        db.add(fresh)
+        db.commit()
+        expired_id, fresh_id, lead_id = expired.id, fresh.id, lead.id
+
+    assert meta_leads.purge_expired_events.run() == {"purged": 1}
+    assert meta_leads.purge_expired_events.run() == {"purged": 0}
+    with Session(engine) as db:
+        assert db.get(MetaWebhookEvent, expired_id) is None
+        assert db.get(MetaWebhookEvent, fresh_id) is not None
+        assert db.get(Lead, lead_id) is not None
+        assert (
+            db.scalar(
+                select(func.count())
+                .select_from(AuditLog)
+                .where(
+                    AuditLog.action == "meta.event.retention_purged",
+                    AuditLog.resource_id == expired_id,
+                )
+            )
+            == 1
+        )
+        assert service.ingest(
+            db, integration_id, body, json.loads(body), signature, "test-request"
+        ) == (1, 0)
+        replacement = db.scalar(
+            select(MetaWebhookEvent).where(MetaWebhookEvent.provider_event_id == "provider-lead-1")
+        )
+        assert replacement is not None
+        replacement_id = replacement.id
+
+    class ProviderClient:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def get(self, *args, **kwargs):
+            response = MagicMock()
+            response.json.return_value = {
+                "field_data": [{"name": "full_name", "values": ["Ada Lovelace"]}]
+            }
+            return response
+
+    monkeypatch.setattr(meta_leads.httpx, "Client", lambda **kwargs: ProviderClient())
+    assert meta_leads.process_event.run(str(replacement_id))["status"] == "completed"
+    with Session(engine) as db:
+        assert db.scalar(select(func.count()).select_from(Lead)) == 1
+        replacement = db.get(MetaWebhookEvent, replacement_id)
+        assert replacement is not None and replacement.lead_id == lead_id
+
+
+def test_expired_queued_event_is_not_claimed_or_recovered(meta_db, monkeypatch) -> None:
+    engine, org_id, integration_id, _ = meta_db
+    body, signature = signed_payload()
+    with Session(engine) as db:
+        service.ingest(db, integration_id, body, json.loads(body), signature, "test-request")
+        event = db.scalar(select(MetaWebhookEvent))
+        assert event is not None
+        event.retention_expires_at = now() - timedelta(seconds=1)
+        event.next_attempt_at = now() - timedelta(seconds=1)
+        db.commit()
+        event_id = event.id
+    monkeypatch.setattr(meta_leads.httpx, "Client", lambda **kwargs: pytest.fail("provider called"))
+    assert meta_leads.process_event.run(str(event_id)) == {"status": "ignored"}
+    assert meta_leads.recover_events.run() == {"dispatched": 0}
+    monkeypatch.setattr(service, "require_permission", lambda *_: None)
+    with Session(engine) as db:
+        event = db.get(MetaWebhookEvent, event_id)
+        assert event is not None and event.attempt_count == 0
+        visible, _ = service.events(db, org_id, MagicMock(), None, 25)
+        assert visible == []
+        pulse = service.health(db, org_id, MagicMock())
+        assert pulse.queued == 0 and pulse.expired == 1
+    assert meta_leads.purge_expired_events.run() == {"purged": 1}
+    with Session(engine) as db:
+        assert service.health(db, org_id, MagicMock()).expired == 0
+
+
+def test_event_expiring_during_provider_fetch_cannot_create_lead(meta_db, monkeypatch) -> None:
+    engine, _, integration_id, _ = meta_db
+    body, signature = signed_payload()
+    with Session(engine) as db:
+        service.ingest(db, integration_id, body, json.loads(body), signature, "test-request")
+        event = db.scalar(select(MetaWebhookEvent))
+        assert event is not None
+        event_id = event.id
+
+    class ProviderClient:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def get(self, *args, **kwargs):
+            with Session(engine) as db:
+                event = db.get(MetaWebhookEvent, event_id)
+                assert event is not None
+                event.retention_expires_at = now() - timedelta(seconds=1)
+                db.commit()
+            response = MagicMock()
+            response.json.return_value = {
+                "field_data": [{"name": "full_name", "values": ["Ada Lovelace"]}]
+            }
+            return response
+
+    monkeypatch.setattr(meta_leads.httpx, "Client", lambda **kwargs: ProviderClient())
+    assert meta_leads.process_event.run(str(event_id)) == {"status": "ignored"}
+    with Session(engine) as db:
+        assert db.scalar(select(func.count()).select_from(Lead)) == 0
+        event = db.get(MetaWebhookEvent, event_id)
+        assert event is not None and event.state == "processing"
+    assert meta_leads.purge_expired_events.run() == {"purged": 1}

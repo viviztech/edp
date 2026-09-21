@@ -125,3 +125,4 @@ class HealthView(BaseModel):
     retrying: int
     failed: int
     completed: int
+    expired: int

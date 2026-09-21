@@ -8,7 +8,7 @@ Owner approvals pending. No real data in development. Default is minimize collec
 | Password hash, sessions, reset hashes | Authentication; service only | PostgreSQL; expire/revoke; never logs/exports |
 | Eligibility, education, business idea | Application review; applicant and assigned reviewers | Relational versioned records; rejected applicant retention pending |
 | Identity/supporting documents | Required evidence only; assigned reviewers | Private S3; quarantine, signed access; deletion policy pending |
-| Lead attribution/provider metadata | CRM and troubleshooting; assigned staff | Minimal PostgreSQL fields; raw payload retention disabled until configured |
+| Lead attribution/provider metadata | CRM and troubleshooting; assigned staff | Minimal provider inbox fields require an approved period; expired inbox rows are hidden and purged by a scheduled worker. CRM attribution, audit and backups have separate pending policies |
 | Scores, private notes, decisions | Accountable selection/mentoring | PostgreSQL; staff visibility separate from participant DTOs |
 | Learning/attendance/grades/certificates | Program delivery | PostgreSQL; no precise location/biometrics; retention pending |
 | Business outcome/revenue bands | Impact; self and scoped reporting staff | Minimize exact financial data; dated snapshots, aggregate output |

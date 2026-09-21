@@ -132,6 +132,7 @@ export default function MetaWorkspace({ org, permissions, locale }: {
       <div><span>{text.processing}</span><strong>{health?.processing ?? "—"}</strong></div>
       <div className="meta-pulse-alert"><span>{text.failed}</span><strong>{health?.failed ?? "—"}</strong></div>
       <div><span>{text.completed}</span><strong>{health?.completed ?? "—"}</strong></div>
+      <div><span>{text.expired}</span><strong>{health?.expired ?? "—"}</strong></div>
       <button disabled={busy} onClick={() => run(loadOverview)}>{text.refresh}</button>
     </section>
     <div className="meta-grid">

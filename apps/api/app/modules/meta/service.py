@@ -319,7 +319,9 @@ def events(
     db: Session, org: UUID, actor: User, cursor: UUID | None, limit: int
 ) -> tuple[list[EventView], UUID | None]:
     require_permission(db, actor, org, "meta.integration.view")
-    query = select(MetaWebhookEvent).where(MetaWebhookEvent.organization_id == org)
+    query = select(MetaWebhookEvent).where(
+        MetaWebhookEvent.organization_id == org, MetaWebhookEvent.retention_expires_at > now()
+    )
     query = query.where(MetaWebhookEvent.id > cursor) if cursor else query
     rows = list(db.scalars(query.order_by(MetaWebhookEvent.id).limit(limit + 1)))
     return (
@@ -483,6 +485,8 @@ def replay_event(
         raise AuthError("not_found", 404)
     if event.version != data.expected_version:
         raise AuthError("version_conflict", 409)
+    if event.retention_expires_at <= now():
+        raise AuthError("retention_expired", 409)
     if event.state != "failed" or event.lead_id is not None:
         raise AuthError("invalid_transition", 409)
     integration = db.scalar(
@@ -541,14 +545,29 @@ def dispatch_event(db: Session, event_id: UUID) -> None:
 
 def health(db: Session, org: UUID, actor: User) -> HealthView:
     require_permission(db, actor, org, "meta.integration.view")
+    current = now()
     counts: dict[str, int] = {
         state: count
         for state, count in db.execute(
             select(MetaWebhookEvent.state, func.count())
-            .where(MetaWebhookEvent.organization_id == org)
+            .where(
+                MetaWebhookEvent.organization_id == org,
+                MetaWebhookEvent.retention_expires_at > current,
+            )
             .group_by(MetaWebhookEvent.state)
         ).all()
     }
+    expired_count = (
+        db.scalar(
+            select(func.count())
+            .select_from(MetaWebhookEvent)
+            .where(
+                MetaWebhookEvent.organization_id == org,
+                MetaWebhookEvent.retention_expires_at <= current,
+            )
+        )
+        or 0
+    )
     integrations_count = (
         db.scalar(
             select(func.count())
@@ -576,4 +595,5 @@ def health(db: Session, org: UUID, actor: User) -> HealthView:
         retrying=counts.get("retrying", 0),
         failed=counts.get("failed", 0),
         completed=counts.get("completed", 0),
+        expired=expired_count,
     )
