@@ -21,6 +21,12 @@ celery_app.conf.update(
     task_soft_time_limit=25,
     task_time_limit=30,
     imports=("app.workers.crm_exports", "app.workers.meta_leads"),
+    beat_schedule={
+        "recover-meta-events": {
+            "task": "edp.meta.recover_events",
+            "schedule": 60.0,
+        },
+    },
 )
 
 

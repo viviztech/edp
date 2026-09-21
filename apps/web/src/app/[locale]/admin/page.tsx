@@ -7,6 +7,7 @@ import { serverApi } from "../../../lib/server-api";
 import Audit from "./view";
 import { cmsMessages } from "../../../lib/cms-messages";
 import { crmMessages } from "../../../lib/crm-messages";
+import { metaMessages } from "../../../lib/meta-messages";
 
 export default async function AdminShell({ params, searchParams }: {
   params: Promise<{ locale: string }>; searchParams: Promise<{ organization?: string }>;
@@ -31,6 +32,7 @@ export default async function AdminShell({ params, searchParams }: {
     <Link href={"/" + locale + "/account"}>{text.back}</Link>
     {grant.permissions.includes("cms.page.view") && <p><Link href={`/${locale}/admin/pages?organization=${grant.organization_id}`}>{cmsMessages[locale].workspace}</Link></p>}
     {grant.permissions.includes("crm.lead.view") && <p><Link href={`/${locale}/admin/crm?organization=${grant.organization_id}`}>{crmMessages[locale].workspace}</Link></p>}
+    {grant.permissions.includes("meta.integration.view") && <p><Link href={`/${locale}/admin/meta?organization=${grant.organization_id}`}>{metaMessages[locale].workspace}</Link></p>}
     {grant.permissions.includes("audit.view") && <Audit organization={grant.organization_id} text={text} />}
   </main>;
 }

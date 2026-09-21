@@ -15,6 +15,21 @@ class IntegrationCreate(BaseModel):
     verify_token: SecretStr = Field(min_length=24, max_length=512)
 
 
+class IntegrationEdit(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    expected_version: int = Field(ge=1)
+    name: str = Field(min_length=1, max_length=120)
+    status: Literal["active", "disabled"]
+
+
+class IntegrationRotate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_version: int = Field(ge=1)
+    access_token: SecretStr | None = Field(default=None, min_length=20, max_length=4096)
+    app_secret: SecretStr | None = Field(default=None, min_length=16, max_length=512)
+    verify_token: SecretStr | None = Field(default=None, min_length=24, max_length=512)
+
+
 class IntegrationView(BaseModel):
     id: UUID
     name: str
@@ -50,6 +65,11 @@ class MappingCreate(BaseModel):
         return value
 
 
+class MappingEdit(MappingCreate):
+    expected_version: int = Field(ge=1)
+    status: Literal["active", "disabled"]
+
+
 class MappingView(BaseModel):
     id: UUID
     integration_id: UUID
@@ -74,6 +94,7 @@ class EventView(BaseModel):
     form_id: str
     state: Literal["queued", "processing", "retrying", "completed", "failed"]
     attempt_count: int
+    version: int
     error_code: str
     lead_id: UUID | None
     created_at: datetime
@@ -88,3 +109,19 @@ class EventList(BaseModel):
 class WebhookAccepted(BaseModel):
     accepted: int
     duplicates: int
+
+
+class EventReplay(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    expected_version: int = Field(ge=1)
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class HealthView(BaseModel):
+    integrations: int
+    active_integrations: int
+    queued: int
+    processing: int
+    retrying: int
+    failed: int
+    completed: int

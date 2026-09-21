@@ -76,6 +76,7 @@ class MetaWebhookEvent(Record, Base):
     form_id: Mapped[str] = mapped_column(String(80))
     state: Mapped[str] = mapped_column(String(16), default="queued")
     attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    version: Mapped[int] = mapped_column(Integer, default=1)
     error_code: Mapped[str] = mapped_column(String(48), default="")
     metadata_json: Mapped[dict[str, object]] = mapped_column(JSON)
     lead_id: Mapped[UUID | None] = mapped_column(
@@ -91,5 +92,7 @@ class MetaWebhookEvent(Record, Base):
             name="meta_event_state",
         ),
         CheckConstraint("attempt_count >= 0", name="meta_event_attempt_count"),
+        CheckConstraint("version > 0", name="meta_event_version"),
         Index("ix_meta_event_health", "organization_id", "state", "created_at"),
+        Index("ix_meta_event_recovery", "state", "next_attempt_at", "created_at"),
     )

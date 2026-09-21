@@ -43,3 +43,8 @@ powershell -ExecutionPolicy Bypass -File scripts/stop-local-postgres.ps1
 ```
 
 After starting PostgreSQL and Redis, apply schema changes from `apps/api` with `..\..\.venv\Scripts\alembic.exe upgrade head`, seed permissions with `..\..\.venv\Scripts\python.exe -m app.modules.identity.cli seed`, and launch the Windows API with `.venv\Scripts\python.exe scripts/run-native-api.py`. A successful `GET /ready` proves both PostgreSQL and Redis are reachable.
+
+
+## Meta lead development
+
+For C03, set the same `META_SECRET_KEY` in the API and worker, and set a current, verified `META_GRAPH_API_VERSION` plus an approved `META_EVENT_RETENTION_DAYS`. Compose reads these from root `.env` and runs a dedicated `beat` service alongside the worker. Restart both after changing Meta settings. The staff page is `/{locale}/admin/meta` for a Marketing Executive with an organization grant. Native host development also requires a running Redis, Celery worker and Celery beat process to process and recover events; API and web alone show only the admin workspace. See `docs/integrations/meta.md` for setup and triage.

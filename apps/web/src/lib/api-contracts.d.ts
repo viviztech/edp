@@ -950,6 +950,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/meta/organizations/{org}/integrations/{integration_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Integration */
+        patch: operations["update_integration_api_v1_meta_organizations__org__integrations__integration_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/meta/organizations/{org}/integrations/{integration_id}/rotate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rotate Integration */
+        post: operations["rotate_integration_api_v1_meta_organizations__org__integrations__integration_id__rotate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/meta/organizations/{org}/integrations/{integration_id}/mappings/{mapping_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Mapping */
+        patch: operations["update_mapping_api_v1_meta_organizations__org__integrations__integration_id__mappings__mapping_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/meta/organizations/{org}/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Integration Health */
+        get: operations["integration_health_api_v1_meta_organizations__org__health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/meta/organizations/{org}/events/{event_id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replay Event */
+        post: operations["replay_event_api_v1_meta_organizations__org__events__event_id__replay_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/integrations/meta/webhook/{integration_id}": {
         parameters: {
             query?: never;
@@ -1427,6 +1512,13 @@ export interface components {
             /** Next Cursor */
             next_cursor: string | null;
         };
+        /** EventReplay */
+        EventReplay: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
         /** EventView */
         EventView: {
             /**
@@ -1454,6 +1546,8 @@ export interface components {
             state: "queued" | "processing" | "retrying" | "completed" | "failed";
             /** Attempt Count */
             attempt_count: number;
+            /** Version */
+            version: number;
             /** Error Code */
             error_code: string;
             /** Lead Id */
@@ -1507,6 +1601,23 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** HealthView */
+        HealthView: {
+            /** Integrations */
+            integrations: number;
+            /** Active Integrations */
+            active_integrations: number;
+            /** Queued */
+            queued: number;
+            /** Processing */
+            processing: number;
+            /** Retrying */
+            retrying: number;
+            /** Failed */
+            failed: number;
+            /** Completed */
+            completed: number;
+        };
         /** History */
         History: {
             /** Items */
@@ -1536,12 +1647,35 @@ export interface components {
              */
             verify_token: string;
         };
+        /** IntegrationEdit */
+        IntegrationEdit: {
+            /** Expected Version */
+            expected_version: number;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "disabled";
+        };
         /** IntegrationList */
         IntegrationList: {
             /** Items */
             items: components["schemas"]["IntegrationView"][];
             /** Next Cursor */
             next_cursor: string | null;
+        };
+        /** IntegrationRotate */
+        IntegrationRotate: {
+            /** Expected Version */
+            expected_version: number;
+            /** Access Token */
+            access_token?: string | null;
+            /** App Secret */
+            app_secret?: string | null;
+            /** Verify Token */
+            verify_token?: string | null;
         };
         /** IntegrationView */
         IntegrationView: {
@@ -1728,6 +1862,29 @@ export interface components {
             field_mapping: {
                 [key: string]: "name" | "email" | "phone";
             };
+        };
+        /** MappingEdit */
+        MappingEdit: {
+            /** Form Id */
+            form_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Campaign
+             * @default
+             */
+            campaign: string;
+            /** Field Mapping */
+            field_mapping: {
+                [key: string]: "name" | "email" | "phone";
+            };
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "disabled";
         };
         /** MappingList */
         MappingList: {
@@ -4302,6 +4459,182 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EventList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_integration_api_v1_meta_organizations__org__integrations__integration_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IntegrationEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntegrationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rotate_integration_api_v1_meta_organizations__org__integrations__integration_id__rotate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IntegrationRotate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntegrationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_mapping_api_v1_meta_organizations__org__integrations__integration_id__mappings__mapping_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                integration_id: string;
+                mapping_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MappingEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MappingView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    integration_health_api_v1_meta_organizations__org__health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replay_event_api_v1_meta_organizations__org__events__event_id__replay_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventReplay"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventView"];
                 };
             };
             /** @description Validation Error */

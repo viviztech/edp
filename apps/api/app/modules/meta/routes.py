@@ -9,10 +9,16 @@ from app.modules.identity.security import AuthError
 from app.modules.meta import service
 from app.modules.meta.schemas import (
     EventList,
+    EventReplay,
+    EventView,
+    HealthView,
     IntegrationCreate,
+    IntegrationEdit,
     IntegrationList,
+    IntegrationRotate,
     IntegrationView,
     MappingCreate,
+    MappingEdit,
     MappingList,
     MappingView,
     WebhookAccepted,
@@ -90,6 +96,78 @@ def list_events(
 ) -> EventList:
     items, next_cursor = service.events(db, org, identity[0], cursor, limit)
     return EventList(items=items, next_cursor=next_cursor)
+
+
+@router.patch(
+    "/meta/organizations/{org}/integrations/{integration_id}",
+    response_model=IntegrationView,
+)
+def update_integration(
+    org: UUID,
+    integration_id: UUID,
+    data: IntegrationEdit,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> IntegrationView:
+    return service.update_integration(
+        db, org, integration_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.post(
+    "/meta/organizations/{org}/integrations/{integration_id}/rotate",
+    response_model=IntegrationView,
+)
+def rotate_integration(
+    org: UUID,
+    integration_id: UUID,
+    data: IntegrationRotate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> IntegrationView:
+    return service.rotate_integration(
+        db, org, integration_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.patch(
+    "/meta/organizations/{org}/integrations/{integration_id}/mappings/{mapping_id}",
+    response_model=MappingView,
+)
+def update_mapping(
+    org: UUID,
+    integration_id: UUID,
+    mapping_id: UUID,
+    data: MappingEdit,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> MappingView:
+    return service.update_mapping(
+        db, org, integration_id, mapping_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.get("/meta/organizations/{org}/health", response_model=HealthView)
+def integration_health(org: UUID, db: DB, identity: Principal) -> HealthView:
+    return service.health(db, org, identity[0])
+
+
+@router.post(
+    "/meta/organizations/{org}/events/{event_id}/replay",
+    response_model=EventView,
+)
+def replay_event(
+    org: UUID,
+    event_id: UUID,
+    data: EventReplay,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> EventView:
+    return service.replay_event(db, org, event_id, identity[0], data, request.state.request_id)
 
 
 @router.get("/integrations/meta/webhook/{integration_id}")

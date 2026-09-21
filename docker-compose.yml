@@ -7,6 +7,9 @@ x-api: &api
     APP_ENV: local
     BFF_KEY: ${BFF_KEY:?Generate a server-only BFF key in .env}
     AUTH_DELIVERY_KEY: ${AUTH_DELIVERY_KEY:-}
+    META_SECRET_KEY: ${META_SECRET_KEY:-}
+    META_GRAPH_API_VERSION: ${META_GRAPH_API_VERSION:-}
+    META_EVENT_RETENTION_DAYS: ${META_EVENT_RETENTION_DAYS:-}
     DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-edp_dev}:${POSTGRES_PASSWORD:?Set a random URL-safe local password in .env}@postgres:5432/${POSTGRES_DB:-edp_dev}
     REDIS_URL: redis://redis:6379/0
     CORS_ORIGINS: '["http://localhost:3000"]'
@@ -62,6 +65,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+  beat:
+    <<: *api
+    command: ["celery", "-A", "app.workers.celery_app:celery_app", "beat", "--loglevel=INFO", "--schedule=/tmp/edp-celerybeat-schedule"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
   web:
     environment:
       API_INTERNAL_URL: http://api:8000

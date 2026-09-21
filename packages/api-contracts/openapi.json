@@ -3888,6 +3888,311 @@
         }
       }
     },
+    "/api/v1/meta/organizations/{org}/integrations/{integration_id}": {
+      "patch": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Update Integration",
+        "operationId": "update_integration_api_v1_meta_organizations__org__integrations__integration_id__patch",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Integration Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationEdit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meta/organizations/{org}/integrations/{integration_id}/rotate": {
+      "post": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Rotate Integration",
+        "operationId": "rotate_integration_api_v1_meta_organizations__org__integrations__integration_id__rotate_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Integration Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationRotate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meta/organizations/{org}/integrations/{integration_id}/mappings/{mapping_id}": {
+      "patch": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Update Mapping",
+        "operationId": "update_mapping_api_v1_meta_organizations__org__integrations__integration_id__mappings__mapping_id__patch",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Integration Id"
+            }
+          },
+          {
+            "name": "mapping_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Mapping Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingEdit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meta/organizations/{org}/health": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Integration Health",
+        "operationId": "integration_health_api_v1_meta_organizations__org__health_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meta/organizations/{org}/events/{event_id}/replay": {
+      "post": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Replay Event",
+        "operationId": "replay_event_api_v1_meta_organizations__org__events__event_id__replay_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventReplay"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/integrations/meta/webhook/{integration_id}": {
       "get": {
         "tags": [
@@ -5155,6 +5460,28 @@
         ],
         "title": "EventList"
       },
+      "EventReplay": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "reason"
+        ],
+        "title": "EventReplay"
+      },
       "EventView": {
         "properties": {
           "id": {
@@ -5206,6 +5533,10 @@
             "type": "integer",
             "title": "Attempt Count"
           },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
           "error_code": {
             "type": "string",
             "title": "Error Code"
@@ -5250,6 +5581,7 @@
           "form_id",
           "state",
           "attempt_count",
+          "version",
           "error_code",
           "lead_id",
           "created_at",
@@ -5351,6 +5683,49 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HealthView": {
+        "properties": {
+          "integrations": {
+            "type": "integer",
+            "title": "Integrations"
+          },
+          "active_integrations": {
+            "type": "integer",
+            "title": "Active Integrations"
+          },
+          "queued": {
+            "type": "integer",
+            "title": "Queued"
+          },
+          "processing": {
+            "type": "integer",
+            "title": "Processing"
+          },
+          "retrying": {
+            "type": "integer",
+            "title": "Retrying"
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed"
+          },
+          "completed": {
+            "type": "integer",
+            "title": "Completed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "integrations",
+          "active_integrations",
+          "queued",
+          "processing",
+          "retrying",
+          "failed",
+          "completed"
+        ],
+        "title": "HealthView"
+      },
       "History": {
         "properties": {
           "items": {
@@ -5431,6 +5806,37 @@
         ],
         "title": "IntegrationCreate"
       },
+      "IntegrationEdit": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "name",
+          "status"
+        ],
+        "title": "IntegrationEdit"
+      },
       "IntegrationList": {
         "properties": {
           "items": {
@@ -5459,6 +5865,66 @@
           "next_cursor"
         ],
         "title": "IntegrationList"
+      },
+      "IntegrationRotate": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "access_token": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096,
+                "minLength": 20,
+                "format": "password",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Token"
+          },
+          "app_secret": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 16,
+                "format": "password",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Secret"
+          },
+          "verify_token": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 24,
+                "format": "password",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verify Token"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version"
+        ],
+        "title": "IntegrationRotate"
       },
       "IntegrationView": {
         "properties": {
@@ -5868,6 +6334,64 @@
           "field_mapping"
         ],
         "title": "MappingCreate"
+      },
+      "MappingEdit": {
+        "properties": {
+          "form_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "pattern": "^[0-9A-Za-z_-]+$",
+            "title": "Form Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "campaign": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Campaign",
+            "default": ""
+          },
+          "field_mapping": {
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "name",
+                "email",
+                "phone"
+              ]
+            },
+            "type": "object",
+            "title": "Field Mapping"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "form_id",
+          "name",
+          "field_mapping",
+          "expected_version",
+          "status"
+        ],
+        "title": "MappingEdit"
       },
       "MappingList": {
         "properties": {
