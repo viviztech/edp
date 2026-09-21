@@ -13,7 +13,7 @@ Owner approvals pending. No real data in development. Default is minimize collec
 | Learning/attendance/grades/certificates | Program delivery | PostgreSQL; no precise location/biometrics; retention pending |
 | Business outcome/revenue bands | Impact; self and scoped reporting staff | Minimize exact financial data; dated snapshots, aggregate output |
 | Consent/preferences/device push tokens | Communication | Versioned consent, revocable preferences; remove stale device tokens |
-| CRM assignment notification intents | Staff in-app notice; recipient and scoped CRM staff | PostgreSQL stores organization, recipient and lead IDs, topic, state and timestamps without lead contact details or message body. Preferences are versioned. Approval of the retention period remains pending; configurable hiding and bounded audited disposal are implemented, with no code default; synthetic data only |
+| CRM assignment and follow-up notification intents | Staff in-app notices; recipient and scoped CRM staff | PostgreSQL stores organization, recipient, lead/activity IDs, topic, state and timestamps without lead contact details, activity notes or message body. CRM activity retains a last-reminded recipient marker under its own lifecycle. Preferences are versioned. Approval of the retention period remains pending; configurable hiding and bounded audited disposal are implemented, with no code default; synthetic data only |
 | Audit and operational logs | Accountability/incident response | Allowlisted metadata; separate access and approved retention |
 | Backups | Recovery | Encrypted separate storage; deletion propagates through documented expiry |
 

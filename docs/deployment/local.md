@@ -55,3 +55,6 @@ Apply migration f8a0b1c2d3e4 and run the API, Redis, Celery worker and beat with
 
 
 Notification retention: set NOTIFICATION_RETENTION_DAYS in API, worker and beat environments only after policy approval, then restart all three. The minutely cleanup task removes expired intents in batches of 100. Staging/production lead assignments that would create notices return retention_policy_not_configured (503) while this setting is absent. Local/test synthetic notices remain available for development. See docs/integrations/notifications.md for the lifecycle and disposal behavior.
+
+
+Follow-up reminders: the same Celery worker/beat pair used for assignment notices runs edp.notifications.queue_due_followups every minute. Confirm both tasks are registered and use the same PostgreSQL database as the API. A due activity must be incomplete, belong to an assigned active lead, and pass recipient permission and preference checks before appearing in the inbox. API/web-only preview cannot schedule reminders.

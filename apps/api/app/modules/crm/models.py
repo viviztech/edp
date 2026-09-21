@@ -70,6 +70,9 @@ class LeadActivity(Record, Base):
     note: Mapped[str] = mapped_column(Text)
     due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reminder_queued_for_user_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=True
+    )
     version: Mapped[int] = mapped_column(Integer, default=1)
     __table_args__ = (
         CheckConstraint(
@@ -78,6 +81,7 @@ class LeadActivity(Record, Base):
         CheckConstraint("length(trim(note)) BETWEEN 1 AND 5000", name="crm_activity_note"),
         CheckConstraint("version > 0", name="crm_activity_version"),
         Index("ix_crm_activity_queue", "organization_id", "lead_id", "due_at"),
+        Index("ix_crm_activity_due", "due_at", "id"),
     )
 
 

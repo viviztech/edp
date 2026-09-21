@@ -14,6 +14,7 @@ export default function NotificationWorkspace({ org, locale }: { org: string; lo
   const root = `/api/notifications/organizations/${org}`;
   const [items, setItems] = useState<Item[]>([]);
   const [preference, setPreference] = useState<Preference | null>(null);
+  const [followupPreference, setFollowupPreference] = useState<Preference | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -33,15 +34,23 @@ export default function NotificationWorkspace({ org, locale }: { org: string; lo
   }, [text.conflict, text.error]);
 
   const load = useCallback(async () => {
-    const [page, pref] = await Promise.all([api<Page>(`${root}/mine`), api<Preference>(`${root}/preference`)]);
-    setItems(page.items); setCursor(page.next_cursor ?? null); setPreference(pref);
+    const [page, pref, followup] = await Promise.all([
+      api<Page>(`${root}/mine`),
+      api<Preference>(`${root}/preference`),
+      api<Preference>(`${root}/preference?topic=followup_due`),
+    ]);
+    setItems(page.items); setCursor(page.next_cursor ?? null); setPreference(pref); setFollowupPreference(followup);
   }, [api, root]);
 
   useEffect(() => {
     let active = true;
-    Promise.all([api<Page>(`${root}/mine`), api<Preference>(`${root}/preference`)]).then(([page, pref]) => {
+    Promise.all([
+      api<Page>(`${root}/mine`),
+      api<Preference>(`${root}/preference`),
+      api<Preference>(`${root}/preference?topic=followup_due`),
+    ]).then(([page, pref, followup]) => {
       if (!active) return;
-      setItems(page.items); setCursor(page.next_cursor ?? null); setPreference(pref);
+      setItems(page.items); setCursor(page.next_cursor ?? null); setPreference(pref); setFollowupPreference(followup);
     }).catch(() => { if (active) setMessage(text.error); });
     return () => { active = false; };
   }, [api, root, text.error]);
@@ -64,11 +73,20 @@ export default function NotificationWorkspace({ org, locale }: { org: string; lo
         setPreference(updated);
       }, text.updated)}>{preference.enabled ? text.disable : text.enable}</button> : null}
     </section>
+    <section className="notice-preference" aria-label={text.followupPreference}>
+      <div><p className="eyebrow">{text.followupPreference}</p><strong>{followupPreference ? (followupPreference.enabled ? text.enabled : text.disabled) : text.loading}</strong></div>
+      {followupPreference ? <button disabled={busy} onClick={() => run(async () => {
+        const updated = await api<Preference>(`${root}/preference?topic=followup_due`, "POST", {
+          enabled: !followupPreference.enabled, expected_version: followupPreference.version,
+        });
+        setFollowupPreference(updated);
+      }, text.updated)}>{followupPreference.enabled ? text.disable : text.enable}</button> : null}
+    </section>
     <section className="notice-inbox" aria-label={text.workspace}>
       <div className="notice-section-head"><h2>{text.workspace}</h2><button disabled={busy} onClick={() => run(load, "")}>{text.refresh}</button></div>
       {items.length === 0 ? <p className="notice-empty">{text.empty}</p> : <ol>{items.map((item) =>
         <li key={item.id} className={item.read_at ? "notice-read" : "notice-unread"}>
-          <div><span className="notice-indicator" aria-hidden="true" /><strong>{text.leadAssigned}</strong><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString(locale)}</time></div>
+          <div><span className="notice-indicator" aria-hidden="true" /><strong>{item.topic === "followup_due" ? text.followupDue : text.leadAssigned}</strong><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString(locale)}</time></div>
           <span className="notice-state">{item.read_at ? text.read : text.unread}</span>
           <div className="notice-actions"><Link href={`/${locale}/admin/crm?organization=${org}`}>{text.openCrm}</Link>
             {!item.read_at ? <button disabled={busy} onClick={() => run(async () => {

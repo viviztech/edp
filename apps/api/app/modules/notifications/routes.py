@@ -8,6 +8,7 @@ from app.modules.notifications import service
 from app.modules.notifications.schemas import (
     MarkRead,
     NotificationList,
+    NotificationTopic,
     NotificationView,
     PreferenceEdit,
     PreferenceView,
@@ -18,15 +19,22 @@ Limit = Annotated[int, Query(ge=1, le=100)]
 
 
 @router.get("/preference", response_model=PreferenceView)
-def preference(org: UUID, db: DB, identity: Principal) -> PreferenceView:
-    return service.preference(db, org, identity[0])
+def preference(
+    org: UUID, db: DB, identity: Principal, topic: NotificationTopic = "lead_assignment"
+) -> PreferenceView:
+    return service.preference(db, org, identity[0], topic)
 
 
 @router.post("/preference", response_model=PreferenceView)
 def update_preference(
-    org: UUID, data: PreferenceEdit, request: Request, db: DB, identity: Principal
+    org: UUID,
+    data: PreferenceEdit,
+    request: Request,
+    db: DB,
+    identity: Principal,
+    topic: NotificationTopic = "lead_assignment",
 ) -> PreferenceView:
-    return service.update_preference(db, org, identity[0], data, request.state.request_id)
+    return service.update_preference(db, org, identity[0], data, request.state.request_id, topic)
 
 
 @router.get("/mine", response_model=NotificationList)

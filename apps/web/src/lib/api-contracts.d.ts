@@ -2026,9 +2026,9 @@ export interface components {
             id: string;
             /**
              * Topic
-             * @constant
+             * @enum {string}
              */
-            topic: "lead_assignment";
+            topic: "lead_assignment" | "followup_due";
             /**
              * Resource Id
              * Format: uuid
@@ -2075,9 +2075,9 @@ export interface components {
             /**
              * Topic
              * @default lead_assignment
-             * @constant
+             * @enum {string}
              */
-            topic: "lead_assignment";
+            topic: "lead_assignment" | "followup_due";
             /** Enabled */
             enabled: boolean;
             /** Version */
@@ -4831,7 +4831,9 @@ export interface operations {
     };
     preference_api_v1_notifications_organizations__org__preference_get: {
         parameters: {
-            query?: never;
+            query?: {
+                topic?: "lead_assignment" | "followup_due";
+            };
             header?: never;
             path: {
                 org: string;
@@ -4862,7 +4864,9 @@ export interface operations {
     };
     update_preference_api_v1_notifications_organizations__org__preference_post: {
         parameters: {
-            query?: never;
+            query?: {
+                topic?: "lead_assignment" | "followup_due";
+            };
             header?: never;
             path: {
                 org: string;

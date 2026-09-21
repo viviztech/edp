@@ -4334,6 +4334,20 @@
               "format": "uuid",
               "title": "Org"
             }
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "lead_assignment",
+                "followup_due"
+              ],
+              "type": "string",
+              "default": "lead_assignment",
+              "title": "Topic"
+            }
           }
         ],
         "responses": {
@@ -4374,6 +4388,20 @@
               "type": "string",
               "format": "uuid",
               "title": "Org"
+            }
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "lead_assignment",
+                "followup_due"
+              ],
+              "type": "string",
+              "default": "lead_assignment",
+              "title": "Topic"
             }
           }
         ],
@@ -6808,7 +6836,10 @@
           },
           "topic": {
             "type": "string",
-            "const": "lead_assignment",
+            "enum": [
+              "lead_assignment",
+              "followup_due"
+            ],
             "title": "Topic"
           },
           "resource_id": {
@@ -6929,7 +6960,10 @@
         "properties": {
           "topic": {
             "type": "string",
-            "const": "lead_assignment",
+            "enum": [
+              "lead_assignment",
+              "followup_due"
+            ],
             "title": "Topic",
             "default": "lead_assignment"
           },

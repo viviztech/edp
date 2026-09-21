@@ -4,9 +4,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+NotificationTopic = Literal["lead_assignment", "followup_due"]
+
 
 class PreferenceView(BaseModel):
-    topic: Literal["lead_assignment"] = "lead_assignment"
+    topic: NotificationTopic = "lead_assignment"
     enabled: bool
     version: int
 
@@ -19,7 +21,7 @@ class PreferenceEdit(BaseModel):
 
 class NotificationView(BaseModel):
     id: UUID
-    topic: Literal["lead_assignment"]
+    topic: NotificationTopic
     resource_id: UUID
     created_at: datetime
     read_at: datetime | None

@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Literal
+from typing import cast
 from uuid import UUID
 
 from sqlalchemy import select
@@ -13,32 +13,40 @@ from app.modules.identity.service import require_permission
 from app.modules.notifications.models import NotificationIntent, NotificationPreference
 from app.modules.notifications.schemas import (
     MarkRead,
+    NotificationTopic,
     NotificationView,
     PreferenceEdit,
     PreferenceView,
 )
 
-TOPIC: Literal["lead_assignment"] = "lead_assignment"
+TOPIC: NotificationTopic = "lead_assignment"
 
 
-def preference(db: Session, org: UUID, actor: User) -> PreferenceView:
+def preference(
+    db: Session, org: UUID, actor: User, topic: NotificationTopic = TOPIC
+) -> PreferenceView:
     require_permission(db, actor, org, "crm.lead.view")
     row = db.scalar(
         select(NotificationPreference).where(
             NotificationPreference.organization_id == org,
             NotificationPreference.user_id == actor.id,
-            NotificationPreference.topic == TOPIC,
+            NotificationPreference.topic == topic,
         )
     )
     return (
-        PreferenceView(enabled=row.enabled, version=row.version)
+        PreferenceView(topic=topic, enabled=row.enabled, version=row.version)
         if row
-        else PreferenceView(enabled=True, version=0)
+        else PreferenceView(topic=topic, enabled=True, version=0)
     )
 
 
 def update_preference(
-    db: Session, org: UUID, actor: User, data: PreferenceEdit, request_id: str
+    db: Session,
+    org: UUID,
+    actor: User,
+    data: PreferenceEdit,
+    request_id: str,
+    topic: NotificationTopic = TOPIC,
 ) -> PreferenceView:
     require_permission(db, actor, org, "crm.lead.view")
     row = db.scalar(
@@ -46,7 +54,7 @@ def update_preference(
         .where(
             NotificationPreference.organization_id == org,
             NotificationPreference.user_id == actor.id,
-            NotificationPreference.topic == TOPIC,
+            NotificationPreference.topic == topic,
         )
         .with_for_update()
     )
@@ -60,7 +68,7 @@ def update_preference(
         if data.expected_version != 0:
             raise AuthError("version_conflict", 409)
         row = NotificationPreference(
-            organization_id=org, user_id=actor.id, topic=TOPIC, enabled=data.enabled
+            organization_id=org, user_id=actor.id, topic=topic, enabled=data.enabled
         )
         db.add(row)
         try:
@@ -80,13 +88,13 @@ def update_preference(
         )
     )
     db.commit()
-    return PreferenceView(enabled=row.enabled, version=row.version)
+    return PreferenceView(topic=topic, enabled=row.enabled, version=row.version)
 
 
 def view(row: NotificationIntent) -> NotificationView:
     return NotificationView(
         id=row.id,
-        topic=TOPIC,
+        topic=cast(NotificationTopic, row.topic),
         resource_id=row.resource_id,
         created_at=row.created_at,
         read_at=row.read_at,

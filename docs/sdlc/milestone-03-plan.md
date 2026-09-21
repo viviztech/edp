@@ -1,6 +1,6 @@
 # Milestone 3 - CRM and lead integrations
 
-Status: in progress. Authority: master Sections 7, 24, 30 and backlog C02-C03.
+Status: in progress. Authority: master Sections 7, 24, 30 and backlog C02-C03 and N01.
 
 1. C02.1: organization-scoped attributed leads with assignments and lifecycle states.
 2. C02.2: append-oriented follow-up activities and due dates.
@@ -39,3 +39,10 @@ Verification: migration upgrade/downgrade/check on disposable PostgreSQL; transa
 Authority: master Sections 19, 30 and 38; the privacy inventory and N01 backlog. This slice applies only to CRM assignment notification intents and preferences already in N01.1. NOTIFICATION_RETENTION_DAYS is deployment-approved configuration with no code default. A missing value blocks new assignment notices in staging/production, and remains a real-data launch blocker; synthetic local development can continue.
 
 Acceptance: with a configured period, recipient inbox reads hide expired intents immediately, mark-read rejects an expired item, the delivery worker never exposes an expired pending intent, and a scheduled worker deletes at most 100 expired rows per invocation under row locks. Each deletion writes a minimal audit event in the same transaction. The parent CRM lead and user preference survive. Repeating cleanup is harmless. PostgreSQL tests cover cutoff, ownership, read denial, bounded repeat cleanup and lead preservation. Configuration validation, lint/type checks, full suite and local smoke must pass. No external delivery is added.
+
+
+## N01.3 - CRM follow-up due reminders
+
+Authority: master Sections 7 and 19 (followup.due), Phase 3 communications foundation, C02 activity queue and N01. Existing CRM activities have due dates and completion versions. This slice adds only in-app notices for incomplete, due follow-ups; no external channel or lead note/contact detail is copied into a notification.
+
+Acceptance: a bounded scheduled scan creates at most one intent per due activity and current assignee, with database uniqueness and locking across concurrent runs. It skips future, completed, unassigned and merged/converted lead work. If a lead is reassigned, the old pending intent is suppressed at dispatch and the current assignee can receive a new one. Completing an activity before dispatch suppresses its pending reminder. Dispatch rechecks organization, activity, lead ownership, active recipient, CRM permission and a separate versioned follow-up preference. Inbox copy and controls work in English and Tamil; wrong-organization and other-recipient access remain denied. Migration upgrade/downgrade/drift, isolated PostgreSQL tests, generated contracts, web checks and local smoke must pass. Provider delivery remains outside scope.

@@ -30,6 +30,10 @@ celery_app.conf.update(
             "task": "edp.meta.purge_expired_events",
             "schedule": 60.0,
         },
+        "queue-due-followups": {
+            "task": "edp.notifications.queue_due_followups",
+            "schedule": 60.0,
+        },
         "deliver-in-app-notifications": {
             "task": "edp.notifications.deliver_in_app",
             "schedule": 60.0,

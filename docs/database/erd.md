@@ -236,3 +236,6 @@ Migration f8a0b1c2d3e4 adds notification_preferences and notification_intents. E
 
 
 N01.2 adds ix_notification_retention(created_at,id) to notification_intents for bounded cleanup. Expiry is derived from created_at and deployment-approved NOTIFICATION_RETENTION_DAYS, so tightening the period immediately hides and schedules disposal of older intents. Audit records have no foreign key to a disposed intent; lead and preference foreign keys remain untouched.
+
+
+N01.3 adds nullable notification_intents.source_activity_id referencing crm_lead_activities, constrained to be present only for followup_due and absent for lead_assignment. A unique (source_activity_id,recipient_user_id) pair guards concurrent reminder creation. The due activity index supports bounded scheduling. CRM activity.reminder_queued_for_user_id is a durable last-recipient marker retained under the CRM activity lifecycle, preventing notification expiry from restarting reminders for an unchanged assignee. This marker is not message content.
