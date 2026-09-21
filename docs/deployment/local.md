@@ -9,13 +9,13 @@ Prerequisites: Python 3.13, Node 24/npm, Flutter stable SDK and platform SDK, Do
 5. `docker compose exec worker celery -A app.workers.celery_app:celery_app inspect ping` checks worker; execute `scripts/compose-smoke.py` from host Python for probes and queue round-trip.
 6. `docker compose down` stops containers; do not remove volumes unless intentional disposable reset.
 
-Host backend: `python -m venv .venv`; install `apps/api/requirements-dev.lock`; copy API `.env.example` to `apps/api/.env` and set URLs for isolated PostgreSQL/Redis; from apps/api run `python -m uvicorn app.main:app --reload`. Use venv Python for checks. API env is read from current working directory; Compose injects variables.
+Host backend: `python -m venv .venv`; install `apps/api/requirements-dev.lock`; copy API `.env.example` to `apps/api/.env` and set URLs for isolated PostgreSQL/Redis. On Windows run `.venv\Scripts\python.exe scripts/run-native-api.py` from the repository root so psycopg uses a compatible selector event loop. On macOS/Linux, from apps/api run `python -m uvicorn app.main:app --reload`. Use venv Python for checks. API env is read from the apps/api working directory; Compose injects variables.
 
 Host web: from apps/web `npm.cmd ci`, `npm.cmd run dev`. Mobile: from apps/mobile `flutter pub get`, `flutter run`; Android emulator API host is `10.0.2.2`, physical device needs reachable development host. Use synthetic accounts only. Account UI is at /en/account or /ta/account. For native Flutter pass --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1 on an Android emulator. Release builds require an HTTPS API URL. iOS native verification requires macOS.
 
 Quality commands and results are in milestone report. Never point migration downgrade or integration tests at shared/production databases.
 
-Native Windows PostgreSQL note: psycopg async connections require a selector event loop. `scripts/native-dependency-smoke.py` configures it for the test client; use the Linux Compose API for normal development. The isolated native smoke is not proof of the container or worker stack.
+Native Windows PostgreSQL note: psycopg async connections require a selector event loop. `scripts/run-native-api.py` configures it for the host API, and `scripts/native-dependency-smoke.py` does the same for the test client. The project-owned host database supports local development; Compose remains the production-like full-stack path and is still required for container and worker evidence.
 
 ## Foundation account workflow
 
@@ -32,3 +32,14 @@ Apply migration 2b3fcc875606, rerun the trusted `identity.cli seed` command to a
 Staff authoring: /en/admin/pages or /ta/admin/pages; public list: /en/pages or /ta/pages; detail: /{locale}/pages/{slug}. CMS body is plain text in this first slice. Save before preview/publish. Published content stays unchanged until another publish. After stale-write conflict, reload the page from the page list and reconcile edits. Archive removes only the selected locale; restore creates an unpublished draft.
 
 Rollback code without dropping published data. Schema downgrade is destructive and for disposable tests only; production disposal needs backup and approval.
+
+### Project-owned Windows PostgreSQL
+
+This workstation uses an isolated PostgreSQL 17 cluster at `.local/postgres17/data`, bound to `127.0.0.1:55432`. It does not alter the Windows PostgreSQL services on ports 5432 or 5433. The ignored `apps/api/.env` points to database `edp_dev` with the generated `edp_dev` role; `edp_test` is reserved for destructive integration tests. Start and stop this cluster from the repository root with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-local-postgres.ps1
+powershell -ExecutionPolicy Bypass -File scripts/stop-local-postgres.ps1
+```
+
+After starting PostgreSQL and Redis, apply schema changes from `apps/api` with `..\..\.venv\Scripts\alembic.exe upgrade head`, seed permissions with `..\..\.venv\Scripts\python.exe -m app.modules.identity.cli seed`, and launch the Windows API with `.venv\Scripts\python.exe scripts/run-native-api.py`. A successful `GET /ready` proves both PostgreSQL and Redis are reachable.

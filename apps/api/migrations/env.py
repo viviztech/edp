@@ -4,7 +4,9 @@ from sqlalchemy import create_engine, pool
 from app.core.config import get_settings
 from app.core.database import Base
 from app.modules.cms import models as cms_models  # noqa: F401
-from app.modules.identity import models  # noqa: F401
+from app.modules.crm import models as crm_models  # noqa: F401
+from app.modules.identity import models as identity_models  # noqa: F401
+from app.modules.meta import models as meta_models  # noqa: F401
 
 target_metadata = Base.metadata
 url = get_settings().database_url.get_secret_value()

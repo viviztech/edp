@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy import (
     JSON,
     CheckConstraint,
+    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -29,7 +30,7 @@ class MetaIntegration(Record, Base):
     verify_token_hash: Mapped[str] = mapped_column(String(64))
     status: Mapped[str] = mapped_column(String(16), default="active")
     version: Mapped[int] = mapped_column(Integer, default=1)
-    updated_at: Mapped[datetime] = mapped_column(default=now, onupdate=now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
     __table_args__ = (
         UniqueConstraint("organization_id", "page_id"),
         CheckConstraint("status IN ('active','disabled')", name="meta_integration_status"),
@@ -80,9 +81,9 @@ class MetaWebhookEvent(Record, Base):
     lead_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("crm_leads.id", ondelete="RESTRICT"), nullable=True, index=True
     )
-    next_attempt_at: Mapped[datetime | None] = mapped_column(nullable=True)
-    processed_at: Mapped[datetime | None] = mapped_column(nullable=True)
-    retention_expires_at: Mapped[datetime] = mapped_column(index=True)
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    retention_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     __table_args__ = (
         UniqueConstraint("integration_id", "provider_event_id"),
         CheckConstraint(
