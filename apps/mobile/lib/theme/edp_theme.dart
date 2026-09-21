@@ -24,7 +24,7 @@ abstract final class EdpTheme {
           onSurface: EdpColors.ink,
           outline: EdpColors.line,
         );
-    return ThemeData(
+    final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: EdpColors.background,
@@ -40,6 +40,13 @@ abstract final class EdpTheme {
           borderSide: const BorderSide(color: EdpColors.line),
           borderRadius: BorderRadius.circular(4),
         ),
+      ),
+    );
+    const fallback = ['NotoSansTamil'];
+    return base.copyWith(
+      textTheme: base.textTheme.apply(fontFamilyFallback: fallback),
+      primaryTextTheme: base.primaryTextTheme.apply(
+        fontFamilyFallback: fallback,
       ),
     );
   }

@@ -16,10 +16,11 @@ export default async function Home({ params }: { params: Promise<{locale: string
   if (!isLocale(locale)) notFound();
   const text = messages[locale];
   const navigation = await publicNavigation(locale);
-  return <main id="main">
+  return <main id="main" className="home-main">
+    <section className="home-hero" aria-labelledby="home-title"><div className="home-hero-copy">
     <p className="eyebrow">{text.title}</p>
-    <h1>{text.introduction}</h1>
-    <p className="description">{text.description}</p>
+    <h1 id="home-title">{text.introduction}</h1>
+    <p className="description">{text.description}</p></div><div className="home-hero-art" aria-hidden="true" /></section>
     <Card className="program-notice"><CardContent><span>{text.availability}</span><Link className="program-cta" href={`/${locale}/account`}>{text.apply}</Link></CardContent></Card>
     {navigation.length > 0 && <section className="information-grid" aria-labelledby="discover-heading">
       <div><p className="eyebrow">{text.discoverEyebrow}</p><h2 id="discover-heading">{text.discoverTitle}</h2></div>

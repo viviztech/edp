@@ -15,7 +15,8 @@ void main() {
     );
     await tester.tap(find.byType(TextButton).last);
     await tester.pumpAndSettle();
-    expect(find.text('Read in English'), findsOneWidget);
+    // The language control can be below the viewport on a small device.
+    expect(find.text('Read in English', skipOffstage: false), findsOneWidget);
     expect(find.text('Build your skills. Shape your business.'), findsNothing);
   });
 }

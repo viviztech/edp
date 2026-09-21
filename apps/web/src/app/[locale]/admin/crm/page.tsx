@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StaffModuleNav } from "../../../../components/staff-module-nav";
 import { notFound, redirect } from "next/navigation";
 import type { components } from "../../../../lib/api-contracts";
 import { crmMessages } from "../../../../lib/crm-messages";
@@ -22,6 +23,7 @@ export default async function CrmPage({ params, searchParams }: { params: Promis
   if (!grant) return <main id="main"><p>{text.permission}</p><Link href={`/${locale}/admin`}>{text.back}</Link></main>;
   return <main id="main" className="crm-main">
     <div className="crm-heading"><div><p className="eyebrow">{grant.organization_name}</p><h1>{text.workspace}</h1><p>{text.queueHint}</p></div><Link href={`/${locale}/admin?organization=${grant.organization_id}`}>{text.back}</Link></div>
+    <StaffModuleNav locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="crm" />
     {grants.length > 1 ? <nav className="crm-orgs" aria-label={text.organization}>{grants.map((item) => <a key={item.organization_id} href={`?organization=${item.organization_id}`}>{item.organization_name}</a>)}</nav> : null}
     <CrmWorkspace key={grant.organization_id} org={grant.organization_id} permissions={grant.permissions} locale={locale} />
   </main>;

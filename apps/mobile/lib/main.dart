@@ -77,33 +77,96 @@ class PublicHome extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(text.title)),
+      appBar: AppBar(title: const Text('EDP')),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            Text(
-              text.welcome,
-              style: Theme.of(context).textTheme.headlineLarge,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: ListView(
+              padding: const EdgeInsets.all(24),
+              children: [
+                Text(
+                  text.title,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(text.welcome, style: theme.textTheme.headlineLarge),
+                const SizedBox(height: 28),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    color: EdpColors.paper,
+                    border: Border(
+                      left: BorderSide(color: EdpColors.highlight, width: 4),
+                    ),
+                  ),
+                  child: Text(text.availability),
+                ),
+                const SizedBox(height: 28),
+                _HomeLink(
+                  title: text.cmsPages,
+                  icon: Icons.menu_book_outlined,
+                  onTap: () => context.push('/pages'),
+                ),
+                const SizedBox(height: 12),
+                _HomeLink(
+                  title: text.authTitle,
+                  icon: Icons.person_outline,
+                  onTap: () => context.push('/account'),
+                ),
+                const SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: ref.read(localeProvider.notifier).toggle,
+                    child: Text(text.language),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            Text(text.availability),
-            TextButton(
-              onPressed: () => context.push('/pages'),
-              child: Text(text.cmsPages),
-            ),
-            TextButton(
-              onPressed: () => context.push('/account'),
-              child: Text(text.authTitle),
-            ),
-            const SizedBox(height: 24),
-            TextButton(
-              onPressed: ref.read(localeProvider.notifier).toggle,
-              child: Text(text.language),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _HomeLink extends StatelessWidget {
+  const _HomeLink({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: EdpColors.paper,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
+        side: const BorderSide(color: EdpColors.line),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 12,
+        ),
+        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+        title: Text(title),
+        trailing: const Icon(Icons.arrow_forward),
+        onTap: onTap,
       ),
     );
   }
