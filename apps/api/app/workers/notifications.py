@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -86,16 +86,60 @@ def queue_due_followups() -> dict[str, int]:
         return {"queued": len(rows)}
 
 
+def eligible_for_delivery(db: Session, row: NotificationIntent) -> bool:
+    """Recheck recipient, ownership, activity and preference at dispatch."""
+    user = db.get(User, row.recipient_user_id)
+    lead = db.get(Lead, row.resource_id)
+    allowed = bool(user and user.status == "active")
+    if allowed and user:
+        try:
+            require_permission(db, user, row.organization_id, "crm.lead.view")
+        except AuthError:
+            allowed = False
+    pref = db.scalar(
+        select(NotificationPreference).where(
+            NotificationPreference.organization_id == row.organization_id,
+            NotificationPreference.user_id == row.recipient_user_id,
+            NotificationPreference.topic == row.topic,
+        )
+    )
+    allowed = allowed and bool(
+        lead
+        and lead.organization_id == row.organization_id
+        and lead.assigned_user_id == row.recipient_user_id
+    )
+    if row.topic == "followup_due":
+        activity = db.get(LeadActivity, row.source_activity_id)
+        allowed = allowed and bool(
+            activity
+            and activity.organization_id == row.organization_id
+            and activity.lead_id == row.resource_id
+            and activity.completed_at is None
+            and activity.due_at is not None
+            and activity.due_at <= now()
+        )
+    if pref and not pref.enabled:
+        allowed = False
+    return allowed
+
+
 @celery_app.task(name="edp.notifications.deliver_in_app")  # type: ignore[untyped-decorator]
 def deliver_in_app() -> dict[str, int]:
-    """Materialize pending database intents; no external provider is contacted."""
-    delivered = suppressed = 0
+    """Materialize a bounded batch of in-app intents with durable retry state."""
+    delivered = suppressed = failed = 0
     with Session(engine) as db:
+        current = now()
         retention_days = get_settings().notification_retention_days
-        query = select(NotificationIntent).where(NotificationIntent.state == "pending")
+        query = select(NotificationIntent).where(
+            NotificationIntent.state.in_(("pending", "retrying")),
+            or_(
+                NotificationIntent.next_attempt_at.is_(None),
+                NotificationIntent.next_attempt_at <= current,
+            ),
+        )
         if retention_days is not None:
             query = query.where(
-                NotificationIntent.created_at >= now() - timedelta(days=retention_days)
+                NotificationIntent.created_at >= current - timedelta(days=retention_days)
             )
         rows = list(
             db.scalars(
@@ -109,40 +153,41 @@ def deliver_in_app() -> dict[str, int]:
                 days=retention_days
             ):
                 continue
-            user = db.get(User, row.recipient_user_id)
-            lead = db.get(Lead, row.resource_id)
-            allowed = bool(user and user.status == "active")
-            if allowed and user:
-                try:
-                    require_permission(db, user, row.organization_id, "crm.lead.view")
-                except AuthError:
-                    allowed = False
-            pref = db.scalar(
-                select(NotificationPreference).where(
-                    NotificationPreference.organization_id == row.organization_id,
-                    NotificationPreference.user_id == row.recipient_user_id,
-                    NotificationPreference.topic == row.topic,
+            try:
+                with db.begin_nested():
+                    allowed = eligible_for_delivery(db, row)
+            except Exception:
+                # Never persist exception text: it may contain contact data or credentials.
+                row.attempt_count += 1
+                row.state = "failed" if row.attempt_count >= 3 else "retrying"
+                row.error_code = "dispatch_error"
+                row.next_attempt_at = (
+                    None
+                    if row.state == "failed"
+                    else now() + timedelta(minutes=2**row.attempt_count)
                 )
-            )
-            allowed = allowed and bool(
-                lead
-                and lead.organization_id == row.organization_id
-                and lead.assigned_user_id == row.recipient_user_id
-            )
-            if row.topic == "followup_due":
-                activity = db.get(LeadActivity, row.source_activity_id)
-                allowed = allowed and bool(
-                    activity
-                    and activity.organization_id == row.organization_id
-                    and activity.lead_id == row.resource_id
-                    and activity.completed_at is None
-                    and activity.due_at is not None
-                    and activity.due_at <= now()
+                row.version += 1
+                db.add(
+                    AuditLog(
+                        actor_id=None,
+                        organization_id=row.organization_id,
+                        resource_id=row.id,
+                        action="notification.failed"
+                        if row.state == "failed"
+                        else "notification.retry_scheduled",
+                        request_id=f"notification:{row.id}",
+                        resource_version=row.version,
+                        changed_fields="state,attempt_count,next_attempt_at",
+                    )
                 )
-            if pref and not pref.enabled:
-                allowed = False
+                db.flush()
+                failed += 1
+                continue
+            row.attempt_count += 1
             row.state = "delivered" if allowed else "suppressed"
             row.delivered_at = now() if allowed else None
+            row.next_attempt_at = None
+            row.error_code = None
             row.version += 1
             db.add(
                 AuditLog(
@@ -155,10 +200,11 @@ def deliver_in_app() -> dict[str, int]:
                     changed_fields="state",
                 )
             )
+            db.flush()
             delivered += int(allowed)
             suppressed += int(not allowed)
         db.commit()
-    return {"delivered": delivered, "suppressed": suppressed}
+    return {"delivered": delivered, "suppressed": suppressed, "failed": failed}
 
 
 @celery_app.task(name="edp.notifications.purge_expired")  # type: ignore[untyped-decorator]

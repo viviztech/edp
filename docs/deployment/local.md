@@ -58,3 +58,5 @@ Notification retention: set NOTIFICATION_RETENTION_DAYS in API, worker and beat 
 
 
 Follow-up reminders: the same Celery worker/beat pair used for assignment notices runs edp.notifications.queue_due_followups every minute. Confirm both tasks are registered and use the same PostgreSQL database as the API. A due activity must be incomplete, belong to an assigned active lead, and pass recipient permission and preference checks before appearing in the inbox. API/web-only preview cannot schedule reminders.
+
+Notification recovery: apply migration a2d3e4f5a6b7, rerun the identity role seed and restart API/worker/beat. Program Directors/Managers with an organization grant can open `/{locale}/admin/notifications` to inspect failed in-app intents and request replay with an audit reason. The worker uses bounded automatic retries; a failed database transaction still requires infrastructure triage.

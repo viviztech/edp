@@ -52,6 +52,9 @@ class NotificationIntent(Record, Base):
     event_key: Mapped[str] = mapped_column(String(160))
     state: Mapped[str] = mapped_column(String(16), default="pending")
     version: Mapped[int] = mapped_column(Integer, default=1)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(40), nullable=True)
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     __table_args__ = (
@@ -68,9 +71,14 @@ class NotificationIntent(Record, Base):
             "source_activity_id", "recipient_user_id", name="uq_notification_activity_recipient"
         ),
         CheckConstraint(
-            "state IN ('pending','delivered','suppressed')", name="notification_intent_state"
+            "state IN ('pending','retrying','failed','delivered','suppressed')",
+            name="notification_intent_state",
         ),
         CheckConstraint("version > 0", name="notification_intent_version"),
+        CheckConstraint(
+            "attempt_count >= 0 AND attempt_count <= 3", name="notification_intent_attempts"
+        ),
+        Index("ix_notification_failures", "organization_id", "state", "id"),
         Index("ix_notification_dispatch", "state", "created_at"),
         Index("ix_notification_inbox", "organization_id", "recipient_user_id", "state", "id"),
         Index("ix_notification_retention", "created_at", "id"),

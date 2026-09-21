@@ -13,7 +13,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
   en: {
     pages: "Create and publish program pages.",
     crm: "Review leads and plan the next action.",
-    notifications: "See assignments and due follow-ups.",
+    notifications: "See assignments, due follow-ups and delivery failures.",
     meta: "Monitor lead forms and delivery.",
   },
   ta: {
@@ -46,7 +46,7 @@ export function StaffModuleNav({
     notifications: notificationMessages[locale].workspace,
     meta: metaMessages[locale].workspace,
   };
-  const available = modules.filter((module) => permissions.includes(module.permission));
+  const available = modules.filter((module) => permissions.includes(module.permission) || (module.key === "notifications" && permissions.includes("notification.operations.view")));
   if (available.length === 0) return null;
   return <nav className={"staff-modules staff-modules-" + variant} aria-label={authMessages[locale].staff}>
     {available.map(({ key, Icon }) => <Link

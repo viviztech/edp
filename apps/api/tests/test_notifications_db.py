@@ -15,7 +15,7 @@ from app.modules.identity.models import AuditLog, Organization, Person, Role, Us
 from app.modules.identity.security import AuthError
 from app.modules.notifications import service
 from app.modules.notifications.models import NotificationIntent
-from app.modules.notifications.schemas import MarkRead, PreferenceEdit
+from app.modules.notifications.schemas import MarkRead, PreferenceEdit, ReplayRequest
 from app.workers import notifications as worker
 
 pytestmark = pytest.mark.skipif(
@@ -56,9 +56,11 @@ def notification_db(request, monkeypatch):
         yield engine, org.id, other.id, users[0].id, users[1].id, users[2].id
 
 
-def assign(db: Session, org: UUID, actor: User, recipient: UUID) -> Lead:
+def assign(
+    db: Session, org: UUID, actor: User, recipient: UUID, email: str = "ada@example.test"
+) -> Lead:
     created = crm_service.create(
-        db, org, actor, LeadCreate(name="Ada", email="ada@example.test"), "test-request"
+        db, org, actor, LeadCreate(name="Ada", email=email), "test-request"
     )
     updated = crm_service.mutate(
         db,
@@ -101,8 +103,8 @@ def test_assignment_delivers_once_to_scoped_recipient(notification_db) -> None:
             )
         assert stale.value.status == 409
         assert db.scalar(select(func.count()).select_from(NotificationIntent)) == 1
-    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 0}
-    assert worker.deliver_in_app.run() == {"delivered": 0, "suppressed": 0}
+    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 0, "failed": 0}
+    assert worker.deliver_in_app.run() == {"delivered": 0, "suppressed": 0, "failed": 0}
     with Session(engine) as db:
         recipient = db.get(User, recipient_id)
         other_user = db.get(User, other_user_id)
@@ -161,7 +163,7 @@ def test_opt_out_suppresses_pending_intent_and_requires_version(notification_db)
                 db, org, recipient, PreferenceEdit(enabled=True, expected_version=0), "test-request"
             )
         assert stale.value.status == 409
-    assert worker.deliver_in_app.run() == {"delivered": 0, "suppressed": 1}
+    assert worker.deliver_in_app.run() == {"delivered": 0, "suppressed": 1, "failed": 0}
     with Session(engine) as db:
         recipient = db.get(User, recipient_id)
         assert recipient is not None
@@ -189,7 +191,7 @@ def test_revoked_recipient_is_suppressed(notification_db) -> None:
         assign(db, org, actor, recipient_id)
         recipient.status = "suspended"
         db.commit()
-    assert worker.deliver_in_app.run() == {"delivered": 0, "suppressed": 1}
+    assert worker.deliver_in_app.run() == {"delivered": 0, "suppressed": 1, "failed": 0}
 
 
 def test_reassignment_suppresses_stale_recipient(notification_db) -> None:
@@ -212,7 +214,7 @@ def test_reassignment_suppresses_stale_recipient(notification_db) -> None:
             "test-request",
         )
         assert db.scalar(select(func.count()).select_from(NotificationIntent)) == 2
-    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 1}
+    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 1, "failed": 0}
     with Session(engine) as db:
         first = db.get(User, first_id)
         second = db.get(User, second_id)
@@ -236,7 +238,7 @@ def test_retention_hides_then_purges_expired_notice(notification_db, monkeypatch
         old.created_at = now() - timedelta(days=2)
         db.commit()
         assert service.mine(db, org, recipient, None, 25)[0] == []
-    assert worker.deliver_in_app.run() == {"delivered": 0, "suppressed": 0}
+    assert worker.deliver_in_app.run() == {"delivered": 0, "suppressed": 0, "failed": 0}
     assert worker.purge_expired.run() == {"purged": 1}
     assert worker.purge_expired.run() == {"purged": 0}
     with Session(engine) as db:
@@ -263,7 +265,7 @@ def test_expired_delivered_notice_cannot_be_read(notification_db, monkeypatch) -
         recipient = db.get(User, recipient_id)
         assert actor and recipient
         assign(db, org, actor, recipient_id)
-    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 0}
+    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 0, "failed": 0}
     with Session(engine) as db:
         recipient = db.get(User, recipient_id)
         row = db.scalar(select(NotificationIntent))
@@ -385,7 +387,7 @@ def test_due_followup_queues_once_and_keeps_future_or_completed_out(notification
             db.scalars(select(NotificationIntent).where(NotificationIntent.topic == "followup_due"))
         )
         assert len(reminders) == 1 and reminders[0].source_activity_id == due_id
-    assert worker.deliver_in_app.run() == {"delivered": 2, "suppressed": 0}
+    assert worker.deliver_in_app.run() == {"delivered": 2, "suppressed": 0, "failed": 0}
     with Session(engine) as db:
         recipient = db.get(User, recipient_id)
         assert recipient is not None
@@ -414,7 +416,7 @@ def test_completed_followup_is_suppressed_before_dispatch(notification_db) -> No
             ActivityComplete(expected_version=1),
             "test-request",
         )
-    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 1}
+    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 1, "failed": 0}
     with Session(engine) as db:
         reminder = db.scalar(
             select(NotificationIntent).where(NotificationIntent.topic == "followup_due")
@@ -447,7 +449,7 @@ def test_reassignment_routes_due_followup_to_current_assignee(notification_db) -
             "test-request",
         )
     assert worker.queue_due_followups.run() == {"queued": 1}
-    assert worker.deliver_in_app.run() == {"delivered": 2, "suppressed": 2}
+    assert worker.deliver_in_app.run() == {"delivered": 2, "suppressed": 2, "failed": 0}
     with Session(engine) as db:
         reminders = list(
             db.scalars(select(NotificationIntent).where(NotificationIntent.topic == "followup_due"))
@@ -480,7 +482,7 @@ def test_followup_preference_is_separate_from_assignment_preference(notification
         assert not changed.enabled and changed.topic == "followup_due"
         assert service.preference(db, org, recipient).enabled
     assert worker.queue_due_followups.run() == {"queued": 1}
-    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 1}
+    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 1, "failed": 0}
     with Session(engine) as db:
         recipient = db.get(User, recipient_id)
         assert recipient is not None
@@ -564,3 +566,158 @@ def test_concurrent_due_scans_create_one_reminder(notification_db) -> None:
             )
             == 1
         )
+
+
+def test_failed_dispatch_is_bounded_and_manual_replay_is_scoped(
+    notification_db, monkeypatch
+) -> None:
+    engine, org, other, actor_id, recipient_id, _ = notification_db
+    with Session(engine) as db:
+        actor = db.get(User, actor_id)
+        assert actor is not None
+        assign(db, org, actor, recipient_id)
+        intent = db.scalar(select(NotificationIntent))
+        assert intent is not None
+        intent_id = intent.id
+
+    original = worker.eligible_for_delivery
+
+    def broken(db: Session, row: NotificationIntent) -> bool:
+        raise RuntimeError("private contact data must never be stored")
+
+    monkeypatch.setattr(worker, "eligible_for_delivery", broken)
+    for count in range(1, 4):
+        result = worker.deliver_in_app.run()
+        assert result["failed"] == 1
+        with Session(engine) as db:
+            intent = db.get(NotificationIntent, intent_id)
+            assert intent is not None
+            assert intent.attempt_count == count
+            assert intent.state == ("failed" if count == 3 else "retrying")
+            assert intent.error_code == "dispatch_error"
+            assert "private" not in (intent.error_code or "")
+            if count < 3:
+                assert intent.next_attempt_at is not None
+                intent.next_attempt_at = now() - timedelta(seconds=1)
+                db.commit()
+    assert worker.deliver_in_app.run()["failed"] == 0
+
+    with Session(engine) as db:
+        actor = db.get(User, actor_id)
+        assert actor is not None
+        with pytest.raises(AuthError) as denied:
+            service.failures(db, org, actor, None, 25)
+        assert denied.value.status == 403
+        role = db.scalar(select(Role).where(Role.name == "Program Manager"))
+        assert role is not None
+        db.add(UserRole(user_id=actor_id, role_id=role.id, organization_id=org))
+        db.commit()
+        actor = db.get(User, actor_id)
+        assert actor is not None
+        items, cursor = service.failures(db, org, actor, None, 25)
+        assert len(items) == 1 and cursor is None
+        assert items[0].id == intent_id and items[0].attempt_count == 3
+        with pytest.raises(AuthError) as wrong_org:
+            service.failures(db, other, actor, None, 25)
+        assert wrong_org.value.status == 403
+        with pytest.raises(AuthError):
+            service.replay(
+                db,
+                other,
+                actor,
+                intent_id,
+                ReplayRequest(expected_version=items[0].version, reason="Reviewed failure"),
+                "request",
+            )
+        with pytest.raises(AuthError) as stale:
+            service.replay(
+                db,
+                org,
+                actor,
+                intent_id,
+                ReplayRequest(expected_version=1, reason="Reviewed failure"),
+                "request",
+            )
+        assert stale.value.status == 409
+        service.replay(
+            db,
+            org,
+            actor,
+            intent_id,
+            ReplayRequest(expected_version=items[0].version, reason="Reviewed failure"),
+            "request",
+        )
+        assert service.failures(db, org, actor, None, 25)[0] == []
+        assert (
+            db.scalar(
+                select(func.count())
+                .select_from(AuditLog)
+                .where(
+                    AuditLog.action == "notification.replay_requested",
+                    AuditLog.resource_id == intent_id,
+                )
+            )
+            == 1
+        )
+    monkeypatch.setattr(worker, "eligible_for_delivery", original)
+    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 0, "failed": 0}
+    with Session(engine) as db:
+        intent = db.get(NotificationIntent, intent_id)
+        assert intent is not None and intent.state == "delivered"
+        assert intent.attempt_count == 1
+
+
+def test_dispatch_failure_does_not_block_healthy_intent(notification_db, monkeypatch) -> None:
+    engine, org, _, actor_id, first_id, second_id = notification_db
+    with Session(engine) as db:
+        actor = db.get(User, actor_id)
+        assert actor is not None
+        assign(db, org, actor, first_id)
+        assign(db, org, actor, second_id, email="other@example.test")
+        failed_id = db.scalar(
+            select(NotificationIntent.id).where(NotificationIntent.recipient_user_id == first_id)
+        )
+        assert failed_id is not None
+    original = worker.eligible_for_delivery
+
+    def one_broken(db: Session, row: NotificationIntent) -> bool:
+        if row.id == failed_id:
+            raise RuntimeError("sensitive exception text")
+        return original(db, row)
+
+    monkeypatch.setattr(worker, "eligible_for_delivery", one_broken)
+    assert worker.deliver_in_app.run() == {"delivered": 1, "suppressed": 0, "failed": 1}
+    with Session(engine) as db:
+        rows = list(db.scalars(select(NotificationIntent)))
+        assert {row.state for row in rows} == {"delivered", "retrying"}
+        assert len(rows) == 2
+
+
+def test_expired_failure_is_hidden_and_cannot_be_replayed(notification_db, monkeypatch) -> None:
+    engine, org, _, actor_id, recipient_id, _ = notification_db
+    monkeypatch.setattr(service.get_settings(), "notification_retention_days", 1)
+    with Session(engine) as db:
+        actor = db.get(User, actor_id)
+        assert actor is not None
+        assign(db, org, actor, recipient_id)
+        role = db.scalar(select(Role).where(Role.name == "Program Manager"))
+        assert role is not None
+        db.add(UserRole(user_id=actor_id, role_id=role.id, organization_id=org))
+        intent = db.scalar(select(NotificationIntent))
+        assert intent is not None
+        intent.state = "failed"
+        intent.attempt_count = 3
+        intent.error_code = "dispatch_error"
+        intent.created_at = now() - timedelta(days=2)
+        db.commit()
+        assert service.failures(db, org, actor, None, 25)[0] == []
+        with pytest.raises(AuthError) as expired:
+            service.replay(
+                db,
+                org,
+                actor,
+                intent.id,
+                ReplayRequest(expected_version=intent.version, reason="Reviewed failed notice"),
+                "request",
+            )
+        assert expired.value.status == 404

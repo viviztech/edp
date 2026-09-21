@@ -1105,6 +1105,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/notifications/organizations/{org}/operations/failed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Failures */
+        get: operations["failures_api_v1_notifications_organizations__org__operations_failed_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/organizations/{org}/operations/{notification_id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replay */
+        post: operations["replay_api_v1_notifications_organizations__org__operations__notification_id__replay_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1635,6 +1669,42 @@ export interface components {
              * Format: date-time
              */
             expires_at: string;
+        };
+        /** FailureList */
+        FailureList: {
+            /** Items */
+            items: components["schemas"]["FailureView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** FailureView */
+        FailureView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Topic
+             * @enum {string}
+             */
+            topic: "lead_assignment" | "followup_due";
+            /**
+             * State
+             * @constant
+             */
+            state: "failed";
+            /** Attempt Count */
+            attempt_count: number;
+            /** Error Code */
+            error_code: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Version */
+            version: number;
         };
         /** Grant */
         Grant: {
@@ -2222,6 +2292,13 @@ export interface components {
              * @enum {string}
              */
             locale: "en" | "ta";
+        };
+        /** ReplayRequest */
+        ReplayRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
         };
         /** Reset */
         Reset: {
@@ -4957,6 +5034,74 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["NotificationView"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    failures_api_v1_notifications_organizations__org__operations_failed_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailureList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replay_api_v1_notifications_organizations__org__operations__notification_id__replay_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                notification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplayRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

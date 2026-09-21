@@ -8,6 +8,8 @@ describe("notificationPath", () => {
     expect(notificationPath(["organizations", id, "mine"], "GET")).toContain("/notifications/");
     expect(notificationPath(["organizations", id, "preference"], "POST")).toContain("/notifications/");
     expect(notificationPath(["organizations", id, id, "read"], "POST")).toContain("/notifications/");
+    expect(notificationPath(["organizations", id, "operations", "failed"], "GET")).toContain("/notifications/");
+    expect(notificationPath(["organizations", id, "operations", id, "replay"], "POST")).toContain("/notifications/");
   });
   it("rejects arbitrary or privileged routes", () => {
     expect(notificationPath(["organizations", id, "all"], "GET")).toBeNull();
@@ -22,6 +24,7 @@ describe("notificationQuery", () => {
   const preference = "/notifications/organizations/" + id + "/preference";
   it("allows a bounded inbox cursor and a separate follow-up preference", () => {
     expect(notificationQuery(mine, "GET", new URLSearchParams({ cursor: id }))).toContain("limit=25");
+    expect(notificationQuery("/notifications/organizations/" + id + "/operations/failed", "GET", new URLSearchParams({ cursor: id }))).toContain("limit=25");
     expect(notificationQuery(preference, "POST", new URLSearchParams({ topic: "followup_due" }))).toBe("topic=followup_due");
   });
   it("rejects arbitrary topics, misplaced cursors and unknown parameters", () => {

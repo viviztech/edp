@@ -12,11 +12,13 @@ from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
 from app.modules.notifications.models import NotificationIntent, NotificationPreference
 from app.modules.notifications.schemas import (
+    FailureView,
     MarkRead,
     NotificationTopic,
     NotificationView,
     PreferenceEdit,
     PreferenceView,
+    ReplayRequest,
 )
 
 TOPIC: NotificationTopic = "lead_assignment"
@@ -163,3 +165,75 @@ def mark_read(
     )
     db.commit()
     return view(row)
+
+
+def failure_view(row: NotificationIntent) -> FailureView:
+    return FailureView(
+        id=row.id,
+        topic=cast(NotificationTopic, row.topic),
+        state="failed",
+        attempt_count=row.attempt_count,
+        error_code=row.error_code or "dispatch_error",
+        created_at=row.created_at,
+        version=row.version,
+    )
+
+
+def failures(
+    db: Session, org: UUID, actor: User, cursor: UUID | None, limit: int
+) -> tuple[list[FailureView], UUID | None]:
+    require_permission(db, actor, org, "notification.operations.view")
+    query = select(NotificationIntent).where(
+        NotificationIntent.organization_id == org,
+        NotificationIntent.state == "failed",
+    )
+    retention_days = get_settings().notification_retention_days
+    if retention_days is not None:
+        query = query.where(NotificationIntent.created_at >= now() - timedelta(days=retention_days))
+    if cursor:
+        query = query.where(NotificationIntent.id > cursor)
+    rows = list(db.scalars(query.order_by(NotificationIntent.id).limit(limit + 1)))
+    return [failure_view(row) for row in rows[:limit]], rows[limit - 1].id if len(
+        rows
+    ) > limit else None
+
+
+def replay(
+    db: Session, org: UUID, actor: User, intent_id: UUID, data: ReplayRequest, request_id: str
+) -> None:
+    require_permission(db, actor, org, "notification.operations.replay")
+    row = db.scalar(
+        select(NotificationIntent)
+        .where(
+            NotificationIntent.id == intent_id,
+            NotificationIntent.organization_id == org,
+        )
+        .with_for_update()
+    )
+    if not row:
+        raise AuthError("not_found", 404)
+    retention_days = get_settings().notification_retention_days
+    if retention_days is not None and row.created_at < now() - timedelta(days=retention_days):
+        raise AuthError("not_found", 404)
+    if row.version != data.expected_version:
+        raise AuthError("version_conflict", 409)
+    if row.state != "failed":
+        raise AuthError("invalid_transition", 409)
+    row.state = "pending"
+    row.attempt_count = 0
+    row.next_attempt_at = None
+    row.error_code = None
+    row.version += 1
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=row.id,
+            action="notification.replay_requested",
+            request_id=request_id,
+            resource_version=row.version,
+            reason=data.reason.strip(),
+            changed_fields="state,attempt_count,next_attempt_at",
+        )
+    )
+    db.commit()

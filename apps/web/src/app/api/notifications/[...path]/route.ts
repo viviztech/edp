@@ -43,6 +43,7 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
         "X-CSRF-Token": request.headers.get("x-csrf-token") ?? "",
       },
     });
+    if (upstream.status === 204) return new NextResponse(null, { status: 204, headers: { "Cache-Control": "private, no-store" } });
     return NextResponse.json(await upstream.json(), {
       status: upstream.status,
       headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" },
