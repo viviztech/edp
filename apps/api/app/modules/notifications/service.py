@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Literal
 from uuid import UUID
 
@@ -5,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.modules.identity.models import AuditLog, User, now
 from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
@@ -101,6 +103,9 @@ def mine(
         NotificationIntent.recipient_user_id == actor.id,
         NotificationIntent.state == "delivered",
     )
+    retention_days = get_settings().notification_retention_days
+    if retention_days is not None:
+        query = query.where(NotificationIntent.created_at >= now() - timedelta(days=retention_days))
     if cursor:
         query = query.where(NotificationIntent.id > cursor)
     rows = list(db.scalars(query.order_by(NotificationIntent.id).limit(limit + 1)))
@@ -127,6 +132,9 @@ def mark_read(
         .with_for_update()
     )
     if not row:
+        raise AuthError("not_found", 404)
+    retention_days = get_settings().notification_retention_days
+    if retention_days is not None and row.created_at < now() - timedelta(days=retention_days):
         raise AuthError("not_found", 404)
     if row.version != data.expected_version:
         raise AuthError("version_conflict", 409)

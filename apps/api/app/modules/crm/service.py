@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.modules.crm.models import (
     DuplicateReview,
     ExportJob,
@@ -105,6 +106,12 @@ def mutate(
     x.version += 1
     x.updated_at = now()
     if assignment_changed and d.assigned_user_id is not None:
+        settings = get_settings()
+        if (
+            settings.app_env in {"staging", "production"}
+            and settings.notification_retention_days is None
+        ):
+            raise AuthError("retention_policy_not_configured", 503)
         db.add(
             NotificationIntent(
                 organization_id=org,

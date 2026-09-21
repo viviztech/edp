@@ -233,3 +233,6 @@ C03.3 enforces the existing `meta_webhook_events.retention_expires_at` index thr
 ## N01.1 in-app assignment notification tables
 
 Migration f8a0b1c2d3e4 adds notification_preferences and notification_intents. Each preference belongs to one organization and user, is unique by (organization_id, user_id, topic), and has an optimistic version. Each intent belongs to one organization and recipient and references a CRM lead. Its unique (organization_id, recipient_user_id, event_key) key deduplicates a lead assignment version; state is pending, delivered or suppressed. Indexes support bounded pending dispatch and recipient inbox reads. The service verifies organization scope, recipient identity and current grant because these cannot be established by the individual foreign keys alone. Both tables retain identifiers and timestamps, not rendered lead details. The notification and audit retention policy remains unapproved.
+
+
+N01.2 adds ix_notification_retention(created_at,id) to notification_intents for bounded cleanup. Expiry is derived from created_at and deployment-approved NOTIFICATION_RETENTION_DAYS, so tightening the period immediately hides and schedules disposal of older intents. Audit records have no foreign key to a disposed intent; lead and preference foreign keys remain untouched.

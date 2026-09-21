@@ -58,4 +58,5 @@ class NotificationIntent(Record, Base):
         CheckConstraint("version > 0", name="notification_intent_version"),
         Index("ix_notification_dispatch", "state", "created_at"),
         Index("ix_notification_inbox", "organization_id", "recipient_user_id", "state", "id"),
+        Index("ix_notification_retention", "created_at", "id"),
     )

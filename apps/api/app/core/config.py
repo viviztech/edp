@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     meta_graph_api_version: str | None = Field(default=None, pattern=r"^v[0-9]{1,2}\.[0-9]{1,2}$")
     meta_graph_base_url: Literal["https://graph.facebook.com"] = "https://graph.facebook.com"
     meta_event_retention_days: int | None = Field(default=None, ge=1, le=3650)
+    notification_retention_days: int | None = Field(default=None, ge=1, le=3650)
     contact_privacy_version: str = Field(default="v1", min_length=1, max_length=40)
     access_token_seconds: int = Field(default=600, ge=60, le=1800)
     session_seconds: int = Field(default=1209600, ge=3600, le=2592000)
@@ -31,6 +32,7 @@ class Settings(BaseSettings):
         "meta_secret_key",
         "meta_graph_api_version",
         "meta_event_retention_days",
+        "notification_retention_days",
         mode="before",
     )
     @classmethod

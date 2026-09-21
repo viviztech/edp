@@ -34,6 +34,10 @@ celery_app.conf.update(
             "task": "edp.notifications.deliver_in_app",
             "schedule": 60.0,
         },
+        "purge-expired-notifications": {
+            "task": "edp.notifications.purge_expired",
+            "schedule": 60.0,
+        },
     },
 )
 

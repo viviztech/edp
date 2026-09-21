@@ -52,3 +52,6 @@ For C03, set the same `META_SECRET_KEY` in the API and worker, and set a current
 ## CRM assignment notifications
 
 Apply migration f8a0b1c2d3e4 and run the API, Redis, Celery worker and beat with the same database URL. The beat dispatches pending assignment intents every minute; API and web alone do not deliver them. Staff with a scoped crm.lead.view grant can open /{locale}/admin/notifications. This N01.1 path is in-app only, uses no provider credentials, and is restricted to synthetic data until notification retention is approved.
+
+
+Notification retention: set NOTIFICATION_RETENTION_DAYS in API, worker and beat environments only after policy approval, then restart all three. The minutely cleanup task removes expired intents in batches of 100. Staging/production lead assignments that would create notices return retention_policy_not_configured (503) while this setting is absent. Local/test synthetic notices remain available for development. See docs/integrations/notifications.md for the lifecycle and disposal behavior.
