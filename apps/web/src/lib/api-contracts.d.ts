@@ -1053,6 +1053,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/notifications/organizations/{org}/preference": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preference */
+        get: operations["preference_api_v1_notifications_organizations__org__preference_get"];
+        put?: never;
+        /** Update Preference */
+        post: operations["update_preference_api_v1_notifications_organizations__org__preference_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/organizations/{org}/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mine */
+        get: operations["mine_api_v1_notifications_organizations__org__mine_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/organizations/{org}/{notification_id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Read */
+        post: operations["mark_read_api_v1_notifications_organizations__org___notification_id__read_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1923,6 +1975,11 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** MarkRead */
+        MarkRead: {
+            /** Expected Version */
+            expected_version: number;
+        };
         /** Message */
         Message: {
             /**
@@ -1953,6 +2010,40 @@ export interface components {
              */
             locale: "en" | "ta";
         };
+        /** NotificationList */
+        NotificationList: {
+            /** Items */
+            items: components["schemas"]["NotificationView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** NotificationView */
+        NotificationView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Topic
+             * @constant
+             */
+            topic: "lead_assignment";
+            /**
+             * Resource Id
+             * Format: uuid
+             */
+            resource_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Read At */
+            read_at: string | null;
+            /** Version */
+            version: number;
+        };
         /** PageList */
         PageList: {
             /** Items */
@@ -1971,6 +2062,26 @@ export interface components {
             slug: string;
             /** Translations */
             translations: components["schemas"]["TranslationView"][];
+        };
+        /** PreferenceEdit */
+        PreferenceEdit: {
+            /** Enabled */
+            enabled: boolean;
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** PreferenceView */
+        PreferenceView: {
+            /**
+             * Topic
+             * @default lead_assignment
+             * @constant
+             */
+            topic: "lead_assignment";
+            /** Enabled */
+            enabled: boolean;
+            /** Version */
+            version: number;
         };
         /** Probe */
         Probe: {
@@ -4705,6 +4816,142 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebhookAccepted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preference_api_v1_notifications_organizations__org__preference_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferenceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_preference_api_v1_notifications_organizations__org__preference_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferenceEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferenceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mine_api_v1_notifications_organizations__org__mine_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_read_api_v1_notifications_organizations__org___notification_id__read_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                notification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkRead"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationView"];
                 };
             };
             /** @description Validation Error */

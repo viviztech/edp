@@ -25,3 +25,11 @@ Acceptance criteria:
 Implementation: reuse the existing expiry column and audit table; no new schema or browser command. Celery beat runs a minutely batch task, and the worker claim path rejects expired events even if the scheduler is delayed. Purge is idempotent and handles at most 100 rows per invocation; later ticks continue the backlog. The scheduler and worker must share the same database and environment.
 
 Scope: webhook operational metadata only. CRM lead and audit retention require separate policy decisions. Live provider activation and Compose runtime checks still require external prerequisites.
+
+## N01.1 — durable staff assignment notifications
+
+Authority: master Phase 3 communications foundation and backlog N01. This slice sends only in-app notifications for CRM lead assignment; external email/SMS/WhatsApp/FCM require approved providers and later slices. It uses no provider credentials or message text containing lead PII.
+
+Acceptance: a successful lead reassignment writes one deduplicated PostgreSQL intent in the same transaction as the lead version and audit. Repeating or rolling back the mutation creates no extra intent. A bounded worker materializes an in-app item only for an active recipient who still has scoped CRM lead-view permission and has not disabled lead-assignment notices. Suppressed items remain auditable without being shown. The recipient can list only their own organization-scoped items, set a versioned preference, and mark a delivered item read. English/Tamil staff UI covers loading, empty, error and conflict states. Wrong-org and other-user access are denied.
+
+Verification: migration upgrade/downgrade/check on disposable PostgreSQL; transaction, duplicate, opt-out, inactive-user and cross-organization tests; generated OpenAPI/types; backend and web lint/type/tests/build; local API/web smoke. One Celery beat schedule processes pending intents in bounded batches. No external delivery status is claimed.

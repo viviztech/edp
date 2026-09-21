@@ -34,6 +34,7 @@ from app.modules.crm.schemas import (
 from app.modules.identity.models import AuditLog, Person, User, UserRole, now
 from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
+from app.modules.notifications.models import NotificationIntent
 from app.workers.celery_app import celery_app
 
 
@@ -91,7 +92,8 @@ def mutate(
         raise AuthError("version_conflict", 409)
     if d.status in {"merged", "converted"} or x.status in {"merged", "converted"}:
         raise AuthError("invalid_transition", 409)
-    if d.assigned_user_id != x.assigned_user_id:
+    assignment_changed = d.assigned_user_id != x.assigned_user_id
+    if assignment_changed:
         require_permission(db, actor, org, "crm.lead.assign")
         if d.assigned_user_id is not None and not db.scalar(
             select(UserRole.id).where(
@@ -102,6 +104,16 @@ def mutate(
     x.status, x.assigned_user_id, x.notes = d.status, d.assigned_user_id, d.notes
     x.version += 1
     x.updated_at = now()
+    if assignment_changed and d.assigned_user_id is not None:
+        db.add(
+            NotificationIntent(
+                organization_id=org,
+                recipient_user_id=d.assigned_user_id,
+                topic="lead_assignment",
+                resource_id=x.id,
+                event_key=f"crm.lead.assigned:{x.id}:{x.version}",
+            )
+        )
     db.add(
         AuditLog(
             actor_id=actor.id,

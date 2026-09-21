@@ -20,7 +20,7 @@ celery_app.conf.update(
     result_expires=300,
     task_soft_time_limit=25,
     task_time_limit=30,
-    imports=("app.workers.crm_exports", "app.workers.meta_leads"),
+    imports=("app.workers.crm_exports", "app.workers.meta_leads", "app.workers.notifications"),
     beat_schedule={
         "recover-meta-events": {
             "task": "edp.meta.recover_events",
@@ -28,6 +28,10 @@ celery_app.conf.update(
         },
         "purge-expired-meta-events": {
             "task": "edp.meta.purge_expired_events",
+            "schedule": 60.0,
+        },
+        "deliver-in-app-notifications": {
+            "task": "edp.notifications.deliver_in_app",
             "schedule": 60.0,
         },
     },
