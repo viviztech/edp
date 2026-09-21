@@ -1,5 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Button } from "../../../../components/ui/button";
+import { Input } from "../../../../components/ui/input";
+import { Textarea } from "../../../../components/ui/textarea";
 import type { components } from "../../../../lib/api-contracts";
 import { cmsMessages } from "../../../../lib/cms-messages";
 type Page=components["schemas"]["PageView"];
@@ -32,11 +35,11 @@ export default function Editor({org,permissions,locale}:{org:string;permissions:
  <section><p role="status">{busy?t.loading:message}</p><p>{t.note}</p>
  <label>{t.locale}<select value={language} disabled={busy} onChange={e=>choose(selected,e.target.value as "en"|"ta")}><option value="en">English</option><option value="ta">Tamil</option></select></label>
  {current&&<p className="cms-state">{t[current.state]} / v{current.version}</p>}
- <form className="account-form" onSubmit={e=>{e.preventDefault();run(async()=>{const data=!selected?await api(base,"POST",{...form,slug,locale:language}):!current?await api(`${base}/${selected.id}/translations`,"POST",{...form,locale:language}):await api(path,"PATCH",{title:form.title,body:form.body,seo_title:form.seo_title,seo_description:form.seo_description,expected_version:current.version});saved(data);});}}>
+ <form className="account-form cms-editor-form" onSubmit={e=>{e.preventDefault();run(async()=>{const data=!selected?await api(base,"POST",{...form,slug,locale:language}):!current?await api(`${base}/${selected.id}/translations`,"POST",{...form,locale:language}):await api(path,"PATCH",{title:form.title,body:form.body,seo_title:form.seo_title,seo_description:form.seo_description,expected_version:current.version});saved(data);});}}>
  <fieldset disabled={busy||current?.state==="archived"||!allowed(selected?"update":"create")}>
- <label>{t.slug}<input required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={120} value={slug} disabled={!!selected} onChange={e=>setSlug(e.target.value)}/></label>
- {(["title","body","seo_title","seo_description"] as const).map(key=><label key={key}>{t[key]}{key==="body"?<textarea aria-label={t.body} required rows={12} maxLength={50000} value={form[key]} onChange={e=>setForm({...form,[key]:e.target.value})}/>:<input required={key==="title"} maxLength={key==="seo_title"?70:200} value={form[key]??""} onChange={e=>setForm({...form,[key]:e.target.value})}/>}</label>)}
- <button type="submit">{selected&&!current?t.addLocale:t.save}</button></fieldset></form>
+ <label>{t.slug}<Input required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={120} value={slug} disabled={!!selected} onChange={e=>setSlug(e.target.value)}/></label>
+ {(["title","body","seo_title","seo_description"] as const).map(key=><label key={key}>{t[key]}{key==="body"?<Textarea aria-label={t.body} required rows={12} maxLength={50000} value={form[key]} onChange={e=>setForm({...form,[key]:e.target.value})}/>:<Input required={key==="title"} maxLength={key==="seo_title"?70:200} value={form[key]??""} onChange={e=>setForm({...form,[key]:e.target.value})}/>}</label>)}
+ <Button type="submit">{selected&&!current?t.addLocale:t.save}</Button></fieldset></form>
  {current&&<><div className="actions"><button disabled={busy} onClick={()=>run(async()=>{const page:Page=await api(path+"/preview");setPreview(page.translations.find(x=>x.locale===language)??null);})}>{t.preview}</button>
  <button disabled={busy||!allowed("publish")||current.state==="archived"} onClick={()=>run(async()=>saved(await api(path+"/publish","POST",{expected_version:current.version})))}>{t.publish}</button>
  <button disabled={busy} onClick={()=>run(async()=>setHistory(await api(path+"/revisions")))}>{t.history}</button>

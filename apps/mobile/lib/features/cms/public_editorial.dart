@@ -23,8 +23,9 @@ class EditorialRepository {
   final String organization;
   EditorialRepository(this.dio, this.organization);
   Future<List<EditorialItem>> list(String kind, String locale) async {
-    if (!RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(organization))
+    if (!RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(organization)) {
       throw StateError('Public organization unavailable');
+    }
     final r = await dio.get<Map<String, dynamic>>(
       '/public/organizations/$organization/editorial',
       queryParameters: {'kind': kind, 'locale': locale, 'limit': 25},

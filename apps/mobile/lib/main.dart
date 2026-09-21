@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'l10n/app_localizations.dart';
+import 'theme/edp_theme.dart';
 import 'features/identity/account_page.dart';
 import 'features/cms/public_pages.dart';
 import 'features/cms/public_editorial.dart';
@@ -64,10 +65,7 @@ class EdpApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       onGenerateTitle: (context) => AppLocalizations.of(context)!.title,
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF086B68),
-        useMaterial3: true,
-      ),
+      theme: EdpTheme.light(),
       routerConfig: ref.watch(routerProvider),
     );
   }
