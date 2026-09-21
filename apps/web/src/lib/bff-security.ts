@@ -1,7 +1,25 @@
 import { timingSafeEqual } from "node:crypto";
 
+function allowedOrigin(origin: string | null, expected: string): boolean {
+  if (!origin) return false;
+  if (origin === expected) return true;
+  try {
+    const actual = new URL(origin);
+    const configured = new URL(expected);
+    const loopback = new Set(["localhost", "127.0.0.1"]);
+    return actual.origin === origin
+      && configured.protocol === "http:"
+      && actual.protocol === "http:"
+      && loopback.has(configured.hostname)
+      && loopback.has(actual.hostname)
+      && actual.port === configured.port;
+  } catch {
+    return false;
+  }
+}
+
 export function validMutation(origin: string | null, expected: string, csrfCookie: string | undefined, csrfHeader: string | null): boolean {
-  if (!origin || origin !== expected || !csrfCookie || !csrfHeader || csrfCookie.length > 128 || csrfHeader.length > 128) return false;
+  if (!allowedOrigin(origin, expected) || !csrfCookie || !csrfHeader || csrfCookie.length > 128 || csrfHeader.length > 128) return false;
   const a = Buffer.from(csrfCookie), b = Buffer.from(csrfHeader);
   return a.length === b.length && timingSafeEqual(a, b);
 }
