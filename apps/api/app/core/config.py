@@ -15,17 +15,29 @@ class Settings(BaseSettings):
     bff_key: SecretStr | None = Field(default=None, min_length=32)
     auth_delivery_key: SecretStr | None = None
     asset_scanner_key: SecretStr | None = Field(default=None, min_length=16)
+    meta_secret_key: SecretStr | None = None
+    meta_graph_api_version: str | None = Field(default=None, pattern=r"^v[0-9]{1,2}\.[0-9]{1,2}$")
+    meta_graph_base_url: Literal["https://graph.facebook.com"] = "https://graph.facebook.com"
+    meta_event_retention_days: int | None = Field(default=None, ge=1, le=3650)
     contact_privacy_version: str = Field(default="v1", min_length=1, max_length=40)
     access_token_seconds: int = Field(default=600, ge=60, le=1800)
     session_seconds: int = Field(default=1209600, ge=3600, le=2592000)
     cors_origins: list[str] = Field(default_factory=list)
 
-    @field_validator("bff_key", "auth_delivery_key", "asset_scanner_key", mode="before")
+    @field_validator(
+        "bff_key",
+        "auth_delivery_key",
+        "asset_scanner_key",
+        "meta_secret_key",
+        "meta_graph_api_version",
+        "meta_event_retention_days",
+        mode="before",
+    )
     @classmethod
     def empty_secret(cls, value: object) -> object:
         return None if value == "" else value
 
-    @field_validator("auth_delivery_key")
+    @field_validator("auth_delivery_key", "meta_secret_key")
     @classmethod
     def delivery_key_format(cls, value: SecretStr | None) -> SecretStr | None:
         if value:

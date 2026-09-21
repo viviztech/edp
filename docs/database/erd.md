@@ -223,3 +223,7 @@ ADR 0003: email-only login initially (master allows email and/or mobile); Person
 The planned page/translation/immutable-revision model, scope-preserving composite foreign keys, constraints and indexes are specified in [CMS page design](../architecture/cms-page-design.md). No CMS tables are implemented yet; add only this subset with C01.1.
 
 C01.1 implementation: migration 2b3fcc875606 now creates cms_pages, cms_page_translations and cms_page_revisions, plus nullable AuditLog resource_version/reason/changed_fields. Publication timestamp is Revision.created_at. Revision numbers follow the translation version at publication (gaps are intentional after edits). Staff pagination uses stable UUID cursors; translations are batched to avoid N+1 reads.
+
+## C03 Meta lead inbox implementation
+
+Migration c5d6e7f8091a adds meta_integrations, meta_form_mappings, and meta_webhook_events. An integration belongs to one organization and page; access tokens and app secrets are Fernet ciphertext, while verification tokens are one-way hashes. A form mapping belongs to the same organization in service policy and maps a bounded provider-field allowlist to name, email, and phone. The event inbox is unique by (integration_id, provider_event_id), records only troubleshooting identifiers rather than fetched lead PII, links the resulting CRM lead, and indexes organization/state/time for operational queues. Event expiry is calculated only from a deployment-configured, approved retention period; ingestion refuses to start when that policy is absent.

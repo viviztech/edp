@@ -59,6 +59,7 @@ CMS_PERMISSIONS += [
 ]
 CMS_PERMISSIONS += ["cms.asset." + action for action in ("view", "create", "publish")]
 ENQUIRY_PERMISSIONS = ["enquiry.view"]
+META_PERMISSIONS = ["meta.integration." + action for action in ("view", "manage", "replay")]
 CRM_PERMISSIONS = (
     [
         "crm.lead." + action
@@ -73,6 +74,7 @@ PERMISSIONS = [
     *CMS_PERMISSIONS,
     *ENQUIRY_PERMISSIONS,
     *CRM_PERMISSIONS,
+    *META_PERMISSIONS,
 ]
 
 
@@ -407,6 +409,8 @@ def seed_roles(db: Session) -> None:
             codes = ["system.access", *CMS_PERMISSIONS]
         elif name == "CRM Executive":
             codes = ["system.access", *CRM_PERMISSIONS]
+        elif name == "Marketing Executive":
+            codes = ["system.access", *META_PERMISSIONS]
         elif name == "Participant":
             codes = []
         else:

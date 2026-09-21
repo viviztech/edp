@@ -897,6 +897,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/meta/organizations/{org}/integrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Integrations */
+        get: operations["list_integrations_api_v1_meta_organizations__org__integrations_get"];
+        put?: never;
+        /** Create Integration */
+        post: operations["create_integration_api_v1_meta_organizations__org__integrations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/meta/organizations/{org}/integrations/{integration_id}/mappings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Mappings */
+        get: operations["list_mappings_api_v1_meta_organizations__org__integrations__integration_id__mappings_get"];
+        put?: never;
+        /** Create Mapping */
+        post: operations["create_mapping_api_v1_meta_organizations__org__integrations__integration_id__mappings_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/meta/organizations/{org}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Events */
+        get: operations["list_events_api_v1_meta_organizations__org__events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/integrations/meta/webhook/{integration_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Verify Webhook */
+        get: operations["verify_webhook_api_v1_integrations_meta_webhook__integration_id__get"];
+        put?: never;
+        /** Receive Webhook */
+        post: operations["receive_webhook_api_v1_integrations_meta_webhook__integration_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1349,6 +1420,52 @@ export interface components {
              */
             status: "new" | "reviewed" | "closed";
         };
+        /** EventList */
+        EventList: {
+            /** Items */
+            items: components["schemas"]["EventView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** EventView */
+        EventView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Integration Id
+             * Format: uuid
+             */
+            integration_id: string;
+            /** Mapping Id */
+            mapping_id: string | null;
+            /** Meta Lead Id */
+            meta_lead_id: string;
+            /** Page Id */
+            page_id: string;
+            /** Form Id */
+            form_id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "queued" | "processing" | "retrying" | "completed" | "failed";
+            /** Attempt Count */
+            attempt_count: number;
+            /** Error Code */
+            error_code: string;
+            /** Lead Id */
+            lead_id: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Processed At */
+            processed_at: string | null;
+        };
         /** ExportJobView */
         ExportJobView: {
             /**
@@ -1396,6 +1513,59 @@ export interface components {
             items: components["schemas"]["PublicPage"][];
             /** Next Cursor */
             next_cursor: string | null;
+        };
+        /** IntegrationCreate */
+        IntegrationCreate: {
+            /** Name */
+            name: string;
+            /** Page Id */
+            page_id: string;
+            /**
+             * Access Token
+             * Format: password
+             */
+            access_token: string;
+            /**
+             * App Secret
+             * Format: password
+             */
+            app_secret: string;
+            /**
+             * Verify Token
+             * Format: password
+             */
+            verify_token: string;
+        };
+        /** IntegrationList */
+        IntegrationList: {
+            /** Items */
+            items: components["schemas"]["IntegrationView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** IntegrationView */
+        IntegrationView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Page Id */
+            page_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "disabled";
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** LeadConversionCreate */
         LeadConversionCreate: {
@@ -1542,6 +1712,57 @@ export interface components {
              * @default Device
              */
             device_name: string;
+        };
+        /** MappingCreate */
+        MappingCreate: {
+            /** Form Id */
+            form_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Campaign
+             * @default
+             */
+            campaign: string;
+            /** Field Mapping */
+            field_mapping: {
+                [key: string]: "name" | "email" | "phone";
+            };
+        };
+        /** MappingList */
+        MappingList: {
+            /** Items */
+            items: components["schemas"]["MappingView"][];
+        };
+        /** MappingView */
+        MappingView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Integration Id
+             * Format: uuid
+             */
+            integration_id: string;
+            /** Form Id */
+            form_id: string;
+            /** Name */
+            name: string;
+            /** Campaign */
+            campaign: string;
+            /** Field Mapping */
+            field_mapping: {
+                [key: string]: string;
+            };
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "disabled";
+            /** Version */
+            version: number;
         };
         /** Message */
         Message: {
@@ -1869,6 +2090,13 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WebhookAccepted */
+        WebhookAccepted: {
+            /** Accepted */
+            accepted: number;
+            /** Duplicates */
+            duplicates: number;
         };
     };
     responses: never;
@@ -3903,6 +4131,245 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LeadConversionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_integrations_api_v1_meta_organizations__org__integrations_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntegrationList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_integration_api_v1_meta_organizations__org__integrations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IntegrationCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntegrationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_mappings_api_v1_meta_organizations__org__integrations__integration_id__mappings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MappingList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_mapping_api_v1_meta_organizations__org__integrations__integration_id__mappings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MappingCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MappingView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_events_api_v1_meta_organizations__org__events_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_webhook_api_v1_integrations_meta_webhook__integration_id__get: {
+        parameters: {
+            query: {
+                "hub.mode": string;
+                "hub.verify_token": string;
+                "hub.challenge": string;
+            };
+            header?: never;
+            path: {
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    receive_webhook_api_v1_integrations_meta_webhook__integration_id__post: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Hub-Signature-256": string;
+            };
+            path: {
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookAccepted"];
                 };
             };
             /** @description Validation Error */

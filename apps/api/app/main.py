@@ -22,6 +22,7 @@ from app.modules.cms.routes import router as cms_router
 from app.modules.crm.routes import router as crm_router
 from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
+from app.modules.meta.routes import router as meta_router
 
 log = structlog.get_logger()
 
@@ -78,6 +79,7 @@ def create_app() -> FastAPI:
     app.include_router(identity_router)
     app.include_router(cms_router)
     app.include_router(crm_router)
+    app.include_router(meta_router)
 
     @app.exception_handler(AuthError)
     async def auth_error(request: Request, exc: AuthError) -> JSONResponse:
@@ -110,7 +112,21 @@ def create_app() -> FastAPI:
         structlog.contextvars.clear_contextvars()
         structlog.contextvars.bind_contextvars(request_id=request_id)
         try:
-            if request.url.path.startswith("/api/v1/cms/") and request.method in {"POST", "PATCH"}:
+            bounded_body = (
+                (
+                    request.url.path.startswith("/api/v1/cms/")
+                    and request.method in {"POST", "PATCH"}
+                )
+                or (
+                    request.url.path.startswith("/api/v1/meta/")
+                    and request.method in {"POST", "PATCH"}
+                )
+                or (
+                    request.url.path.startswith("/api/v1/integrations/meta/webhook/")
+                    and request.method == "POST"
+                )
+            )
+            if bounded_body:
                 body = bytearray()
                 async for chunk in request.stream():
                     body.extend(chunk)

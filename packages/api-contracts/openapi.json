@@ -3579,6 +3579,439 @@
         }
       }
     },
+    "/api/v1/meta/organizations/{org}/integrations": {
+      "post": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Create Integration",
+        "operationId": "create_integration_api_v1_meta_organizations__org__integrations_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "List Integrations",
+        "operationId": "list_integrations_api_v1_meta_organizations__org__integrations_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meta/organizations/{org}/integrations/{integration_id}/mappings": {
+      "post": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Create Mapping",
+        "operationId": "create_mapping_api_v1_meta_organizations__org__integrations__integration_id__mappings_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Integration Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "List Mappings",
+        "operationId": "list_mappings_api_v1_meta_organizations__org__integrations__integration_id__mappings_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Integration Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meta/organizations/{org}/events": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "List Events",
+        "operationId": "list_events_api_v1_meta_organizations__org__events_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/meta/webhook/{integration_id}": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Verify Webhook",
+        "operationId": "verify_webhook_api_v1_integrations_meta_webhook__integration_id__get",
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Integration Id"
+            }
+          },
+          {
+            "name": "hub.mode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 32,
+              "title": "Hub.Mode"
+            }
+          },
+          {
+            "name": "hub.verify_token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Hub.Verify Token"
+            }
+          },
+          {
+            "name": "hub.challenge",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Hub.Challenge"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Receive Webhook",
+        "operationId": "receive_webhook_api_v1_integrations_meta_webhook__integration_id__post",
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Integration Id"
+            }
+          },
+          {
+            "name": "X-Hub-Signature-256",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "title": "X-Hub-Signature-256"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -4693,6 +5126,137 @@
         ],
         "title": "EnquiryView"
       },
+      "EventList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EventView"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "EventList"
+      },
+      "EventView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Integration Id"
+          },
+          "mapping_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mapping Id"
+          },
+          "meta_lead_id": {
+            "type": "string",
+            "title": "Meta Lead Id"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id"
+          },
+          "form_id": {
+            "type": "string",
+            "title": "Form Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "processing",
+              "retrying",
+              "completed",
+              "failed"
+            ],
+            "title": "State"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "error_code": {
+            "type": "string",
+            "title": "Error Code"
+          },
+          "lead_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "processed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "integration_id",
+          "mapping_id",
+          "meta_lead_id",
+          "page_id",
+          "form_id",
+          "state",
+          "attempt_count",
+          "error_code",
+          "lead_id",
+          "created_at",
+          "processed_at"
+        ],
+        "title": "EventView"
+      },
       "ExportJobView": {
         "properties": {
           "id": {
@@ -4815,6 +5379,130 @@
           "next_cursor"
         ],
         "title": "History"
+      },
+      "IntegrationCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "page_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "pattern": "^[0-9A-Za-z_-]+$",
+            "title": "Page Id"
+          },
+          "access_token": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 20,
+            "format": "password",
+            "title": "Access Token",
+            "writeOnly": true
+          },
+          "app_secret": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 16,
+            "format": "password",
+            "title": "App Secret",
+            "writeOnly": true
+          },
+          "verify_token": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 24,
+            "format": "password",
+            "title": "Verify Token",
+            "writeOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "page_id",
+          "access_token",
+          "app_secret",
+          "verify_token"
+        ],
+        "title": "IntegrationCreate"
+      },
+      "IntegrationList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationView"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "IntegrationList"
+      },
+      "IntegrationView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "page_id",
+          "status",
+          "version",
+          "created_at"
+        ],
+        "title": "IntegrationView"
       },
       "LeadConversionCreate": {
         "properties": {
@@ -5137,6 +5825,122 @@
           "email"
         ],
         "title": "Login"
+      },
+      "MappingCreate": {
+        "properties": {
+          "form_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "pattern": "^[0-9A-Za-z_-]+$",
+            "title": "Form Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "campaign": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Campaign",
+            "default": ""
+          },
+          "field_mapping": {
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "name",
+                "email",
+                "phone"
+              ]
+            },
+            "type": "object",
+            "title": "Field Mapping"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "form_id",
+          "name",
+          "field_mapping"
+        ],
+        "title": "MappingCreate"
+      },
+      "MappingList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MappingView"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "MappingList"
+      },
+      "MappingView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Integration Id"
+          },
+          "form_id": {
+            "type": "string",
+            "title": "Form Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "campaign": {
+            "type": "string",
+            "title": "Campaign"
+          },
+          "field_mapping": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Field Mapping"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "integration_id",
+          "form_id",
+          "name",
+          "campaign",
+          "field_mapping",
+          "status",
+          "version"
+        ],
+        "title": "MappingView"
       },
       "Message": {
         "properties": {
@@ -5886,6 +6690,24 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WebhookAccepted": {
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "title": "Accepted"
+          },
+          "duplicates": {
+            "type": "integer",
+            "title": "Duplicates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "accepted",
+          "duplicates"
+        ],
+        "title": "WebhookAccepted"
       }
     }
   }
