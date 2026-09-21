@@ -5,13 +5,13 @@ Prerequisites: Python 3.13, Node 24/npm, Flutter stable SDK and platform SDK, Do
 1. After installing backend dependencies, run `python scripts/init-local-env.py` with venv Python. It creates ignored API/web/Compose env files with random database/BFF keys and an encryption key; refuses overwrites. Or fill the .env.example files yourself. Never commit secrets.
 2. `docker compose config --quiet` validates required settings.
 3. `docker compose up --build -d` starts PostgreSQL, Redis, one-shot migrations, API, worker and web.
-4. Open `http://localhost:3000/en`; API `http://localhost:8000/health`, `/ready`, `/docs` (development only).
+4. Open `http://127.0.0.1:3001/en`; API `http://localhost:8000/health`, `/ready`, `/docs` (development only).
 5. `docker compose exec worker celery -A app.workers.celery_app:celery_app inspect ping` checks worker; execute `scripts/compose-smoke.py` from host Python for probes and queue round-trip.
 6. `docker compose down` stops containers; do not remove volumes unless intentional disposable reset.
 
 Host backend: `python -m venv .venv`; install `apps/api/requirements-dev.lock`; copy API `.env.example` to `apps/api/.env` and set URLs for isolated PostgreSQL/Redis. On Windows run `.venv\Scripts\python.exe scripts/run-native-api.py` from the repository root so psycopg uses a compatible selector event loop. On macOS/Linux, from apps/api run `python -m uvicorn app.main:app --reload`. Use venv Python for checks. API env is read from the apps/api working directory; Compose injects variables.
 
-Host web: from apps/web `npm.cmd ci`, `npm.cmd run dev`. Mobile: from apps/mobile `flutter pub get`, `flutter run`; Android emulator API host is `10.0.2.2`, physical device needs reachable development host. Use synthetic accounts only. Account UI is at /en/account or /ta/account. For native Flutter pass --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1 on an Android emulator. Release builds require an HTTPS API URL. iOS native verification requires macOS.
+Host web: from apps/web `npm.cmd ci`, `npm.cmd run dev -- --hostname 127.0.0.1 --port 3001`. Set `WEB_ORIGIN=http://127.0.0.1:3001` and match API `CORS_ORIGINS`. Mobile: from apps/mobile `flutter pub get`, `flutter run`; Android emulator API host is `10.0.2.2`, physical device needs reachable development host. Use synthetic accounts only. Account UI is at /en/account or /ta/account. For native Flutter pass --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1 on an Android emulator. Release builds require an HTTPS API URL. iOS native verification requires macOS.
 
 Quality commands and results are in milestone report. Never point migration downgrade or integration tests at shared/production databases.
 

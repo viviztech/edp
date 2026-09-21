@@ -12,7 +12,7 @@ x-api: &api
     META_EVENT_RETENTION_DAYS: ${META_EVENT_RETENTION_DAYS:-}
     DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-edp_dev}:${POSTGRES_PASSWORD:?Set a random URL-safe local password in .env}@postgres:5432/${POSTGRES_DB:-edp_dev}
     REDIS_URL: redis://redis:6379/0
-    CORS_ORIGINS: '["http://localhost:3000"]'
+    CORS_ORIGINS: '["http://127.0.0.1:3001"]'
 
 services:
   postgres:
@@ -75,13 +75,13 @@ services:
     environment:
       API_INTERNAL_URL: http://api:8000
       PUBLIC_ORGANIZATION_ID: ${PUBLIC_ORGANIZATION_ID:-}
-      WEB_ORIGIN: http://localhost:3000
+      WEB_ORIGIN: http://127.0.0.1:3001
       BFF_KEY: ${BFF_KEY:?Generate a server-only BFF key in .env}
       COOKIE_SECURE: "false"
     build:
       context: .
       dockerfile: infra/docker/web.Dockerfile
-    ports: ["127.0.0.1:3000:3000"]
+    ports: ["127.0.0.1:3001:3000"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/en').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 10s
