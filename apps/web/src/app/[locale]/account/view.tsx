@@ -83,7 +83,7 @@ export default function Account({ text, locale }: { text: AuthMessages; locale: 
       <h2>{text.sessions}</h2>
       {sessions.length === 0 ? <p>{text.noSessions}</p> : <ul>{sessions.map(device => <li key={device.id}>{device.device_name} {device.current ? "(" + text.current + ")" : ""} <button disabled={busy} onClick={() => action("revoke/" + device.id)}>{text.revoke}</button></li>)}</ul>}
       <h2>{text.organizations}</h2>
-      {profile.grants.filter(grant => grant.permissions.includes("system.access")).length === 0 ? <p>{text.noOrganizations}</p> : <ul>{profile.grants.filter(grant => grant.permissions.includes("system.access")).map(grant => <li key={grant.organization_id}><Link href={"/" + locale + "/admin?organization=" + grant.organization_id}>{grant.organization_name}</Link></li>)}</ul>}
+      {profile.grants.filter(grant => grant.permissions.includes("system.access")).length === 0 ? <p>{text.noOrganizations}</p> : <ul>{profile.grants.filter(grant => grant.permissions.includes("system.access")).map(grant => <li key={grant.organization_id}><Link href={"/" + locale + "/admin?organization=" + grant.organization_id}>{grant.organization_name}</Link>{" ? "}<Link href={"/" + locale + "/applications?organization=" + grant.organization_id}>{text.application}</Link></li>)}</ul>}
     </> : <>
       <nav className="actions" aria-label={text.title}>{modes.map(([key, label]) => <button type="button" key={key} disabled={busy} aria-pressed={mode === key} onClick={() => { setMode(key); setMessage(""); }}>{label}</button>)}</nav>
       <form key={mode} onSubmit={submit} className="account-form">

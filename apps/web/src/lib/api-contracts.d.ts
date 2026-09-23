@@ -242,6 +242,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/applications/organizations/{org}/form": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Form */
+        get: operations["form_api_v1_applications_organizations__org__form_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Draft */
+        get: operations["draft_api_v1_applications_organizations__org__draft_get"];
+        put?: never;
+        /** Create Draft */
+        post: operations["create_draft_api_v1_applications_organizations__org__draft_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/draft/{application_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Save */
+        patch: operations["save_api_v1_applications_organizations__org__draft__application_id__patch"];
+        trace?: never;
+    };
     "/api/v1/cms/organizations/{org}/pages": {
         parameters: {
             query?: never;
@@ -1230,6 +1282,26 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** AnswerInput */
+        AnswerInput: {
+            /**
+             * Field Id
+             * Format: uuid
+             */
+            field_id: string;
+            /** Value */
+            value: string;
+        };
+        /** AnswerView */
+        AnswerView: {
+            /**
+             * Field Id
+             * Format: uuid
+             */
+            field_id: string;
+            /** Value */
+            value: string;
+        };
         /** AssetCreate */
         AssetCreate: {
             /** Filename */
@@ -1343,6 +1415,40 @@ export interface components {
             locale: "en" | "ta";
             /** Slug */
             slug: string;
+        };
+        /** DraftSave */
+        DraftSave: {
+            /** Expected Version */
+            expected_version: number;
+            /** Answers */
+            answers: components["schemas"]["AnswerInput"][];
+        };
+        /** DraftView */
+        DraftView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            form: components["schemas"]["FormView"];
+            /**
+             * State
+             * @constant
+             */
+            state: "draft";
+            /** Version */
+            version: number;
+            /** Revision */
+            revision: number;
+            /** Completion Percent */
+            completion_percent: number;
+            /** Answers */
+            answers: components["schemas"]["AnswerView"][];
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** DuplicateResolve */
         DuplicateResolve: {
@@ -1705,6 +1811,52 @@ export interface components {
             created_at: string;
             /** Version */
             version: number;
+        };
+        /** FieldView */
+        FieldView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Section */
+            section: string;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /**
+             * Field Type
+             * @enum {string}
+             */
+            field_type: "text" | "textarea" | "number" | "date" | "boolean";
+            /** Required */
+            required: boolean;
+            /** Position */
+            position: number;
+        };
+        /** FormView */
+        FormView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /** Version */
+            version: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Fields */
+            fields: components["schemas"]["FieldView"][];
         };
         /** Grant */
         Grant: {
@@ -2848,6 +3000,135 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    form_api_v1_applications_organizations__org__form_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    draft_api_v1_applications_organizations__org__draft_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_draft_api_v1_applications_organizations__org__draft_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_api_v1_applications_organizations__org__draft__application_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftSave"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftView"];
                 };
             };
             /** @description Validation Error */

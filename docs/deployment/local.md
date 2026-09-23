@@ -61,4 +61,8 @@ Follow-up reminders: the same Celery worker/beat pair used for assignment notice
 
 Notification recovery: apply migration a2d3e4f5a6b7, rerun the identity role seed and restart API/worker/beat. Program Directors/Managers with an organization grant can open `/{locale}/admin/notifications` to inspect failed in-app intents and request replay with an audit reason. The worker uses bounded automatic retries; a failed database transaction still requires infrastructure triage.
 
+## Applicant draft development
+
+Apply migration b3e4f5a6b7c8. In APP_ENV=local, provision one synthetic published form for a development organization from apps/api with python -m app.modules.applications.cli seed-demo --organization-id UUID. The command refuses non-local environments and preserves an existing published form. An authenticated person with an organization grant can open /{locale}/account and follow **Application draft** to /{locale}/applications?organization=UUID. This slice saves drafts only; submission and document upload are unavailable.
+
 The local web BFF accepts `localhost` and `127.0.0.1` as equivalent Origin hostnames only on its configured HTTP port. Cookies remain host-scoped, so use one hostname consistently for an existing session. Production origins still require an exact match.

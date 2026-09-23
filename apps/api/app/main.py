@@ -18,6 +18,7 @@ from starlette.exceptions import HTTPException
 from app.core.config import get_settings
 from app.core.database import create_engine
 from app.core.logging import configure_logging
+from app.modules.applications.routes import router as applications_router
 from app.modules.cms.routes import router as cms_router
 from app.modules.crm.routes import router as crm_router
 from app.modules.identity.routes import router as identity_router
@@ -78,6 +79,7 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json" if docs_enabled else None,
     )
     app.include_router(identity_router)
+    app.include_router(applications_router)
     app.include_router(cms_router)
     app.include_router(crm_router)
     app.include_router(meta_router)
@@ -116,7 +118,10 @@ def create_app() -> FastAPI:
         try:
             bounded_body = (
                 (
-                    request.url.path.startswith("/api/v1/cms/")
+                    (
+                        request.url.path.startswith("/api/v1/cms/")
+                        or request.url.path.startswith("/api/v1/applications/")
+                    )
                     and request.method in {"POST", "PATCH"}
                 )
                 or (

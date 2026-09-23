@@ -7,3 +7,8 @@ Forgot password requests a reset message without revealing whether an email is r
 Program applications and student learning are not yet available. Do not submit real personal data or documents during foundation testing.
 
 Public information: use Pages on web or the mobile home screen to browse published information in the selected language. Missing translations are unavailable; drafts and archived content are never shown. No sign-in is needed.
+
+
+## Application draft
+
+After signing in, choose an organization and open Application draft. A published form is required. Saving creates a new version and the completion indicator counts required fields. This development slice cannot submit an application or upload documents; do not enter real applicant data until the program fields, consent and retention policies are approved.
