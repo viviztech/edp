@@ -5226,6 +5226,765 @@
         }
       }
     },
+    "/api/v1/programs/organizations/{org}/catalog": {
+      "get": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Catalog",
+        "operationId": "catalog_api_v1_programs_organizations__org__catalog_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/programs": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Create Program",
+        "operationId": "create_program_api_v1_programs_organizations__org__programs_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NamedCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgramView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/programs/{item_id}": {
+      "patch": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Update Program",
+        "operationId": "update_program_api_v1_programs_organizations__org__programs__item_id__patch",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NamedUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgramView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/programs/{item_id}/state": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Transition Program",
+        "operationId": "transition_program_api_v1_programs_organizations__org__programs__item_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgramView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/centers": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Create Center",
+        "operationId": "create_center_api_v1_programs_organizations__org__centers_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CenterCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/centers/{item_id}": {
+      "patch": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Update Center",
+        "operationId": "update_center_api_v1_programs_organizations__org__centers__item_id__patch",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CenterUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/centers/{item_id}/state": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Transition Center",
+        "operationId": "transition_center_api_v1_programs_organizations__org__centers__item_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/cohorts": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Create Cohort",
+        "operationId": "create_cohort_api_v1_programs_organizations__org__cohorts_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CohortCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/cohorts/{item_id}": {
+      "patch": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Update Cohort",
+        "operationId": "update_cohort_api_v1_programs_organizations__org__cohorts__item_id__patch",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CohortUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/cohorts/{item_id}/state": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Transition Cohort",
+        "operationId": "transition_cohort_api_v1_programs_organizations__org__cohorts__item_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/cycles": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Create Cycle",
+        "operationId": "create_cycle_api_v1_programs_organizations__org__cycles_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CycleCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/cycles/{item_id}": {
+      "patch": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Update Cycle",
+        "operationId": "update_cycle_api_v1_programs_organizations__org__cycles__item_id__patch",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CycleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/cycles/{item_id}/state": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Transition Cycle",
+        "operationId": "transition_cycle_api_v1_programs_organizations__org__cycles__item_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -5680,6 +6439,435 @@
         ],
         "title": "AuditView"
       },
+      "CatalogView": {
+        "properties": {
+          "programs": {
+            "items": {
+              "$ref": "#/components/schemas/ProgramView"
+            },
+            "type": "array",
+            "title": "Programs"
+          },
+          "centers": {
+            "items": {
+              "$ref": "#/components/schemas/CenterView"
+            },
+            "type": "array",
+            "title": "Centers"
+          },
+          "cohorts": {
+            "items": {
+              "$ref": "#/components/schemas/CohortView"
+            },
+            "type": "array",
+            "title": "Cohorts"
+          },
+          "cycles": {
+            "items": {
+              "$ref": "#/components/schemas/CycleView"
+            },
+            "type": "array",
+            "title": "Cycles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "programs",
+          "centers",
+          "cohorts",
+          "cycles"
+        ],
+        "title": "CatalogView"
+      },
+      "CenterCreate": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "locality": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Locality"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name_en",
+          "name_ta",
+          "locality"
+        ],
+        "title": "CenterCreate"
+      },
+      "CenterUpdate": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "locality": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Locality"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "name_en",
+          "name_ta",
+          "locality"
+        ],
+        "title": "CenterUpdate"
+      },
+      "CenterView": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "locality": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Locality"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name_en",
+          "name_ta",
+          "locality",
+          "id",
+          "organization_id",
+          "state",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CenterView"
+      },
+      "CohortCreate": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "center_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Center Id"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Ends On"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name_en",
+          "name_ta",
+          "program_id",
+          "center_id",
+          "starts_on",
+          "ends_on"
+        ],
+        "title": "CohortCreate"
+      },
+      "CohortUpdate": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "center_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Center Id"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Ends On"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "name_en",
+          "name_ta",
+          "program_id",
+          "center_id",
+          "starts_on",
+          "ends_on"
+        ],
+        "title": "CohortUpdate"
+      },
+      "CohortView": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "center_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Center Id"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Ends On"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "active",
+              "completed",
+              "cancelled"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name_en",
+          "name_ta",
+          "program_id",
+          "center_id",
+          "starts_on",
+          "ends_on",
+          "id",
+          "organization_id",
+          "state",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CohortView"
+      },
       "Command": {
         "properties": {
           "expected_version": {
@@ -5752,6 +6940,245 @@
           "slug"
         ],
         "title": "CreatePage"
+      },
+      "CycleCreate": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "cohort_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Id"
+          },
+          "form_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Form Id"
+          },
+          "opens_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opens At"
+          },
+          "closes_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Closes At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name_en",
+          "name_ta",
+          "program_id",
+          "form_id",
+          "opens_at",
+          "closes_at"
+        ],
+        "title": "CycleCreate"
+      },
+      "CycleUpdate": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "cohort_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Id"
+          },
+          "form_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Form Id"
+          },
+          "opens_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opens At"
+          },
+          "closes_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Closes At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "name_en",
+          "name_ta",
+          "program_id",
+          "form_id",
+          "opens_at",
+          "closes_at"
+        ],
+        "title": "CycleUpdate"
+      },
+      "CycleView": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "cohort_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Id"
+          },
+          "form_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Form Id"
+          },
+          "opens_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opens At"
+          },
+          "closes_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Closes At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "open",
+              "closed",
+              "cancelled"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name_en",
+          "name_ta",
+          "program_id",
+          "form_id",
+          "opens_at",
+          "closes_at",
+          "id",
+          "organization_id",
+          "state",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CycleView"
       },
       "DefinitionCommand": {
         "properties": {
@@ -7937,6 +9364,66 @@
         "type": "object",
         "title": "Message"
       },
+      "NamedCreate": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name_en",
+          "name_ta"
+        ],
+        "title": "NamedCreate"
+      },
+      "NamedUpdate": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "name_en",
+          "name_ta"
+        ],
+        "title": "NamedUpdate"
+      },
       "NewTranslation": {
         "properties": {
           "title": {
@@ -8220,6 +9707,76 @@
           "grants"
         ],
         "title": "Profile"
+      },
+      "ProgramView": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "archived"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name_en",
+          "name_ta",
+          "id",
+          "organization_id",
+          "state",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ProgramView"
       },
       "PublicEditorial": {
         "properties": {
@@ -8610,6 +10167,33 @@
           "organization_name"
         ],
         "title": "StaffView"
+      },
+      "StateCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "target",
+          "reason"
+        ],
+        "title": "StateCommand"
       },
       "TagCreate": {
         "properties": {

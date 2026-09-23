@@ -30,9 +30,22 @@ Acceptance criteria:
 5. The English/Tamil staff workspace uses a fixed BFF allowlist, CSRF/origin checks, bounded bodies, private no-store responses and permission-aware controls.
 6. Migration round-trip/drift, PostgreSQL policy tests, authenticated API tests, contracts, backend checks, frontend tests/build and local smoke pass.
 
+## P01.1 - program delivery foundation
+
+Scope: add organization-scoped programs, training centers, cohorts and application cycles. Programs and centers form the reusable catalog; cohorts bind an active program to an active center and a delivery window; application cycles bind an active program, optional compatible cohort and published application definition to an intake window. All writes use optimistic versions and audited, reasoned lifecycle commands.
+
+Acceptance criteria:
+
+1. Composite foreign keys prevent cross-organization or cross-program references in PostgreSQL.
+2. Program Managers and Directors can administer the organization catalog; Training Center Coordinators have read-only catalog access until narrower center bindings are designed.
+3. Lifecycle transitions are explicit, version checked and audited with a reason; inactive dependencies cannot be activated or opened.
+4. The English/Tamil staff workspace covers create, list, empty, loading, error and lifecycle states through a fixed, bounded, CSRF-protected BFF.
+5. Migration round-trip/drift, PostgreSQL lifecycle/RBAC tests, contracts, backend checks, frontend tests and production build pass.
+6. Participant, enrollment, session and selection behavior remains unavailable for A02/P01.2 so no second Person model or unapproved enrollment path is introduced.
+
 ## Planned follow-ups
 
 - A01.3: private documents after object storage, malware scanning and retention approval.
 - A01.4: declarations, consent, validation, immutable submission and application number.
-- P01 foundation: programs, centers and cohorts.
+- P01.2: program sessions, selected-application enrollment conversion, participant projection and schedule timeline.
 - A02: review, rubric, interviews, decisions and enrollment conversion.

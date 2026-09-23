@@ -67,6 +67,12 @@ META_PERMISSIONS = ["meta.integration." + action for action in ("view", "manage"
 APPLICATION_PERMISSIONS = [
     "application.form." + action for action in ("view", "create", "update", "publish")
 ]
+PROGRAM_PERMISSIONS = [
+    "program.view",
+    "program.manage",
+    "cohort.manage",
+    "application.cycle.manage",
+]
 CRM_PERMISSIONS = (
     [
         "crm.lead." + action
@@ -84,6 +90,7 @@ PERMISSIONS = [
     *META_PERMISSIONS,
     *NOTIFICATION_OPERATIONS_PERMISSIONS,
     *APPLICATION_PERMISSIONS,
+    *PROGRAM_PERMISSIONS,
 ]
 
 
@@ -423,13 +430,17 @@ def seed_roles(db: Session) -> None:
                 "system.access",
                 *NOTIFICATION_OPERATIONS_PERMISSIONS,
                 *APPLICATION_PERMISSIONS,
+                *PROGRAM_PERMISSIONS,
             ]
         elif name == "Program Manager":
             codes = [
                 "system.access",
                 *NOTIFICATION_OPERATIONS_PERMISSIONS,
                 *APPLICATION_PERMISSIONS[:-1],
+                *PROGRAM_PERMISSIONS,
             ]
+        elif name == "Training Center Coordinator":
+            codes = ["system.access", "program.view"]
         elif name == "Marketing Executive":
             codes = ["system.access", *META_PERMISSIONS]
         elif name == "Participant":

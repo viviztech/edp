@@ -1,6 +1,6 @@
 # Milestone 4 implementation report
 
-Status: A01.1 and A01.2 implemented locally; milestone remains in progress.
+Status: A01.1, A01.2 and P01.1 implemented locally; milestone remains in progress.
 
 ## A01.1 configurable applicant-owned drafts
 
@@ -18,3 +18,11 @@ Added one editable definition draft per organization, optimistic edit revisions,
 Program Managers receive scoped view/create/update rights. Program Directors and Super Admins additionally receive the separate publish permission. Create, update, copy and publish are audited with identifiers and changed field names without copying policy text. The staff workspace exposes history, field ordering, explicit publication warning and permission-aware actions through a bounded fixed-allowlist BFF.
 
 Evidence: migration c4f5a6b7c8d9 upgrade/downgrade and Alembic drift checks pass on isolated PostgreSQL. Three new PostgreSQL/API tests plus the existing applicant regressions cover RBAC, authenticated routes, stale writes, database immutability, policy copying, publication retirement, audit and applicant pinning. The full API suite passes 73 tests; changed backend files pass Ruff and the applications module passes strict MyPy. OpenAPI and TypeScript contracts were regenerated. Web strict TypeScript, ESLint, 23 Vitest tests and the Next.js production build pass. The isolated Playwright suite passes authenticated definition creation, publication, version copying, scoped navigation and mobile overflow checks with no JavaScript errors. Local API readiness, the admin route, live OpenAPI paths and unauthenticated BFF rejection also pass on ports 8000 and 3001.
+
+## P01.1 program delivery foundation
+
+Added organization-scoped programs, training centers, cohorts and application cycles. Composite PostgreSQL keys enforce organization and program consistency. Programs, cohorts and cycles have explicit lifecycle graphs; every transition requires the current version and an audit reason. A cohort requires active program and center dependencies. Opening an application cycle revalidates its active program, compatible non-terminal cohort and immutable published application definition.
+
+Program Directors and Program Managers receive program.view, program.manage, cohort.manage and application.cycle.manage. Training Center Coordinators receive program.view only while center-scoped role bindings remain undesigned. The English/Tamil staff workspace creates and reviews all four resource types and exposes permitted state commands through a fixed BFF route allowlist with browser session, origin/CSRF, 64 KiB bodies and private no-store responses.
+
+Evidence: migration d5a6b7c8d9e0 downgrade/upgrade and Alembic drift check pass on isolated PostgreSQL. Two new PostgreSQL/API tests cover lifecycle, dependency checks, optimistic conflict, audit, organization denial, seeded role permissions and authenticated routes. The complete API suite passes 75 tests; changed backend files pass Ruff and formatting, and the programs module passes strict MyPy. OpenAPI and TypeScript contracts were regenerated. Web strict TypeScript, ESLint, 26 Vitest tests and the Next.js production build pass. Local health/readiness, 13 P01 OpenAPI paths, the admin route and unauthenticated BFF rejection pass on ports 8000 and 3001. Authenticated browser acceptance remains a Milestone 4 gate because no controllable browser was connected for this run. The existing repository-wide Ruff/MyPy gate still reports the previously documented legacy CMS debt outside this slice. Participant, enrollment, session and selected-application conversion remain scheduled for P01.2/A02.

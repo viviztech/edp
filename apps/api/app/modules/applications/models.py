@@ -35,6 +35,7 @@ class ApplicationForm(Record, Base):
     )
     __table_args__ = (
         UniqueConstraint("organization_id", "version"),
+        UniqueConstraint("id", "organization_id", name="uq_application_form_scope"),
         CheckConstraint("version > 0", name="application_form_version"),
         CheckConstraint("revision > 0", name="application_form_revision"),
         CheckConstraint("state IN ('draft','published','retired')", name="application_form_state"),

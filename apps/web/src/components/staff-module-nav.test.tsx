@@ -5,6 +5,7 @@ import { applicationAdminMessages } from "../lib/application-admin-messages";
 import { cmsMessages } from "../lib/cms-messages";
 import { crmMessages } from "../lib/crm-messages";
 import { metaMessages } from "../lib/meta-messages";
+import { programMessages } from "../lib/program-messages";
 
 afterEach(cleanup);
 
@@ -31,6 +32,12 @@ describe("staff module navigation", () => {
     render(<StaffModuleNav locale="en" organization="org-3" permissions={["application.form.view"]} variant="tiles" />);
     const link = screen.getByText(applicationAdminMessages.en.workspace).closest("a");
     expect(link?.getAttribute("href")).toBe("/en/admin/application-definitions?organization=org-3");
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+  it("links program administration only with program view permission", () => {
+    render(<StaffModuleNav locale="en" organization="org-4" permissions={["program.view"]} variant="tiles" />);
+    const link = screen.getByText(programMessages.en.workspace).closest("a");
+    expect(link?.getAttribute("href")).toBe("/en/admin/programs?organization=org-4");
     expect(screen.getAllByRole("link")).toHaveLength(1);
   });
 });

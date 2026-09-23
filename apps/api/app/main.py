@@ -25,6 +25,7 @@ from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
 from app.modules.meta.routes import router as meta_router
 from app.modules.notifications.routes import router as notifications_router
+from app.modules.programs.routes import router as programs_router
 
 log = structlog.get_logger()
 
@@ -84,6 +85,7 @@ def create_app() -> FastAPI:
     app.include_router(crm_router)
     app.include_router(meta_router)
     app.include_router(notifications_router)
+    app.include_router(programs_router)
 
     @app.exception_handler(AuthError)
     async def auth_error(request: Request, exc: AuthError) -> JSONResponse:
@@ -121,6 +123,7 @@ def create_app() -> FastAPI:
                     (
                         request.url.path.startswith("/api/v1/cms/")
                         or request.url.path.startswith("/api/v1/applications/")
+                        or request.url.path.startswith("/api/v1/programs/")
                     )
                     and request.method in {"POST", "PATCH"}
                 )

@@ -66,3 +66,7 @@ Notification recovery: apply migration a2d3e4f5a6b7, rerun the identity role see
 Apply migrations through c4f5a6b7c8d9 and rerun python -m app.modules.identity.cli seed to add the application definition permissions. Program Directors can publish at /{locale}/admin/application-definitions?organization=UUID; Program Managers can prepare drafts. For applicant-only review, apply migration b3e4f5a6b7c8. In APP_ENV=local, provision one synthetic published form for a development organization from apps/api with python -m app.modules.applications.cli seed-demo --organization-id UUID. The command refuses non-local environments and preserves an existing published form. An authenticated person with an organization grant can open /{locale}/account and follow **Application draft** to /{locale}/applications?organization=UUID. This slice saves drafts only; submission and document upload are unavailable.
 
 The local web BFF accepts `localhost` and `127.0.0.1` as equivalent Origin hostnames only on its configured HTTP port. Cookies remain host-scoped, so use one hostname consistently for an existing session. Production origins still require an exact match.
+
+## Program delivery administration
+
+Apply migration d5a6b7c8d9e0 and rerun python -m app.modules.identity.cli seed from apps/api. Authorized staff can open /{locale}/admin/programs?organization=UUID. Create and publish an application definition before creating an application cycle. This P01.1 slice does not provide participant enrollment or program sessions.
