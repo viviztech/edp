@@ -245,3 +245,7 @@ Migration c4f5a6b7c8d9 adds the application definition edit revision, publisher 
 ## P01.1 implementation note
 
 Migration d5a6b7c8d9e0 implements Program, TrainingCenter, Cohort and ApplicationCycle. Their composite organization keys and the cycle cohort/program key enforce the planned tenant boundary in PostgreSQL. ProgramSession, Participant and Enrollment in the conceptual ERD remain pending P01.2/A02; no duplicate Person or premature enrollment table was added.
+
+## A01.4 implemented application evidence
+
+Migration `e6b7c8d9e0f1` binds Application to ApplicationCycle with a composite cycle/form/organization foreign key, changes uniqueness to `(person_id, cycle_id)`, and adds unique application number and submitted timestamp evidence. ApplicationAcknowledgementDefinition is an ordered child of the immutable form policy. ApplicationAcknowledgement references both the application/form and definition/form tuples and records `accepted_at`. ApplicationStatusHistory is unique by application/version. Database triggers reject mutation of submitted applications, their revisions/answers, acceptance rows and status history. The conceptual ApplicationVersion/ApplicationSection names above correspond to implemented ApplicationRevision/ApplicationAnswer tables. Documents remain conceptual pending A01.3.

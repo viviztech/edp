@@ -3,14 +3,11 @@
 import json
 import os
 import secrets
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
-from cryptography.fernet import Fernet
-from playwright.sync_api import expect, sync_playwright
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
-
+from app.modules.applications.models import ApplicationForm
 from app.modules.identity.models import (
     AuthDelivery,
     Organization,
@@ -20,6 +17,12 @@ from app.modules.identity.models import (
     VerificationToken,
 )
 from app.modules.identity.service import audit, seed_roles
+from app.modules.programs import service as program_service
+from app.modules.programs.schemas import CycleCreate, NamedCreate, StateCommand
+from cryptography.fernet import Fernet
+from playwright.sync_api import expect, sync_playwright
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
 
 engine = create_engine(os.environ["DATABASE_URL"])
 assert engine.url.database in {"edp_foundation_e2e", "edp_test"}, (
@@ -222,8 +225,17 @@ with sync_playwright() as playwright:
         "Synthetic enterprise application"
     )
     page.get_by_label("Tamil title", exact=True).fill("Synthetic Tamil application")
-    page.get_by_label("English label", exact=True).fill("Describe the business idea")
-    page.get_by_label("Tamil label", exact=True).fill("Synthetic Tamil field")
+    page.get_by_label("English label", exact=True).nth(0).fill(
+        "Describe the business idea"
+    )
+    page.get_by_label("Tamil label", exact=True).nth(0).fill("Synthetic Tamil field")
+    acknowledgement_labels = page.locator(".definition-fields textarea")
+    while acknowledgement_labels.count() < 4:
+        page.get_by_role("button", name="Add acknowledgement", exact=True).click()
+    acknowledgement_labels.nth(0).fill("I declare this application is accurate.")
+    acknowledgement_labels.nth(1).fill("Synthetic Tamil declaration")
+    acknowledgement_labels.nth(2).fill("I consent to processing for this application.")
+    acknowledgement_labels.nth(3).fill("Synthetic Tamil consent")
     page.get_by_role("button", name="Save draft", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Draft definition created.")
     page.once("dialog", lambda dialog: dialog.accept())
@@ -237,6 +249,88 @@ with sync_playwright() as playwright:
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     page.screenshot(
         path=str(evidence / "application-definitions-mobile.png"), full_page=True
+    )
+    page.set_viewport_size({"width": 1280, "height": 900})
+    with Session(engine) as db:
+        actor = db.scalar(select(User).where(User.email == email))
+        form = db.scalar(
+            select(ApplicationForm).where(
+                ApplicationForm.organization_id == organization_id,
+                ApplicationForm.state == "published",
+            )
+        )
+        assert actor and form
+        program = program_service.create_program(
+            db,
+            organization_id,
+            actor,
+            NamedCreate(
+                code="e2e-program",
+                name_en="E2E program",
+                name_ta="Synthetic Tamil program",
+            ),
+            "e2e-program-create",
+        )
+        program = program_service.transition_program(
+            db,
+            organization_id,
+            program.id,
+            actor,
+            StateCommand(
+                expected_version=program.version,
+                target="active",
+                reason="E2E activation",
+            ),
+            "e2e-program-activate",
+        )
+        cycle = program_service.create_cycle(
+            db,
+            organization_id,
+            actor,
+            CycleCreate(
+                code="e2e-cycle",
+                name_en="E2E application cycle",
+                name_ta="Synthetic Tamil cycle",
+                program_id=program.id,
+                form_id=form.id,
+                opens_at=datetime.now(UTC) - timedelta(hours=1),
+                closes_at=datetime.now(UTC) + timedelta(days=1),
+            ),
+            "e2e-cycle-create",
+        )
+        program_service.transition_cycle(
+            db,
+            organization_id,
+            cycle.id,
+            actor,
+            StateCommand(
+                expected_version=cycle.version, target="open", reason="E2E intake"
+            ),
+            "e2e-cycle-open",
+        )
+    page.goto(base + "/en/applications?organization=" + str(organization_id))
+    expect(page.get_by_role("heading", name="My applications")).to_be_visible()
+    expect(
+        page.get_by_role("heading", name="E2E application cycle", exact=True)
+    ).to_be_visible()
+    page.get_by_role("button", name="Start application", exact=True).click()
+    page.get_by_label("Describe the business idea", exact=False).fill(
+        "Synthetic repair cooperative"
+    )
+    page.get_by_label(
+        "I declare this application is accurate. (Required)", exact=True
+    ).check()
+    page.get_by_label(
+        "I consent to processing for this application. (Required)", exact=True
+    ).check()
+    page.once("dialog", lambda dialog: dialog.accept())
+    page.get_by_role("button", name="Submit application", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Application submitted")
+    expect(page.get_by_text("Application number:", exact=False)).to_contain_text("EDP-")
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.screenshot(
+        path=str(evidence / "application-submitted-mobile.png"), full_page=True
     )
     page.set_viewport_size({"width": 1280, "height": 900})
     page.goto(base + "/en/admin?organization=" + str(uuid4()))
@@ -282,5 +376,5 @@ with sync_playwright() as playwright:
 engine.dispose()
 print(
     "Browser E2E passed: identity, CSRF, scoped CMS, application policy "
-    "publish/versioning, audit, responsive layouts and session recovery; no JS errors"
+    "publish/versioning, immutable application submission, audit, responsive layouts and session recovery; no JS errors"
 )

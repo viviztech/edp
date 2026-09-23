@@ -18,3 +18,7 @@ Owner approvals pending. No real data in development. Default is minimize collec
 | Backups | Recovery | Encrypted separate storage; deletion propagates through documented expiry |
 
 Product owner approves field purpose, consent copy, privacy notice, processors, retention periods, data requests and deletion exceptions. Operations owns backups/deletion execution. Engineering owns enforcement and tests. Export/download creates an auditable access event. Public business profile requires explicit opt-in. AI receives no participant data in initial release.
+
+## A01.4 submitted application evidence
+
+Submitted answers are stored in immutable relational revisions. Declaration and consent evidence stores the immutable policy-definition ID and acceptance timestamp; the policy text remains on the pinned form version. The generated application number contains UTC year and a sequence only. Applicant-visible history excludes staff notes. Audit stores identifiers and changed-field names without answer or acknowledgement content. Submitted-answer retention, deletion exceptions and data-subject handling still require owner approval before real applicant data is collected; A01.3 document ingestion remains disabled.

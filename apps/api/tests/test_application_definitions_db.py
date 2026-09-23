@@ -9,6 +9,7 @@ from test_identity import auth, signed_in  # noqa: F401
 from app.modules.applications import service
 from app.modules.applications.models import ApplicationField, ApplicationForm
 from app.modules.applications.schemas import (
+    AcknowledgementInput,
     DefinitionCommand,
     DefinitionCreate,
     DefinitionFieldInput,
@@ -42,6 +43,20 @@ def content(title: str = "Enterprise application") -> DefinitionCreate:
                 field_type="textarea",
                 required=True,
             )
+        ],
+        acknowledgements=[
+            AcknowledgementInput(
+                key="final_declaration",
+                kind="declaration",
+                label_en="I declare this application is accurate",
+                label_ta="Synthetic Tamil declaration",
+            ),
+            AcknowledgementInput(
+                key="privacy_consent",
+                kind="consent",
+                label_en="I consent to application processing",
+                label_ta="Synthetic Tamil consent",
+            ),
         ],
     )
 
@@ -101,6 +116,7 @@ def test_definition_authoring_permissions_versioning_and_immutability(definition
                 expected_revision=1,
                 title_en="Enterprise application 2027",
                 title_ta="Synthetic Tamil title",
+                acknowledgements=content().acknowledgements,
                 fields=[
                     *content().fields,
                     DefinitionFieldInput(
@@ -126,6 +142,7 @@ def test_definition_authoring_permissions_versioning_and_immutability(definition
                     title_en="Stale",
                     title_ta="Synthetic Tamil",
                     fields=content().fields,
+                    acknowledgements=content().acknowledgements,
                 ),
                 "stale",
             )
@@ -161,6 +178,7 @@ def test_definition_authoring_permissions_versioning_and_immutability(definition
                     title_en="Changed",
                     title_ta="Synthetic Tamil",
                     fields=content().fields,
+                    acknowledgements=content().acknowledgements,
                 ),
                 "immutable",
             )
@@ -240,7 +258,6 @@ def test_publish_retires_previous_policy_and_keeps_applicant_draft_pinned(defini
         assert old and old.state == "retired"
         assert service.mine(db, org, first_applicant).form.version == 1
         assert service.create_draft(db, org, second_applicant, "applicant-v2").form.version == 2
-
 
 
 def test_definition_routes_apply_scoped_role_permissions(request) -> None:

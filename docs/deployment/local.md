@@ -70,3 +70,7 @@ The local web BFF accepts `localhost` and `127.0.0.1` as equivalent Origin hostn
 ## Program delivery administration
 
 Apply migration d5a6b7c8d9e0 and rerun python -m app.modules.identity.cli seed from apps/api. Authorized staff can open /{locale}/admin/programs?organization=UUID. Create and publish an application definition before creating an application cycle. This P01.1 slice does not provide participant enrollment or program sessions.
+
+## Applicant submission development
+
+Apply migration `e6b7c8d9e0f1`, rerun the identity permission seed, and use the program administration workspace to create and open an application cycle whose published form includes at least one required declaration and one required consent. An authenticated applicant opens `/{locale}/applications?organization=UUID`, selects the open cycle, saves required answers, accepts the policy and submits. The receipt is read-only and its application number is server-generated. Existing form-only development drafts cannot submit; create a cycle draft from the current workspace. Do not use real applicant data until submitted-answer retention is approved. Document upload remains disabled pending A01.3.

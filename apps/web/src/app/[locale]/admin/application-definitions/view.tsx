@@ -7,11 +7,17 @@ import { applicationAdminMessages } from "../../../../lib/application-admin-mess
 type Definition = components["schemas"]["DefinitionView"];
 type FieldType = components["schemas"]["DefinitionFieldInput"]["field_type"];
 type DraftField = components["schemas"]["DefinitionFieldInput"];
+type DraftAcknowledgement = components["schemas"]["AcknowledgementInput"];
 type Locale = "en" | "ta";
 
 const newField = (index: number): DraftField => ({
   key: `field_${index}`, section: "general", label_en: "", label_ta: "",
   field_type: "text", required: false,
+});
+
+const newAcknowledgement = (index: number): DraftAcknowledgement => ({
+  key: `acknowledgement_${index}`, kind: index === 1 ? "declaration" : "consent",
+  label_en: "", label_ta: "", required: true,
 });
 
 export default function ApplicationDefinitionWorkspace({ org, locale, permissions }: {
@@ -24,6 +30,7 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
   const [titleEn, setTitleEn] = useState("");
   const [titleTa, setTitleTa] = useState("");
   const [fields, setFields] = useState<DraftField[]>([newField(1)]);
+  const [acknowledgements, setAcknowledgements] = useState<DraftAcknowledgement[]>([newAcknowledgement(1), newAcknowledgement(2)]);
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState<string>(text.loading);
   const selected = useMemo(() => items.find((item) => item.id === selectedId), [items, selectedId]);
@@ -52,6 +59,10 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
     setFields(item.fields.map((entry) => ({
       key: entry.key, section: entry.section, label_en: entry.label_en,
       label_ta: entry.label_ta, field_type: entry.field_type, required: entry.required,
+    })));
+    setAcknowledgements(item.acknowledgements.map((entry) => ({
+      key: entry.key, kind: entry.kind, label_en: entry.label_en,
+      label_ta: entry.label_ta, required: entry.required,
     })));
     setMessage("");
   }, []);
@@ -86,7 +97,8 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
   }
 
   function beginNew() {
-    setSelectedId("new"); setTitleEn(""); setTitleTa(""); setFields([newField(1)]); setMessage("");
+    setSelectedId("new"); setTitleEn(""); setTitleTa(""); setFields([newField(1)]);
+    setAcknowledgements([newAcknowledgement(1), newAcknowledgement(2)]); setMessage("");
   }
   function updateField(index: number, patch: Partial<DraftField>) {
     setFields((current) => current.map((item, position) => position === index ? { ...item, ...patch } : item));
@@ -101,7 +113,11 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
     });
   }
 
-  const payload = { title_en: titleEn, title_ta: titleTa, fields };
+  function updateAcknowledgement(index: number, patch: Partial<DraftAcknowledgement>) {
+    setAcknowledgements((current) => current.map((item, position) => position === index ? { ...item, ...patch } : item));
+  }
+
+  const payload = { title_en: titleEn, title_ta: titleTa, fields, acknowledgements };
   const hasDraft = items.some((item) => item.state === "draft");
 
   return <div className="definition-workspace" aria-busy={busy}>
@@ -161,6 +177,20 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
                   {(["text", "textarea", "number", "date", "boolean"] as FieldType[]).map((type) => <option key={type} value={type}>{text[type]}</option>)}
                 </select></label>
                 <label className="definition-required"><input type="checkbox" disabled={!editable || busy} checked={item.required} onChange={(event) => updateField(index, { required: event.target.checked })} />{text.required}</label>
+              </div>
+            </li>)}</ol>
+            <div className="definition-section-head"><h3>{text.acknowledgements}</h3>
+              {editable ? <button type="button" disabled={busy || acknowledgements.length >= 20} onClick={() => setAcknowledgements((current) => [...current, newAcknowledgement(current.length + 1)])}>{text.addAcknowledgement}</button> : null}
+            </div>
+            <p className="definition-boundary">{text.publishRequirements}</p>
+            <ol className="definition-fields">{acknowledgements.map((item, index) => <li key={index}>
+              <div className="definition-field-head"><strong>{index + 1}. {item.label_en || item.key}</strong>{editable ? <button type="button" disabled={busy || acknowledgements.length <= 2} onClick={() => setAcknowledgements((current) => current.filter((_, position) => position !== index))}>{text.remove}</button> : null}</div>
+              <div className="definition-field-grid">
+                <label>{text.key}<input required pattern="[a-z][a-z0-9_]*" maxLength={80} disabled={!editable || busy} value={item.key} onChange={(event) => updateAcknowledgement(index, { key: event.target.value })} /></label>
+                <label>{text.acknowledgementKind}<select disabled={!editable || busy} value={item.kind} onChange={(event) => updateAcknowledgement(index, { kind: event.target.value as DraftAcknowledgement["kind"] })}><option value="declaration">{text.declaration}</option><option value="consent">{text.consent}</option></select></label>
+                <label>{text.englishLabel}<textarea required maxLength={1000} disabled={!editable || busy} value={item.label_en} onChange={(event) => updateAcknowledgement(index, { label_en: event.target.value })} /></label>
+                <label>{text.tamilLabel}<textarea required maxLength={1000} disabled={!editable || busy} value={item.label_ta} onChange={(event) => updateAcknowledgement(index, { label_ta: event.target.value })} /></label>
+                <label className="definition-required"><input type="checkbox" disabled={!editable || busy} checked={item.required} onChange={(event) => updateAcknowledgement(index, { required: event.target.checked })} />{text.required}</label>
               </div>
             </li>)}</ol>
             {editable ? <button className="definition-primary" disabled={busy}>{text.save}</button> : null}

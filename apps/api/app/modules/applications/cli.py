@@ -7,7 +7,11 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.modules.applications.models import ApplicationField, ApplicationForm
+from app.modules.applications.models import (
+    ApplicationAcknowledgementDefinition,
+    ApplicationField,
+    ApplicationForm,
+)
 from app.modules.identity.models import Organization, now
 
 
@@ -37,7 +41,7 @@ def main() -> None:
             version=1,
             state="draft",
             title_en="Entrepreneurship application draft",
-            title_ta="தொழில்முனைவு விண்ணப்ப வரைவு",
+            title_ta="தொழில்முனைவு விண்ணப்பம்",
             published_at=now(),
         )
         db.add(form)
@@ -76,11 +80,33 @@ def main() -> None:
                 ),
             ]
         )
+        db.add_all(
+            [
+                ApplicationAcknowledgementDefinition(
+                    form_id=form.id,
+                    acknowledgement_key="final_declaration",
+                    kind="declaration",
+                    label_en="I declare that the information in this application is accurate.",
+                    label_ta="இந்த விண்ணப்பத் தகவல் சரியானது என்று அறிவிக்கிறேன்.",
+                    required=True,
+                    position=1,
+                ),
+                ApplicationAcknowledgementDefinition(
+                    form_id=form.id,
+                    acknowledgement_key="application_consent",
+                    kind="consent",
+                    label_en="I consent to processing this information for my application.",
+                    label_ta="என் விண்ணப்பத்திற்காக இந்தத் தகவலை செயலாக்க ஒப்புக்கொள்கிறேன்.",
+                    required=True,
+                    position=2,
+                ),
+            ]
+        )
         db.flush()
         form.state = "published"
         form.published_at = now()
         db.commit()
-        print("Synthetic local draft form created. Submission remains unavailable.")
+        print("Synthetic local application policy created with declaration and consent.")
 
 
 if __name__ == "__main__":

@@ -364,6 +364,74 @@ export interface paths {
         patch: operations["save_api_v1_applications_organizations__org__draft__application_id__patch"];
         trace?: never;
     };
+    "/api/v1/applications/organizations/{org}/cycles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cycles */
+        get: operations["cycles_api_v1_applications_organizations__org__cycles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/cycles/{cycle_id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Cycle Draft */
+        post: operations["create_cycle_draft_api_v1_applications_organizations__org__cycles__cycle_id__draft_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/cycles/{cycle_id}/application": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cycle Application */
+        get: operations["cycle_application_api_v1_applications_organizations__org__cycles__cycle_id__application_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/draft/{application_id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit */
+        post: operations["submit_api_v1_applications_organizations__org__draft__application_id__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cms/organizations/{org}/pages": {
         parameters: {
             query?: never;
@@ -1520,6 +1588,61 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AcceptedAcknowledgementView */
+        AcceptedAcknowledgementView: {
+            /**
+             * Definition Id
+             * Format: uuid
+             */
+            definition_id: string;
+            /**
+             * Accepted At
+             * Format: date-time
+             */
+            accepted_at: string;
+        };
+        /** AcknowledgementInput */
+        AcknowledgementInput: {
+            /** Key */
+            key: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "declaration" | "consent";
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /**
+             * Required
+             * @default true
+             */
+            required: boolean;
+        };
+        /** AcknowledgementView */
+        AcknowledgementView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "declaration" | "consent";
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /** Required */
+            required: boolean;
+            /** Position */
+            position: number;
+        };
         /** ActivityComplete */
         ActivityComplete: {
             /** Expected Version */
@@ -1929,6 +2052,40 @@ export interface components {
              */
             closes_at: string;
         };
+        /** CycleOpportunityList */
+        CycleOpportunityList: {
+            /** Items */
+            items: components["schemas"]["CycleOpportunityView"][];
+        };
+        /** CycleOpportunityView */
+        CycleOpportunityView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Name En */
+            name_en: string;
+            /** Name Ta */
+            name_ta: string;
+            /**
+             * Form Id
+             * Format: uuid
+             */
+            form_id: string;
+            /**
+             * Opens At
+             * Format: date-time
+             */
+            opens_at: string;
+            /**
+             * Closes At
+             * Format: date-time
+             */
+            closes_at: string;
+        };
         /** CycleUpdate */
         CycleUpdate: {
             /** Expected Version */
@@ -2031,6 +2188,8 @@ export interface components {
             title_ta: string;
             /** Fields */
             fields: components["schemas"]["DefinitionFieldInput"][];
+            /** Acknowledgements */
+            acknowledgements?: components["schemas"]["AcknowledgementInput"][];
         };
         /** DefinitionFieldInput */
         DefinitionFieldInput: {
@@ -2066,6 +2225,8 @@ export interface components {
             title_ta: string;
             /** Fields */
             fields: components["schemas"]["DefinitionFieldInput"][];
+            /** Acknowledgements */
+            acknowledgements?: components["schemas"]["AcknowledgementInput"][];
             /** Expected Revision */
             expected_revision: number;
         };
@@ -2089,6 +2250,8 @@ export interface components {
             title_ta: string;
             /** Fields */
             fields: components["schemas"]["FieldView"][];
+            /** Acknowledgements */
+            acknowledgements: components["schemas"]["AcknowledgementView"][];
             /**
              * State
              * @enum {string}
@@ -2118,6 +2281,8 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Cycle Id */
+            cycle_id: string | null;
             form: components["schemas"]["FormView"];
             /**
              * State
@@ -2545,6 +2710,8 @@ export interface components {
             title_ta: string;
             /** Fields */
             fields: components["schemas"]["FieldView"][];
+            /** Acknowledgements */
+            acknowledgements: components["schemas"]["AcknowledgementView"][];
         };
         /** Grant */
         Grant: {
@@ -3249,6 +3416,75 @@ export interface components {
             target: string;
             /** Reason */
             reason: string;
+        };
+        /** StatusHistoryView */
+        StatusHistoryView: {
+            /** From State */
+            from_state: string | null;
+            /** To State */
+            to_state: string;
+            /** Application Version */
+            application_version: number;
+            /** Reason Code */
+            reason_code: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** SubmitCommand */
+        SubmitCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /** Accepted Acknowledgement Ids */
+            accepted_acknowledgement_ids: string[];
+        };
+        /** SubmittedView */
+        SubmittedView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Cycle Id
+             * Format: uuid
+             */
+            cycle_id: string;
+            form: components["schemas"]["FormView"];
+            /**
+             * State
+             * @constant
+             */
+            state: "submitted";
+            /** Version */
+            version: number;
+            /** Revision */
+            revision: number;
+            /**
+             * Completion Percent
+             * @constant
+             */
+            completion_percent: 100;
+            /** Application Number */
+            application_number: string;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+            /** Answers */
+            answers: components["schemas"]["AnswerView"][];
+            /** Accepted Acknowledgements */
+            accepted_acknowledgements: components["schemas"]["AcceptedAcknowledgementView"][];
+            /** Status History */
+            status_history: components["schemas"]["StatusHistoryView"][];
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** TagCreate */
         TagCreate: {
@@ -4086,6 +4322,137 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cycles_api_v1_applications_organizations__org__cycles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOpportunityList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_cycle_draft_api_v1_applications_organizations__org__cycles__cycle_id__draft_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cycle_application_api_v1_applications_organizations__org__cycles__cycle_id__application_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftView"] | components["schemas"]["SubmittedView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_api_v1_applications_organizations__org__draft__application_id__submit_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmittedView"];
                 };
             };
             /** @description Validation Error */

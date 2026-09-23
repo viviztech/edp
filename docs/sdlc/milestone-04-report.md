@@ -1,6 +1,6 @@
 # Milestone 4 implementation report
 
-Status: A01.1, A01.2 and P01.1 implemented locally; milestone remains in progress.
+Status: A01.1, A01.2, A01.4 and P01.1 implemented locally; milestone remains in progress.
 
 ## A01.1 configurable applicant-owned drafts
 
@@ -18,6 +18,15 @@ Added one editable definition draft per organization, optimistic edit revisions,
 Program Managers receive scoped view/create/update rights. Program Directors and Super Admins additionally receive the separate publish permission. Create, update, copy and publish are audited with identifiers and changed field names without copying policy text. The staff workspace exposes history, field ordering, explicit publication warning and permission-aware actions through a bounded fixed-allowlist BFF.
 
 Evidence: migration c4f5a6b7c8d9 upgrade/downgrade and Alembic drift checks pass on isolated PostgreSQL. Three new PostgreSQL/API tests plus the existing applicant regressions cover RBAC, authenticated routes, stale writes, database immutability, policy copying, publication retirement, audit and applicant pinning. The full API suite passes 73 tests; changed backend files pass Ruff and the applications module passes strict MyPy. OpenAPI and TypeScript contracts were regenerated. Web strict TypeScript, ESLint, 23 Vitest tests and the Next.js production build pass. The isolated Playwright suite passes authenticated definition creation, publication, version copying, scoped navigation and mobile overflow checks with no JavaScript errors. Local API readiness, the admin route, live OpenAPI paths and unauthenticated BFF rejection also pass on ports 8000 and 3001.
+
+
+## A01.4 declarations, consent and immutable submission
+
+Application definition policy now includes ordered bilingual declarations and consents. Publication requires at least one required item of each kind. Applicant drafts bind to an open application cycle, remain unique per person/cycle and validate the cycle/form/organization scope. Final submission locks the current row, validates required answers and acknowledgements, records timestamped policy acceptance, creates a status transition and audit, and assigns a unique non-PII `EDP-{year}-{sequence}` application number atomically. Successful command retries return the same receipt. PostgreSQL triggers freeze the submitted application, revisions, answers and acceptance evidence.
+
+The English/Tamil applicant workspace lists open cycles, creates or resumes the cycle application, saves answers, captures required acknowledgement checkboxes behind an explicit final confirmation, and displays a read-only application-number receipt and status history. Browser calls use the fixed BFF allowlist, session authorization, origin/CSRF checks, bounded requests and private no-store responses. The staff policy editor manages the acknowledgement text as part of the immutable form version. A01.3 private documents remain disabled.
+
+Evidence: migration `e6b7c8d9e0f1` passes disposable PostgreSQL downgrade/upgrade and Alembic drift checks; the development database is at head. Two focused PostgreSQL/service/API tests cover incomplete answers, missing consent, ownership, idempotent retry, unique receipt, history/audit and direct database immutability. The complete backend suite passes 77 tests. Focused Ruff and strict MyPy pass. OpenAPI and TypeScript contracts were regenerated. Web strict TypeScript and ESLint pass; 28 Vitest tests and the Next.js production build pass with single-worker settings on this constrained workstation. Isolated authenticated Chrome acceptance passes policy creation/publication, open-cycle draft, final confirmation, immutable receipt, responsive layout, CSRF and scope checks with no JavaScript errors. Supporting-document retention/scanning and remote CI remain Milestone 4 gates.
 
 ## P01.1 program delivery foundation
 

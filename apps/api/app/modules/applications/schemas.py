@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 FieldType = Literal["text", "textarea", "number", "date", "boolean"]
 DefinitionState = Literal["draft", "published", "retired"]
+AcknowledgementKind = Literal["declaration", "consent"]
 
 
 class FieldView(BaseModel):
@@ -19,6 +20,16 @@ class FieldView(BaseModel):
     position: int
 
 
+class AcknowledgementView(BaseModel):
+    id: UUID
+    key: str
+    kind: AcknowledgementKind
+    label_en: str
+    label_ta: str
+    required: bool
+    position: int
+
+
 class FormView(BaseModel):
     id: UUID
     organization_id: UUID
@@ -26,6 +37,7 @@ class FormView(BaseModel):
     title_en: str
     title_ta: str
     fields: list[FieldView]
+    acknowledgements: list[AcknowledgementView]
 
 
 class DefinitionFieldInput(BaseModel):
@@ -43,11 +55,26 @@ class DefinitionFieldInput(BaseModel):
         return value.strip()
 
 
+class AcknowledgementInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    key: str = Field(min_length=1, max_length=80, pattern=r"^[a-z][a-z0-9_]*$")
+    kind: AcknowledgementKind
+    label_en: str = Field(min_length=1, max_length=1000)
+    label_ta: str = Field(min_length=1, max_length=1000)
+    required: bool = True
+
+    @field_validator("key", "label_en", "label_ta")
+    @classmethod
+    def strip_text(cls, value: str) -> str:
+        return value.strip()
+
+
 class DefinitionContent(BaseModel):
     model_config = ConfigDict(extra="forbid")
     title_en: str = Field(min_length=1, max_length=160)
     title_ta: str = Field(min_length=1, max_length=160)
     fields: list[DefinitionFieldInput] = Field(min_length=1, max_length=100)
+    acknowledgements: list[AcknowledgementInput] = Field(default_factory=list, max_length=20)
 
     @field_validator("title_en", "title_ta")
     @classmethod
@@ -55,10 +82,13 @@ class DefinitionContent(BaseModel):
         return value.strip()
 
     @model_validator(mode="after")
-    def unique_fields(self) -> "DefinitionContent":
-        keys = [item.key for item in self.fields]
-        if len(keys) != len(set(keys)):
+    def unique_policy_keys(self) -> "DefinitionContent":
+        field_keys = [item.key for item in self.fields]
+        acknowledgement_keys = [item.key for item in self.acknowledgements]
+        if len(field_keys) != len(set(field_keys)):
             raise ValueError("Duplicate field key")
+        if len(acknowledgement_keys) != len(set(acknowledgement_keys)):
+            raise ValueError("Duplicate acknowledgement key")
         return self
 
 
@@ -112,10 +142,67 @@ class AnswerView(BaseModel):
 
 class DraftView(BaseModel):
     id: UUID
+    cycle_id: UUID | None
     form: FormView
     state: Literal["draft"]
     version: int
     revision: int
     completion_percent: int
     answers: list[AnswerView]
+    updated_at: datetime
+
+
+class CycleOpportunityView(BaseModel):
+    id: UUID
+    code: str
+    name_en: str
+    name_ta: str
+    form_id: UUID
+    opens_at: datetime
+    closes_at: datetime
+
+
+class CycleOpportunityList(BaseModel):
+    items: list[CycleOpportunityView]
+
+
+class SubmitCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_version: int = Field(ge=1)
+    accepted_acknowledgement_ids: list[UUID] = Field(min_length=1, max_length=20)
+
+    @field_validator("accepted_acknowledgement_ids")
+    @classmethod
+    def unique_acknowledgements(cls, value: list[UUID]) -> list[UUID]:
+        if len(value) != len(set(value)):
+            raise ValueError("Duplicate acknowledgement")
+        return value
+
+
+class AcceptedAcknowledgementView(BaseModel):
+    definition_id: UUID
+    accepted_at: datetime
+
+
+class StatusHistoryView(BaseModel):
+    from_state: str | None
+    to_state: str
+    application_version: int
+    reason_code: str
+    created_at: datetime
+
+
+class SubmittedView(BaseModel):
+    id: UUID
+    cycle_id: UUID
+    form: FormView
+    state: Literal["submitted"]
+    version: int
+    revision: int
+    completion_percent: Literal[100]
+    application_number: str
+    submitted_at: datetime
+    answers: list[AnswerView]
+    accepted_acknowledgements: list[AcceptedAcknowledgementView]
+    status_history: list[StatusHistoryView]
     updated_at: datetime

@@ -8,6 +8,7 @@ from test_identity import auth, signed_in  # noqa: F401
 
 from app.modules.applications import service as application_service
 from app.modules.applications.schemas import (
+    AcknowledgementInput,
     DefinitionCommand,
     DefinitionCreate,
     DefinitionFieldInput,
@@ -67,6 +68,20 @@ def definition() -> DefinitionCreate:
                 field_type="textarea",
                 required=True,
             )
+        ],
+        acknowledgements=[
+            AcknowledgementInput(
+                key="final_declaration",
+                kind="declaration",
+                label_en="I declare this is accurate.",
+                label_ta="Synthetic Tamil declaration",
+            ),
+            AcknowledgementInput(
+                key="application_consent",
+                kind="consent",
+                label_en="I consent to application processing.",
+                label_ta="Synthetic Tamil consent",
+            ),
         ],
     )
 

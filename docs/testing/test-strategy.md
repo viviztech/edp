@@ -45,3 +45,7 @@ Backend test discovery: `pytest -q` from apps/api and `pytest -q apps/api/tests`
 ## C03 Meta ingestion evidence
 
 Focused tests cover exact raw-body HMAC verification and tamper rejection, encrypted provider secrets, mapping allowlists and required name mapping, reduction of provider responses to configured CRM fields, and denial when an integration is outside the requested organization. PostgreSQL acceptance must additionally prove concurrent duplicate delivery creates one inbox row and one lead, constraints survive upgrade/downgrade/upgrade, queue outage remains replayable, and worker retries do not process a claimed event twice.
+
+## A01.4 submission coverage
+
+PostgreSQL tests exercise owner and organization isolation, open-cycle binding, one application per person/cycle, incomplete-answer and missing-acknowledgement rejection, optimistic conflict, idempotent successful retry, stable unique application number, atomic status/audit evidence and direct answer immutability after submission. Route tests use authenticated sessions. Web gates cover the exact BFF allowlist, localized contract compilation, lint, unit tests and production build. Isolated authenticated Chrome acceptance demonstrates cycle selection, final confirmation, immutable receipt, CSRF/scope enforcement and narrow-screen layout with no JavaScript errors.

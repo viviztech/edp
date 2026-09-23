@@ -139,6 +139,9 @@ class ApplicationCycle(Record, Base):
         ),
         UniqueConstraint("organization_id", "code"),
         UniqueConstraint("id", "organization_id"),
+        UniqueConstraint(
+            "id", "form_id", "organization_id", name="uq_application_cycle_form_scope"
+        ),
         CheckConstraint(
             "state IN ('draft','open','closed','cancelled')", name="application_cycle_state"
         ),

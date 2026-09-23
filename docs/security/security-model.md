@@ -60,3 +60,7 @@ Application definition administration separates view, create, update and publish
 ## P01.1 program administration
 
 Implemented permissions are program.view, program.manage, cohort.manage and application.cycle.manage at organization scope. Program Directors and Program Managers receive all four; Training Center Coordinators receive view only until center-scoped bindings exist. Composite database keys block cross-organization and cross-program links. Versioned state commands require audit reasons, and audit rows exclude bilingual names and application policy content.
+
+## A01.4 submission controls
+
+Applicants may list only currently open cycles in their organization and may read, save or submit only the application owned by their Person. UUID-shaped BFF route allowlists, session authentication, origin/CSRF enforcement, body limits and no-store responses constrain browser access. Submission locks the row, checks optimistic version and cycle/form scope, and commits acknowledgement references, non-PII application number, timestamp, history and allowlisted audit atomically. PostgreSQL triggers protect submitted evidence even outside the service. Audit excludes answer and policy text. Supporting documents and real-data use remain disabled until scanning and retention controls are approved.

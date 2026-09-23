@@ -30,6 +30,19 @@ Acceptance criteria:
 5. The English/Tamil staff workspace uses a fixed BFF allowlist, CSRF/origin checks, bounded bodies, private no-store responses and permission-aware controls.
 6. Migration round-trip/drift, PostgreSQL policy tests, authenticated API tests, contracts, backend checks, frontend tests/build and local smoke pass.
 
+## A01.4 - declarations, consent and immutable submission
+
+Scope: bind applicant drafts to an open application cycle and its immutable form policy; configure bilingual declaration/consent acknowledgements with that policy; validate all required answers and acknowledgements; submit exactly once; preserve the submitted revision and acceptance evidence; generate a non-PII application number; and expose applicant status history. Supporting documents remain disabled pending A01.3 storage, malware-scanning and retention approval.
+
+Acceptance criteria:
+
+1. Only the authenticated owner can submit a draft, and only to its organization-scoped open cycle during the configured UTC window.
+2. Submission rejects missing required answers, missing required declaration/consent policy, stale versions and cycle/form mismatch without partial writes.
+3. One application per person per cycle and a unique server-generated application number prevent duplicate submission; a retry of the successful command returns the same submitted result.
+4. The current revision, acknowledgements, application number, submitted timestamp and status history are committed atomically and submitted applicant evidence is database-immutable.
+5. The English/Tamil applicant workspace covers cycle selection, draft saving, declaration/consent review, final confirmation, submitted receipt, status, loading, empty, validation, conflict and error states through the secured BFF.
+6. Migration round-trip/drift, PostgreSQL ownership/concurrency/immutability tests, authenticated API tests, contracts, backend checks, frontend tests/build and local smoke pass.
+
 ## P01.1 - program delivery foundation
 
 Scope: add organization-scoped programs, training centers, cohorts and application cycles. Programs and centers form the reusable catalog; cohorts bind an active program to an active center and a delivery window; application cycles bind an active program, optional compatible cohort and published application definition to an intake window. All writes use optimistic versions and audited, reasoned lifecycle commands.
@@ -46,6 +59,5 @@ Acceptance criteria:
 ## Planned follow-ups
 
 - A01.3: private documents after object storage, malware scanning and retention approval.
-- A01.4: declarations, consent, validation, immutable submission and application number.
 - P01.2: program sessions, selected-application enrollment conversion, participant projection and schedule timeline.
 - A02: review, rubric, interviews, decisions and enrollment conversion.

@@ -1063,6 +1063,226 @@
         }
       }
     },
+    "/api/v1/applications/organizations/{org}/cycles": {
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Cycles",
+        "operationId": "cycles_api_v1_applications_organizations__org__cycles_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleOpportunityList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/organizations/{org}/cycles/{cycle_id}/draft": {
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Create Cycle Draft",
+        "operationId": "create_cycle_draft_api_v1_applications_organizations__org__cycles__cycle_id__draft_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/organizations/{org}/cycles/{cycle_id}/application": {
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Cycle Application",
+        "operationId": "cycle_application_api_v1_applications_organizations__org__cycles__cycle_id__application_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/DraftView"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SubmittedView"
+                    }
+                  ],
+                  "title": "Response Cycle Application Api V1 Applications Organizations  Org  Cycles  Cycle Id  Application Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/organizations/{org}/draft/{application_id}/submit": {
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Submit",
+        "operationId": "submit_api_v1_applications_organizations__org__draft__application_id__submit_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "application_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Application Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmittedView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/cms/organizations/{org}/pages": {
       "post": {
         "tags": [
@@ -6040,6 +6260,119 @@
   },
   "components": {
     "schemas": {
+      "AcceptedAcknowledgementView": {
+        "properties": {
+          "definition_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Definition Id"
+          },
+          "accepted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Accepted At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "definition_id",
+          "accepted_at"
+        ],
+        "title": "AcceptedAcknowledgementView"
+      },
+      "AcknowledgementInput": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Key"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "declaration",
+              "consent"
+            ],
+            "title": "Kind"
+          },
+          "label_en": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Label En"
+          },
+          "label_ta": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Label Ta"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "key",
+          "kind",
+          "label_en",
+          "label_ta"
+        ],
+        "title": "AcknowledgementInput"
+      },
+      "AcknowledgementView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "declaration",
+              "consent"
+            ],
+            "title": "Kind"
+          },
+          "label_en": {
+            "type": "string",
+            "title": "Label En"
+          },
+          "label_ta": {
+            "type": "string",
+            "title": "Label Ta"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "key",
+          "kind",
+          "label_en",
+          "label_ta",
+          "required",
+          "position"
+        ],
+        "title": "AcknowledgementView"
+      },
       "ActivityComplete": {
         "properties": {
           "expected_version": {
@@ -7008,6 +7341,69 @@
         ],
         "title": "CycleCreate"
       },
+      "CycleOpportunityList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CycleOpportunityView"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "CycleOpportunityList"
+      },
+      "CycleOpportunityView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "title": "Name Ta"
+          },
+          "form_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Form Id"
+          },
+          "opens_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opens At"
+          },
+          "closes_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Closes At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name_en",
+          "name_ta",
+          "form_id",
+          "opens_at",
+          "closes_at"
+        ],
+        "title": "CycleOpportunityView"
+      },
       "CycleUpdate": {
         "properties": {
           "expected_version": {
@@ -7217,6 +7613,14 @@
             "maxItems": 100,
             "minItems": 1,
             "title": "Fields"
+          },
+          "acknowledgements": {
+            "items": {
+              "$ref": "#/components/schemas/AcknowledgementInput"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Acknowledgements"
           }
         },
         "additionalProperties": false,
@@ -7323,6 +7727,14 @@
             "minItems": 1,
             "title": "Fields"
           },
+          "acknowledgements": {
+            "items": {
+              "$ref": "#/components/schemas/AcknowledgementInput"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Acknowledgements"
+          },
           "expected_revision": {
             "type": "integer",
             "minimum": 1.0,
@@ -7370,6 +7782,13 @@
             "type": "array",
             "title": "Fields"
           },
+          "acknowledgements": {
+            "items": {
+              "$ref": "#/components/schemas/AcknowledgementView"
+            },
+            "type": "array",
+            "title": "Acknowledgements"
+          },
           "state": {
             "type": "string",
             "enum": [
@@ -7409,6 +7828,7 @@
           "title_en",
           "title_ta",
           "fields",
+          "acknowledgements",
           "state",
           "revision",
           "published_at",
@@ -7447,6 +7867,18 @@
             "format": "uuid",
             "title": "Id"
           },
+          "cycle_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Id"
+          },
           "form": {
             "$ref": "#/components/schemas/FormView"
           },
@@ -7483,6 +7915,7 @@
         "type": "object",
         "required": [
           "id",
+          "cycle_id",
           "form",
           "state",
           "version",
@@ -8497,6 +8930,13 @@
             },
             "type": "array",
             "title": "Fields"
+          },
+          "acknowledgements": {
+            "items": {
+              "$ref": "#/components/schemas/AcknowledgementView"
+            },
+            "type": "array",
+            "title": "Acknowledgements"
           }
         },
         "type": "object",
@@ -8506,7 +8946,8 @@
           "version",
           "title_en",
           "title_ta",
-          "fields"
+          "fields",
+          "acknowledgements"
         ],
         "title": "FormView"
       },
@@ -10194,6 +10635,160 @@
           "reason"
         ],
         "title": "StateCommand"
+      },
+      "StatusHistoryView": {
+        "properties": {
+          "from_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From State"
+          },
+          "to_state": {
+            "type": "string",
+            "title": "To State"
+          },
+          "application_version": {
+            "type": "integer",
+            "title": "Application Version"
+          },
+          "reason_code": {
+            "type": "string",
+            "title": "Reason Code"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from_state",
+          "to_state",
+          "application_version",
+          "reason_code",
+          "created_at"
+        ],
+        "title": "StatusHistoryView"
+      },
+      "SubmitCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "accepted_acknowledgement_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Accepted Acknowledgement Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "accepted_acknowledgement_ids"
+        ],
+        "title": "SubmitCommand"
+      },
+      "SubmittedView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cycle Id"
+          },
+          "form": {
+            "$ref": "#/components/schemas/FormView"
+          },
+          "state": {
+            "type": "string",
+            "const": "submitted",
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "completion_percent": {
+            "type": "integer",
+            "const": 100,
+            "title": "Completion Percent"
+          },
+          "application_number": {
+            "type": "string",
+            "title": "Application Number"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Submitted At"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/AnswerView"
+            },
+            "type": "array",
+            "title": "Answers"
+          },
+          "accepted_acknowledgements": {
+            "items": {
+              "$ref": "#/components/schemas/AcceptedAcknowledgementView"
+            },
+            "type": "array",
+            "title": "Accepted Acknowledgements"
+          },
+          "status_history": {
+            "items": {
+              "$ref": "#/components/schemas/StatusHistoryView"
+            },
+            "type": "array",
+            "title": "Status History"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "cycle_id",
+          "form",
+          "state",
+          "version",
+          "revision",
+          "completion_percent",
+          "application_number",
+          "submitted_at",
+          "answers",
+          "accepted_acknowledgements",
+          "status_history",
+          "updated_at"
+        ],
+        "title": "SubmittedView"
       },
       "TagCreate": {
         "properties": {

@@ -3,19 +3,27 @@ from decimal import Decimal, InvalidOperation
 from typing import cast
 from uuid import UUID
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.modules.applications.models import (
     Application,
+    ApplicationAcknowledgement,
+    ApplicationAcknowledgementDefinition,
     ApplicationAnswer,
     ApplicationField,
     ApplicationForm,
     ApplicationRevision,
+    ApplicationStatusHistory,
 )
 from app.modules.applications.schemas import (
+    AcceptedAcknowledgementView,
+    AcknowledgementKind,
+    AcknowledgementView,
     AnswerView,
+    CycleOpportunityList,
+    CycleOpportunityView,
     DefinitionCommand,
     DefinitionContent,
     DefinitionCreate,
@@ -28,10 +36,14 @@ from app.modules.applications.schemas import (
     FieldType,
     FieldView,
     FormView,
+    StatusHistoryView,
+    SubmitCommand,
+    SubmittedView,
 )
 from app.modules.identity.models import AuditLog, Organization, User, now
 from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
+from app.modules.programs.models import ApplicationCycle
 
 
 def _fields(db: Session, form_id: UUID) -> list[ApplicationField]:
@@ -45,7 +57,18 @@ def _fields(db: Session, form_id: UUID) -> list[ApplicationField]:
     )
 
 
-def form_view(form: ApplicationForm, fields: list[ApplicationField]) -> FormView:
+def _acknowledgements(db: Session, form_id: UUID) -> list[ApplicationAcknowledgementDefinition]:
+    return list(
+        db.scalars(
+            select(ApplicationAcknowledgementDefinition)
+            .where(ApplicationAcknowledgementDefinition.form_id == form_id)
+            .order_by(ApplicationAcknowledgementDefinition.position)
+            .limit(21)
+        )
+    )
+
+
+def form_view(db: Session, form: ApplicationForm, fields: list[ApplicationField]) -> FormView:
     return FormView(
         id=form.id,
         organization_id=form.organization_id,
@@ -65,6 +88,18 @@ def form_view(form: ApplicationForm, fields: list[ApplicationField]) -> FormView
             )
             for item in fields
         ],
+        acknowledgements=[
+            AcknowledgementView(
+                id=item.id,
+                key=item.acknowledgement_key,
+                kind=cast(AcknowledgementKind, item.kind),
+                label_en=item.label_en,
+                label_ta=item.label_ta,
+                required=item.required,
+                position=item.position,
+            )
+            for item in _acknowledgements(db, form.id)
+        ],
     )
 
 
@@ -73,7 +108,7 @@ def definition_view(
     form: ApplicationForm,
     fields: list[ApplicationField] | None = None,
 ) -> DefinitionView:
-    result = form_view(form, fields if fields is not None else _fields(db, form.id))
+    result = form_view(db, form, fields if fields is not None else _fields(db, form.id))
     return DefinitionView(
         **result.model_dump(),
         state=cast(DefinitionState, form.state),
@@ -118,12 +153,17 @@ def _audit_definition(
     )
 
 
-def _replace_fields(
+def _replace_policy(
     db: Session,
     form: ApplicationForm,
     data: DefinitionContent,
 ) -> list[ApplicationField]:
     db.execute(delete(ApplicationField).where(ApplicationField.form_id == form.id))
+    db.execute(
+        delete(ApplicationAcknowledgementDefinition).where(
+            ApplicationAcknowledgementDefinition.form_id == form.id
+        )
+    )
     fields = [
         ApplicationField(
             form_id=form.id,
@@ -137,7 +177,19 @@ def _replace_fields(
         )
         for position, item in enumerate(data.fields, start=1)
     ]
-    db.add_all(fields)
+    acknowledgements = [
+        ApplicationAcknowledgementDefinition(
+            form_id=form.id,
+            acknowledgement_key=item.key,
+            kind=item.kind,
+            label_en=item.label_en,
+            label_ta=item.label_ta,
+            required=item.required,
+            position=position,
+        )
+        for position, item in enumerate(data.acknowledgements, start=1)
+    ]
+    db.add_all([*fields, *acknowledgements])
     return fields
 
 
@@ -165,18 +217,19 @@ def get_definition(
 
 
 def _next_version(db: Session, org: UUID) -> int:
-    if not db.scalar(
-        select(Organization.id).where(Organization.id == org).with_for_update()
-    ):
+    if not db.scalar(select(Organization.id).where(Organization.id == org).with_for_update()):
         raise AuthError("not_found", 404)
-    return int(
-        db.scalar(
-            select(func.coalesce(func.max(ApplicationForm.version), 0)).where(
-                ApplicationForm.organization_id == org
+    return (
+        int(
+            db.scalar(
+                select(func.coalesce(func.max(ApplicationForm.version), 0)).where(
+                    ApplicationForm.organization_id == org
+                )
             )
+            or 0
         )
-        or 0
-    ) + 1
+        + 1
+    )
 
 
 def _ensure_no_draft(db: Session, org: UUID) -> None:
@@ -209,7 +262,7 @@ def create_definition(
     db.add(form)
     try:
         db.flush()
-        fields = _replace_fields(db, form, data)
+        fields = _replace_policy(db, form, data)
         _audit_definition(
             db,
             actor,
@@ -217,7 +270,7 @@ def create_definition(
             form,
             "application.definition_created",
             request_id,
-            "title_en,title_ta,fields",
+            "title_en,title_ta,fields,acknowledgements",
         )
         db.commit()
     except IntegrityError as exc:
@@ -243,7 +296,7 @@ def update_definition(
     form.title_en = data.title_en
     form.title_ta = data.title_ta
     form.revision += 1
-    fields = _replace_fields(db, form, data)
+    fields = _replace_policy(db, form, data)
     _audit_definition(
         db,
         actor,
@@ -251,7 +304,7 @@ def update_definition(
         form,
         "application.definition_updated",
         request_id,
-        "title_en,title_ta,fields",
+        "title_en,title_ta,fields,acknowledgements",
     )
     db.commit()
     return definition_view(db, form, fields)
@@ -273,6 +326,7 @@ def copy_definition(
         raise AuthError("invalid_transition", 409)
     _ensure_no_draft(db, org)
     source_fields = _fields(db, source.id)
+    source_acknowledgements = _acknowledgements(db, source.id)
     form = ApplicationForm(
         organization_id=org,
         version=_next_version(db, org),
@@ -297,7 +351,19 @@ def copy_definition(
             )
             for item in source_fields
         ]
-        db.add_all(fields)
+        acknowledgements = [
+            ApplicationAcknowledgementDefinition(
+                form_id=form.id,
+                acknowledgement_key=item.acknowledgement_key,
+                kind=item.kind,
+                label_en=item.label_en,
+                label_ta=item.label_ta,
+                required=item.required,
+                position=item.position,
+            )
+            for item in source_acknowledgements
+        ]
+        db.add_all([*fields, *acknowledgements])
         _audit_definition(
             db,
             actor,
@@ -329,7 +395,9 @@ def publish_definition(
     if form.revision != data.expected_revision:
         raise AuthError("version_conflict", 409)
     fields = _fields(db, form.id)
-    if not fields:
+    acknowledgements = _acknowledgements(db, form.id)
+    required_kinds = {item.kind for item in acknowledgements if item.required}
+    if not fields or not {"declaration", "consent"}.issubset(required_kinds):
         raise AuthError("application_configuration_invalid", 422)
     active = list(
         db.scalars(
@@ -379,7 +447,7 @@ def published_form(db: Session, org: UUID) -> tuple[ApplicationForm, list[Applic
 
 def get_form(db: Session, org: UUID) -> FormView:
     form, fields = published_form(db, org)
-    return form_view(form, fields)
+    return form_view(db, form, fields)
 
 
 def _validate(field: ApplicationField, value: str) -> str:
@@ -423,7 +491,8 @@ def _view(
     percent = 100 if not required else int(completed * 100 / len(required))
     return DraftView(
         id=application.id,
-        form=form_view(form, fields),
+        cycle_id=application.cycle_id,
+        form=form_view(db, form, fields),
         state="draft",
         version=application.version,
         revision=revision.revision,
@@ -458,6 +527,16 @@ def create_draft(db: Session, org: UUID, actor: User, request_id: str) -> DraftV
     db.add(revision)
     db.flush()
     application.current_revision_id = revision.id
+    db.add(
+        ApplicationStatusHistory(
+            application_id=application.id,
+            actor_user_id=actor.id,
+            from_state=None,
+            to_state="draft",
+            application_version=1,
+            reason_code="applicant_started",
+        )
+    )
     db.add(
         AuditLog(
             actor_id=actor.id,
@@ -545,3 +624,324 @@ def save(
     )
     db.commit()
     return _view(db, application, form, fields)
+
+
+def _open_cycle(db: Session, org: UUID, cycle_id: UUID, lock: bool = False) -> ApplicationCycle:
+    query = select(ApplicationCycle).where(
+        ApplicationCycle.id == cycle_id,
+        ApplicationCycle.organization_id == org,
+    )
+    cycle = db.scalar(query.with_for_update() if lock else query)
+    current = now()
+    if not cycle or cycle.state != "open" or cycle.opens_at > current or cycle.closes_at <= current:
+        raise AuthError("application_cycle_unavailable", 404)
+    return cycle
+
+
+def available_cycles(db: Session, org: UUID) -> CycleOpportunityList:
+    current = now()
+    rows = list(
+        db.scalars(
+            select(ApplicationCycle)
+            .where(
+                ApplicationCycle.organization_id == org,
+                ApplicationCycle.state == "open",
+                ApplicationCycle.opens_at <= current,
+                ApplicationCycle.closes_at > current,
+            )
+            .order_by(ApplicationCycle.closes_at, ApplicationCycle.id)
+            .limit(100)
+        )
+    )
+    return CycleOpportunityList(
+        items=[
+            CycleOpportunityView(
+                id=item.id,
+                code=item.code,
+                name_en=item.name_en,
+                name_ta=item.name_ta,
+                form_id=item.form_id,
+                opens_at=item.opens_at,
+                closes_at=item.closes_at,
+            )
+            for item in rows
+        ]
+    )
+
+
+def _create_cycle_draft(
+    db: Session,
+    org: UUID,
+    cycle: ApplicationCycle,
+    actor: User,
+    request_id: str,
+) -> DraftView:
+    existing = db.scalar(
+        select(Application).where(
+            Application.person_id == actor.person_id,
+            Application.cycle_id == cycle.id,
+        )
+    )
+    if existing:
+        form = db.get(ApplicationForm, existing.form_id)
+        if not form:
+            raise AuthError("application_integrity_error", 503)
+        if existing.state == "submitted":
+            raise AuthError("application_already_submitted", 409)
+        return _view(db, existing, form, _fields(db, form.id))
+    form = db.get(ApplicationForm, cycle.form_id)
+    if not form or form.organization_id != org or form.state not in {"published", "retired"}:
+        raise AuthError("application_configuration_invalid", 503)
+    fields = _fields(db, form.id)
+    application = Application(
+        organization_id=org,
+        person_id=actor.person_id,
+        form_id=form.id,
+        cycle_id=cycle.id,
+    )
+    db.add(application)
+    try:
+        db.flush()
+        revision = ApplicationRevision(
+            application_id=application.id,
+            form_id=form.id,
+            revision=1,
+        )
+        db.add(revision)
+        db.flush()
+        application.current_revision_id = revision.id
+        db.add(
+            ApplicationStatusHistory(
+                application_id=application.id,
+                actor_user_id=actor.id,
+                from_state=None,
+                to_state="draft",
+                application_version=1,
+                reason_code="applicant_started",
+            )
+        )
+        db.add(
+            AuditLog(
+                actor_id=actor.id,
+                organization_id=org,
+                resource_id=application.id,
+                action="application.draft_created",
+                request_id=request_id,
+                resource_version=1,
+                changed_fields="state,cycle_id,form_id",
+            )
+        )
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("version_conflict", 409) from exc
+    return _view(db, application, form, fields)
+
+
+def create_cycle_draft(
+    db: Session,
+    org: UUID,
+    cycle_id: UUID,
+    actor: User,
+    request_id: str,
+) -> DraftView:
+    return _create_cycle_draft(db, org, _open_cycle(db, org, cycle_id), actor, request_id)
+
+
+def _submitted_view(
+    db: Session,
+    application: Application,
+    form: ApplicationForm,
+) -> SubmittedView:
+    revision = db.get(ApplicationRevision, application.current_revision_id)
+    if (
+        not revision
+        or not application.cycle_id
+        or not application.application_number
+        or not application.submitted_at
+    ):
+        raise AuthError("application_integrity_error", 503)
+    answers = list(
+        db.scalars(
+            select(ApplicationAnswer)
+            .where(ApplicationAnswer.revision_id == revision.id)
+            .order_by(ApplicationAnswer.field_id)
+            .limit(101)
+        )
+    )
+    accepted = list(
+        db.scalars(
+            select(ApplicationAcknowledgement)
+            .where(ApplicationAcknowledgement.application_id == application.id)
+            .order_by(ApplicationAcknowledgement.accepted_at, ApplicationAcknowledgement.id)
+            .limit(21)
+        )
+    )
+    history = list(
+        db.scalars(
+            select(ApplicationStatusHistory)
+            .where(ApplicationStatusHistory.application_id == application.id)
+            .order_by(ApplicationStatusHistory.application_version)
+            .limit(25)
+        )
+    )
+    return SubmittedView(
+        id=application.id,
+        cycle_id=application.cycle_id,
+        form=form_view(db, form, _fields(db, form.id)),
+        state="submitted",
+        version=application.version,
+        revision=revision.revision,
+        completion_percent=100,
+        application_number=application.application_number,
+        submitted_at=application.submitted_at,
+        answers=[AnswerView(field_id=item.field_id, value=item.value) for item in answers],
+        accepted_acknowledgements=[
+            AcceptedAcknowledgementView(
+                definition_id=item.definition_id,
+                accepted_at=item.accepted_at,
+            )
+            for item in accepted
+        ],
+        status_history=[
+            StatusHistoryView(
+                from_state=item.from_state,
+                to_state=item.to_state,
+                application_version=item.application_version,
+                reason_code=item.reason_code,
+                created_at=item.created_at,
+            )
+            for item in history
+        ],
+        updated_at=application.updated_at,
+    )
+
+
+def cycle_application(
+    db: Session,
+    org: UUID,
+    cycle_id: UUID,
+    actor: User,
+) -> DraftView | SubmittedView:
+    application = db.scalar(
+        select(Application).where(
+            Application.organization_id == org,
+            Application.cycle_id == cycle_id,
+            Application.person_id == actor.person_id,
+        )
+    )
+    if not application:
+        raise AuthError("not_found", 404)
+    form = db.get(ApplicationForm, application.form_id)
+    if not form:
+        raise AuthError("application_integrity_error", 503)
+    if application.state == "submitted":
+        return _submitted_view(db, application, form)
+    return _view(db, application, form, _fields(db, form.id))
+
+
+def submit(
+    db: Session,
+    org: UUID,
+    application_id: UUID,
+    actor: User,
+    data: SubmitCommand,
+    request_id: str,
+) -> SubmittedView:
+    application = db.scalar(
+        select(Application)
+        .where(
+            Application.id == application_id,
+            Application.organization_id == org,
+            Application.person_id == actor.person_id,
+        )
+        .with_for_update()
+    )
+    if not application:
+        raise AuthError("not_found", 404)
+    form = db.get(ApplicationForm, application.form_id)
+    if not form:
+        raise AuthError("application_integrity_error", 503)
+    if application.state == "submitted":
+        if data.expected_version in {application.version, application.version - 1}:
+            return _submitted_view(db, application, form)
+        raise AuthError("version_conflict", 409)
+    if application.version != data.expected_version:
+        raise AuthError("version_conflict", 409)
+    if not application.cycle_id:
+        raise AuthError("application_cycle_required", 422)
+    cycle = _open_cycle(db, org, application.cycle_id, lock=True)
+    if cycle.form_id != application.form_id:
+        raise AuthError("application_configuration_invalid", 503)
+    revision = db.get(ApplicationRevision, application.current_revision_id)
+    if not revision:
+        raise AuthError("application_integrity_error", 503)
+    fields = _fields(db, form.id)
+    answers = list(
+        db.scalars(select(ApplicationAnswer).where(ApplicationAnswer.revision_id == revision.id))
+    )
+    values = {item.field_id: item.value.strip() for item in answers}
+    if any(item.required and not values.get(item.id) for item in fields):
+        raise AuthError("application_incomplete", 422)
+    definitions = _acknowledgements(db, form.id)
+    required_kinds = {item.kind for item in definitions if item.required}
+    if not {"declaration", "consent"}.issubset(required_kinds):
+        raise AuthError("application_configuration_invalid", 503)
+    allowed_ids = {item.id for item in definitions}
+    accepted_ids = set(data.accepted_acknowledgement_ids)
+    required_ids = {item.id for item in definitions if item.required}
+    if not accepted_ids.issubset(allowed_ids) or not required_ids.issubset(accepted_ids):
+        raise AuthError("acknowledgement_required", 422)
+    submitted_at = now()
+    sequence = db.scalar(text("SELECT nextval('application_number_seq')"))
+    if sequence is None:
+        raise AuthError("application_integrity_error", 503)
+    application_number = f"EDP-{submitted_at.year}-{int(sequence):08d}"
+    for definition_id in accepted_ids:
+        db.add(
+            ApplicationAcknowledgement(
+                application_id=application.id,
+                form_id=form.id,
+                definition_id=definition_id,
+                accepted_at=submitted_at,
+            )
+        )
+    # Acceptance evidence must exist while the application is still a draft.
+    # The database trigger freezes it in the same transaction on submission.
+    db.flush()
+    previous_state = application.state
+    application.state = "submitted"
+    application.version += 1
+    application.application_number = application_number
+    application.submitted_at = submitted_at
+    application.updated_at = submitted_at
+    db.add(
+        ApplicationStatusHistory(
+            application_id=application.id,
+            actor_user_id=actor.id,
+            from_state=previous_state,
+            to_state="submitted",
+            application_version=application.version,
+            reason_code="applicant_submitted",
+        )
+    )
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=application.id,
+            action="application.submitted",
+            request_id=request_id,
+            resource_version=application.version,
+            changed_fields=(
+                "state,cycle_id,current_revision_id,application_number,submitted_at,"
+                "acknowledgements"
+            ),
+        )
+    )
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("version_conflict", 409) from exc
+    return _submitted_view(db, application, form)

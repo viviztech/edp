@@ -8,7 +8,7 @@ An application definition belongs to one organization and has a monotonically in
 
 Creating the first policy or copying a published/retired version produces a new draft. Draft updates replace the complete ordered field set under an optimistic edit revision. Publication locks the draft, validates the revision, retires the current live definition, publishes the new version and audits the command in one transaction. Existing applicant drafts retain their original form and fields; only newly created drafts use the newest published definition.
 
-Definitions contain stable field and section keys, English/Tamil labels, a bounded answer type, required flag and position. They do not define eligibility decisions, documents, declarations, consent, submission, review, or retention policy. Those remain unavailable until their separate requirements are approved.
+Definitions contain stable field and section keys, English/Tamil labels, a bounded answer type, required flag and position. A01.4 extends the same immutable policy version with ordered bilingual declaration and consent acknowledgements. Publication requires at least one required acknowledgement of each kind. Eligibility decisions, documents, review and retention policy remain unavailable until their separate requirements are approved.
 
 ## Authorization and audit
 
