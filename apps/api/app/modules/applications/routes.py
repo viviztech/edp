@@ -3,7 +3,16 @@ from uuid import UUID
 from fastapi import APIRouter, Request
 
 from app.modules.applications import service
-from app.modules.applications.schemas import DraftSave, DraftView, FormView
+from app.modules.applications.schemas import (
+    DefinitionCommand,
+    DefinitionCreate,
+    DefinitionList,
+    DefinitionUpdate,
+    DefinitionView,
+    DraftSave,
+    DraftView,
+    FormView,
+)
 from app.modules.identity.routes import DB, Principal
 
 router = APIRouter(prefix="/api/v1/applications/organizations/{org}", tags=["applications"])
@@ -12,6 +21,74 @@ router = APIRouter(prefix="/api/v1/applications/organizations/{org}", tags=["app
 @router.get("/form", response_model=FormView)
 def form(org: UUID, db: DB, identity: Principal) -> FormView:
     return service.get_form(db, org)
+
+
+@router.get("/definitions", response_model=DefinitionList)
+def definitions(org: UUID, db: DB, identity: Principal) -> DefinitionList:
+    return service.list_definitions(db, org, identity[0])
+
+
+@router.post("/definitions", response_model=DefinitionView, status_code=201)
+def create_definition(
+    org: UUID,
+    data: DefinitionCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> DefinitionView:
+    return service.create_definition(db, org, identity[0], data, request.state.request_id)
+
+
+@router.get("/definitions/{definition_id}", response_model=DefinitionView)
+def definition(
+    org: UUID,
+    definition_id: UUID,
+    db: DB,
+    identity: Principal,
+) -> DefinitionView:
+    return service.get_definition(db, org, definition_id, identity[0])
+
+
+@router.patch("/definitions/{definition_id}", response_model=DefinitionView)
+def update_definition(
+    org: UUID,
+    definition_id: UUID,
+    data: DefinitionUpdate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> DefinitionView:
+    return service.update_definition(
+        db, org, definition_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.post("/definitions/{definition_id}/copy", response_model=DefinitionView, status_code=201)
+def copy_definition(
+    org: UUID,
+    definition_id: UUID,
+    data: DefinitionCommand,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> DefinitionView:
+    return service.copy_definition(
+        db, org, definition_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.post("/definitions/{definition_id}/publish", response_model=DefinitionView)
+def publish_definition(
+    org: UUID,
+    definition_id: UUID,
+    data: DefinitionCommand,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> DefinitionView:
+    return service.publish_definition(
+        db, org, definition_id, identity[0], data, request.state.request_id
+    )
 
 
 @router.post("/draft", response_model=DraftView, status_code=201)

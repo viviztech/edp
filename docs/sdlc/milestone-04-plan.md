@@ -17,9 +17,21 @@ Acceptance criteria:
 5. Migration upgrade/downgrade/drift, PostgreSQL ownership/version/type tests, generated contracts, backend checks, web lint/type/tests/build and local smoke pass.
 6. A local-only CLI may create clearly synthetic fields for development review. There is no submission endpoint.
 
+## A01.2 - application definition administration and policy versioning
+
+Scope: authorized staff create and edit one organization-scoped definition draft, copy an immutable published/retired version into the next policy version, inspect history and publish through a separate permission. Publication atomically retires the prior live policy. Existing applicant drafts stay pinned to their original definition.
+
+Acceptance criteria:
+
+1. Program Managers can view/create/update definitions; Program Directors and Super Admins additionally publish.
+2. Draft writes use optimistic edit revisions, stable unique field keys, bounded bilingual labels and ordered typed fields.
+3. Published/retired policy content is immutable in both the service and PostgreSQL; only the lifecycle transition to retired remains possible.
+4. Publishing is atomic, audited without policy text, and does not alter existing applicant revisions.
+5. The English/Tamil staff workspace uses a fixed BFF allowlist, CSRF/origin checks, bounded bodies, private no-store responses and permission-aware controls.
+6. Migration round-trip/drift, PostgreSQL policy tests, authenticated API tests, contracts, backend checks, frontend tests/build and local smoke pass.
+
 ## Planned follow-ups
 
-- A01.2: approved application definition administration and policy versioning.
 - A01.3: private documents after object storage, malware scanning and retention approval.
 - A01.4: declarations, consent, validation, immutable submission and application number.
 - P01 foundation: programs, centers and cohorts.

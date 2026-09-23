@@ -1,6 +1,6 @@
 # Prioritized delivery backlog
 
-Status: foundation, CMS/public, CRM, Meta, and the in-app communications foundation are implemented in local vertical slices; formal milestone gates and production prerequisites remain documented in their reports. A01.1 applicant drafts are implemented locally without submission or real-data collection. Later domain stories remain planned. Complexity S/M/L/XL indicates relative uncertainty/effort, not price or calendar commitment. All inherit DoD, authorization, audit, localization, migration and channel tests. Refine XL items before sprint commitment. Phases follow master Section 30; two-week sprints where practical.
+Status: foundation, CMS/public, CRM, Meta, and the in-app communications foundation are implemented in local vertical slices; formal milestone gates and production prerequisites remain documented in their reports. A01.1 applicant drafts and A01.2 versioned definition administration are implemented locally without submission or real-data collection. Later domain stories remain planned. Complexity S/M/L/XL indicates relative uncertainty/effort, not price or calendar commitment. All inherit DoD, authorization, audit, localization, migration and channel tests. Refine XL items before sprint commitment. Phases follow master Section 30; two-week sprints where practical.
 
 | ID | Epic / feature; user story | Acceptance criteria | Technical tasks | Dependencies | Priority / size |
 |---|---|---|---|---|---|

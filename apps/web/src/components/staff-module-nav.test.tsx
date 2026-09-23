@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { StaffModuleNav } from "./staff-module-nav";
+import { applicationAdminMessages } from "../lib/application-admin-messages";
 import { cmsMessages } from "../lib/cms-messages";
-import { metaMessages } from "../lib/meta-messages";
 import { crmMessages } from "../lib/crm-messages";
+import { metaMessages } from "../lib/meta-messages";
 
 afterEach(cleanup);
 
@@ -24,5 +25,12 @@ describe("staff module navigation", () => {
     const link = screen.getByRole("link");
     expect(link.getAttribute("href")).toBe("/ta/admin/meta?organization=org-2");
     expect(link.getAttribute("aria-current")).toBe("page");
+  });
+
+  it("links application policy only for its scoped view permission", () => {
+    render(<StaffModuleNav locale="en" organization="org-3" permissions={["application.form.view"]} variant="tiles" />);
+    const link = screen.getByText(applicationAdminMessages.en.workspace).closest("a");
+    expect(link?.getAttribute("href")).toBe("/en/admin/application-definitions?organization=org-3");
+    expect(screen.getAllByRole("link")).toHaveLength(1);
   });
 });

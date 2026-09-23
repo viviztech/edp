@@ -259,6 +259,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/applications/organizations/{org}/definitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Definitions */
+        get: operations["definitions_api_v1_applications_organizations__org__definitions_get"];
+        put?: never;
+        /** Create Definition */
+        post: operations["create_definition_api_v1_applications_organizations__org__definitions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/definitions/{definition_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Definition */
+        get: operations["definition_api_v1_applications_organizations__org__definitions__definition_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Definition */
+        patch: operations["update_definition_api_v1_applications_organizations__org__definitions__definition_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/definitions/{definition_id}/copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Copy Definition */
+        post: operations["copy_definition_api_v1_applications_organizations__org__definitions__definition_id__copy_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/definitions/{definition_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Definition */
+        post: operations["publish_definition_api_v1_applications_organizations__org__definitions__definition_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/applications/organizations/{org}/draft": {
         parameters: {
             query?: never;
@@ -1415,6 +1485,92 @@ export interface components {
             locale: "en" | "ta";
             /** Slug */
             slug: string;
+        };
+        /** DefinitionCommand */
+        DefinitionCommand: {
+            /** Expected Revision */
+            expected_revision: number;
+        };
+        /** DefinitionCreate */
+        DefinitionCreate: {
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Fields */
+            fields: components["schemas"]["DefinitionFieldInput"][];
+        };
+        /** DefinitionFieldInput */
+        DefinitionFieldInput: {
+            /** Key */
+            key: string;
+            /** Section */
+            section: string;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /**
+             * Field Type
+             * @enum {string}
+             */
+            field_type: "text" | "textarea" | "number" | "date" | "boolean";
+            /**
+             * Required
+             * @default false
+             */
+            required: boolean;
+        };
+        /** DefinitionList */
+        DefinitionList: {
+            /** Items */
+            items: components["schemas"]["DefinitionView"][];
+        };
+        /** DefinitionUpdate */
+        DefinitionUpdate: {
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Fields */
+            fields: components["schemas"]["DefinitionFieldInput"][];
+            /** Expected Revision */
+            expected_revision: number;
+        };
+        /** DefinitionView */
+        DefinitionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /** Version */
+            version: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Fields */
+            fields: components["schemas"]["FieldView"][];
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "published" | "retired";
+            /** Revision */
+            revision: number;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** DraftSave */
         DraftSave: {
@@ -3031,6 +3187,212 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FormView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    definitions_api_v1_applications_organizations__org__definitions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefinitionList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_definition_api_v1_applications_organizations__org__definitions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DefinitionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefinitionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    definition_api_v1_applications_organizations__org__definitions__definition_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                definition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefinitionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_definition_api_v1_applications_organizations__org__definitions__definition_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                definition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DefinitionUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefinitionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    copy_definition_api_v1_applications_organizations__org__definitions__definition_id__copy_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                definition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DefinitionCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefinitionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_definition_api_v1_applications_organizations__org__definitions__definition_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                definition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DefinitionCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefinitionView"];
                 };
             };
             /** @description Validation Error */

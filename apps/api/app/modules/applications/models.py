@@ -11,6 +11,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -24,15 +25,26 @@ class ApplicationForm(Record, Base):
         ForeignKey("organizations.id", ondelete="RESTRICT"), index=True
     )
     version: Mapped[int] = mapped_column(Integer)
+    revision: Mapped[int] = mapped_column(Integer, default=1)
     state: Mapped[str] = mapped_column(String(16), default="draft")
     title_en: Mapped[str] = mapped_column(String(160))
     title_ta: Mapped[str] = mapped_column(String(160))
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    published_by_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=True, index=True
+    )
     __table_args__ = (
         UniqueConstraint("organization_id", "version"),
         CheckConstraint("version > 0", name="application_form_version"),
+        CheckConstraint("revision > 0", name="application_form_revision"),
         CheckConstraint("state IN ('draft','published','retired')", name="application_form_state"),
         Index("ix_application_form_active", "organization_id", "state", "version"),
+        Index(
+            "uq_application_form_draft",
+            "organization_id",
+            unique=True,
+            postgresql_where=text("state = 'draft'"),
+        ),
     )
 
 

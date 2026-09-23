@@ -239,3 +239,5 @@ N01.2 adds ix_notification_retention(created_at,id) to notification_intents for 
 
 
 N01.3 adds nullable notification_intents.source_activity_id referencing crm_lead_activities, constrained to be present only for followup_due and absent for lead_assignment. A unique (source_activity_id,recipient_user_id) pair guards concurrent reminder creation. The due activity index supports bounded scheduling. CRM activity.reminder_queued_for_user_id is a durable last-recipient marker retained under the CRM activity lifecycle, preventing notification expiry from restarting reminders for an unchanged assignee. This marker is not message content.
+
+Migration c4f5a6b7c8d9 adds the application definition edit revision, publisher reference, one-draft-per-organization partial uniqueness and database triggers that freeze published/retired titles and fields. Publication retires the previous live version; applicant revisions retain their original form foreign key.

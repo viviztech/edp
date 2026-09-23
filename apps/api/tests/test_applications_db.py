@@ -42,7 +42,7 @@ def application_db(request):
         form = ApplicationForm(
             organization_id=org.id,
             version=1,
-            state="published",
+            state="draft",
             title_en="Development application",
             title_ta="Development application",
             published_at=now(),
@@ -72,6 +72,9 @@ def application_db(request):
             ),
         ]
         db.add_all(fields)
+        db.flush()
+        form.state = "published"
+        form.published_at = now()
         db.commit()
         yield engine, org.id, users[0].id, users[1].id, fields[0].id, fields[1].id
 

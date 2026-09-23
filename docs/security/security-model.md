@@ -17,8 +17,8 @@ Configurable seed roles, no role-name conditionals. `view`, `create`, `update`, 
 | Role | Initial permission family | Scope / exclusions |
 |---|---|---|
 | Super Admin | Explicit complete permission catalog, system.manage, audit.view | Organization; separately provisioned, MFA-ready; actions audited |
-| Program Director | report.view/export, program.view, participant.view, selection.finalize | Authorized programs; exports explicit |
-| Program Manager | program/cohort/enrollment manage, participant update, mentor assign | Assigned programs; cannot grant global roles |
+| Program Director | application.form.view/create/update/publish, report.view/export, program.view, participant.view, selection.finalize | Authorized organizations/programs; application publication and exports explicit |
+| Program Manager | application.form.view/create/update, program/cohort/enrollment manage, participant update, mentor assign | Assigned organizations/programs; cannot publish application policy or grant global roles |
 | CRM Executive | crm.lead.view/create/update, follow-up manage | Assigned leads; assign/export separate grants |
 | Marketing Executive | campaign manage, attribution reports | Campaign scope; no applicant documents |
 | Selection Committee | application.view/review, selection.score | Assigned reviews; no finalization by default |
@@ -54,3 +54,5 @@ Implementation reference: [ADR 0003](../architecture/adr/0003-foundation-session
 ## Meta provider boundary
 
 Meta configuration requires explicit meta.integration.view/manage permissions in organization scope. Marketing Executive receives that bounded family; CRM permissions and applicant data remain separate. Provider access tokens and application secrets are encrypted with a dedicated Fernet key, verification tokens are hashed, and no secret appears in response schemas, browser code, Celery arguments, audit fields, or logs. Webhook POST bodies are capped before JSON parsing, authenticated with the exact raw-body SHA-256 HMAC and constant-time comparison, then deduplicated in PostgreSQL before dispatch. The worker accepts only an inbox UUID, sends credentials in the Authorization header to the fixed https://graph.facebook.com host, maps only configured fields, classifies permanent provider rejection separately from retryable rate-limit/server/network failures, and never automatically merges an existing identity.
+
+Application definition administration separates view, create, update and publish permissions. Program Managers prepare drafts; Program Directors and Super Admins may publish. Published and retired titles/fields are protected by PostgreSQL triggers, and existing applicant drafts remain pinned to their original definition version.

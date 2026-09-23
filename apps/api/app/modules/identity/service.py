@@ -64,6 +64,9 @@ NOTIFICATION_OPERATIONS_PERMISSIONS = [
     "notification.operations.replay",
 ]
 META_PERMISSIONS = ["meta.integration." + action for action in ("view", "manage", "replay")]
+APPLICATION_PERMISSIONS = [
+    "application.form." + action for action in ("view", "create", "update", "publish")
+]
 CRM_PERMISSIONS = (
     [
         "crm.lead." + action
@@ -80,6 +83,7 @@ PERMISSIONS = [
     *CRM_PERMISSIONS,
     *META_PERMISSIONS,
     *NOTIFICATION_OPERATIONS_PERMISSIONS,
+    *APPLICATION_PERMISSIONS,
 ]
 
 
@@ -414,8 +418,18 @@ def seed_roles(db: Session) -> None:
             codes = ["system.access", *CMS_PERMISSIONS]
         elif name == "CRM Executive":
             codes = ["system.access", *CRM_PERMISSIONS]
-        elif name in {"Program Director", "Program Manager"}:
-            codes = ["system.access", *NOTIFICATION_OPERATIONS_PERMISSIONS]
+        elif name == "Program Director":
+            codes = [
+                "system.access",
+                *NOTIFICATION_OPERATIONS_PERMISSIONS,
+                *APPLICATION_PERMISSIONS,
+            ]
+        elif name == "Program Manager":
+            codes = [
+                "system.access",
+                *NOTIFICATION_OPERATIONS_PERMISSIONS,
+                *APPLICATION_PERMISSIONS[:-1],
+            ]
         elif name == "Marketing Executive":
             codes = ["system.access", *META_PERMISSIONS]
         elif name == "Participant":

@@ -35,7 +35,7 @@ def main() -> None:
         form = ApplicationForm(
             organization_id=organization.id,
             version=1,
-            state="published",
+            state="draft",
             title_en="Entrepreneurship application draft",
             title_ta="தொழில்முனைவு விண்ணப்ப வரைவு",
             published_at=now(),
@@ -76,6 +76,9 @@ def main() -> None:
                 ),
             ]
         )
+        db.flush()
+        form.state = "published"
+        form.published_at = now()
         db.commit()
         print("Synthetic local draft form created. Submission remains unavailable.")
 
