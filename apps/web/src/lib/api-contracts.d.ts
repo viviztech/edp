@@ -1550,6 +1550,363 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/programs/organizations/{org}/enrollments/convert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Convert Enrollment */
+        post: operations["convert_enrollment_api_v1_programs_organizations__org__enrollments_convert_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/programs/organizations/{org}/participants/{participant_id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Participant */
+        post: operations["transition_participant_api_v1_programs_organizations__org__participants__participant_id__state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/programs/organizations/{org}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Session */
+        post: operations["create_session_api_v1_programs_organizations__org__sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/programs/organizations/{org}/sessions/{session_id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Session */
+        post: operations["transition_session_api_v1_programs_organizations__org__sessions__session_id__state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/programs/organizations/{org}/my-timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Timeline */
+        get: operations["my_timeline_api_v1_programs_organizations__org__my_timeline_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Workspace */
+        get: operations["get_workspace_api_v1_selection_organizations__org__workspace_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/cycles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Cycle */
+        post: operations["create_cycle_api_v1_selection_organizations__org__cycles_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/cycles/{cycle_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Cycle */
+        patch: operations["update_cycle_api_v1_selection_organizations__org__cycles__cycle_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/cycles/{cycle_id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Cycle */
+        post: operations["transition_cycle_api_v1_selection_organizations__org__cycles__cycle_id__state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/rubrics/{rubric_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Rubric */
+        put: operations["update_rubric_api_v1_selection_organizations__org__rubrics__rubric_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/rubrics/{rubric_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Rubric */
+        post: operations["publish_rubric_api_v1_selection_organizations__org__rubrics__rubric_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/rubrics/{rubric_id}/copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Copy Rubric */
+        post: operations["copy_rubric_api_v1_selection_organizations__org__rubrics__rubric_id__copy_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Assignment */
+        post: operations["create_assignment_api_v1_selection_organizations__org__assignments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/conflict": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Declare Conflict */
+        post: operations["declare_conflict_api_v1_selection_organizations__org__assignments__assignment_id__conflict_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save Review */
+        put: operations["save_review_api_v1_selection_organizations__org__assignments__assignment_id__review_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Review */
+        post: operations["submit_review_api_v1_selection_organizations__org__assignments__assignment_id__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/moderation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Moderate Review */
+        post: operations["moderate_review_api_v1_selection_organizations__org__assignments__assignment_id__moderation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/interviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Interview */
+        post: operations["create_interview_api_v1_selection_organizations__org__interviews_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/interviews/{interview_id}/score": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Interview Score */
+        post: operations["submit_interview_score_api_v1_selection_organizations__org__interviews__interview_id__score_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/interviews/{interview_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Interview */
+        post: operations["complete_interview_api_v1_selection_organizations__org__interviews__interview_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/cycles/{cycle_id}/applications/{application_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Decision */
+        post: operations["record_decision_api_v1_selection_organizations__org__cycles__cycle_id__applications__application_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1716,6 +2073,36 @@ export interface components {
             /** Value */
             value: string;
         };
+        /** ApplicationAggregateView */
+        ApplicationAggregateView: {
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /** Application Number */
+            application_number: string;
+            /**
+             * Application State
+             * @enum {string}
+             */
+            application_state: "under_review" | "shortlisted" | "interview_scheduled" | "selected" | "waitlisted" | "rejected";
+            /** Application Version */
+            application_version: number;
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+            /** Completed Reviews */
+            completed_reviews: number;
+            /** Included Reviews */
+            included_reviews: number;
+            /** Excluded Reviews */
+            excluded_reviews: number;
+            /** Aggregate Score */
+            aggregate_score: string | null;
+        };
         /** AssetCreate */
         AssetCreate: {
             /** Filename */
@@ -1775,6 +2162,102 @@ export interface components {
             /** Public Url */
             public_url: string | null;
         };
+        /** AssignmentCreate */
+        AssignmentCreate: {
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /**
+             * Reviewer User Id
+             * Format: uuid
+             */
+            reviewer_user_id: string;
+        };
+        /** AssignmentView */
+        AssignmentView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+            /**
+             * Rubric Id
+             * Format: uuid
+             */
+            rubric_id: string;
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /** Application Number */
+            application_number: string;
+            /**
+             * Reviewer User Id
+             * Format: uuid
+             */
+            reviewer_user_id: string;
+            /** Reviewer Name */
+            reviewer_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "assigned" | "in_review" | "completed";
+            /**
+             * Conflict Status
+             * @enum {string}
+             */
+            conflict_status: "pending" | "clear" | "conflict";
+            /** Conflict Note */
+            conflict_note: string | null;
+            /** Scores */
+            scores: components["schemas"]["ScoreView"][];
+            /** Internal Comment */
+            internal_comment: string | null;
+            /** Weighted Score */
+            weighted_score: string | null;
+            /** Submitted At */
+            submitted_at: string | null;
+            /**
+             * Moderation Status
+             * @enum {string}
+             */
+            moderation_status: "included" | "excluded";
+            /** Moderation Reason */
+            moderation_reason: string | null;
+            /** Moderated At */
+            moderated_at: string | null;
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** AuditView */
         AuditView: {
             /**
@@ -1806,6 +2289,26 @@ export interface components {
             cohorts: components["schemas"]["CohortView"][];
             /** Cycles */
             cycles: components["schemas"]["CycleView"][];
+            /**
+             * Enrollment Candidates
+             * @default []
+             */
+            enrollment_candidates: components["schemas"]["EnrollmentCandidateView"][];
+            /**
+             * Participants
+             * @default []
+             */
+            participants: components["schemas"]["ParticipantView"][];
+            /**
+             * Enrollments
+             * @default []
+             */
+            enrollments: components["schemas"]["EnrollmentView"][];
+            /**
+             * Sessions
+             * @default []
+             */
+            sessions: components["schemas"]["app__modules__programs__schemas__SessionView"][];
         };
         /** CenterCreate */
         CenterCreate: {
@@ -1997,6 +2500,18 @@ export interface components {
              */
             reason: string;
         };
+        /** ConflictCommand */
+        ConflictCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "clear" | "conflict";
+            /** Note */
+            note?: string | null;
+        };
         /** CreatePage */
         CreatePage: {
             /** Title */
@@ -2020,6 +2535,79 @@ export interface components {
             locale: "en" | "ta";
             /** Slug */
             slug: string;
+        };
+        /** CriterionInput */
+        CriterionInput: {
+            /** Key */
+            key: string;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /** Guidance En */
+            guidance_en?: string | null;
+            /** Guidance Ta */
+            guidance_ta?: string | null;
+            /** Weight */
+            weight: number;
+            /**
+             * Minimum Score
+             * @default 0
+             */
+            minimum_score: number;
+            /** Maximum Score */
+            maximum_score: number;
+            /**
+             * Required
+             * @default true
+             */
+            required: boolean;
+        };
+        /** CriterionView */
+        CriterionView: {
+            /** Key */
+            key: string;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /** Guidance En */
+            guidance_en?: string | null;
+            /** Guidance Ta */
+            guidance_ta?: string | null;
+            /** Weight */
+            weight: number;
+            /**
+             * Minimum Score
+             * @default 0
+             */
+            minimum_score: number;
+            /** Maximum Score */
+            maximum_score: number;
+            /**
+             * Required
+             * @default true
+             */
+            required: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+        };
+        /** CycleCommand */
+        CycleCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "active" | "closed";
+            /** Reason */
+            reason: string;
         };
         /** CycleCreate */
         CycleCreate: {
@@ -2174,6 +2762,78 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** DecisionCommand */
+        DecisionCommand: {
+            /** Expected Application Version */
+            expected_application_version: number;
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "shortlisted" | "selected" | "waitlisted" | "rejected";
+            /** Reason */
+            reason: string;
+            /**
+             * Override
+             * @default false
+             */
+            override: boolean;
+        };
+        /** DecisionView */
+        DecisionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /** Application Number */
+            application_number: string;
+            /**
+             * Actor User Id
+             * Format: uuid
+             */
+            actor_user_id: string;
+            /**
+             * From State
+             * @enum {string}
+             */
+            from_state: "under_review" | "shortlisted" | "interview_scheduled" | "selected" | "waitlisted" | "rejected";
+            /**
+             * To State
+             * @enum {string}
+             */
+            to_state: "shortlisted" | "selected" | "waitlisted" | "rejected";
+            /** Reason */
+            reason: string;
+            /** Is Override */
+            is_override: boolean;
+            /** Aggregate Score Snapshot */
+            aggregate_score_snapshot: string | null;
+            /** Interview Score Snapshot */
+            interview_score_snapshot: string | null;
+            /** Application Version */
+            application_version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** DefinitionCommand */
         DefinitionCommand: {
@@ -2550,6 +3210,112 @@ export interface components {
              */
             status: "new" | "reviewed" | "closed";
         };
+        /** EnrollmentCandidateView */
+        EnrollmentCandidateView: {
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /** Application Number */
+            application_number: string;
+            /** Application Version */
+            application_version: number;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Program Id
+             * Format: uuid
+             */
+            program_id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+        };
+        /** EnrollmentConversionView */
+        EnrollmentConversionView: {
+            participant: components["schemas"]["ParticipantView"];
+            enrollment: components["schemas"]["EnrollmentView"];
+        };
+        /** EnrollmentConvert */
+        EnrollmentConvert: {
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /** Expected Application Version */
+            expected_application_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** EnrollmentView */
+        EnrollmentView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Participant Id
+             * Format: uuid
+             */
+            participant_id: string;
+            /**
+             * Program Id
+             * Format: uuid
+             */
+            program_id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "completed" | "withdrawn";
+            /**
+             * Enrolled At
+             * Format: date-time
+             */
+            enrolled_at: string;
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** EventList */
         EventList: {
             /** Items */
@@ -2832,6 +3598,108 @@ export interface components {
              */
             created_at: string;
         };
+        /** InterviewComplete */
+        InterviewComplete: {
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** InterviewCreate */
+        InterviewCreate: {
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "online" | "in_person";
+            /** Location */
+            location?: string | null;
+            /** Panel User Ids */
+            panel_user_ids: string[];
+        };
+        /** InterviewView */
+        InterviewView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /** Application Number */
+            application_number: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "online" | "in_person";
+            /** Location */
+            location: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "scheduled" | "completed";
+            /** Average Score */
+            average_score: string | null;
+            /** Completed At */
+            completed_at: string | null;
+            /** Version */
+            version: number;
+            /** Panel */
+            panel: components["schemas"]["PanelMemberView"][];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** LeadConversionCreate */
         LeadConversionCreate: {
             /**
@@ -3065,6 +3933,18 @@ export interface components {
              */
             status: string;
         };
+        /** ModerationCommand */
+        ModerationCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "included" | "excluded";
+            /** Reason */
+            reason: string;
+        };
         /** NamedCreate */
         NamedCreate: {
             /** Code */
@@ -3157,6 +4037,97 @@ export interface components {
             slug: string;
             /** Translations */
             translations: components["schemas"]["TranslationView"][];
+        };
+        /** PanelMemberView */
+        PanelMemberView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+            /** Display Name */
+            display_name: string;
+            /** Score */
+            score: string | null;
+            /** Comment */
+            comment: string | null;
+            /** Submitted At */
+            submitted_at: string | null;
+            /** Version */
+            version: number;
+        };
+        /** PanelScoreSubmit */
+        PanelScoreSubmit: {
+            /** Expected Version */
+            expected_version: number;
+            /** Score */
+            score: number | string;
+            /** Comment */
+            comment?: string | null;
+        };
+        /** ParticipantStateCommand */
+        ParticipantStateCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "active" | "suspended" | "completed" | "withdrawn";
+            /** Reason */
+            reason: string;
+        };
+        /** ParticipantTimeline */
+        ParticipantTimeline: {
+            participant: components["schemas"]["ParticipantView"];
+            /** Enrollments */
+            enrollments: components["schemas"]["EnrollmentView"][];
+            /** Sessions */
+            sessions: components["schemas"]["app__modules__programs__schemas__SessionView"][];
+            /** Events */
+            events: components["schemas"]["TimelineEvent"][];
+        };
+        /** ParticipantView */
+        ParticipantView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "suspended" | "completed" | "withdrawn";
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** PreferenceEdit */
         PreferenceEdit: {
@@ -3374,29 +4345,226 @@ export interface components {
              */
             token: string;
         };
-        /** SessionView */
-        SessionView: {
+        /** ReviewSave */
+        ReviewSave: {
+            /** Expected Version */
+            expected_version: number;
+            /** Scores */
+            scores: components["schemas"]["ScoreInput"][];
+            /** Internal Comment */
+            internal_comment?: string | null;
+        };
+        /** ReviewSubmit */
+        ReviewSubmit: {
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** ReviewerView */
+        ReviewerView: {
             /**
              * Id
              * Format: uuid
              */
             id: string;
-            /** Device Name */
-            device_name: string;
-            /** Channel */
-            channel: string;
+            /** Display Name */
+            display_name: string;
+        };
+        /** RubricCommand */
+        RubricCommand: {
+            /** Expected Edit Version */
+            expected_edit_version: number;
+        };
+        /** RubricUpdate */
+        RubricUpdate: {
+            /** Expected Edit Version */
+            expected_edit_version: number;
+            /** Criteria */
+            criteria: components["schemas"]["CriterionInput"][];
+        };
+        /** RubricView */
+        RubricView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+            /** Version Number */
+            version_number: number;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "published" | "retired";
+            /** Edit Version */
+            edit_version: number;
+            /** Published At */
+            published_at: string | null;
+            /** Criteria */
+            criteria: components["schemas"]["CriterionView"][];
             /**
              * Created At
              * Format: date-time
              */
             created_at: string;
             /**
-             * Expires At
+             * Updated At
              * Format: date-time
              */
-            expires_at: string;
-            /** Current */
-            current: boolean;
+            updated_at: string;
+        };
+        /** ScoreInput */
+        ScoreInput: {
+            /**
+             * Criterion Id
+             * Format: uuid
+             */
+            criterion_id: string;
+            /** Score */
+            score: number | string;
+        };
+        /** ScoreView */
+        ScoreView: {
+            /**
+             * Criterion Id
+             * Format: uuid
+             */
+            criterion_id: string;
+            /** Score */
+            score: string;
+        };
+        /** SelectionCycleCreate */
+        SelectionCycleCreate: {
+            /**
+             * Application Cycle Id
+             * Format: uuid
+             */
+            application_cycle_id: string;
+            /** Code */
+            code: string;
+            /** Name En */
+            name_en: string;
+            /** Name Ta */
+            name_ta: string;
+        };
+        /** SelectionCycleUpdate */
+        SelectionCycleUpdate: {
+            /** Expected Version */
+            expected_version: number;
+            /** Name En */
+            name_en: string;
+            /** Name Ta */
+            name_ta: string;
+        };
+        /** SelectionCycleView */
+        SelectionCycleView: {
+            /**
+             * Application Cycle Id
+             * Format: uuid
+             */
+            application_cycle_id: string;
+            /** Code */
+            code: string;
+            /** Name En */
+            name_en: string;
+            /** Name Ta */
+            name_ta: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "active" | "closed";
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** SelectionWorkspace */
+        SelectionWorkspace: {
+            /** Cycles */
+            cycles: components["schemas"]["SelectionCycleView"][];
+            /** Rubrics */
+            rubrics: components["schemas"]["RubricView"][];
+            /** Applications */
+            applications: components["schemas"]["SubmittedApplicationSummary"][];
+            /** Reviewers */
+            reviewers: components["schemas"]["ReviewerView"][];
+            /** Assignments */
+            assignments: components["schemas"]["AssignmentView"][];
+            /** Aggregates */
+            aggregates: components["schemas"]["ApplicationAggregateView"][];
+            /** Interviews */
+            interviews: components["schemas"]["InterviewView"][];
+            /** Decisions */
+            decisions: components["schemas"]["DecisionView"][];
+        };
+        /** SessionCreate */
+        SessionCreate: {
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "in_person" | "online" | "hybrid";
+            /** Location */
+            location?: string | null;
+        };
+        /** SessionStateCommand */
+        SessionStateCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "completed" | "cancelled";
+            /** Reason */
+            reason: string;
         };
         /** StaffView */
         StaffView: {
@@ -3440,6 +4608,26 @@ export interface components {
             /** Accepted Acknowledgement Ids */
             accepted_acknowledgement_ids: string[];
         };
+        /** SubmittedApplicationSummary */
+        SubmittedApplicationSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Application Number */
+            application_number: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "submitted" | "under_review";
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+        };
         /** SubmittedView */
         SubmittedView: {
             /**
@@ -3455,9 +4643,9 @@ export interface components {
             form: components["schemas"]["FormView"];
             /**
              * State
-             * @constant
+             * @enum {string}
              */
-            state: "submitted";
+            state: "submitted" | "under_review" | "shortlisted" | "interview_scheduled" | "selected" | "waitlisted" | "rejected" | "enrolled";
             /** Version */
             version: number;
             /** Revision */
@@ -3505,6 +4693,30 @@ export interface components {
             id: string;
             /** Name */
             name: string;
+        };
+        /** TimelineEvent */
+        TimelineEvent: {
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "application" | "selection" | "enrollment" | "session";
+            /** State */
+            state: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /**
+             * Resource Id
+             * Format: uuid
+             */
+            resource_id: string;
         };
         /** TokenInput */
         TokenInput: {
@@ -3583,6 +4795,86 @@ export interface components {
             accepted: number;
             /** Duplicates */
             duplicates: number;
+        };
+        /** SessionView */
+        app__modules__identity__schemas__SessionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Device Name */
+            device_name: string;
+            /** Channel */
+            channel: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Current */
+            current: boolean;
+        };
+        /** SessionView */
+        app__modules__programs__schemas__SessionView: {
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "in_person" | "online" | "hybrid";
+            /** Location */
+            location?: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "scheduled" | "completed" | "cancelled";
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
     };
     responses: never;
@@ -3859,7 +5151,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SessionView"][];
+                    "application/json": components["schemas"]["app__modules__identity__schemas__SessionView"][];
                 };
             };
         };
@@ -7165,6 +8457,744 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CycleView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    convert_enrollment_api_v1_programs_organizations__org__enrollments_convert_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentConvert"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrollmentConversionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_participant_api_v1_programs_organizations__org__participants__participant_id__state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                participant_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParticipantStateCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParticipantView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_session_api_v1_programs_organizations__org__sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__programs__schemas__SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_session_api_v1_programs_organizations__org__sessions__session_id__state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionStateCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__programs__schemas__SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_timeline_api_v1_programs_organizations__org__my_timeline_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParticipantTimeline"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_workspace_api_v1_selection_organizations__org__workspace_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectionWorkspace"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_cycle_api_v1_selection_organizations__org__cycles_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectionCycleCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectionCycleView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_cycle_api_v1_selection_organizations__org__cycles__cycle_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectionCycleUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectionCycleView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_cycle_api_v1_selection_organizations__org__cycles__cycle_id__state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CycleCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectionCycleView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_rubric_api_v1_selection_organizations__org__rubrics__rubric_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                rubric_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RubricUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RubricView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_rubric_api_v1_selection_organizations__org__rubrics__rubric_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                rubric_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RubricCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RubricView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    copy_rubric_api_v1_selection_organizations__org__rubrics__rubric_id__copy_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                rubric_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RubricView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_assignment_api_v1_selection_organizations__org__assignments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    declare_conflict_api_v1_selection_organizations__org__assignments__assignment_id__conflict_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConflictCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_review_api_v1_selection_organizations__org__assignments__assignment_id__review_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewSave"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_review_api_v1_selection_organizations__org__assignments__assignment_id__submit_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewSubmit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    moderate_review_api_v1_selection_organizations__org__assignments__assignment_id__moderation_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModerationCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_interview_api_v1_selection_organizations__org__interviews_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InterviewCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_interview_score_api_v1_selection_organizations__org__interviews__interview_id__score_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                interview_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PanelScoreSubmit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_interview_api_v1_selection_organizations__org__interviews__interview_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                interview_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InterviewComplete"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_decision_api_v1_selection_organizations__org__cycles__cycle_id__applications__application_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                cycle_id: string;
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionView"];
                 };
             };
             /** @description Validation Error */

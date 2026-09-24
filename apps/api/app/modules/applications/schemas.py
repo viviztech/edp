@@ -196,7 +196,16 @@ class SubmittedView(BaseModel):
     id: UUID
     cycle_id: UUID
     form: FormView
-    state: Literal["submitted"]
+    state: Literal[
+        "submitted",
+        "under_review",
+        "shortlisted",
+        "interview_scheduled",
+        "selected",
+        "waitlisted",
+        "rejected",
+        "enrolled",
+    ]
     version: int
     revision: int
     completion_percent: Literal[100]

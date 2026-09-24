@@ -10,3 +10,9 @@ CRM assignment notices: staff with crm.lead.view can open /{locale}/admin/notifi
 
 
 Follow-up reminders: an incomplete CRM call, email, meeting or task with a due time can produce an in-app reminder for the lead's current assignee after the background scheduler runs. The Notifications page has separate controls for assignment notices and follow-up reminders. Turn either off to stop its pending and future notices. Completed or reassigned follow-ups are rechecked before delivery. Use the CRM queue link to review the actual work; reminder text does not include the lead's details.
+
+Selection: configure and publish a rubric, activate the selection cycle after intake closure, assign reviewers and wait for cleared conflicts and submitted scores. Use Application score aggregates to shortlist an evidence-backed application. Schedule its interview with start/end, mode and one or more panel members. Each panel member submits their score once; after all have submitted, complete the interview. A Director or Super Admin can select, waitlist or reject, and can override a terminal result only with a recorded reason. Finalize the cycle after every assigned application has a terminal result. Scores and internal comments are never applicant-visible, and enrollment is completed later through the participant/enrollment workflow.
+
+## Enrollment and program schedule
+
+After a selection cycle is finalized, open Programs. Selected applicants with a cohort appear under enrollment candidates. Create enrollment only after confirming cohort capacity; the action creates the participant link and changes the applicant receipt to enrolled. Use Participants for reasoned suspend/reactivate/complete transitions. Create bilingual sessions within cohort dates and provide a location for in-person or hybrid delivery. Complete or cancel sessions with a reason.

@@ -244,8 +244,22 @@ Migration c4f5a6b7c8d9 adds the application definition edit revision, publisher 
 
 ## P01.1 implementation note
 
-Migration d5a6b7c8d9e0 implements Program, TrainingCenter, Cohort and ApplicationCycle. Their composite organization keys and the cycle cohort/program key enforce the planned tenant boundary in PostgreSQL. ProgramSession, Participant and Enrollment in the conceptual ERD remain pending P01.2/A02; no duplicate Person or premature enrollment table was added.
+Migration d5a6b7c8d9e0 implements Program, TrainingCenter, Cohort and ApplicationCycle. Their composite organization keys and the cycle cohort/program key enforce the planned tenant boundary in PostgreSQL. ProgramSession, Participant and Enrollment were subsequently implemented by P01.2 without duplicating Person.
 
 ## A01.4 implemented application evidence
 
 Migration `e6b7c8d9e0f1` binds Application to ApplicationCycle with a composite cycle/form/organization foreign key, changes uniqueness to `(person_id, cycle_id)`, and adds unique application number and submitted timestamp evidence. ApplicationAcknowledgementDefinition is an ordered child of the immutable form policy. ApplicationAcknowledgement references both the application/form and definition/form tuples and records `accepted_at`. ApplicationStatusHistory is unique by application/version. Database triggers reject mutation of submitted applications, their revisions/answers, acceptance rows and status history. The conceptual ApplicationVersion/ApplicationSection names above correspond to implemented ApplicationRevision/ApplicationAnswer tables. Documents remain conceptual pending A01.3.
+
+## A02.1 implemented selection foundation
+
+Migration f0a1b2c3d4e5 implements SelectionCycle, SelectionRubric, SelectionCriterion and ReviewAssignment. Composite foreign keys enforce organization scope from the application cycle through rubric and assignment, and from assignment to Application. Partial unique indexes constrain one draft and one published rubric per selection cycle; assignment uniqueness is (application_id, reviewer_user_id). PostgreSQL checks enforce lifecycle values, positive weights, bounded score ranges, criterion order and conflict-note consistency. Triggers freeze published/retired rubrics and criteria. Application and ApplicationStatusHistory now include under_review; the submitted-evidence trigger permits only the audited submitted-to-under_review state/version transition and preserves every submitted evidence field.
+## A02.2 review scoring evidence
+
+Migration `a1b2c3d4e5f6` adds ApplicationScore as one row per ReviewAssignment and pinned SelectionCriterion. Composite foreign keys require the assignment and criterion to share the same SelectionRubric. ReviewAssignment now records the internal comment, server-calculated weighted score, submission time and reasoned moderation state. Completion checks require score and timestamp evidence. PostgreSQL triggers reject changes to submitted scores, comments, reviewer, rubric, application and completion evidence; moderation fields remain independently versioned. Aggregates are derived views over included completed assignments and are not stored.
+
+## A02.3 interview and decision evidence
+
+Migration `b2c3d4e5f6a7` implements Interview, InterviewPanelMember and SelectionDecision. Interview is unique per application and scoped to the same organization as its SelectionCycle and Application. Panel membership is unique per interview/user; bounded score and submission checks keep draft and submitted states coherent. SelectionDecision is append-only and unique per application version, preserving actor, from/to state, reason, override flag and review/interview score snapshots. Application and status history now cover shortlisted, interview_scheduled, selected, waitlisted and rejected. PostgreSQL triggers preserve submitted application content while allowing only the documented state/version transitions, and reject changes to submitted panel scores, completed interviews and decision history.
+## P01.2 participant and program-delivery evidence
+
+Migration `5c48c1c3e88b` implements Participant as an organization/person projection, Enrollment as the unique application and participant/cohort membership, ProgramSession as the cohort schedule source, append-only ParticipantStatusHistory and minimal-ID DomainOutbox. Composite foreign keys bind every record to the same organization, program and cohort. Application now permits only selected-to-enrolled as the conversion transition. ProgramCalendar is derived from ProgramSession.

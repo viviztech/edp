@@ -73,6 +73,27 @@ PROGRAM_PERMISSIONS = [
     "cohort.manage",
     "application.cycle.manage",
 ]
+PROGRAM_DELIVERY_PERMISSIONS = [
+    "participant.view",
+    "participant.update",
+    "enrollment.manage",
+    "schedule.manage",
+]
+PARTICIPANT_SELF_PERMISSION = "participant.self"
+SELECTION_PERMISSIONS = [
+    "selection.cycle.view",
+    "selection.cycle.manage",
+    "selection.rubric.manage",
+    "selection.rubric.publish",
+    "selection.assignment.manage",
+    "selection.review",
+    "selection.review.moderate",
+    "selection.interview.manage",
+    "selection.interview.score",
+    "selection.decision.manage",
+    "selection.decision.override",
+    "selection.finalize",
+]
 CRM_PERMISSIONS = (
     [
         "crm.lead." + action
@@ -91,6 +112,9 @@ PERMISSIONS = [
     *NOTIFICATION_OPERATIONS_PERMISSIONS,
     *APPLICATION_PERMISSIONS,
     *PROGRAM_PERMISSIONS,
+    *PROGRAM_DELIVERY_PERMISSIONS,
+    PARTICIPANT_SELF_PERMISSION,
+    *SELECTION_PERMISSIONS,
 ]
 
 
@@ -431,6 +455,8 @@ def seed_roles(db: Session) -> None:
                 *NOTIFICATION_OPERATIONS_PERMISSIONS,
                 *APPLICATION_PERMISSIONS,
                 *PROGRAM_PERMISSIONS,
+                *PROGRAM_DELIVERY_PERMISSIONS,
+                *SELECTION_PERMISSIONS,
             ]
         elif name == "Program Manager":
             codes = [
@@ -438,13 +464,27 @@ def seed_roles(db: Session) -> None:
                 *NOTIFICATION_OPERATIONS_PERMISSIONS,
                 *APPLICATION_PERMISSIONS[:-1],
                 *PROGRAM_PERMISSIONS,
+                *PROGRAM_DELIVERY_PERMISSIONS,
+                "selection.cycle.view",
+                "selection.cycle.manage",
+                "selection.rubric.manage",
+                "selection.assignment.manage",
+                "selection.interview.manage",
+                "selection.decision.manage",
+            ]
+        elif name == "Selection Committee":
+            codes = [
+                "system.access",
+                "selection.cycle.view",
+                "selection.review",
+                "selection.interview.score",
             ]
         elif name == "Training Center Coordinator":
             codes = ["system.access", "program.view"]
         elif name == "Marketing Executive":
             codes = ["system.access", *META_PERMISSIONS]
         elif name == "Participant":
-            codes = []
+            codes = ["system.access", PARTICIPANT_SELF_PERMISSION]
         else:
             codes = ["system.access"]
         for code in codes:

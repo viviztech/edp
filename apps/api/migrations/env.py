@@ -10,6 +10,7 @@ from app.modules.identity import models as identity_models  # noqa: F401
 from app.modules.meta import models as meta_models  # noqa: F401
 from app.modules.notifications import models as notification_models  # noqa: F401
 from app.modules.programs import models as program_models  # noqa: F401
+from app.modules.selection import models as selection_models  # noqa: F401
 
 target_metadata = Base.metadata
 url = get_settings().database_url.get_secret_value()

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Bell, Building2, ClipboardList, FilePenLine, Network, UsersRound } from "lucide-react";
+import { ArrowUpRight, Bell, Building2, ClipboardList, FilePenLine, ListChecks, Network, UsersRound } from "lucide-react";
 import { applicationAdminMessages } from "../lib/application-admin-messages";
 import { authMessages } from "../lib/auth-messages";
 import { cmsMessages } from "../lib/cms-messages";
@@ -7,8 +7,9 @@ import { crmMessages } from "../lib/crm-messages";
 import { metaMessages } from "../lib/meta-messages";
 import { notificationMessages } from "../lib/notification-messages";
 import { programMessages } from "../lib/program-messages";
+import { selectionMessages } from "../lib/selection-messages";
 
-type ModuleKey = "pages" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs";
+type ModuleKey = "pages" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection";
 type Locale = "en" | "ta";
 
 const descriptions: Record<Locale, Record<ModuleKey, string>> = {
@@ -19,6 +20,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     meta: "Monitor lead forms and delivery.",
     applicationDefinitions: "Version the bilingual applicant form policy.",
     programs: "Plan programs, centers, cohorts and intake cycles.",
+    selection: "Configure rubrics and assign submitted applications.",
   },
   ta: {
     pages: "\u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0baa\u0bcd \u0baa\u0b95\u0bcd\u0b95\u0b99\u0bcd\u0b95\u0bb3\u0bc8 \u0b89\u0bb0\u0bc1\u0bb5\u0bbe\u0b95\u0bcd\u0b95\u0bbf \u0bb5\u0bc6\u0bb3\u0bbf\u0baf\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
@@ -27,6 +29,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     meta: "\u0bb5\u0bbe\u0baf\u0bcd\u0baa\u0bcd\u0baa\u0bc1 \u0baa\u0b9f\u0bbf\u0bb5\u0b99\u0bcd\u0b95\u0bb3\u0bc8\u0baf\u0bc1\u0bae\u0bcd \u0bb5\u0bb0\u0bb5\u0bc8\u0baf\u0bc1\u0bae\u0bcd \u0b95\u0ba3\u0bcd\u0b95\u0bbe\u0ba3\u0bbf\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
     applicationDefinitions: "\u0b87\u0bb0\u0bc1\u0bae\u0bca\u0bb4\u0bbf \u0bb5\u0bbf\u0ba3\u0bcd\u0ba3\u0baa\u0bcd\u0baa\u0baa\u0bcd \u0baa\u0b9f\u0bbf\u0bb5\u0b95\u0bcd \u0b95\u0bca\u0bb3\u0bcd\u0b95\u0bc8\u0baf\u0bc8\u0baa\u0bcd \u0baa\u0ba4\u0bbf\u0baa\u0bcd\u0baa\u0bc1\u0b95\u0bb3\u0bbe\u0b95 \u0bae\u0bc7\u0bb2\u0bbe\u0ba3\u0bcd\u0bae\u0bc8 \u0b9a\u0bc6\u0baf\u0bcd\u0baf\u0bb5\u0bc1\u0bae\u0bcd.",
     programs: "\u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0b99\u0bcd\u0b95\u0bb3\u0bcd, \u0bae\u0bc8\u0baf\u0b99\u0bcd\u0b95\u0bb3\u0bcd, \u0b95\u0bc1\u0bb4\u0bc1\u0b95\u0bcd\u0b95\u0bb3\u0bcd \u0bae\u0bb1\u0bcd\u0bb1\u0bc1\u0bae\u0bcd \u0bb5\u0bbf\u0ba3\u0bcd\u0ba3\u0baa\u0bcd\u0baa\u0b95\u0bcd \u0b95\u0bbe\u0bb2\u0b99\u0bcd\u0b95\u0bb3\u0bc8\u0ba4\u0bcd \u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0bae\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
+    selection: "மதிப்பீட்டுப் பட்டியலை அமைத்து விண்ணப்பங்களை ஒதுக்கவும்.",
   },
 };
 
@@ -37,6 +40,7 @@ const modules = [
   { key: "meta", route: "meta", permission: "meta.integration.view", Icon: Network },
   { key: "applicationDefinitions", route: "application-definitions", permission: "application.form.view", Icon: ClipboardList },
   { key: "programs", route: "programs", permission: "program.view", Icon: Building2 },
+  { key: "selection", route: "selection", permission: "selection.cycle.view", Icon: ListChecks },
 ] as const;
 
 export function StaffModuleNav({ locale, organization, permissions, variant = "tabs", active }: {
@@ -53,6 +57,7 @@ export function StaffModuleNav({ locale, organization, permissions, variant = "t
     meta: metaMessages[locale].workspace,
     applicationDefinitions: applicationAdminMessages[locale].workspace,
     programs: programMessages[locale].workspace,
+    selection: selectionMessages[locale].workspace,
   };
   const available = modules.filter((module) =>
     permissions.includes(module.permission)

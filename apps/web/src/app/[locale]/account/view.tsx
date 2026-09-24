@@ -6,7 +6,7 @@ import type { AuthMessages } from "../../../lib/auth-messages";
 
 type Mode = "login" | "register" | "request-verification" | "verify" | "request-reset" | "reset";
 type Profile = components["schemas"]["Profile"];
-type Session = components["schemas"]["SessionView"];
+type Session = components["schemas"]["app__modules__identity__schemas__SessionView"];
 
 export default function Account({ text, locale }: { text: AuthMessages; locale: string }) {
   const [mode, setMode] = useState<Mode>("login");

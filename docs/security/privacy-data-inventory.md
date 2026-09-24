@@ -22,3 +22,13 @@ Product owner approves field purpose, consent copy, privacy notice, processors, 
 ## A01.4 submitted application evidence
 
 Submitted answers are stored in immutable relational revisions. Declaration and consent evidence stores the immutable policy-definition ID and acceptance timestamp; the policy text remains on the pinned form version. The generated application number contains UTC year and a sequence only. Applicant-visible history excludes staff notes. Audit stores identifiers and changed-field names without answer or acknowledgement content. Submitted-answer retention, deletion exceptions and data-subject handling still require owner approval before real applicant data is collected; A01.3 document ingestion remains disabled.
+
+## Selection review evidence
+
+Criterion scores, weighted totals and internal reviewer comments are confidential staff selection records linked to an application, reviewer and published rubric. Applicant responses do not expose them. Submitted evidence is database-immutable; reasoned moderation is a separate audited record. Retention and subject-access/export treatment require the same approved selection-record policy before real-data production use.
+
+## Interview and selection decisions
+
+Panel scores/comments, interview averages, decision reasons and evidence snapshots are confidential selection records. Applicant receipts expose status only. Submitted panel evidence, completed interviews and decision history are immutable; authorized overrides add history instead of rewriting it. Retention, subject-access and bulk-communication policy remain deployment prerequisites before real applicant data is used.
+
+P01.2 Participant stores only organization, Person reference, lifecycle status and version; it does not copy name, email or contact data. Enrollment stores lifecycle identifiers and timestamps. ProgramSession contains bilingual schedule content and location/joining details, so staff must not place secrets in that field. The participant timeline excludes reviewer comments, scores, decision reasons and audit records. The enrollment outbox payload contains UUID references only.

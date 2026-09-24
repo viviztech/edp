@@ -327,7 +327,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/SessionView"
+                    "$ref": "#/components/schemas/app__modules__identity__schemas__SessionView"
                   },
                   "type": "array",
                   "title": "Response Sessions Api V1 Auth Sessions Get"
@@ -6205,6 +6205,1239 @@
         }
       }
     },
+    "/api/v1/programs/organizations/{org}/enrollments/convert": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Convert Enrollment",
+        "operationId": "convert_enrollment_api_v1_programs_organizations__org__enrollments_convert_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrollmentConvert"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentConversionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/participants/{participant_id}/state": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Transition Participant",
+        "operationId": "transition_participant_api_v1_programs_organizations__org__participants__participant_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "participant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Participant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParticipantStateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/sessions": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Create Session",
+        "operationId": "create_session_api_v1_programs_organizations__org__sessions_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__programs__schemas__SessionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/sessions/{session_id}/state": {
+      "post": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "Transition Session",
+        "operationId": "transition_session_api_v1_programs_organizations__org__sessions__session_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionStateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__programs__schemas__SessionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/programs/organizations/{org}/my-timeline": {
+      "get": {
+        "tags": [
+          "programs"
+        ],
+        "summary": "My Timeline",
+        "operationId": "my_timeline_api_v1_programs_organizations__org__my_timeline_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantTimeline"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/workspace": {
+      "get": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Get Workspace",
+        "operationId": "get_workspace_api_v1_selection_organizations__org__workspace_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectionWorkspace"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/cycles": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Create Cycle",
+        "operationId": "create_cycle_api_v1_selection_organizations__org__cycles_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectionCycleCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectionCycleView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/cycles/{cycle_id}": {
+      "patch": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Update Cycle",
+        "operationId": "update_cycle_api_v1_selection_organizations__org__cycles__cycle_id__patch",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectionCycleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectionCycleView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/cycles/{cycle_id}/state": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Transition Cycle",
+        "operationId": "transition_cycle_api_v1_selection_organizations__org__cycles__cycle_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CycleCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectionCycleView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/rubrics/{rubric_id}": {
+      "put": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Update Rubric",
+        "operationId": "update_rubric_api_v1_selection_organizations__org__rubrics__rubric_id__put",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "rubric_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Rubric Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RubricUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubricView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/rubrics/{rubric_id}/publish": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Publish Rubric",
+        "operationId": "publish_rubric_api_v1_selection_organizations__org__rubrics__rubric_id__publish_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "rubric_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Rubric Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RubricCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubricView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/rubrics/{rubric_id}/copy": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Copy Rubric",
+        "operationId": "copy_rubric_api_v1_selection_organizations__org__rubrics__rubric_id__copy_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "rubric_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Rubric Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubricView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/assignments": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Create Assignment",
+        "operationId": "create_assignment_api_v1_selection_organizations__org__assignments_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/conflict": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Declare Conflict",
+        "operationId": "declare_conflict_api_v1_selection_organizations__org__assignments__assignment_id__conflict_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assignment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConflictCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/review": {
+      "put": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Save Review",
+        "operationId": "save_review_api_v1_selection_organizations__org__assignments__assignment_id__review_put",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assignment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewSave"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/submit": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Submit Review",
+        "operationId": "submit_review_api_v1_selection_organizations__org__assignments__assignment_id__submit_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assignment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/moderation": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Moderate Review",
+        "operationId": "moderate_review_api_v1_selection_organizations__org__assignments__assignment_id__moderation_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assignment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/interviews": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Create Interview",
+        "operationId": "create_interview_api_v1_selection_organizations__org__interviews_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InterviewCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/interviews/{interview_id}/score": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Submit Interview Score",
+        "operationId": "submit_interview_score_api_v1_selection_organizations__org__interviews__interview_id__score_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "interview_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Interview Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PanelScoreSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/interviews/{interview_id}/complete": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Complete Interview",
+        "operationId": "complete_interview_api_v1_selection_organizations__org__interviews__interview_id__complete_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "interview_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Interview Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InterviewComplete"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/selection/organizations/{org}/cycles/{cycle_id}/applications/{application_id}/decision": {
+      "post": {
+        "tags": [
+          "selection"
+        ],
+        "summary": "Record Decision",
+        "operationId": "record_decision_api_v1_selection_organizations__org__cycles__cycle_id__applications__application_id__decision_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          },
+          {
+            "name": "application_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Application Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -6560,6 +7793,77 @@
         ],
         "title": "AnswerView"
       },
+      "ApplicationAggregateView": {
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "application_number": {
+            "type": "string",
+            "title": "Application Number"
+          },
+          "application_state": {
+            "type": "string",
+            "enum": [
+              "under_review",
+              "shortlisted",
+              "interview_scheduled",
+              "selected",
+              "waitlisted",
+              "rejected"
+            ],
+            "title": "Application State"
+          },
+          "application_version": {
+            "type": "integer",
+            "title": "Application Version"
+          },
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          },
+          "completed_reviews": {
+            "type": "integer",
+            "title": "Completed Reviews"
+          },
+          "included_reviews": {
+            "type": "integer",
+            "title": "Included Reviews"
+          },
+          "excluded_reviews": {
+            "type": "integer",
+            "title": "Excluded Reviews"
+          },
+          "aggregate_score": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aggregate Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "application_id",
+          "application_number",
+          "application_state",
+          "application_version",
+          "selection_cycle_id",
+          "completed_reviews",
+          "included_reviews",
+          "excluded_reviews",
+          "aggregate_score"
+        ],
+        "title": "ApplicationAggregateView"
+      },
       "AssetCreate": {
         "properties": {
           "filename": {
@@ -6716,6 +8020,216 @@
         ],
         "title": "AssetView"
       },
+      "AssignmentCreate": {
+        "properties": {
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          },
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "reviewer_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Reviewer User Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "selection_cycle_id",
+          "application_id",
+          "reviewer_user_id"
+        ],
+        "title": "AssignmentCreate"
+      },
+      "AssignmentView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          },
+          "rubric_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Rubric Id"
+          },
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "application_number": {
+            "type": "string",
+            "title": "Application Number"
+          },
+          "reviewer_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Reviewer User Id"
+          },
+          "reviewer_name": {
+            "type": "string",
+            "title": "Reviewer Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "assigned",
+              "in_review",
+              "completed"
+            ],
+            "title": "Status"
+          },
+          "conflict_status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "clear",
+              "conflict"
+            ],
+            "title": "Conflict Status"
+          },
+          "conflict_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conflict Note"
+          },
+          "scores": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreView"
+            },
+            "type": "array",
+            "title": "Scores"
+          },
+          "internal_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Comment"
+          },
+          "weighted_score": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Score"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          },
+          "moderation_status": {
+            "type": "string",
+            "enum": [
+              "included",
+              "excluded"
+            ],
+            "title": "Moderation Status"
+          },
+          "moderation_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moderation Reason"
+          },
+          "moderated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moderated At"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "selection_cycle_id",
+          "rubric_id",
+          "application_id",
+          "application_number",
+          "reviewer_user_id",
+          "reviewer_name",
+          "status",
+          "conflict_status",
+          "conflict_note",
+          "scores",
+          "internal_comment",
+          "weighted_score",
+          "submitted_at",
+          "moderation_status",
+          "moderation_reason",
+          "moderated_at",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AssignmentView"
+      },
       "AuditView": {
         "properties": {
           "id": {
@@ -6801,6 +8315,38 @@
             },
             "type": "array",
             "title": "Cycles"
+          },
+          "enrollment_candidates": {
+            "items": {
+              "$ref": "#/components/schemas/EnrollmentCandidateView"
+            },
+            "type": "array",
+            "title": "Enrollment Candidates",
+            "default": []
+          },
+          "participants": {
+            "items": {
+              "$ref": "#/components/schemas/ParticipantView"
+            },
+            "type": "array",
+            "title": "Participants",
+            "default": []
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/components/schemas/EnrollmentView"
+            },
+            "type": "array",
+            "title": "Enrollments",
+            "default": []
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/app__modules__programs__schemas__SessionView"
+            },
+            "type": "array",
+            "title": "Sessions",
+            "default": []
           }
         },
         "type": "object",
@@ -7222,6 +8768,42 @@
         ],
         "title": "Command"
       },
+      "ConflictCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "clear",
+              "conflict"
+            ],
+            "title": "Status"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "status"
+        ],
+        "title": "ConflictCommand"
+      },
       "CreatePage": {
         "properties": {
           "title": {
@@ -7273,6 +8855,210 @@
           "slug"
         ],
         "title": "CreatePage"
+      },
+      "CriterionInput": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Key"
+          },
+          "label_en": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Label En"
+          },
+          "label_ta": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Label Ta"
+          },
+          "guidance_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guidance En"
+          },
+          "guidance_ta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guidance Ta"
+          },
+          "weight": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Weight"
+          },
+          "minimum_score": {
+            "type": "integer",
+            "maximum": 99.0,
+            "minimum": 0.0,
+            "title": "Minimum Score",
+            "default": 0
+          },
+          "maximum_score": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Maximum Score"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "key",
+          "label_en",
+          "label_ta",
+          "weight",
+          "maximum_score"
+        ],
+        "title": "CriterionInput"
+      },
+      "CriterionView": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Key"
+          },
+          "label_en": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Label En"
+          },
+          "label_ta": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Label Ta"
+          },
+          "guidance_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guidance En"
+          },
+          "guidance_ta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guidance Ta"
+          },
+          "weight": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Weight"
+          },
+          "minimum_score": {
+            "type": "integer",
+            "maximum": 99.0,
+            "minimum": 0.0,
+            "title": "Minimum Score",
+            "default": 0
+          },
+          "maximum_score": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Maximum Score"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "key",
+          "label_en",
+          "label_ta",
+          "weight",
+          "maximum_score",
+          "id",
+          "position"
+        ],
+        "title": "CriterionView"
+      },
+      "CycleCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed"
+            ],
+            "title": "Target"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "target",
+          "reason"
+        ],
+        "title": "CycleCommand"
       },
       "CycleCreate": {
         "properties": {
@@ -7575,6 +9361,158 @@
           "updated_at"
         ],
         "title": "CycleView"
+      },
+      "DecisionCommand": {
+        "properties": {
+          "expected_application_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Application Version"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "shortlisted",
+              "selected",
+              "waitlisted",
+              "rejected"
+            ],
+            "title": "Target"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason"
+          },
+          "override": {
+            "type": "boolean",
+            "title": "Override",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_application_version",
+          "target",
+          "reason"
+        ],
+        "title": "DecisionCommand"
+      },
+      "DecisionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          },
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "application_number": {
+            "type": "string",
+            "title": "Application Number"
+          },
+          "actor_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Actor User Id"
+          },
+          "from_state": {
+            "type": "string",
+            "enum": [
+              "under_review",
+              "shortlisted",
+              "interview_scheduled",
+              "selected",
+              "waitlisted",
+              "rejected"
+            ],
+            "title": "From State"
+          },
+          "to_state": {
+            "type": "string",
+            "enum": [
+              "shortlisted",
+              "selected",
+              "waitlisted",
+              "rejected"
+            ],
+            "title": "To State"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "is_override": {
+            "type": "boolean",
+            "title": "Is Override"
+          },
+          "aggregate_score_snapshot": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aggregate Score Snapshot"
+          },
+          "interview_score_snapshot": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interview Score Snapshot"
+          },
+          "application_version": {
+            "type": "integer",
+            "title": "Application Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "selection_cycle_id",
+          "application_id",
+          "application_number",
+          "actor_user_id",
+          "from_state",
+          "to_state",
+          "reason",
+          "is_override",
+          "aggregate_score_snapshot",
+          "interview_score_snapshot",
+          "application_version",
+          "created_at"
+        ],
+        "title": "DecisionView"
       },
       "DefinitionCommand": {
         "properties": {
@@ -8553,6 +10491,180 @@
         ],
         "title": "EnquiryView"
       },
+      "EnrollmentCandidateView": {
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "application_number": {
+            "type": "string",
+            "title": "Application Number"
+          },
+          "application_version": {
+            "type": "integer",
+            "title": "Application Version"
+          },
+          "person_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Person Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "application_id",
+          "application_number",
+          "application_version",
+          "person_id",
+          "display_name",
+          "program_id",
+          "cohort_id",
+          "selection_cycle_id"
+        ],
+        "title": "EnrollmentCandidateView"
+      },
+      "EnrollmentConversionView": {
+        "properties": {
+          "participant": {
+            "$ref": "#/components/schemas/ParticipantView"
+          },
+          "enrollment": {
+            "$ref": "#/components/schemas/EnrollmentView"
+          }
+        },
+        "type": "object",
+        "required": [
+          "participant",
+          "enrollment"
+        ],
+        "title": "EnrollmentConversionView"
+      },
+      "EnrollmentConvert": {
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "expected_application_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Application Version"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "application_id",
+          "expected_application_version",
+          "reason"
+        ],
+        "title": "EnrollmentConvert"
+      },
+      "EnrollmentView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "participant_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Participant Id"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "completed",
+              "withdrawn"
+            ],
+            "title": "Status"
+          },
+          "enrolled_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Enrolled At"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "participant_id",
+          "program_id",
+          "cohort_id",
+          "application_id",
+          "status",
+          "enrolled_at",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "EnrollmentView"
+      },
       "EventList": {
         "properties": {
           "items": {
@@ -9283,6 +11395,216 @@
         ],
         "title": "IntegrationView"
       },
+      "InterviewComplete": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version"
+        ],
+        "title": "InterviewComplete"
+      },
+      "InterviewCreate": {
+        "properties": {
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          },
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "online",
+              "in_person"
+            ],
+            "title": "Mode"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "panel_user_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Panel User Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "selection_cycle_id",
+          "application_id",
+          "starts_at",
+          "ends_at",
+          "mode",
+          "panel_user_ids"
+        ],
+        "title": "InterviewCreate"
+      },
+      "InterviewView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          },
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "application_number": {
+            "type": "string",
+            "title": "Application Number"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "online",
+              "in_person"
+            ],
+            "title": "Mode"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "completed"
+            ],
+            "title": "Status"
+          },
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "panel": {
+            "items": {
+              "$ref": "#/components/schemas/PanelMemberView"
+            },
+            "type": "array",
+            "title": "Panel"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "selection_cycle_id",
+          "application_id",
+          "application_number",
+          "starts_at",
+          "ends_at",
+          "mode",
+          "location",
+          "status",
+          "average_score",
+          "completed_at",
+          "version",
+          "panel",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "InterviewView"
+      },
       "LeadConversionCreate": {
         "properties": {
           "person_id": {
@@ -9805,6 +12127,37 @@
         "type": "object",
         "title": "Message"
       },
+      "ModerationCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "included",
+              "excluded"
+            ],
+            "title": "Status"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "status",
+          "reason"
+        ],
+        "title": "ModerationCommand"
+      },
       "NamedCreate": {
         "properties": {
           "code": {
@@ -10046,6 +12399,244 @@
           "translations"
         ],
         "title": "PageView"
+      },
+      "PanelMemberView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "display_name",
+          "score",
+          "comment",
+          "submitted_at",
+          "version"
+        ],
+        "title": "PanelMemberView"
+      },
+      "PanelScoreSubmit": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Score"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "score"
+        ],
+        "title": "PanelScoreSubmit"
+      },
+      "ParticipantStateCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "completed",
+              "withdrawn"
+            ],
+            "title": "Target"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "target",
+          "reason"
+        ],
+        "title": "ParticipantStateCommand"
+      },
+      "ParticipantTimeline": {
+        "properties": {
+          "participant": {
+            "$ref": "#/components/schemas/ParticipantView"
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/components/schemas/EnrollmentView"
+            },
+            "type": "array",
+            "title": "Enrollments"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/app__modules__programs__schemas__SessionView"
+            },
+            "type": "array",
+            "title": "Sessions"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineEvent"
+            },
+            "type": "array",
+            "title": "Events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "participant",
+          "enrollments",
+          "sessions",
+          "events"
+        ],
+        "title": "ParticipantTimeline"
+      },
+      "ParticipantView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "person_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Person Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "completed",
+              "withdrawn"
+            ],
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "person_id",
+          "display_name",
+          "status",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ParticipantView"
       },
       "PreferenceEdit": {
         "properties": {
@@ -10549,46 +13140,553 @@
         ],
         "title": "Reset"
       },
-      "SessionView": {
+      "ReviewSave": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "scores": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreInput"
+            },
+            "type": "array",
+            "maxItems": 25,
+            "title": "Scores"
+          },
+          "internal_comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Comment"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "scores"
+        ],
+        "title": "ReviewSave"
+      },
+      "ReviewSubmit": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version"
+        ],
+        "title": "ReviewSubmit"
+      },
+      "ReviewerView": {
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
             "title": "Id"
           },
-          "device_name": {
+          "display_name": {
             "type": "string",
-            "title": "Device Name"
+            "title": "Display Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "display_name"
+        ],
+        "title": "ReviewerView"
+      },
+      "RubricCommand": {
+        "properties": {
+          "expected_edit_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Edit Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_edit_version"
+        ],
+        "title": "RubricCommand"
+      },
+      "RubricUpdate": {
+        "properties": {
+          "expected_edit_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Edit Version"
           },
-          "channel": {
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionInput"
+            },
+            "type": "array",
+            "maxItems": 25,
+            "minItems": 1,
+            "title": "Criteria"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_edit_version",
+          "criteria"
+        ],
+        "title": "RubricUpdate"
+      },
+      "RubricView": {
+        "properties": {
+          "id": {
             "type": "string",
-            "title": "Channel"
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          },
+          "version_number": {
+            "type": "integer",
+            "title": "Version Number"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "retired"
+            ],
+            "title": "State"
+          },
+          "edit_version": {
+            "type": "integer",
+            "title": "Edit Version"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionView"
+            },
+            "type": "array",
+            "title": "Criteria"
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
             "title": "Created At"
           },
-          "expires_at": {
+          "updated_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Expires At"
-          },
-          "current": {
-            "type": "boolean",
-            "title": "Current"
+            "title": "Updated At"
           }
         },
         "type": "object",
         "required": [
           "id",
-          "device_name",
-          "channel",
+          "organization_id",
+          "selection_cycle_id",
+          "version_number",
+          "state",
+          "edit_version",
+          "published_at",
+          "criteria",
           "created_at",
-          "expires_at",
-          "current"
+          "updated_at"
         ],
-        "title": "SessionView"
+        "title": "RubricView"
+      },
+      "ScoreInput": {
+        "properties": {
+          "criterion_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Criterion Id"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Score"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "criterion_id",
+          "score"
+        ],
+        "title": "ScoreInput"
+      },
+      "ScoreView": {
+        "properties": {
+          "criterion_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Criterion Id"
+          },
+          "score": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)",
+            "title": "Score"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "criterion_id",
+          "score"
+        ],
+        "title": "ScoreView"
+      },
+      "SelectionCycleCreate": {
+        "properties": {
+          "application_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Cycle Id"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "application_cycle_id",
+          "code",
+          "name_en",
+          "name_ta"
+        ],
+        "title": "SelectionCycleCreate"
+      },
+      "SelectionCycleUpdate": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "name_en",
+          "name_ta"
+        ],
+        "title": "SelectionCycleUpdate"
+      },
+      "SelectionCycleView": {
+        "properties": {
+          "application_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Cycle Id"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "closed"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "application_cycle_id",
+          "code",
+          "name_en",
+          "name_ta",
+          "id",
+          "organization_id",
+          "state",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SelectionCycleView"
+      },
+      "SelectionWorkspace": {
+        "properties": {
+          "cycles": {
+            "items": {
+              "$ref": "#/components/schemas/SelectionCycleView"
+            },
+            "type": "array",
+            "title": "Cycles"
+          },
+          "rubrics": {
+            "items": {
+              "$ref": "#/components/schemas/RubricView"
+            },
+            "type": "array",
+            "title": "Rubrics"
+          },
+          "applications": {
+            "items": {
+              "$ref": "#/components/schemas/SubmittedApplicationSummary"
+            },
+            "type": "array",
+            "title": "Applications"
+          },
+          "reviewers": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewerView"
+            },
+            "type": "array",
+            "title": "Reviewers"
+          },
+          "assignments": {
+            "items": {
+              "$ref": "#/components/schemas/AssignmentView"
+            },
+            "type": "array",
+            "title": "Assignments"
+          },
+          "aggregates": {
+            "items": {
+              "$ref": "#/components/schemas/ApplicationAggregateView"
+            },
+            "type": "array",
+            "title": "Aggregates"
+          },
+          "interviews": {
+            "items": {
+              "$ref": "#/components/schemas/InterviewView"
+            },
+            "type": "array",
+            "title": "Interviews"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionView"
+            },
+            "type": "array",
+            "title": "Decisions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cycles",
+          "rubrics",
+          "applications",
+          "reviewers",
+          "assignments",
+          "aggregates",
+          "interviews",
+          "decisions"
+        ],
+        "title": "SelectionWorkspace"
+      },
+      "SessionCreate": {
+        "properties": {
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "in_person",
+              "online",
+              "hybrid"
+            ],
+            "title": "Mode"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cohort_id",
+          "title_en",
+          "title_ta",
+          "starts_at",
+          "ends_at",
+          "mode"
+        ],
+        "title": "SessionCreate"
+      },
+      "SessionStateCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "cancelled"
+            ],
+            "title": "Target"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "target",
+          "reason"
+        ],
+        "title": "SessionStateCommand"
       },
       "StaffView": {
         "properties": {
@@ -10703,6 +13801,40 @@
         ],
         "title": "SubmitCommand"
       },
+      "SubmittedApplicationSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "application_number": {
+            "type": "string",
+            "title": "Application Number"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "submitted",
+              "under_review"
+            ],
+            "title": "State"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Submitted At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "application_number",
+          "state",
+          "submitted_at"
+        ],
+        "title": "SubmittedApplicationSummary"
+      },
       "SubmittedView": {
         "properties": {
           "id": {
@@ -10720,7 +13852,16 @@
           },
           "state": {
             "type": "string",
-            "const": "submitted",
+            "enum": [
+              "submitted",
+              "under_review",
+              "shortlisted",
+              "interview_scheduled",
+              "selected",
+              "waitlisted",
+              "rejected",
+              "enrolled"
+            ],
             "title": "State"
           },
           "version": {
@@ -10840,6 +13981,52 @@
           "name"
         ],
         "title": "TagView"
+      },
+      "TimelineEvent": {
+        "properties": {
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "application",
+              "selection",
+              "enrollment",
+              "session"
+            ],
+            "title": "Kind"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Resource Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "occurred_at",
+          "kind",
+          "state",
+          "title_en",
+          "title_ta",
+          "resource_id"
+        ],
+        "title": "TimelineEvent"
       },
       "TokenInput": {
         "properties": {
@@ -11022,6 +14209,149 @@
           "duplicates"
         ],
         "title": "WebhookAccepted"
+      },
+      "app__modules__identity__schemas__SessionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "device_name": {
+            "type": "string",
+            "title": "Device Name"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "current": {
+            "type": "boolean",
+            "title": "Current"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "device_name",
+          "channel",
+          "created_at",
+          "expires_at",
+          "current"
+        ],
+        "title": "SessionView"
+      },
+      "app__modules__programs__schemas__SessionView": {
+        "properties": {
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "in_person",
+              "online",
+              "hybrid"
+            ],
+            "title": "Mode"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cohort_id",
+          "title_en",
+          "title_ta",
+          "starts_at",
+          "ends_at",
+          "mode",
+          "id",
+          "organization_id",
+          "status",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SessionView"
       }
     }
   }

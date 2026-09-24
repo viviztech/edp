@@ -9,11 +9,13 @@ type Program = components["schemas"]["ProgramView"];
 type Center = components["schemas"]["CenterView"];
 type Cohort = components["schemas"]["CohortView"];
 type Cycle = components["schemas"]["CycleView"];
+type Participant = components["schemas"]["ParticipantView"];
+type Session = components["schemas"]["app__modules__programs__schemas__SessionView"];
 type Definition = components["schemas"]["DefinitionView"];
 type Locale = "en" | "ta";
-type Resource = "programs" | "centers" | "cohorts" | "cycles";
+type Resource = "programs" | "centers" | "cohorts" | "cycles" | "sessions";
 
-const empty: Catalog = { programs: [], centers: [], cohorts: [], cycles: [] };
+const empty: Catalog = { programs: [], centers: [], cohorts: [], cycles: [], enrollment_candidates: [], participants: [], enrollments: [], sessions: [] };
 
 export default function ProgramWorkspace({ org, locale, permissions }: { org: string; locale: Locale; permissions: string[] }) {
   const text = programMessages[locale];
@@ -25,6 +27,9 @@ export default function ProgramWorkspace({ org, locale, permissions }: { org: st
   const canProgram = permissions.includes("program.manage");
   const canCohort = permissions.includes("cohort.manage");
   const canCycle = permissions.includes("application.cycle.manage");
+  const canEnroll = permissions.includes("enrollment.manage");
+  const canParticipant = permissions.includes("participant.update");
+  const canSchedule = permissions.includes("schedule.manage");
 
   const request = useCallback(async <T,>(path: string, method = "GET", data?: unknown): Promise<T> => {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -82,6 +87,24 @@ export default function ProgramWorkspace({ org, locale, permissions }: { org: st
     void run(() => request(`${root}/${resource}/${item.id}/state`, "POST", { expected_version: item.version, target, reason: reason.trim() }));
   }
 
+  function convert(applicationId: string, version: number) {
+    const reason = window.prompt(text.reason);
+    if (!reason || reason.trim().length < 3) return;
+    void run(() => request(`${root}/enrollments/convert`, "POST", { application_id: applicationId, expected_application_version: version, reason: reason.trim() }));
+  }
+
+  function participantState(item: Participant, target: string) {
+    const reason = window.prompt(text.reason);
+    if (!reason || reason.trim().length < 3) return;
+    void run(() => request(`${root}/participants/${item.id}/state`, "POST", { expected_version: item.version, target, reason: reason.trim() }));
+  }
+
+  function sessionState(item: Session, target: string) {
+    const reason = window.prompt(text.reason);
+    if (!reason || reason.trim().length < 3) return;
+    void run(() => request(`${root}/sessions/${item.id}/state`, "POST", { expected_version: item.version, target, reason: reason.trim() }));
+  }
+
   const name = (item: { name_en: string; name_ta: string }) => locale === "ta" ? item.name_ta : item.name_en;
   const field = (label: string, key: string, type = "text", required = true) => <label>{label}<input name={key} type={type} required={required} /></label>;
 
@@ -103,6 +126,16 @@ export default function ProgramWorkspace({ org, locale, permissions }: { org: st
       <section className="program-panel program-wide"><h2>{text.cycles}</h2>
         {canCycle && <form className="program-form program-form-wide" onSubmit={(event) => create("cycles", event, (data) => ({ ...data, cohort_id: data.cohort_id || null, opens_at: new Date(String(data.opens_at)).toISOString(), closes_at: new Date(String(data.closes_at)).toISOString() }))}>{field(text.code, "code")}{field(text.englishName, "name_en")}{field(text.tamilName, "name_ta")}<Select label={text.program} name="program_id" options={catalog.programs.filter((item) => item.state === "active").map((item) => [item.id, name(item)])} choose={text.choose} /><Select label={text.cohort} name="cohort_id" options={catalog.cohorts.filter((item) => ["planned", "active"].includes(item.state)).map((item) => [item.id, name(item)])} choose={text.choose} required={false} /><Select label={text.form} name="form_id" options={forms.map((item) => [item.id, `${item.title_en} v${item.version}`])} choose={text.choose} />{field(text.opens, "opens_at", "datetime-local")}{field(text.closes, "closes_at", "datetime-local")}<button disabled={busy}>{text.create}</button></form>}
         <ul className="program-list">{catalog.cycles.map((item) => <li key={item.id}><Record name={name(item)} code={item.code} state={item.state} version={item.version} label={text.version} /><small>{new Date(item.opens_at).toLocaleString(locale)} – {new Date(item.closes_at).toLocaleString(locale)}</small>{canCycle && <div className="program-actions">{item.state === "draft" && <button onClick={() => transition("cycles", item, "open")}>{text.open}</button>}{item.state === "open" && <button onClick={() => transition("cycles", item, "closed")}>{text.close}</button>}{["draft", "open"].includes(item.state) && <button onClick={() => transition("cycles", item, "cancelled")}>{text.cancel}</button>}</div>}</li>)}</ul>{!catalog.cycles.length && <p>{text.empty}</p>}
+      </section>
+      <section className="program-panel program-wide"><h2>{text.enrollmentCandidates}</h2>
+        <ul className="program-list">{catalog.enrollment_candidates.map((item) => <li key={item.application_id}><Record name={item.display_name} code={item.application_number} state="selected" version={item.application_version} label={text.version} />{canEnroll && <div className="program-actions"><button disabled={busy} onClick={() => convert(item.application_id, item.application_version)}>{text.convert}</button></div>}</li>)}</ul>{!catalog.enrollment_candidates.length && <p>{text.empty}</p>}
+      </section>
+      <section className="program-panel program-wide"><h2>{text.participants}</h2>
+        <ul className="program-list">{catalog.participants.map((item) => <li key={item.id}><Record name={item.display_name} code={item.person_id} state={item.status} version={item.version} label={text.version} />{canParticipant && <div className="program-actions">{item.status === "active" && <><button onClick={() => participantState(item, "suspended")}>{text.suspend}</button><button onClick={() => participantState(item, "completed")}>{text.complete}</button></>}{item.status === "suspended" && <button onClick={() => participantState(item, "active")}>{text.activate}</button>}</div>}</li>)}</ul>{!catalog.participants.length && <p>{text.empty}</p>}
+      </section>
+      <section className="program-panel program-wide"><h2>{text.sessions}</h2>
+        {canSchedule && <form className="program-form program-form-wide" onSubmit={(event) => create("sessions", event, (data) => ({ ...data, starts_at: new Date(String(data.starts_at)).toISOString(), ends_at: new Date(String(data.ends_at)).toISOString(), location: data.location || null }))}><Select label={text.cohort} name="cohort_id" options={catalog.cohorts.filter((item) => ["planned", "active"].includes(item.state)).map((item) => [item.id, name(item)])} choose={text.choose} />{field(text.englishName, "title_en")}{field(text.tamilName, "title_ta")}{field(text.starts, "starts_at", "datetime-local")}{field(text.ends, "ends_at", "datetime-local")}<label>{text.mode}<select name="mode"><option value="in_person">{text.inPerson}</option><option value="online">{text.online}</option><option value="hybrid">{text.hybrid}</option></select></label>{field(text.location, "location", "text", false)}<button disabled={busy}>{text.schedule}</button></form>}
+        <ul className="program-list">{catalog.sessions.map((item) => <li key={item.id}><Record name={locale === "ta" ? item.title_ta : item.title_en} code={new Date(item.starts_at).toLocaleString(locale)} state={item.status} version={item.version} label={text.version} /><small>{item.mode}{item.location ? ` ? ${item.location}` : ""}</small>{canSchedule && item.status === "scheduled" && <div className="program-actions"><button onClick={() => sessionState(item, "completed")}>{text.complete}</button><button onClick={() => sessionState(item, "cancelled")}>{text.cancel}</button></div>}</li>)}</ul>{!catalog.sessions.length && <p>{text.empty}</p>}
       </section>
     </div>
   </div>;

@@ -7,7 +7,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
-from app.modules.applications.models import ApplicationForm
+from app.modules.applications.models import Application, ApplicationForm
 from app.modules.identity.models import (
     AuthDelivery,
     Organization,
@@ -18,7 +18,25 @@ from app.modules.identity.models import (
 )
 from app.modules.identity.service import audit, seed_roles
 from app.modules.programs import service as program_service
-from app.modules.programs.schemas import CycleCreate, NamedCreate, StateCommand
+from app.modules.programs.models import (
+    DomainOutbox,
+    Enrollment,
+    Participant,
+    ProgramSession,
+)
+from app.modules.programs.schemas import (
+    CenterCreate,
+    CohortCreate,
+    CycleCreate,
+    NamedCreate,
+    StateCommand,
+)
+from app.modules.selection.models import (
+    Interview,
+    ReviewAssignment,
+    SelectionCycle,
+    SelectionDecision,
+)
 from cryptography.fernet import Fernet
 from playwright.sync_api import expect, sync_playwright
 from sqlalchemy import create_engine, select
@@ -283,6 +301,46 @@ with sync_playwright() as playwright:
             ),
             "e2e-program-activate",
         )
+        center = program_service.create_center(
+            db,
+            organization_id,
+            actor,
+            CenterCreate(
+                code="e2e-center",
+                name_en="E2E center",
+                name_ta="Synthetic Tamil center",
+                locality="Chennai",
+            ),
+            "e2e-center-create",
+        )
+        cohort = program_service.create_cohort(
+            db,
+            organization_id,
+            actor,
+            CohortCreate(
+                code="e2e-cohort",
+                name_en="E2E cohort",
+                name_ta="Synthetic Tamil cohort",
+                program_id=program.id,
+                center_id=center.id,
+                starts_on=datetime.now(UTC).date() - timedelta(days=7),
+                ends_on=datetime.now(UTC).date() + timedelta(days=90),
+                capacity=20,
+            ),
+            "e2e-cohort-create",
+        )
+        cohort = program_service.transition_cohort(
+            db,
+            organization_id,
+            cohort.id,
+            actor,
+            StateCommand(
+                expected_version=cohort.version,
+                target="active",
+                reason="E2E cohort activation",
+            ),
+            "e2e-cohort-activate",
+        )
         cycle = program_service.create_cycle(
             db,
             organization_id,
@@ -292,6 +350,7 @@ with sync_playwright() as playwright:
                 name_en="E2E application cycle",
                 name_ta="Synthetic Tamil cycle",
                 program_id=program.id,
+                cohort_id=cohort.id,
                 form_id=form.id,
                 opens_at=datetime.now(UTC) - timedelta(hours=1),
                 closes_at=datetime.now(UTC) + timedelta(days=1),
@@ -332,6 +391,208 @@ with sync_playwright() as playwright:
     page.screenshot(
         path=str(evidence / "application-submitted-mobile.png"), full_page=True
     )
+    page.set_viewport_size({"width": 1280, "height": 900})
+    with Session(engine) as db:
+        actor = db.scalar(select(User).where(User.email == email))
+        assert actor
+        program_service.transition_cycle(
+            db,
+            organization_id,
+            cycle.id,
+            actor,
+            StateCommand(
+                expected_version=2,
+                target="closed",
+                reason="E2E intake completed",
+            ),
+            "e2e-cycle-close",
+        )
+    page.goto(base + "/en/admin/selection?organization=" + str(organization_id))
+    expect(page.get_by_role("heading", name="Selection administration")).to_be_visible()
+    page.get_by_label("Code", exact=True).fill("e2e-selection")
+    page.get_by_label("English name", exact=True).fill("E2E selection")
+    page.get_by_label("Tamil name", exact=True).fill("Synthetic Tamil selection")
+    page.locator('select[name="application_cycle_id"]').select_option(
+        label="E2E application cycle"
+    )
+    page.get_by_role("button", name="Create cycle", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.get_by_label("Criterion key", exact=True).fill("business_idea")
+    page.get_by_label("English label", exact=True).fill("Business idea")
+    page.get_by_label("Tamil label", exact=True).fill("Synthetic Tamil business idea")
+    page.get_by_role("button", name="Save rubric", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.get_by_role("button", name="Publish rubric", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.once("dialog", lambda dialog: dialog.accept("E2E review approved"))
+    page.get_by_role("button", name="Activate review", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    assign_button = page.get_by_role("button", name="Assign reviewer", exact=True)
+    assignment_form = page.locator("form").filter(has=assign_button)
+    assignment_form.locator('select[name="selection_cycle_id"]').select_option(
+        label="E2E selection"
+    )
+    application_number = (
+        assignment_form.locator('select[name="application_id"]')
+        .locator("option:not([value=''])")
+        .first.text_content()
+    )
+    assert application_number and application_number.startswith("EDP-")
+    assignment_form.locator('select[name="application_id"]').select_option(
+        label=application_number
+    )
+    assignment_form.locator('select[name="reviewer_user_id"]').select_option(
+        label="Synthetic E2E"
+    )
+    assign_button.click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(
+        page.get_by_text("Conflict declaration required", exact=False)
+    ).to_be_visible()
+    page.get_by_role("button", name="No conflict", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("No conflict declared.", exact=True)).to_be_visible()
+    review_editor = page.locator(".selection-review-editor")
+    review_editor.locator('input[type="number"]').fill("4")
+    review_editor.get_by_label("Internal reviewer comment", exact=True).fill(
+        "Synthetic browser review evidence"
+    )
+    review_editor.get_by_role("button", name="Save review draft", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.locator(".selection-review-editor").get_by_role(
+        "button", name="Submit review", exact=True
+    ).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Weighted score: 80.00", exact=True).first).to_be_visible()
+    page.once("dialog", lambda dialog: dialog.accept("Synthetic calibration exclusion"))
+    page.get_by_role("button", name="Exclude from aggregate", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("1 reviews excluded", exact=True)).to_be_visible()
+    page.once("dialog", lambda dialog: dialog.accept("Synthetic calibration restored"))
+    page.get_by_role("button", name="Restore to aggregate", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Aggregate score: 80.00", exact=True)).to_be_visible()
+    page.once("dialog", lambda dialog: dialog.accept("Synthetic shortlist evidence"))
+    page.get_by_role("button", name="Shortlist", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    interview_form = page.locator(".selection-interview-form")
+    interview_form.locator('select[name="application_id"]').select_option(
+        label=application_number
+    )
+    interview_form.locator('select[name="selection_cycle_id"]').select_option(
+        label="E2E selection"
+    )
+    interview_form.locator('input[name="starts_at"]').fill("2027-01-15T10:00")
+    interview_form.locator('input[name="ends_at"]').fill("2027-01-15T11:00")
+    interview_form.locator('select[name="panel_user_ids"]').select_option(
+        label="Synthetic E2E"
+    )
+    interview_form.get_by_role("button", name="Schedule interview", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    score_button = page.get_by_role("button", name="Submit interview score", exact=True)
+    score_form = page.locator("form").filter(has=score_button)
+    score_form.locator('input[name="score"]').fill("84")
+    score_form.locator('textarea[name="comment"]').fill("Synthetic panel evidence")
+    score_button.click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.get_by_role("button", name="Complete interview", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Interview score: 84.00", exact=True).first).to_be_visible()
+    page.once("dialog", lambda dialog: dialog.accept("Synthetic final selection"))
+    page.get_by_role("button", name="Select", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.once("dialog", lambda dialog: dialog.accept("Synthetic capacity override"))
+    page.get_by_role("button", name="Override to waitlist", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.once("dialog", lambda dialog: dialog.accept("Synthetic capacity restored"))
+    page.get_by_role("button", name="Override to selected", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.once("dialog", lambda dialog: dialog.accept("Synthetic cycle finalized"))
+    page.get_by_role("button", name="Finalize selection", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.goto(base + "/en/admin/programs?organization=" + str(organization_id))
+    expect(
+        page.get_by_role("heading", name="Selected applicants ready for enrollment")
+    ).to_be_visible()
+    page.once("dialog", lambda dialog: dialog.accept("Synthetic enrollment approval"))
+    page.get_by_role("button", name="Create enrollment", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    schedule_button = page.get_by_role("button", name="Schedule session", exact=True)
+    schedule_form = page.locator("form").filter(has=schedule_button)
+    schedule_form.locator('select[name="cohort_id"]').select_option(label="E2E cohort")
+    schedule_form.locator('input[name="title_en"]').fill("Business foundations")
+    schedule_form.locator('input[name="title_ta"]').fill("Synthetic Tamil session")
+    session_start = datetime.now(UTC) + timedelta(days=1)
+    schedule_form.locator('input[name="starts_at"]').fill(
+        session_start.strftime("%Y-%m-%dT%H:%M")
+    )
+    schedule_form.locator('input[name="ends_at"]').fill(
+        (session_start + timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M")
+    )
+    schedule_form.locator('input[name="location"]').fill("E2E training room")
+    schedule_button.click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Business foundations", exact=True)).to_be_visible()
+    page.goto(base + "/en/participant?organization=" + str(organization_id))
+    expect(page.get_by_role("heading", name="My program schedule")).to_be_visible()
+    expect(page.get_by_text("Business foundations", exact=True).first).to_be_visible()
+    expect(page.get_by_role("heading", name="Timeline", exact=True)).to_be_visible()
+
+    with Session(engine) as db:
+        assignment = db.scalar(
+            select(ReviewAssignment).where(
+                ReviewAssignment.organization_id == organization_id
+            )
+        )
+        assert assignment and assignment.conflict_status == "clear"
+        assert assignment.status == "completed"
+        assert float(assignment.weighted_score or 0) == 80
+        assert assignment.moderation_status == "included"
+        application = db.scalar(
+            select(Application).where(Application.organization_id == organization_id)
+        )
+        interview = db.scalar(
+            select(Interview).where(Interview.organization_id == organization_id)
+        )
+        selection_cycle = db.scalar(
+            select(SelectionCycle).where(
+                SelectionCycle.organization_id == organization_id
+            )
+        )
+        decisions = list(
+            db.scalars(
+                select(SelectionDecision).where(
+                    SelectionDecision.organization_id == organization_id
+                )
+            )
+        )
+        participant = db.scalar(
+            select(Participant).where(Participant.organization_id == organization_id)
+        )
+        enrollment = db.scalar(
+            select(Enrollment).where(Enrollment.organization_id == organization_id)
+        )
+        program_session = db.scalar(
+            select(ProgramSession).where(
+                ProgramSession.organization_id == organization_id
+            )
+        )
+        outbox = db.scalar(
+            select(DomainOutbox).where(DomainOutbox.organization_id == organization_id)
+        )
+        assert application and application.state == "enrolled"
+        assert (
+            participant and enrollment and enrollment.participant_id == participant.id
+        )
+        assert program_session and program_session.title_en == "Business foundations"
+        assert outbox and outbox.event_type == "enrollment.created"
+        assert interview and interview.status == "completed"
+        assert float(interview.average_score or 0) == 84
+        assert selection_cycle and selection_cycle.state == "closed"
+        assert len(decisions) == 4 and sum(item.is_override for item in decisions) == 2
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.screenshot(path=str(evidence / "selection-mobile.png"), full_page=True)
     page.set_viewport_size({"width": 1280, "height": 900})
     page.goto(base + "/en/admin?organization=" + str(uuid4()))
     expect(
@@ -376,5 +637,5 @@ with sync_playwright() as playwright:
 engine.dispose()
 print(
     "Browser E2E passed: identity, CSRF, scoped CMS, application policy "
-    "publish/versioning, immutable application submission, audit, responsive layouts and session recovery; no JS errors"
+    "publish/versioning, immutable application submission, selection rubric/assignment/conflict/scoring/moderation/interview/decisions/finalization, enrollment/participant/session/timeline, audit, responsive layouts and session recovery; no JS errors"
 )

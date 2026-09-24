@@ -15,9 +15,17 @@ from app.modules.programs.schemas import (
     CycleCreate,
     CycleUpdate,
     CycleView,
+    EnrollmentConversionView,
+    EnrollmentConvert,
     NamedCreate,
     NamedUpdate,
+    ParticipantStateCommand,
+    ParticipantTimeline,
+    ParticipantView,
     ProgramView,
+    SessionCreate,
+    SessionStateCommand,
+    SessionView,
     StateCommand,
 )
 
@@ -111,3 +119,58 @@ def transition_cycle(
     org: UUID, item_id: UUID, data: StateCommand, request: Request, db: DB, identity: Principal
 ) -> CycleView:
     return service.transition_cycle(db, org, item_id, identity[0], data, request.state.request_id)
+
+
+@router.post("/enrollments/convert", response_model=EnrollmentConversionView, status_code=201)
+def convert_enrollment(
+    org: UUID,
+    data: EnrollmentConvert,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> EnrollmentConversionView:
+    return service.convert_enrollment(db, org, identity[0], data, request.state.request_id)
+
+
+@router.post("/participants/{participant_id}/state", response_model=ParticipantView)
+def transition_participant(
+    org: UUID,
+    participant_id: UUID,
+    data: ParticipantStateCommand,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> ParticipantView:
+    return service.transition_participant(
+        db, org, participant_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.post("/sessions", response_model=SessionView, status_code=201)
+def create_session(
+    org: UUID,
+    data: SessionCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> SessionView:
+    return service.create_session(db, org, identity[0], data, request.state.request_id)
+
+
+@router.post("/sessions/{session_id}/state", response_model=SessionView)
+def transition_session(
+    org: UUID,
+    session_id: UUID,
+    data: SessionStateCommand,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> SessionView:
+    return service.transition_session(
+        db, org, session_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.get("/my-timeline", response_model=ParticipantTimeline)
+def my_timeline(org: UUID, db: DB, identity: Principal) -> ParticipantTimeline:
+    return service.my_timeline(db, org, identity[0])

@@ -49,3 +49,15 @@ Focused tests cover exact raw-body HMAC verification and tamper rejection, encry
 ## A01.4 submission coverage
 
 PostgreSQL tests exercise owner and organization isolation, open-cycle binding, one application per person/cycle, incomplete-answer and missing-acknowledgement rejection, optimistic conflict, idempotent successful retry, stable unique application number, atomic status/audit evidence and direct answer immutability after submission. Route tests use authenticated sessions. Web gates cover the exact BFF allowlist, localized contract compilation, lint, unit tests and production build. Isolated authenticated Chrome acceptance demonstrates cycle selection, final confirmation, immutable receipt, CSRF/scope enforcement and narrow-screen layout with no JavaScript errors.
+
+## A02.2 selection scoring coverage
+
+Database-backed tests exercise rubric-bound criterion validation, score ranges, required scores, deterministic weighted totals, reviewer ownership, conflict and active-cycle gates, optimistic versions, post-submission database immutability, moderation permission, reasoned exclude/restore and aggregate counts/means. Web tests cover the fixed BFF allowlist; strict TypeScript, ESLint and a production build validate the generated contract and reviewer workspace. Authenticated browser acceptance must save scores and a comment, submit, verify the locked total, moderate, and observe the aggregate change without exposing it to a reviewer account.
+
+## A02.3 selection finalization coverage
+
+PostgreSQL tests cover evidence-backed shortlisting, unauthorized reviewer decisions, panel eligibility, interview range and membership constraints, single-submit panel scores, database immutability, incomplete-panel completion rejection, calculated average, decision snapshots, optimistic application versions, terminal overrides, append-only decisions, scoped reviewer visibility, applicant status and finalizable-cycle rules. Migration verification runs downgrade/upgrade/drift against populated data. Authenticated Chrome covers the staff workflow from review through finalized selected state, including two override transitions and persisted database assertions.
+
+## P01.2 program delivery coverage
+
+PostgreSQL acceptance continues the real A02.3 workflow through finalized selected application conversion, capacity and duplicate guards, Person reuse, participant role creation, enrolled status receipt, atomic audit/outbox evidence, session date/mode validation, self-only schedule projection, chronological lifecycle events and immutable participant history. Migration verification uses populated downgrade/re-upgrade/drift. Web gates cover the exact BFF allowlist, generated contracts, strict TypeScript, ESLint, Vitest and production build.

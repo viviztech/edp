@@ -217,3 +217,54 @@ html[lang="ta"] .editorial-list h2 { font-family: Arial, sans-serif; }
 
 /* A01.4 application cycle, consent and submission states */
 .application-message{min-height:1.5rem;color:var(--accent);font-weight:700}.application-cycles{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.75rem;margin:1.5rem 0}.application-cycles h2{grid-column:1/-1;margin:0;font:400 1.5rem Georgia,serif}.application-cycles button{display:grid;gap:.3rem;text-align:left;padding:1rem;border:1px solid var(--line);background:#fff;color:var(--ink)}.application-cycles button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 4px 0 var(--accent)}.application-cycles span,.application-cycles small{color:#526e74}.application-start,.application-receipt{margin:1.5rem 0;padding:1.25rem;border:1px solid var(--line);background:#fff}.application-receipt{border-left:5px solid #2f7d54;background:#f1faf5}.application-receipt>strong{display:block;font:400 clamp(1.4rem,4vw,2rem) Georgia,serif;color:#175b3b}.application-acknowledgements{display:grid;gap:.8rem;padding:1rem;border:1px solid var(--line)}.application-acknowledgements legend{padding:0 .4rem;font:400 1.25rem Georgia,serif}.application-acknowledgements label{display:grid;grid-template-columns:auto 1fr;align-items:start}.application-acknowledgements input{width:1.2rem;min-height:1.2rem}.application-actions{display:flex;flex-wrap:wrap;gap:.75rem}.application-form .application-submit{background:#8d4824}.application-history{margin-top:1.5rem}.application-history ol{display:grid;gap:.5rem;padding-left:1.5rem}.application-history li{padding:.75rem 1rem;background:#fff;border:1px solid var(--line)}.application-history time{display:block;color:#526e74}.definition-editor textarea{width:100%;min-height:5rem;padding:.55rem .65rem;border:1px solid var(--line);background:#fbfdfd;color:var(--ink);font:inherit;resize:vertical}.definition-editor textarea:disabled{opacity:1;background:#edf2f1;color:#425d62}
+.selection-rubrics { display: grid; gap: 1rem; }
+.selection-rubric { border: 1px solid var(--border); border-radius: .8rem; padding: 1rem; background: color-mix(in srgb, var(--card) 92%, var(--accent) 8%); }
+.selection-editor { display: grid; gap: .75rem; margin-top: .9rem; }
+.selection-criterion-editor { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .65rem; padding: .8rem; border: 1px solid var(--border); border-radius: .65rem; }
+.selection-criterion-editor label { display: grid; gap: .3rem; font-size: .78rem; font-weight: 700; }
+.selection-criterion-editor input { min-width: 0; width: 100%; }
+.selection-total { color: #9f1239; font-weight: 700; }
+.selection-total.valid { color: #166534; }
+.selection-criteria { display: grid; gap: .5rem; padding-left: 1.25rem; }
+.selection-criteria li { display: flex; justify-content: space-between; gap: 1rem; }
+.danger-button { color: #9f1239; border-color: #fecdd3; }
+@media (max-width: 760px) { .selection-criterion-editor { grid-template-columns: 1fr; } }
+.selection-review-editor,
+.selection-result {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--surface) 92%, var(--copper));
+}
+
+.selection-review-editor label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 650;
+}
+
+.selection-review-editor label > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.selection-review-editor input,
+.selection-review-editor textarea {
+  width: 100%;
+}
+
+.selection-review-editor textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.selection-result > span {
+  width: fit-content;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface-strong);
+}

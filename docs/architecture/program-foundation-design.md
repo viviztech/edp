@@ -1,12 +1,12 @@
 # Program delivery foundation design
 
-Status: P01.1 implemented. Authority: master Sections 9, 10, 19, 21, 30, 36 and 37.
+Status: P01.1 and P01.2 implemented. Authority: master Sections 9, 10, 19, 21, 30, 36 and 37.
 
 ## Domain boundary
 
 Program is the organization-owned offering. TrainingCenter is an organization-owned delivery location. Cohort binds one active Program to one active TrainingCenter with dates and optional capacity. ApplicationCycle binds an active Program, optional compatible non-terminal Cohort and one immutable published ApplicationForm to an intake window.
 
-This slice deliberately stops before ProgramSession, Participant and Enrollment. Enrollment must be created only by the future selected-application conversion transaction so it retains the existing Person and Application links, remains unique, and emits its audit/outbox evidence atomically.
+P01.2 implements ProgramSession, Participant and Enrollment. Enrollment is created only by the selected-application conversion transaction, retaining Person and Application links, unique application/cohort membership, audit and outbox evidence atomically. ProgramCalendar remains a projection of ProgramSession.
 
 ## Integrity and lifecycle
 

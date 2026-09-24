@@ -1,6 +1,6 @@
 from datetime import date
 from decimal import Decimal, InvalidOperation
-from typing import cast
+from typing import Literal, cast
 from uuid import UUID
 
 from sqlalchemy import delete, func, select, text
@@ -789,7 +789,11 @@ def _submitted_view(
         id=application.id,
         cycle_id=application.cycle_id,
         form=form_view(db, form, _fields(db, form.id)),
-        state="submitted",
+        state=cast(
+            "Literal['submitted', 'under_review', 'shortlisted', "
+            "'interview_scheduled', 'selected', 'waitlisted', 'rejected', 'enrolled']",
+            application.state,
+        ),
         version=application.version,
         revision=revision.revision,
         completion_percent=100,
@@ -835,7 +839,7 @@ def cycle_application(
     form = db.get(ApplicationForm, application.form_id)
     if not form:
         raise AuthError("application_integrity_error", 503)
-    if application.state == "submitted":
+    if application.state != "draft":
         return _submitted_view(db, application, form)
     return _view(db, application, form, _fields(db, form.id))
 
@@ -862,10 +866,8 @@ def submit(
     form = db.get(ApplicationForm, application.form_id)
     if not form:
         raise AuthError("application_integrity_error", 503)
-    if application.state == "submitted":
-        if data.expected_version in {application.version, application.version - 1}:
-            return _submitted_view(db, application, form)
-        raise AuthError("version_conflict", 409)
+    if application.state != "draft":
+        return _submitted_view(db, application, form)
     if application.version != data.expected_version:
         raise AuthError("version_conflict", 409)
     if not application.cycle_id:

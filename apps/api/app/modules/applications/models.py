@@ -110,13 +110,20 @@ class Application(Record, Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
     __table_args__ = (
         UniqueConstraint("id", "form_id"),
+        UniqueConstraint("id", "organization_id", name="uq_application_organization_scope"),
         UniqueConstraint("person_id", "cycle_id", name="uq_application_person_cycle"),
-        CheckConstraint("state IN ('draft','submitted')", name="application_state"),
+        CheckConstraint(
+            "state IN ('draft','submitted','under_review','shortlisted',"
+            "'interview_scheduled','selected','waitlisted','rejected','enrolled')",
+            name="application_state",
+        ),
         CheckConstraint("version > 0", name="application_version"),
         CheckConstraint(
             "(state = 'draft' AND application_number IS NULL AND submitted_at IS NULL) OR "
-            "(state = 'submitted' AND cycle_id IS NOT NULL AND application_number IS NOT NULL "
-            "AND submitted_at IS NOT NULL)",
+            "(state IN ('submitted','under_review','shortlisted',"
+            "'interview_scheduled','selected','waitlisted','rejected','enrolled') "
+            "AND cycle_id IS NOT NULL "
+            "AND application_number IS NOT NULL AND submitted_at IS NOT NULL)",
             name="application_submission_evidence",
         ),
         ForeignKeyConstraint(
@@ -207,9 +214,15 @@ class ApplicationStatusHistory(Record, Base):
     __table_args__ = (
         UniqueConstraint("application_id", "application_version"),
         CheckConstraint(
-            "from_state IS NULL OR from_state IN ('draft','submitted')",
+            "from_state IS NULL OR from_state IN "
+            "('draft','submitted','under_review','shortlisted',"
+            "'interview_scheduled','selected','waitlisted','rejected','enrolled')",
             name="application_history_from_state",
         ),
-        CheckConstraint("to_state IN ('draft','submitted')", name="application_history_to_state"),
+        CheckConstraint(
+            "to_state IN ('draft','submitted','under_review','shortlisted',"
+            "'interview_scheduled','selected','waitlisted','rejected','enrolled')",
+            name="application_history_to_state",
+        ),
         CheckConstraint("application_version > 0", name="application_history_version"),
     )
