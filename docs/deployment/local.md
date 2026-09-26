@@ -79,3 +79,7 @@ Apply migration `e6b7c8d9e0f1`, rerun the identity permission seed, and use the 
 ## P01.3 local coordinator bindings
 
 Apply migration 6d59d2d4f99c, rerun python -m app.modules.identity.cli seed from apps/api, and restart the API before testing coordinator access. Create the coordinator account and organization role through the trusted operator procedure, then assign a center or cohort from the Programs workspace. A coordinator with the role but no active assignment is deliberately denied. Use synthetic accounts only.
+
+## L01.1 local learning
+
+Apply migration 7e6ae3e5a10d, rerun python -m app.modules.identity.cli seed, and restart the API. Program Directors and Program Managers open /{locale}/admin/learning?organization=UUID; enrolled participants open /{locale}/learning?organization=UUID. Build at least one lesson in every module before publishing, then assign the published course to a planned or active cohort. Material provider keys must be synthetic in development. Learner material delivery remains unavailable until the private media adapter is configured.

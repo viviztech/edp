@@ -66,3 +66,9 @@ PostgreSQL acceptance continues the real A02.3 workflow through finalized select
 ## P01.3 coordinator scope coverage
 
 PostgreSQL/API tests create two centers and cohorts, prove that an unassigned coordinator is denied, create a center binding, and confirm that catalog and schedule access include only the assigned center. Negative cases cover wrong-cohort mutation, duplicate active assignment, incompatible account role and direct database scope tampering. Revocation is optimistic, audited and immediately removes access. Route coverage exercises assignment creation/revocation through authenticated HTTP. Migration verification downgrades to P01.2, upgrades to head and checks metadata drift. Web tests pin the exact BFF allowlist; strict TypeScript, ESLint, Vitest, production build and authenticated responsive browser acceptance remain the UI gates.
+
+## L01.1 evidence
+
+The PostgreSQL workflow test covers incomplete publication rejection, bilingual ordered course creation, private material metadata, publication, cohort assignment, duplicate rejection, enrollment-scoped visibility, provider-key non-disclosure, idempotent course start, unauthorized course denial, audit creation and direct database mutation rejection after publication. The full database-backed API suite passes 84 tests.
+
+Migration 7e6ae3e5a10d passes downgrade to P01.3, re-upgrade and Alembic drift checks. Focused LMS Ruff and strict MyPy pass. Generated OpenAPI and TypeScript contracts are current. Web TypeScript, ESLint, 32 Vitest tests and the Next.js production build pass. Authenticated Chrome completes staff authoring/publication/assignment and learner access/start, checks persisted evidence and mobile overflow, and reports no JavaScript errors. Repository-wide Ruff/MyPy remains red on separately recorded legacy CMS and selection findings.

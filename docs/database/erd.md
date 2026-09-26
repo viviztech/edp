@@ -268,3 +268,7 @@ Migration `5c48c1c3e88b` implements Participant as an organization/person projec
 ## P01.3 scoped staff-assignment evidence
 
 Migration 6d59d2d4f99c implements ProgramStaffAssignment as an organization/user/center binding with optional cohort scope, state, optimistic version and revoked timestamp. A composite (cohort_id, center_id, organization_id) foreign key prevents mismatched scope. Partial unique indexes permit only one active binding for a user at a center or cohort while retaining revoked history. A PostgreSQL trigger freezes user and scope identifiers and accepts only the versioned active-to-revoked transition.
+
+### L01.1 physical implementation
+
+Migration 7e6ae3e5a10d implements Course, CourseModule, Lesson, LessonMaterial, CohortCourse and CourseEnrollment. Composite foreign keys carry organization and parent identity through the hierarchy. Unique constraints enforce module, lesson, material and cohort-course order. LessonMaterial is private-only and stores a provider key that is excluded from learner DTOs. PostgreSQL triggers reject structural mutation after course publication. CourseEnrollment is unique by source Enrollment and Course; progress and completion evidence remain later L01 slices.

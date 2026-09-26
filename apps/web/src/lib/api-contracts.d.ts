@@ -242,6 +242,159 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/organizations/{org}/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalog */
+        get: operations["catalog_api_v1_courses_organizations__org__catalog_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Course */
+        post: operations["create_course_api_v1_courses_organizations__org__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/modules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Module */
+        post: operations["create_module_api_v1_courses_organizations__org__modules_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Lesson */
+        post: operations["create_lesson_api_v1_courses_organizations__org__lessons_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/materials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Material */
+        post: operations["create_material_api_v1_courses_organizations__org__materials_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/{course_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Course */
+        post: operations["publish_course_api_v1_courses_organizations__org___course_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/cohort-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign Course */
+        post: operations["assign_course_api_v1_courses_organizations__org__cohort_assignments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/my-learning": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Learning */
+        get: operations["my_learning_api_v1_courses_organizations__org__my_learning_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Course */
+        post: operations["start_course_api_v1_courses_organizations__org__my_learning__course_id__start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/applications/organizations/{org}/form": {
         parameters: {
             query?: never;
@@ -2087,6 +2240,123 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** AdminCourseView */
+        AdminCourseView: {
+            /** Code */
+            code: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Description En */
+            description_en: string;
+            /** Description Ta */
+            description_ta: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "published" | "archived";
+            /** Version */
+            version: number;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Modules */
+            modules: components["schemas"]["AdminModuleView"][];
+        };
+        /** AdminLessonView */
+        AdminLessonView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Module Id
+             * Format: uuid
+             */
+            module_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Body En */
+            body_en: string;
+            /** Body Ta */
+            body_ta: string;
+            /** Duration Minutes */
+            duration_minutes?: number | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Materials */
+            materials: components["schemas"]["MaterialAdminView"][];
+        };
+        /** AdminModuleView */
+        AdminModuleView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Lessons */
+            lessons: components["schemas"]["AdminLessonView"][];
+        };
         /** AnswerInput */
         AnswerInput: {
             /**
@@ -2409,6 +2679,53 @@ export interface components {
              */
             updated_at: string;
         };
+        /** CohortCourseCreate */
+        CohortCourseCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Position */
+            position: number;
+            /** Reason */
+            reason: string;
+        };
+        /** CohortCourseView */
+        CohortCourseView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Position */
+            position: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /** CohortCreate */
         CohortCreate: {
             /** Code */
@@ -2550,6 +2867,108 @@ export interface components {
             status: "clear" | "conflict";
             /** Note */
             note?: string | null;
+        };
+        /** CourseCreate */
+        CourseCreate: {
+            /** Code */
+            code: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Description En */
+            description_en: string;
+            /** Description Ta */
+            description_ta: string;
+        };
+        /** CourseEnrollmentView */
+        CourseEnrollmentView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "in_progress" | "completed";
+            /** Version */
+            version: number;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** CourseView */
+        CourseView: {
+            /** Code */
+            code: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Description En */
+            description_en: string;
+            /** Description Ta */
+            description_ta: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "published" | "archived";
+            /** Version */
+            version: number;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** CreatePage */
         CreatePage: {
@@ -3867,6 +4286,173 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** LearnerCourseView */
+        LearnerCourseView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Description En */
+            description_en: string;
+            /** Description Ta */
+            description_ta: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /** Position */
+            position: number;
+            course_enrollment: components["schemas"]["CourseEnrollmentView"] | null;
+            /** Modules */
+            modules: components["schemas"]["LearnerModuleView"][];
+        };
+        /** LearnerLessonView */
+        LearnerLessonView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Body En */
+            body_en: string;
+            /** Body Ta */
+            body_ta: string;
+            /** Duration Minutes */
+            duration_minutes: number | null;
+            /** Materials */
+            materials: components["schemas"]["LearnerMaterialView"][];
+        };
+        /** LearnerMaterialView */
+        LearnerMaterialView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "video" | "document" | "link";
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /**
+             * Available
+             * @default false
+             */
+            available: boolean;
+        };
+        /** LearnerModuleView */
+        LearnerModuleView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Lessons */
+            lessons: components["schemas"]["LearnerLessonView"][];
+        };
+        /** LearningCatalogView */
+        LearningCatalogView: {
+            /** Courses */
+            courses: components["schemas"]["AdminCourseView"][];
+            /** Assignments */
+            assignments: components["schemas"]["CohortCourseView"][];
+        };
+        /** LessonCreate */
+        LessonCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Module Id
+             * Format: uuid
+             */
+            module_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Body En */
+            body_en: string;
+            /** Body Ta */
+            body_ta: string;
+            /** Duration Minutes */
+            duration_minutes?: number | null;
+        };
+        /** LessonView */
+        LessonView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Module Id
+             * Format: uuid
+             */
+            module_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Body En */
+            body_en: string;
+            /** Body Ta */
+            body_ta: string;
+            /** Duration Minutes */
+            duration_minutes?: number | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /** Login */
         Login: {
             /**
@@ -3964,6 +4550,75 @@ export interface components {
             /** Expected Version */
             expected_version: number;
         };
+        /** MaterialAdminView */
+        MaterialAdminView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Position */
+            position: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "video" | "document" | "link";
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /** Provider Key */
+            provider_key: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /** Is Private */
+            is_private: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** MaterialCreate */
+        MaterialCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Position */
+            position: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "video" | "document" | "link";
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /** Provider Key */
+            provider_key: string;
+        };
         /** Message */
         Message: {
             /**
@@ -3983,6 +4638,54 @@ export interface components {
             status: "included" | "excluded";
             /** Reason */
             reason: string;
+        };
+        /** ModuleCreate */
+        ModuleCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+        };
+        /** ModuleView */
+        ModuleView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** MyLearningView */
+        MyLearningView: {
+            /** Courses */
+            courses: components["schemas"]["LearnerCourseView"][];
         };
         /** NamedCreate */
         NamedCreate: {
@@ -4342,6 +5045,13 @@ export interface components {
              * Format: date-time
              */
             published_at: string;
+        };
+        /** PublishCourse */
+        PublishCourse: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
         };
         /** Register */
         Register: {
@@ -5387,6 +6097,311 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    catalog_api_v1_courses_organizations__org__catalog_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearningCatalogView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_course_api_v1_courses_organizations__org__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_module_api_v1_courses_organizations__org__modules_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModuleCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_lesson_api_v1_courses_organizations__org__lessons_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LessonCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_material_api_v1_courses_organizations__org__materials_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialAdminView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_course_api_v1_courses_organizations__org___course_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishCourse"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_course_api_v1_courses_organizations__org__cohort_assignments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CohortCourseCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CohortCourseView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_learning_api_v1_courses_organizations__org__my_learning_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyLearningView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_course_api_v1_courses_organizations__org__my_learning__course_id__start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseEnrollmentView"];
                 };
             };
             /** @description Validation Error */

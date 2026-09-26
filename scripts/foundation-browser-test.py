@@ -7,6 +7,11 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
+from cryptography.fernet import Fernet
+from playwright.sync_api import expect, sync_playwright
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
+
 from app.modules.applications.models import Application, ApplicationForm
 from app.modules.identity.models import (
     AuthDelivery,
@@ -19,6 +24,7 @@ from app.modules.identity.models import (
 )
 from app.modules.identity.security import hasher
 from app.modules.identity.service import audit, seed_roles
+from app.modules.lms.models import CohortCourse, Course, CourseEnrollment
 from app.modules.programs import service as program_service
 from app.modules.programs.models import (
     DomainOutbox,
@@ -40,10 +46,6 @@ from app.modules.selection.models import (
     SelectionCycle,
     SelectionDecision,
 )
-from cryptography.fernet import Fernet
-from playwright.sync_api import expect, sync_playwright
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
 
 engine = create_engine(os.environ["DATABASE_URL"])
 assert engine.url.database in {"edp_foundation_e2e", "edp_test"}, (
@@ -589,6 +591,91 @@ with sync_playwright() as playwright:
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("Business foundations", exact=True)).to_be_visible()
 
+    page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
+    expect(page.get_by_role("heading", name="Course studio", exact=True)).to_be_visible()
+    course_form = page.locator("form").filter(
+        has=page.get_by_role("heading", name="Create course", exact=True)
+    )
+    course_form.locator('input[name="code"]').fill("e2e-foundations")
+    course_form.locator('input[name="title_en"]').fill("Enterprise foundations")
+    course_form.locator('input[name="title_ta"]').fill("Synthetic Tamil course")
+    course_form.locator('textarea[name="description_en"]').fill(
+        "A practical introduction to understanding customers."
+    )
+    course_form.locator('textarea[name="description_ta"]').fill(
+        "Synthetic Tamil course description."
+    )
+    course_form.get_by_role("button", name="Create", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+
+    module_form = page.locator("form").filter(
+        has=page.get_by_role("heading", name="Add module", exact=True)
+    )
+    module_form.locator('select[name="course_id"]').select_option(
+        label="Enterprise foundations"
+    )
+    module_form.locator('input[name="position"]').fill("1")
+    module_form.locator('input[name="title_en"]').fill("Know the customer")
+    module_form.locator('input[name="title_ta"]').fill("Synthetic Tamil module")
+    module_form.get_by_role("button", name="Create", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+
+    lesson_form = page.locator("form").filter(
+        has=page.get_by_role("heading", name="Add lesson", exact=True)
+    )
+    lesson_form.locator('select[name="module_key"]').select_option(
+        label="Enterprise foundations / Know the customer"
+    )
+    lesson_form.locator('input[name="position"]').fill("1")
+    lesson_form.locator('input[name="duration_minutes"]').fill("20")
+    lesson_form.locator('input[name="title_en"]').fill("Customer problem")
+    lesson_form.locator('input[name="title_ta"]').fill("Synthetic Tamil lesson")
+    lesson_form.locator('textarea[name="body_en"]').fill(
+        "Describe the customer problem in observable terms."
+    )
+    lesson_form.locator('textarea[name="body_ta"]').fill(
+        "Synthetic Tamil lesson body."
+    )
+    lesson_form.get_by_role("button", name="Create", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+
+    material_form = page.locator("form").filter(
+        has=page.get_by_role(
+            "heading", name="Add private material reference", exact=True
+        )
+    )
+    material_form.locator('select[name="lesson_key"]').select_option(
+        label="Enterprise foundations / Know the customer / Customer problem"
+    )
+    material_form.locator('input[name="position"]').fill("1")
+    material_form.locator('input[name="label_en"]').fill("Customer worksheet")
+    material_form.locator('input[name="label_ta"]').fill(
+        "Synthetic Tamil worksheet"
+    )
+    material_form.locator('input[name="provider_key"]').fill(
+        "private/e2e/customer-worksheet.pdf"
+    )
+    material_form.get_by_role("button", name="Create", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+
+    page.once("dialog", lambda dialog: dialog.accept("E2E content approved"))
+    page.get_by_role("button", name="Publish course", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    pathway_form = page.locator(".learning-assignment form")
+    pathway_form.locator('select[name="course_id"]').select_option(
+        label="Enterprise foundations"
+    )
+    pathway_form.locator('select[name="cohort_id"]').select_option(label="E2E cohort")
+    pathway_form.locator('input[name="position"]').fill("1")
+    pathway_form.locator('input[name="reason"]').fill("E2E cohort pathway approved")
+    pathway_form.get_by_role("button", name="Add to cohort", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Enterprise foundations", exact=True).first).to_be_visible()
+
+    page.goto(base + "/en/admin/programs?organization=" + str(organization_id))
+    expect(
+        page.get_by_role("heading", name="Program administration", exact=True)
+    ).to_be_visible()
     assign_button = page.get_by_role("button", name="Assign coordinator", exact=True)
     assignment_form = page.locator("form").filter(has=assign_button)
     assignment_form.locator('input[name="email"]').fill(coordinator_email)
@@ -707,6 +794,19 @@ with sync_playwright() as playwright:
     assert not coordinator_errors, coordinator_errors
     coordinator_context.close()
 
+    page.goto(base + "/en/learning?organization=" + str(organization_id))
+    expect(page.get_by_role("heading", name="My learning path", exact=True)).to_be_visible()
+    expect(page.get_by_text("Enterprise foundations", exact=True)).to_be_visible()
+    expect(page.get_by_text("Customer problem", exact=True)).to_be_visible()
+    expect(page.get_by_text("private/e2e/customer-worksheet.pdf", exact=True)).not_to_be_visible()
+    page.get_by_role("button", name="Start course", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("In progress", exact=True)).to_be_visible()
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.screenshot(path=str(evidence / "learning-mobile.png"), full_page=True)
+    page.set_viewport_size({"width": 1280, "height": 900})
+
     page.goto(base + "/en/participant?organization=" + str(organization_id))
     expect(page.get_by_role("heading", name="My program schedule")).to_be_visible()
     expect(page.get_by_text("Business foundations", exact=True).first).to_be_visible()
@@ -761,6 +861,17 @@ with sync_playwright() as playwright:
         outbox = db.scalar(
             select(DomainOutbox).where(DomainOutbox.organization_id == organization_id)
         )
+        course = db.scalar(
+            select(Course).where(Course.organization_id == organization_id)
+        )
+        cohort_course = db.scalar(
+            select(CohortCourse).where(CohortCourse.organization_id == organization_id)
+        )
+        course_enrollment = db.scalar(
+            select(CourseEnrollment).where(
+                CourseEnrollment.organization_id == organization_id
+            )
+        )
         assert application and application.state == "enrolled"
         assert (
             participant and enrollment and enrollment.participant_id == participant.id
@@ -772,6 +883,10 @@ with sync_playwright() as playwright:
         assert staff_assignment and staff_assignment.state == "revoked"
         assert staff_assignment.revoked_at is not None
         assert outbox and outbox.event_type == "enrollment.created"
+        assert course and course.state == "published"
+        assert cohort_course and cohort_course.course_id == course.id
+        assert course_enrollment and course_enrollment.course_id == course.id
+        assert course_enrollment.enrollment_id == enrollment.id
         assert interview and interview.status == "completed"
         assert float(interview.average_score or 0) == 84
         assert selection_cycle and selection_cycle.state == "closed"
@@ -823,5 +938,9 @@ with sync_playwright() as playwright:
 engine.dispose()
 print(
     "Browser E2E passed: identity, CSRF, scoped CMS, application policy "
-    "publish/versioning, immutable application submission, selection rubric/assignment/conflict/scoring/moderation/interview/decisions/finalization, enrollment/participant/session/timeline, center-scoped coordinator assignment/revocation, audit, responsive layouts and session recovery; no JS errors"
+    "publish/versioning, immutable application submission, selection rubric/assignment/"
+    "conflict/scoring/moderation/interview/decisions/finalization, enrollment/participant/"
+    "session/timeline, center-scoped coordinator assignment/revocation, learning authoring/"
+    "publication/cohort access/start, audit, responsive layouts and session recovery; "
+    "no JS errors"
 )

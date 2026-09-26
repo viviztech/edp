@@ -268,3 +268,59 @@ html[lang="ta"] .editorial-list h2 { font-family: Arial, sans-serif; }
   border-radius: 999px;
   background: var(--surface-strong);
 }
+
+
+/* L01 learning pathway: an ordered course spine derived from the curriculum sequence. */
+.learning-main { max-width: 90rem; margin: 0 auto; padding: 1.5rem; }
+.learning-heading { display: flex; align-items: start; justify-content: space-between; gap: 2rem; margin: 2rem 0; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
+.learning-heading h1 { max-width: none; margin: .25rem 0; }
+.learning-heading p { max-width: 68ch; }
+.learning-message { min-height: 1.5rem; color: var(--accent); font-weight: 700; }
+.learning-authoring { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.learning-authoring form, .learning-assignment form { display: grid; gap: .75rem; align-content: start; padding: 1.2rem; border: 1px solid var(--line); background: #fff; }
+.learning-authoring h2, .learning-assignment h2, .learning-catalog > h2 { margin: 0; font: 400 1.7rem/1.2 Georgia, serif; }
+.learning-authoring label, .learning-assignment label { display: grid; gap: .3rem; font-size: .82rem; font-weight: 700; }
+.learning-authoring input, .learning-authoring select, .learning-authoring textarea, .learning-assignment input, .learning-assignment select { width: 100%; min-height: 2.65rem; padding: .55rem .65rem; border: 1px solid var(--line); background: #fbfdfd; color: var(--ink); font: inherit; }
+.learning-authoring textarea { min-height: 6rem; resize: vertical; }
+.learning-authoring button, .learning-assignment button, .learning-course > button, .learner-path button { justify-self: start; min-height: 2.6rem; padding: .55rem .9rem; border: 1px solid var(--accent); background: var(--accent); color: #fff; font-weight: 800; }
+.learning-authoring button:disabled, .learning-assignment button:disabled, .learner-path button:disabled { opacity: .55; }
+.learning-catalog { padding: 1.25rem; border: 1px solid var(--line); background: #edf5f4; }
+.learning-spine { counter-reset: course; display: grid; gap: 1rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
+.learning-spine > li { counter-increment: course; display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); gap: .9rem; }
+.learning-spine > li::before { content: counter(course, decimal-leading-zero); display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border: 1px solid var(--accent); background: var(--accent); color: #fff; font: 700 1rem/1 Arial, sans-serif; }
+.learning-course { min-width: 0; padding: 1.1rem; border: 1px solid var(--line); border-top: 4px solid var(--highlight); background: #fff; }
+.learning-course > header { display: flex; justify-content: space-between; gap: 1rem; }
+.learning-course h3 { margin: .15rem 0; font: 400 1.65rem/1.2 Georgia, serif; }
+.learning-course small { display: block; color: var(--muted-foreground); overflow-wrap: anywhere; }
+.learning-modules { display: grid; gap: .75rem; padding: 0; margin: 1rem 0; list-style: none; }
+.learning-modules > li { padding: .8rem 1rem; border-left: 3px solid var(--accent); background: #f6fafb; }
+.learning-modules ol { display: grid; gap: .45rem; margin-top: .55rem; padding-left: 1.3rem; }
+.learning-modules ol li { padding-bottom: .4rem; border-bottom: 1px solid var(--line); }
+.learning-assignment { margin-top: 1rem; padding: 1.25rem; border: 1px solid var(--line); background: #fff; }
+.learning-assignment form { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0; border: 0; }
+.learning-assignment form button { align-self: end; }
+.learning-assignment ul { display: grid; gap: .5rem; padding: 0; list-style: none; }
+.learning-assignment li { display: flex; justify-content: space-between; gap: 1rem; padding: .7rem 0; border-bottom: 1px solid var(--line); }
+
+.learner-main { max-width: 76rem; }
+.learning-empty { padding: 1.2rem; border-left: 4px solid var(--highlight); background: #fff; }
+.learner-path { display: grid; gap: 1.25rem; margin: 0; padding: 0; list-style: none; }
+.learner-path > li > article { border: 1px solid var(--line); background: #fff; }
+.learner-path article > header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 1rem; padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--line); }
+.learner-order { display: grid; place-items: center; width: 3.25rem; height: 3.25rem; background: var(--ink); color: #fff; font-weight: 800; }
+.learner-path h2 { margin: .15rem 0 0; font: 400 clamp(1.5rem, 4vw, 2.2rem)/1.15 Georgia, serif; }
+.learner-path article > p { max-width: 68ch; padding: 0 1.25rem; }
+.learning-progress { padding: .3rem .65rem; background: #dcefe5; color: #175b3b; font-size: .78rem; font-weight: 800; }
+.learner-modules { display: grid; gap: 1rem; padding: 1.25rem; list-style: none; }
+.learner-modules > li { border-left: 4px solid var(--accent); padding-left: 1rem; }
+.learner-modules h3 { display: flex; gap: .7rem; align-items: center; margin: 0; font: 400 1.45rem/1.2 Georgia, serif; }
+.learner-modules h3 span { display: grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid var(--accent); font: 700 .8rem Arial, sans-serif; }
+.learner-modules ol { display: grid; gap: .65rem; padding: .8rem 0 0; list-style: none; }
+.learner-modules ol > li { padding: .9rem 1rem; background: #f6fafb; border: 1px solid var(--line); }
+.learner-modules ol > li > div { display: flex; justify-content: space-between; gap: 1rem; }
+.learner-modules ol > li > p { max-width: 68ch; white-space: pre-wrap; }
+.learning-private { display: grid; gap: .2rem; padding: .7rem; border-left: 3px solid var(--highlight); background: #fff; }
+.learning-private small { color: var(--muted-foreground); }
+@media (max-width: 900px) { .learning-authoring { grid-template-columns: 1fr; } .learning-assignment form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .learning-main { padding: 1rem; } .learning-heading { display: block; } .learning-spine > li { grid-template-columns: 1fr; } .learning-spine > li::before { width: 2.6rem; height: 2.6rem; } .learning-assignment form { grid-template-columns: 1fr; } .learner-path article > header { grid-template-columns: auto minmax(0, 1fr); } .learner-path article > header button, .learning-progress { grid-column: 1 / -1; } }
+@media (prefers-reduced-motion: reduce) { .learning-main * { transition: none !important; } }

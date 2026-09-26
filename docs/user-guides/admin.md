@@ -21,3 +21,9 @@ After a selection cycle is finalized, open Programs. Selected applicants with a 
 ## Center and cohort coordinators
 
 Provision the staff account and grant Training Center Coordinator in the correct organization before assigning delivery scope. In Programs, use Center and cohort staff assignments, enter the exact account email, choose an active center and optionally one of its planned or active cohorts, then record the assignment reason. Leaving cohort blank grants every cohort at that center, including later cohorts. Selecting a cohort grants only that cohort. Revoke an assignment with a reason as soon as responsibility ends; the coordinator loses scoped catalog and mutation access on the next request. Use a new assignment instead of editing retained scope evidence.
+
+## Learning course studio
+
+Open Learning from the staff workspace. Create a bilingual course, then add modules and lessons in their intended positive-number order. Add only private provider references; do not paste public credentials or real participant data. Publication freezes the structure, requires every module to contain a lesson, and records the approval reason. After publication, add the course to a planned or active cohort at a unique pathway position.
+
+Participants with an active enrollment open My learning path. They see only published courses assigned to their enrolled cohorts and can start each course once; repeated start requests return the same record. Private material labels are visible, while the provider reference and download URL remain hidden until the approved media service is configured.

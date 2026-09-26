@@ -29,3 +29,7 @@ The public home uses the original `apps/web/public/illustrations/program-path.sv
 The staff design remains a frontend pass over completed modules, not a new feature or provider workflow. Pages without a matching grant keep the existing denied/redirect behavior. Authenticated browser and native mobile review are still needed before treating the whole interface as visually accepted.
 
 The mobile home now has a Material 3 program notice and navigation cards for public pages and account access. It uses the same copper highlight and teal actions as the web entry point. `apps/mobile/assets/fonts/NotoSansTamil-Regular.ttf` comes from the [Noto Tamil project](https://notofonts.github.io/tamil/) under the SIL Open Font License; its `OFL.txt` is bundled alongside the font.
+
+## Learning pathway
+
+The L01 web workspace uses the existing ink, teal and copper tokens. Its signature element is an ordered course spine: real sequence numbers connect the staff curriculum structure and participant pathway instead of acting as decoration. Course, module and lesson hierarchy stays visible without relying on color. Forms retain native labels, keyboard focus and disabled states; mobile collapses the spine and action rows without horizontal overflow. English and Tamil share the same structure and responsive behavior.

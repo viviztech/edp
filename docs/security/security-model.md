@@ -84,3 +84,9 @@ Implemented permissions are selection.cycle.view/manage, selection.rubric.manage
 ## P01.3 coordinator scope enforcement
 
 staff.assignment.manage is limited to Program Managers, Program Directors and Super Admins. A target account must already be active and hold the Training Center Coordinator role in the same organization. The service first checks the requested permission, then distinguishes an unrestricted role grant from the coordinator grant and resolves active assignments. Catalog queries filter centers, cohorts, cycles, enrollments, participants and sessions before serialization. Each cohort, participant and schedule command repeats the scope check after loading the organization-bound resource. Revocation immediately removes access because permissions are resolved on every request. Assignment rows and audit records contain IDs and reasons only; they do not duplicate Person or participant data.
+
+## L01.1 learning authorization
+
+lms.course.view/manage/publish/assign are organization-scoped and granted to Program Directors, Program Managers and Super Admins. lms.learn is granted to Participant, but each request must additionally resolve the authenticated Person to an active Participant, active Enrollment, cohort assignment and published Course. Request parameters cannot select another participant or enrollment. Trainers receive no LMS grant until an assigned course/cohort binding is implemented.
+
+Published structures are protected by PostgreSQL triggers from module, lesson or material insert/update/delete. Composite keys reject cross-organization parents and ordered-position duplicates. Audit records identifiers, version, changed fields and approval reason without lesson bodies or provider keys. Learner responses omit provider keys; signed material access remains disabled until the approved storage/video adapter repeats enrollment authorization and issues a short-lived URL.

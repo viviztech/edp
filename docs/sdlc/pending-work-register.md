@@ -84,3 +84,11 @@ The following are future implementation slices and are not defects or unfinished
 Before starting L01, commit and push the current changes and obtain remote CI results. Repository-wide CMS Ruff/MyPy debt is verified and remains tracked for remediation; it must not be attributed to later focused modules. Native macOS validation, live-provider work, staging, and production gates may remain explicitly deferred while local feature development continues.
 
 Update this register whenever an item is completed, deferred by an approved decision, or superseded. Link the supporting commit, CI run, ADR, test evidence, or release record in the corresponding row.
+
+## Update - 2026-09-26
+
+- P01.3 and its flow documentation were committed and pushed to origin/main in commit ae7cff4.
+- Repository-wide Ruff was verified and reports 166 pre-existing legacy CMS and early-migration findings; strict MyPy also contains documented CMS and selection debt. Focused P01.3 and L01.1 checks pass.
+- Superseded P01.2 coordinator wording was reconciled.
+- L01.1 course catalog and enrollment access is implemented and locally accepted. It remains uncommitted at the time of this update; remote CI therefore remains pending.
+- Later L01 work includes lesson progress, prerequisites, trainer bindings and signed media delivery.

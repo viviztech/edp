@@ -81,6 +81,13 @@ PROGRAM_DELIVERY_PERMISSIONS = [
     "staff.assignment.manage",
 ]
 PARTICIPANT_SELF_PERMISSION = "participant.self"
+LMS_STAFF_PERMISSIONS = [
+    "lms.course.view",
+    "lms.course.manage",
+    "lms.course.publish",
+    "lms.course.assign",
+]
+LMS_LEARN_PERMISSION = "lms.learn"
 SELECTION_PERMISSIONS = [
     "selection.cycle.view",
     "selection.cycle.manage",
@@ -115,6 +122,8 @@ PERMISSIONS = [
     *PROGRAM_PERMISSIONS,
     *PROGRAM_DELIVERY_PERMISSIONS,
     PARTICIPANT_SELF_PERMISSION,
+    *LMS_STAFF_PERMISSIONS,
+    LMS_LEARN_PERMISSION,
     *SELECTION_PERMISSIONS,
 ]
 
@@ -457,6 +466,7 @@ def seed_roles(db: Session) -> None:
                 *APPLICATION_PERMISSIONS,
                 *PROGRAM_PERMISSIONS,
                 *PROGRAM_DELIVERY_PERMISSIONS,
+                *LMS_STAFF_PERMISSIONS,
                 *SELECTION_PERMISSIONS,
             ]
         elif name == "Program Manager":
@@ -466,6 +476,7 @@ def seed_roles(db: Session) -> None:
                 *APPLICATION_PERMISSIONS[:-1],
                 *PROGRAM_PERMISSIONS,
                 *PROGRAM_DELIVERY_PERMISSIONS,
+                *LMS_STAFF_PERMISSIONS,
                 "selection.cycle.view",
                 "selection.cycle.manage",
                 "selection.rubric.manage",
@@ -492,7 +503,11 @@ def seed_roles(db: Session) -> None:
         elif name == "Marketing Executive":
             codes = ["system.access", *META_PERMISSIONS]
         elif name == "Participant":
-            codes = ["system.access", PARTICIPANT_SELF_PERMISSION]
+            codes = [
+                "system.access",
+                PARTICIPANT_SELF_PERMISSION,
+                LMS_LEARN_PERMISSION,
+            ]
         else:
             codes = ["system.access"]
         for code in codes:

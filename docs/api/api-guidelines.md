@@ -41,3 +41,9 @@ P01.2 extends `/api/v1/programs/organizations/{org}`. `POST /enrollments/convert
 ## P01.3 program staff assignment endpoints
 
 P01.3 adds POST /api/v1/programs/organizations/{org}/staff-assignments and POST /api/v1/programs/organizations/{org}/staff-assignments/{id}/revoke. Creation accepts an existing coordinator email, center, optional cohort and reason; the response returns identifiers and display metadata but no role internals. Revocation requires the exact assignment version and reason. GET /catalog includes assignment state and applies coordinator scope before returning delivery data. The browser BFF permits only the two explicit mutation shapes.
+
+## L01.1 learning endpoints
+
+L01.1 uses /api/v1/courses/organizations/{org}. Authorized staff use GET /catalog, POST /, POST /modules, POST /lessons, POST /materials, POST /{course}/publish and POST /cohort-assignments. Publication requires an exact course version and reason. Assignment accepts only course, cohort, order and reason; organization scope and course publication are server validated.
+
+Participants use GET /my-learning and idempotent POST /my-learning/{course}/start. Ownership is derived from the authenticated Person, active Participant and active program Enrollment. Learner material DTOs include safe labels and availability only; private provider keys never cross the learner API or browser BFF. The Next.js BFF allowlists only these exact UUID-shaped paths and applies Origin/CSRF checks to every mutation.

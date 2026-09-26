@@ -23,6 +23,7 @@ from app.modules.cms.routes import router as cms_router
 from app.modules.crm.routes import router as crm_router
 from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
+from app.modules.lms.routes import router as lms_router
 from app.modules.meta.routes import router as meta_router
 from app.modules.notifications.routes import router as notifications_router
 from app.modules.programs.routes import router as programs_router
@@ -81,6 +82,7 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json" if docs_enabled else None,
     )
     app.include_router(identity_router)
+    app.include_router(lms_router)
     app.include_router(applications_router)
     app.include_router(cms_router)
     app.include_router(crm_router)
@@ -126,6 +128,7 @@ def create_app() -> FastAPI:
                         request.url.path.startswith("/api/v1/cms/")
                         or request.url.path.startswith("/api/v1/applications/")
                         or request.url.path.startswith("/api/v1/programs/")
+                        or request.url.path.startswith("/api/v1/courses/")
                         or request.url.path.startswith("/api/v1/selection/")
                     )
                     and request.method in {"POST", "PATCH", "PUT"}
