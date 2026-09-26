@@ -1,6 +1,6 @@
 # Milestone 6 implementation report
 
-Status: L01.1 implemented and locally accepted; Milestone 6 remains in progress.
+Status: L01.1 and L01.2 implemented and locally accepted; Milestone 6 remains in progress.
 
 ## Delivered behavior
 
@@ -34,3 +34,7 @@ The Next.js staff course studio and learner pathway provide English/Tamil loadin
 ## Remaining L01 scope
 
 Lesson progress, course-progress projection, prerequisites, trainer-scoped bindings, signed media access, Flutter learning screens and full course completion rules remain open. Quizzes, assignments and grading belong to L02.
+
+## L01.2 implementation
+
+Implemented ordered lesson prerequisites, all-lessons/minimum-lessons completion rules, immutable lesson evidence, versioned course-enrollment aggregation, automatic completion, participant progress UI, and count-only staff cohort summaries. Local PostgreSQL acceptance proves prerequisite enforcement, idempotency, aggregation, finalization, and database immutability. Verification passed: both L01.2 migrations upgrade cleanly; the base migration and trigger-only hardening rollback/reapply without drift; focused Ruff and strict MyPy pass; the full API suite passes 84 tests; TypeScript, ESLint, 32 Vitest tests, and the Next 16 production build pass; authenticated Chrome acceptance completes a lesson, reaches 100% course completion, validates responsive layout, and reports no JavaScript errors. The generated OpenAPI and TypeScript contracts are current. Native Flutter remains deferred under ADR 0004, remote CI confirmation remains open, and existing repository-wide CMS/early-migration Ruff/MyPy debt is unchanged.

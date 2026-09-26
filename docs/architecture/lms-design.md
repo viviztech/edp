@@ -1,6 +1,6 @@
 # LMS design
 
-Status: L01.1 implementation design.
+Status: L01.1 and L01.2 implementation design.
 
 ## Boundary
 
@@ -26,3 +26,11 @@ LessonMaterial stores a private provider reference and localized label. Learner 
 ## Integrity
 
 Composite foreign keys enforce organization and parent scope. Unique constraints enforce module, lesson, material and cohort-course positions. PostgreSQL triggers reject structural insert, update or delete after publication. CourseEnrollment is unique by Enrollment and Course.
+
+## L01.2 progress and completion
+
+LessonPrerequisite links lessons inside the same organization and course. Authoring accepts only an earlier lesson in the ordered module/lesson spine, which makes cycles impossible. The database freezes prerequisite rows with the rest of the course structure after publication.
+
+LessonProgress is one immutable completion record per course enrollment and lesson. Composite foreign keys prove that enrollment, course, lesson, and organization share one scope. The course progress view is derived from immutable lesson rows. CourseEnrollment is the mutable lifecycle aggregate: each new completion increments its version and transitions once from in_progress to completed when the frozen rule is met.
+
+A course rule is either all_lessons or minimum_lessons. Rule changes require draft state, an exact course version, a reason, permission, and audit evidence. Publication rejects a minimum above the lesson count. Participant commands derive identity from the signed-in person and active participant enrollment, enforce prerequisites server-side, and are idempotent for an already-completed lesson. Staff catalog summaries expose cohort counts and percentages without participant identity.

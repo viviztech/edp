@@ -72,3 +72,7 @@ PostgreSQL/API tests create two centers and cohorts, prove that an unassigned co
 The PostgreSQL workflow test covers incomplete publication rejection, bilingual ordered course creation, private material metadata, publication, cohort assignment, duplicate rejection, enrollment-scoped visibility, provider-key non-disclosure, idempotent course start, unauthorized course denial, audit creation and direct database mutation rejection after publication. The full database-backed API suite passes 84 tests.
 
 Migration 7e6ae3e5a10d passes downgrade to P01.3, re-upgrade and Alembic drift checks. Focused LMS Ruff and strict MyPy pass. Generated OpenAPI and TypeScript contracts are current. Web TypeScript, ESLint, 32 Vitest tests and the Next.js production build pass. Authenticated Chrome completes staff authoring/publication/assignment and learner access/start, checks persisted evidence and mobile overflow, and reports no JavaScript errors. Repository-wide Ruff/MyPy remains red on separately recorded legacy CMS and selection findings.
+
+## L01.2 evidence
+
+The PostgreSQL LMS acceptance test covers reverse prerequisite rejection, blocked out-of-order completion, idempotent retry, 50% aggregation, automatic final completion, cohort summary aggregation, audit evidence, and database rejection of completion-evidence mutation. Migration downgrade/upgrade/drift, focused Ruff and strict MyPy, the full API suite, TypeScript, ESLint, Vitest, Next production build, and authenticated browser acceptance form the release gate.

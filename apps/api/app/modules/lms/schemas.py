@@ -2,11 +2,13 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 CourseState = Literal["draft", "published", "archived"]
 MaterialKind = Literal["video", "document", "link"]
 CourseEnrollmentState = Literal["in_progress", "completed"]
+CompletionRule = Literal["all_lessons", "minimum_lessons"]
+ProgressState = Literal["not_started", "in_progress", "completed"]
 
 
 class CourseCreate(BaseModel):
@@ -16,11 +18,21 @@ class CourseCreate(BaseModel):
     title_ta: str = Field(min_length=1, max_length=200)
     description_en: str = Field(min_length=1, max_length=5000)
     description_ta: str = Field(min_length=1, max_length=5000)
+    completion_rule: CompletionRule = "all_lessons"
+    minimum_lessons: int | None = Field(default=None, ge=1)
 
     @field_validator("code", "title_en", "title_ta", "description_en", "description_ta")
     @classmethod
     def strip_course_text(cls, value: str) -> str:
         return value.strip()
+
+    @model_validator(mode="after")
+    def valid_completion_rule(self) -> "CourseCreate":
+        if self.completion_rule == "all_lessons" and self.minimum_lessons is not None:
+            raise ValueError("minimum_lessons must be empty for all_lessons")
+        if self.completion_rule == "minimum_lessons" and self.minimum_lessons is None:
+            raise ValueError("minimum_lessons is required")
+        return self
 
 
 class CourseView(CourseCreate):
@@ -31,6 +43,27 @@ class CourseView(CourseCreate):
     published_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+class CompletionRuleUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    completion_rule: CompletionRule
+    minimum_lessons: int | None = Field(default=None, ge=1)
+    expected_version: int = Field(ge=1)
+    reason: str = Field(min_length=3, max_length=500)
+
+    @field_validator("reason")
+    @classmethod
+    def strip_reason(cls, value: str) -> str:
+        return value.strip()
+
+    @model_validator(mode="after")
+    def valid_completion_rule(self) -> "CompletionRuleUpdate":
+        if self.completion_rule == "all_lessons" and self.minimum_lessons is not None:
+            raise ValueError("minimum_lessons must be empty for all_lessons")
+        if self.completion_rule == "minimum_lessons" and self.minimum_lessons is None:
+            raise ValueError("minimum_lessons is required")
+        return self
 
 
 class ModuleCreate(BaseModel):
@@ -107,6 +140,28 @@ class LearnerMaterialView(BaseModel):
     available: bool = False
 
 
+class LessonPrerequisiteCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    course_id: UUID
+    lesson_id: UUID
+    prerequisite_lesson_id: UUID
+    reason: str = Field(min_length=3, max_length=500)
+
+    @field_validator("reason")
+    @classmethod
+    def strip_reason(cls, value: str) -> str:
+        return value.strip()
+
+
+class LessonPrerequisiteView(BaseModel):
+    id: UUID
+    organization_id: UUID
+    course_id: UUID
+    lesson_id: UUID
+    prerequisite_lesson_id: UUID
+    created_at: datetime
+
+
 class PublishCourse(BaseModel):
     model_config = ConfigDict(extra="forbid")
     expected_version: int = Field(ge=1)
@@ -142,6 +197,7 @@ class CohortCourseView(BaseModel):
 
 class AdminLessonView(LessonView):
     materials: list[MaterialAdminView]
+    prerequisite_lesson_ids: list[UUID]
 
 
 class AdminModuleView(ModuleView):
@@ -152,9 +208,19 @@ class AdminCourseView(CourseView):
     modules: list[AdminModuleView]
 
 
+class CourseProgressSummary(BaseModel):
+    course_id: UUID
+    cohort_id: UUID
+    assigned_learners: int
+    started_learners: int
+    completed_learners: int
+    average_percent: int
+
+
 class LearningCatalogView(BaseModel):
     courses: list[AdminCourseView]
     assignments: list[CohortCourseView]
+    progress_summaries: list[CourseProgressSummary]
 
 
 class CourseEnrollmentView(BaseModel):
@@ -170,6 +236,29 @@ class CourseEnrollmentView(BaseModel):
     updated_at: datetime
 
 
+class CourseProgressView(BaseModel):
+    total_lessons: int
+    required_lessons: int
+    completed_lessons: int
+    percent: int
+    status: ProgressState
+
+
+class LessonCompletionCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_course_enrollment_version: int = Field(ge=1)
+
+
+class LessonProgressView(BaseModel):
+    id: UUID
+    course_enrollment_id: UUID
+    course_id: UUID
+    lesson_id: UUID
+    completed_at: datetime
+    course_enrollment: CourseEnrollmentView
+    progress: CourseProgressView
+
+
 class LearnerLessonView(BaseModel):
     id: UUID
     position: int
@@ -178,6 +267,10 @@ class LearnerLessonView(BaseModel):
     body_en: str
     body_ta: str
     duration_minutes: int | None
+    prerequisite_lesson_ids: list[UUID]
+    locked: bool
+    completed: bool
+    completed_at: datetime | None
     materials: list[LearnerMaterialView]
 
 
@@ -196,10 +289,13 @@ class LearnerCourseView(BaseModel):
     title_ta: str
     description_en: str
     description_ta: str
+    completion_rule: CompletionRule
+    minimum_lessons: int | None
     cohort_id: UUID
     enrollment_id: UUID
     position: int
     course_enrollment: CourseEnrollmentView | None
+    progress: CourseProgressView
     modules: list[LearnerModuleView]
 
 

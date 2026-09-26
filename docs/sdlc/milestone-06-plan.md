@@ -1,6 +1,6 @@
 # Milestone 6 plan
 
-Status: L01.1 implemented and locally accepted; remote CI and later L01 slices remain open.
+Status: L01.1 and L01.2 implemented and locally accepted; remote CI and later L01 slices remain open.
 
 ## L01.1 course catalog and enrollment access
 
@@ -25,3 +25,7 @@ Acceptance criteria:
 - Signed media URL issuance and native media playback.
 - Quizzes, assignments, grading and certificate eligibility.
 - Native Flutter learning screens, deferred under ADR 0004.
+
+## L01.2 lesson progress and completion
+
+Scope: ordered prerequisites, draft-only completion-rule configuration, immutable lesson completion, derived learner progress, automatic course completion, cohort summary visibility, bilingual responsive web flows, version conflicts, audit, API contracts, migration rollback, and acceptance evidence. Native Flutter remains deferred under ADR 0004. Signed media delivery, assessments, attendance, and certificates remain later slices.

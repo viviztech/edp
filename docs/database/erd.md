@@ -272,3 +272,10 @@ Migration 6d59d2d4f99c implements ProgramStaffAssignment as an organization/user
 ### L01.1 physical implementation
 
 Migration 7e6ae3e5a10d implements Course, CourseModule, Lesson, LessonMaterial, CohortCourse and CourseEnrollment. Composite foreign keys carry organization and parent identity through the hierarchy. Unique constraints enforce module, lesson, material and cohort-course order. LessonMaterial is private-only and stores a provider key that is excluded from learner DTOs. PostgreSQL triggers reject structural mutation after course publication. CourseEnrollment is unique by source Enrollment and Course; progress and completion evidence remain later L01 slices.
+
+## L01.2 learning progress extension
+
+- courses 1--many lessons; courses carry a frozen all_lessons or minimum_lessons completion rule.
+- lessons 1--many lesson_prerequisites as target and prerequisite; both composite foreign keys include course and organization.
+- course_enrollments 1--many lesson_progress; lesson_progress also references lessons through course and organization.
+- lesson_progress rows are immutable completion evidence. Course progress is calculated, while course_enrollments store the versioned lifecycle and completion timestamp.

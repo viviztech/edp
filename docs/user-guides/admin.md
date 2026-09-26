@@ -27,3 +27,7 @@ Provision the staff account and grant Training Center Coordinator in the correct
 Open Learning from the staff workspace. Create a bilingual course, then add modules and lessons in their intended positive-number order. Add only private provider references; do not paste public credentials or real participant data. Publication freezes the structure, requires every module to contain a lesson, and records the approval reason. After publication, add the course to a planned or active cohort at a unique pathway position.
 
 Participants with an active enrollment open My learning path. They see only published courses assigned to their enrolled cohorts and can start each course once; repeated start requests return the same record. Private material labels are visible, while the provider reference and download URL remain hidden until the approved media service is configured.
+
+## Configure course completion
+
+In Learning, create all modules and lessons in their final order. Add a prerequisite only from an earlier lesson to a later lesson. Choose Complete every lesson or set a positive minimum lesson count, record the reason, and publish only after review. Published rules and prerequisites cannot be edited. The cohort pathway shows assigned, started, completed, and average progress counts.

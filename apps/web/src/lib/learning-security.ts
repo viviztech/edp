@@ -9,9 +9,10 @@ export function learningPath(path: string[], method: string): string | null {
     ],
     POST: [
       `organizations/${id}`,
-      `organizations/${id}/(modules|lessons|materials|cohort-assignments)`,
-      `organizations/${id}/${id}/publish`,
+      `organizations/${id}/(modules|lessons|materials|prerequisites|cohort-assignments)`,
+      `organizations/${id}/${id}/(publish|completion-rule)`,
       `organizations/${id}/my-learning/${id}/start`,
+      `organizations/${id}/my-learning/${id}/lessons/${id}/complete`,
     ],
   };
   return rules[method]?.some((rule) => new RegExp(`^${rule}$`).test(value))

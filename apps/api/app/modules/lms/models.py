@@ -27,6 +27,8 @@ class Course(Record, Base):
     description_en: Mapped[str] = mapped_column(Text)
     description_ta: Mapped[str] = mapped_column(Text)
     state: Mapped[str] = mapped_column(String(16), default="draft")
+    completion_rule: Mapped[str] = mapped_column(String(24), default="all_lessons")
+    minimum_lessons: Mapped[int | None] = mapped_column(Integer, nullable=True)
     version: Mapped[int] = mapped_column(Integer, default=1)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
@@ -35,6 +37,14 @@ class Course(Record, Base):
         UniqueConstraint("organization_id", "code"),
         UniqueConstraint("id", "organization_id"),
         CheckConstraint("state IN ('draft','published','archived')", name="course_state"),
+        CheckConstraint(
+            "completion_rule IN ('all_lessons','minimum_lessons')", name="course_completion_rule"
+        ),
+        CheckConstraint(
+            "(completion_rule = 'all_lessons' AND minimum_lessons IS NULL) OR "
+            "(completion_rule = 'minimum_lessons' AND minimum_lessons > 0)",
+            name="course_completion_rule_value",
+        ),
         CheckConstraint("version > 0", name="course_version"),
         CheckConstraint(
             "(state = 'draft' AND published_at IS NULL) OR "
@@ -115,6 +125,31 @@ class LessonMaterial(Record, Base):
     )
 
 
+class LessonPrerequisite(Record, Base):
+    __tablename__ = "lesson_prerequisites"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    lesson_id: Mapped[UUID] = mapped_column(index=True)
+    prerequisite_lesson_id: Mapped[UUID] = mapped_column(index=True)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["lesson_id", "course_id", "organization_id"],
+            ["lessons.id", "lessons.course_id", "lessons.organization_id"],
+            name="fk_lesson_prerequisite_target_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["prerequisite_lesson_id", "course_id", "organization_id"],
+            ["lessons.id", "lessons.course_id", "lessons.organization_id"],
+            name="fk_lesson_prerequisite_required_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("lesson_id", "prerequisite_lesson_id"),
+        CheckConstraint("lesson_id <> prerequisite_lesson_id", name="lesson_prerequisite_distinct"),
+        Index("ix_lesson_prerequisite_course", "course_id", "lesson_id"),
+    )
+
+
 class CohortCourse(Record, Base):
     __tablename__ = "cohort_courses"
     organization_id: Mapped[UUID] = mapped_column(index=True)
@@ -167,6 +202,7 @@ class CourseEnrollment(Record, Base):
         ),
         UniqueConstraint("enrollment_id", "course_id"),
         UniqueConstraint("id", "organization_id"),
+        UniqueConstraint("id", "course_id", "organization_id"),
         CheckConstraint("status IN ('in_progress','completed')", name="course_enrollment_status"),
         CheckConstraint("version > 0", name="course_enrollment_version"),
         CheckConstraint(
@@ -174,4 +210,33 @@ class CourseEnrollment(Record, Base):
             "(status = 'completed' AND completed_at IS NOT NULL)",
             name="course_enrollment_completion_evidence",
         ),
+    )
+
+
+class LessonProgress(Record, Base):
+    __tablename__ = "lesson_progress"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    course_enrollment_id: Mapped[UUID] = mapped_column(index=True)
+    lesson_id: Mapped[UUID] = mapped_column(index=True)
+    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["course_enrollment_id", "course_id", "organization_id"],
+            [
+                "course_enrollments.id",
+                "course_enrollments.course_id",
+                "course_enrollments.organization_id",
+            ],
+            name="fk_lesson_progress_enrollment_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["lesson_id", "course_id", "organization_id"],
+            ["lessons.id", "lessons.course_id", "lessons.organization_id"],
+            name="fk_lesson_progress_lesson_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("course_enrollment_id", "lesson_id"),
+        Index("ix_lesson_progress_rollup", "course_enrollment_id", "course_id"),
     )

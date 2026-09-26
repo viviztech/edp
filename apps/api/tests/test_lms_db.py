@@ -10,7 +10,7 @@ from test_identity import auth, signed_in  # noqa: F401
 
 from app.modules.applications.models import Application, ApplicationForm
 from app.modules.identity.models import AuditLog, Organization, Role, User, UserRole, now
-from app.modules.lms.models import CourseEnrollment, CourseModule
+from app.modules.lms.models import CourseEnrollment, CourseModule, LessonProgress
 from app.modules.programs.models import (
     ApplicationCycle,
     Cohort,
@@ -199,6 +199,59 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request) -> None
     assert lesson.status_code == 201
     lesson_data = lesson.json()
 
+    second_lesson = client.post(
+        root + "/lessons",
+        headers=headers,
+        json={
+            "course_id": course["id"],
+            "module_id": module_data["id"],
+            "position": 2,
+            "title_en": "Validate the customer problem",
+            "title_ta": "Synthetic Tamil second lesson",
+            "body_en": "Validate the problem after defining it.",
+            "body_ta": "Synthetic Tamil second lesson body.",
+            "duration_minutes": 15,
+        },
+    )
+    assert second_lesson.status_code == 201
+    second_lesson_data = second_lesson.json()
+    prerequisite = client.post(
+        root + "/prerequisites",
+        headers=headers,
+        json={
+            "course_id": course["id"],
+            "lesson_id": second_lesson_data["id"],
+            "prerequisite_lesson_id": lesson_data["id"],
+            "reason": "The definition must precede validation",
+        },
+    )
+    assert prerequisite.status_code == 201
+    invalid_prerequisite = client.post(
+        root + "/prerequisites",
+        headers=headers,
+        json={
+            "course_id": course["id"],
+            "lesson_id": lesson_data["id"],
+            "prerequisite_lesson_id": second_lesson_data["id"],
+            "reason": "Reject reverse ordering",
+        },
+    )
+    assert invalid_prerequisite.status_code == 422
+    assert invalid_prerequisite.json()["error"]["code"] == "prerequisite_must_precede_lesson"
+
+    rule = client.post(
+        root + f"/{course['id']}/completion-rule",
+        headers=headers,
+        json={
+            "completion_rule": "minimum_lessons",
+            "minimum_lessons": 2,
+            "expected_version": 1,
+            "reason": "Require both approved lessons",
+        },
+    )
+    assert rule.status_code == 200
+    assert rule.json()["version"] == 2
+
     material = client.post(
         root + "/materials",
         headers=headers,
@@ -218,11 +271,23 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request) -> None
     published = client.post(
         root + f"/{course['id']}/publish",
         headers=headers,
-        json={"expected_version": 1, "reason": "Content review complete"},
+        json={"expected_version": 2, "reason": "Content review complete"},
     )
     assert published.status_code == 200
     assert published.json()["state"] == "published"
-    assert published.json()["version"] == 2
+    assert published.json()["version"] == 3
+    frozen_rule = client.post(
+        root + f"/{course['id']}/completion-rule",
+        headers=headers,
+        json={
+            "completion_rule": "all_lessons",
+            "minimum_lessons": None,
+            "expected_version": 3,
+            "reason": "Published rules are frozen",
+        },
+    )
+    assert frozen_rule.status_code == 409
+    assert frozen_rule.json()["error"]["code"] == "course_structure_frozen"
 
     assignment = client.post(
         root + "/cohort-assignments",
@@ -266,6 +331,53 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request) -> None
     assert started.json()["enrollment_id"] == str(enrollment_id)
     assert client.post(root + f"/my-learning/{uuid4()}/start", headers=headers).status_code == 403
 
+    blocked = client.post(
+        root + f"/my-learning/{course['id']}/lessons/{second_lesson_data['id']}/complete",
+        headers=headers,
+        json={"expected_course_enrollment_version": 1},
+    )
+    assert blocked.status_code == 409
+    assert blocked.json()["error"]["code"] == "lesson_prerequisite_incomplete"
+
+    first_complete = client.post(
+        root + f"/my-learning/{course['id']}/lessons/{lesson_data['id']}/complete",
+        headers=headers,
+        json={"expected_course_enrollment_version": 1},
+    )
+    assert first_complete.status_code == 200
+    assert first_complete.json()["progress"]["percent"] == 50
+    assert first_complete.json()["progress"]["status"] == "in_progress"
+    repeated_complete = client.post(
+        root + f"/my-learning/{course['id']}/lessons/{lesson_data['id']}/complete",
+        headers=headers,
+        json={"expected_course_enrollment_version": 1},
+    )
+    assert repeated_complete.status_code == 200
+    assert repeated_complete.json()["id"] == first_complete.json()["id"]
+
+    final_complete = client.post(
+        root + f"/my-learning/{course['id']}/lessons/{second_lesson_data['id']}/complete",
+        headers=headers,
+        json={"expected_course_enrollment_version": 2},
+    )
+    assert final_complete.status_code == 200
+    assert final_complete.json()["progress"]["percent"] == 100
+    assert final_complete.json()["progress"]["status"] == "completed"
+    assert final_complete.json()["course_enrollment"]["status"] == "completed"
+
+    completed_learning = client.get(root + "/my-learning", headers=headers).json()["courses"][0]
+    assert completed_learning["progress"]["completed_lessons"] == 2
+    assert all(
+        lesson["completed"]
+        for module in completed_learning["modules"]
+        for lesson in module["lessons"]
+    )
+    staff_catalog = client.get(root + "/catalog", headers=headers).json()
+    summary = staff_catalog["progress_summaries"][0]
+    assert summary["started_learners"] == 1
+    assert summary["completed_learners"] == 1
+    assert summary["average_percent"] == 100
+
     with Session(engine) as db:
         assert (
             db.scalar(
@@ -290,6 +402,14 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request) -> None
                 title_ta="Synthetic Tamil",
             )
         )
+        with pytest.raises(DBAPIError):
+            db.commit()
+        db.rollback()
+        progress = db.scalar(
+            select(LessonProgress).where(LessonProgress.lesson_id == lesson_data["id"])
+        )
+        assert progress
+        progress.completed_at = now() + timedelta(days=1)
         with pytest.raises(DBAPIError):
             db.commit()
         db.rollback()

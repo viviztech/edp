@@ -18,6 +18,11 @@ describe("learning BFF allowlist", () => {
       .toBe(`/courses/organizations/${org}/my-learning`);
     expect(learningPath(["organizations", org, "my-learning", course, "start"], "POST"))
       .toBe(`/courses/organizations/${org}/my-learning/${course}/start`);
+    expect(learningPath(["organizations", org, "prerequisites"], "POST")).not.toBeNull();
+    expect(learningPath(["organizations", org, course, "completion-rule"], "POST")).not.toBeNull();
+    expect(learningPath([
+      "organizations", org, "my-learning", course, "lessons", course, "complete",
+    ], "POST")).not.toBeNull();
   });
 
   it("rejects traversal, deletes and unknown commands", () => {

@@ -9,7 +9,7 @@ type Catalog = components["schemas"]["LearningCatalogView"];
 type Course = components["schemas"]["AdminCourseView"];
 type ProgramCatalog = components["schemas"]["CatalogView"];
 
-const empty: Catalog = { courses: [], assignments: [] };
+const empty: Catalog = { courses: [], assignments: [], progress_summaries: [] };
 const emptyPrograms: ProgramCatalog = {
   programs: [],
   centers: [],
@@ -135,13 +135,22 @@ export default function LearningWorkspace({
   return <div aria-busy={busy}>
     <p className="learning-message" role="status">{busy ? text.loading : message}</p>
     {canManage && <section className="learning-authoring" aria-label={text.structure}>
-      <form onSubmit={(event) => submit(event, "", (data) => data)}>
+      <form onSubmit={(event) => submit(event, "", (data) => ({
+        ...data,
+        completion_rule: data.completion_rule,
+        minimum_lessons: data.completion_rule === "minimum_lessons" ? Number(data.minimum_lessons) : null,
+      }))}>
         <h2>{text.createCourse}</h2>
         <Field label={text.code} name="code" />
         <Field label={text.englishTitle} name="title_en" />
         <Field label={text.tamilTitle} name="title_ta" />
         <Area label={text.englishDescription} name="description_en" />
         <Area label={text.tamilDescription} name="description_ta" />
+        <label>{text.completionRule}<select name="completion_rule">
+          <option value="all_lessons">{text.allLessons}</option>
+          <option value="minimum_lessons">{text.minimumLessons}</option>
+        </select></label>
+        <Field label={text.minimumLessons} name="minimum_lessons" type="number" required={false} />
         <button disabled={busy}>{text.create}</button>
       </form>
       <form onSubmit={(event) => submit(event, "/modules", (data) => ({
@@ -193,6 +202,43 @@ export default function LearningWorkspace({
         <Area label={text.tamilBody} name="body_ta" />
         <button disabled={busy}>{text.create}</button>
       </form>
+      <form onSubmit={(event) => submit(event, "/prerequisites", (data) => {
+        const target = String(data.lesson_key).split(":");
+        const required = String(data.prerequisite_key).split(":");
+        return { course_id: target[0], lesson_id: target[1],
+          prerequisite_lesson_id: required[1], reason: data.reason };
+      })}>
+        <h2>{text.addPrerequisite}</h2>
+        <Select label={text.lesson} name="lesson_key" choose={text.choose}
+          options={draftLessons.map(({ course, module, lesson }) => [
+            `${course.id}:${lesson.id}`, `${title(course)} / ${title(module)} / ${title(lesson)}`,
+          ])} />
+        <Select label={text.prerequisite} name="prerequisite_key" choose={text.choose}
+          options={draftLessons.map(({ course, module, lesson }) => [
+            `${course.id}:${lesson.id}`, `${title(course)} / ${title(module)} / ${title(lesson)}`,
+          ])} />
+        <Field label={text.reason} name="reason" />
+        <button disabled={busy}>{text.create}</button>
+      </form>
+      <form onSubmit={(event) => submit(event,
+        `/${String(new FormData(event.currentTarget).get("course_id"))}/completion-rule`,
+        (data) => {
+          const course = draftCourses.find((item) => item.id === data.course_id);
+          return { completion_rule: data.completion_rule,
+            minimum_lessons: data.completion_rule === "minimum_lessons" ? Number(data.minimum_lessons) : null,
+            expected_version: course?.version ?? 1, reason: data.reason };
+        })}>
+        <h2>{text.completionRule}</h2>
+        <Select label={text.course} name="course_id" choose={text.choose}
+          options={draftCourses.map((course) => [course.id, title(course)])} />
+        <label>{text.completionRule}<select name="completion_rule">
+          <option value="all_lessons">{text.allLessons}</option>
+          <option value="minimum_lessons">{text.minimumLessons}</option>
+        </select></label>
+        <Field label={text.minimumLessons} name="minimum_lessons" type="number" required={false} />
+        <Field label={text.reason} name="reason" />
+        <button disabled={busy}>{text.saveRule}</button>
+      </form>
       <form onSubmit={(event) => submit(event, "/materials", (data) => {
         const key = String(data.lesson_key).split(":");
         return {
@@ -239,12 +285,18 @@ export default function LearningWorkspace({
                 {course.state === "draft" ? text.draft : text.published}
               </span></header>
             <p>{locale === "ta" ? course.description_ta : course.description_en}</p>
+            <p className="learning-rule"><strong>{text.completionRule}:</strong> {
+              course.completion_rule === "all_lessons" ? text.allLessons
+                : `${text.minimumLessons}: ${course.minimum_lessons}`
+            }</p>
             {course.modules.length > 0 && <ol className="learning-modules">
               {course.modules.map((module) => <li key={module.id}>
                 <strong>{module.position}. {title(module)}</strong>
                 <ol>{module.lessons.map((lesson) => <li key={lesson.id}>
                   <span>{lesson.position}. {title(lesson)}</span>
                   {lesson.duration_minutes && <small>{lesson.duration_minutes} min</small>}
+                  {lesson.prerequisite_lesson_ids.length > 0 &&
+                    <small>{text.prerequisite}: {lesson.prerequisite_lesson_ids.length}</small>}
                   {lesson.materials.map((material) =>
                     <small key={material.id}>{material.kind}: {locale === "ta" ? material.label_ta : material.label_en}</small>)}
                 </li>)}</ol>
@@ -298,6 +350,12 @@ export default function LearningWorkspace({
             : assignment.cohort_id}</span>
         </li>;
       })}</ul>
+      <h3>{text.progress}</h3>
+      <ul>{catalog.progress_summaries.map((summary) => <li
+        key={`${summary.cohort_id}:${summary.course_id}`}
+      ><strong>{summary.completed_learners} / {summary.assigned_learners} {text.completed}</strong>
+        <span>{summary.started_learners} {text.started} | {summary.average_percent}% {text.average}</span>
+      </li>)}</ul>
     </section>}
   </div>;
 }

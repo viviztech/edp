@@ -276,6 +276,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/organizations/{org}/{course_id}/completion-rule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Completion Rule */
+        post: operations["update_completion_rule_api_v1_courses_organizations__org___course_id__completion_rule_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/prerequisites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Prerequisite */
+        post: operations["create_prerequisite_api_v1_courses_organizations__org__prerequisites_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/courses/organizations/{org}/modules": {
         parameters: {
             query?: never;
@@ -389,6 +423,23 @@ export interface paths {
         put?: never;
         /** Start Course */
         post: operations["start_course_api_v1_courses_organizations__org__my_learning__course_id__start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/lessons/{lesson_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Lesson */
+        post: operations["complete_lesson_api_v1_courses_organizations__org__my_learning__course_id__lessons__lesson_id__complete_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2253,6 +2304,14 @@ export interface components {
             /** Description Ta */
             description_ta: string;
             /**
+             * Completion Rule
+             * @default all_lessons
+             * @enum {string}
+             */
+            completion_rule: "all_lessons" | "minimum_lessons";
+            /** Minimum Lessons */
+            minimum_lessons?: number | null;
+            /**
              * Id
              * Format: uuid
              */
@@ -2325,6 +2384,8 @@ export interface components {
             created_at: string;
             /** Materials */
             materials: components["schemas"]["MaterialAdminView"][];
+            /** Prerequisite Lesson Ids */
+            prerequisite_lesson_ids: string[];
         };
         /** AdminModuleView */
         AdminModuleView: {
@@ -2856,6 +2917,20 @@ export interface components {
              */
             reason: string;
         };
+        /** CompletionRuleUpdate */
+        CompletionRuleUpdate: {
+            /**
+             * Completion Rule
+             * @enum {string}
+             */
+            completion_rule: "all_lessons" | "minimum_lessons";
+            /** Minimum Lessons */
+            minimum_lessons?: number | null;
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
         /** ConflictCommand */
         ConflictCommand: {
             /** Expected Version */
@@ -2880,6 +2955,14 @@ export interface components {
             description_en: string;
             /** Description Ta */
             description_ta: string;
+            /**
+             * Completion Rule
+             * @default all_lessons
+             * @enum {string}
+             */
+            completion_rule: "all_lessons" | "minimum_lessons";
+            /** Minimum Lessons */
+            minimum_lessons?: number | null;
         };
         /** CourseEnrollmentView */
         CourseEnrollmentView: {
@@ -2928,6 +3011,43 @@ export interface components {
              */
             updated_at: string;
         };
+        /** CourseProgressSummary */
+        CourseProgressSummary: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Assigned Learners */
+            assigned_learners: number;
+            /** Started Learners */
+            started_learners: number;
+            /** Completed Learners */
+            completed_learners: number;
+            /** Average Percent */
+            average_percent: number;
+        };
+        /** CourseProgressView */
+        CourseProgressView: {
+            /** Total Lessons */
+            total_lessons: number;
+            /** Required Lessons */
+            required_lessons: number;
+            /** Completed Lessons */
+            completed_lessons: number;
+            /** Percent */
+            percent: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "not_started" | "in_progress" | "completed";
+        };
         /** CourseView */
         CourseView: {
             /** Code */
@@ -2940,6 +3060,14 @@ export interface components {
             description_en: string;
             /** Description Ta */
             description_ta: string;
+            /**
+             * Completion Rule
+             * @default all_lessons
+             * @enum {string}
+             */
+            completion_rule: "all_lessons" | "minimum_lessons";
+            /** Minimum Lessons */
+            minimum_lessons?: number | null;
             /**
              * Id
              * Format: uuid
@@ -4304,6 +4432,13 @@ export interface components {
             /** Description Ta */
             description_ta: string;
             /**
+             * Completion Rule
+             * @enum {string}
+             */
+            completion_rule: "all_lessons" | "minimum_lessons";
+            /** Minimum Lessons */
+            minimum_lessons: number | null;
+            /**
              * Cohort Id
              * Format: uuid
              */
@@ -4316,6 +4451,7 @@ export interface components {
             /** Position */
             position: number;
             course_enrollment: components["schemas"]["CourseEnrollmentView"] | null;
+            progress: components["schemas"]["CourseProgressView"];
             /** Modules */
             modules: components["schemas"]["LearnerModuleView"][];
         };
@@ -4338,6 +4474,14 @@ export interface components {
             body_ta: string;
             /** Duration Minutes */
             duration_minutes: number | null;
+            /** Prerequisite Lesson Ids */
+            prerequisite_lesson_ids: string[];
+            /** Locked */
+            locked: boolean;
+            /** Completed */
+            completed: boolean;
+            /** Completed At */
+            completed_at: string | null;
             /** Materials */
             materials: components["schemas"]["LearnerMaterialView"][];
         };
@@ -4387,6 +4531,13 @@ export interface components {
             courses: components["schemas"]["AdminCourseView"][];
             /** Assignments */
             assignments: components["schemas"]["CohortCourseView"][];
+            /** Progress Summaries */
+            progress_summaries: components["schemas"]["CourseProgressSummary"][];
+        };
+        /** LessonCompletionCommand */
+        LessonCompletionCommand: {
+            /** Expected Course Enrollment Version */
+            expected_course_enrollment_version: number;
         };
         /** LessonCreate */
         LessonCreate: {
@@ -4412,6 +4563,89 @@ export interface components {
             body_ta: string;
             /** Duration Minutes */
             duration_minutes?: number | null;
+        };
+        /** LessonPrerequisiteCreate */
+        LessonPrerequisiteCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /**
+             * Prerequisite Lesson Id
+             * Format: uuid
+             */
+            prerequisite_lesson_id: string;
+            /** Reason */
+            reason: string;
+        };
+        /** LessonPrerequisiteView */
+        LessonPrerequisiteView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /**
+             * Prerequisite Lesson Id
+             * Format: uuid
+             */
+            prerequisite_lesson_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** LessonProgressView */
+        LessonProgressView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Course Enrollment Id
+             * Format: uuid
+             */
+            course_enrollment_id: string;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /**
+             * Completed At
+             * Format: date-time
+             */
+            completed_at: string;
+            course_enrollment: components["schemas"]["CourseEnrollmentView"];
+            progress: components["schemas"]["CourseProgressView"];
         };
         /** LessonView */
         LessonView: {
@@ -6176,6 +6410,77 @@ export interface operations {
             };
         };
     };
+    update_completion_rule_api_v1_courses_organizations__org___course_id__completion_rule_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompletionRuleUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_prerequisite_api_v1_courses_organizations__org__prerequisites_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LessonPrerequisiteCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonPrerequisiteView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_module_api_v1_courses_organizations__org__modules_post: {
         parameters: {
             query?: never;
@@ -6402,6 +6707,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CourseEnrollmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_lesson_api_v1_courses_organizations__org__my_learning__course_id__lessons__lesson_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LessonCompletionCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonProgressView"];
                 };
             };
             /** @description Validation Error */

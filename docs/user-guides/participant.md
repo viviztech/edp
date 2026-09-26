@@ -16,3 +16,7 @@ After signing in, choose an organization and open Application draft. A published
 ## Participant schedule
 
 After staff converts a finalized selected application, sign in and open `/{language}/participant` for the organization. The page shows your application, selection and enrollment journey plus sessions for your enrolled cohorts in chronological order. Online sessions may omit a physical location; in-person and hybrid sessions include staff-provided joining details. You cannot see reviewer scores, comments or internal decision reasons.
+
+## Complete lessons
+
+Start an assigned course to enable its first eligible lessons. Locked lessons show that an earlier prerequisite remains. Mark each available lesson complete; the progress bar and course status update immediately. Completion is safe to retry. The course becomes completed automatically when its published rule is satisfied.

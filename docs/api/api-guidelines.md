@@ -47,3 +47,7 @@ P01.3 adds POST /api/v1/programs/organizations/{org}/staff-assignments and POST 
 L01.1 uses /api/v1/courses/organizations/{org}. Authorized staff use GET /catalog, POST /, POST /modules, POST /lessons, POST /materials, POST /{course}/publish and POST /cohort-assignments. Publication requires an exact course version and reason. Assignment accepts only course, cohort, order and reason; organization scope and course publication are server validated.
 
 Participants use GET /my-learning and idempotent POST /my-learning/{course}/start. Ownership is derived from the authenticated Person, active Participant and active program Enrollment. Learner material DTOs include safe labels and availability only; private provider keys never cross the learner API or browser BFF. The Next.js BFF allowlists only these exact UUID-shaped paths and applies Origin/CSRF checks to every mutation.
+
+## L01.2 progress endpoints
+
+Staff use POST /prerequisites and POST /{course}/completion-rule while a course is draft. Rule mutation requires expected_version and reason. Participants use POST /my-learning/{course}/lessons/{lesson}/complete with expected_course_enrollment_version. The command is idempotent after completion, returns the lesson evidence plus the recalculated course aggregate, and uses stable errors: course_not_started, lesson_prerequisite_incomplete, prerequisite_must_precede_lesson, completion_rule_invalid, and version_conflict. GET /catalog includes bounded cohort progress summaries; GET /my-learning includes lesson lock/completion state and derived progress.

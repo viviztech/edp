@@ -7,11 +7,16 @@ from app.modules.lms import service
 from app.modules.lms.schemas import (
     CohortCourseCreate,
     CohortCourseView,
+    CompletionRuleUpdate,
     CourseCreate,
     CourseEnrollmentView,
     CourseView,
     LearningCatalogView,
+    LessonCompletionCommand,
     LessonCreate,
+    LessonPrerequisiteCreate,
+    LessonPrerequisiteView,
+    LessonProgressView,
     LessonView,
     MaterialAdminView,
     MaterialCreate,
@@ -38,6 +43,31 @@ def create_course(
     identity: Principal,
 ) -> CourseView:
     return service.create_course(db, org, identity[0], data, request.state.request_id)
+
+
+@router.post("/{course_id}/completion-rule", response_model=CourseView)
+def update_completion_rule(
+    org: UUID,
+    course_id: UUID,
+    data: CompletionRuleUpdate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> CourseView:
+    return service.update_completion_rule(
+        db, org, course_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.post("/prerequisites", response_model=LessonPrerequisiteView, status_code=201)
+def create_prerequisite(
+    org: UUID,
+    data: LessonPrerequisiteCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> LessonPrerequisiteView:
+    return service.create_prerequisite(db, org, identity[0], data, request.state.request_id)
 
 
 @router.post("/modules", response_model=ModuleView, status_code=201)
@@ -122,4 +152,22 @@ def start_course(
         course_id,
         identity[0],
         request.state.request_id,
+    )
+
+
+@router.post(
+    "/my-learning/{course_id}/lessons/{lesson_id}/complete",
+    response_model=LessonProgressView,
+)
+def complete_lesson(
+    org: UUID,
+    course_id: UUID,
+    lesson_id: UUID,
+    data: LessonCompletionCommand,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> LessonProgressView:
+    return service.complete_lesson(
+        db, org, course_id, lesson_id, identity[0], data, request.state.request_id
     )

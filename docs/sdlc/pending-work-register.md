@@ -92,3 +92,7 @@ Update this register whenever an item is completed, deferred by an approved deci
 - Superseded P01.2 coordinator wording was reconciled.
 - L01.1 course catalog and enrollment access was committed on `main` as `8b075ee`; remote CI remains pending until the pushed commit completes its workflow.
 - Later L01 work includes lesson progress, prerequisites, trainer bindings and signed media delivery.
+
+## L01.2 completion record
+
+L01.2 adds ordered prerequisites, draft-only completion rules, immutable lesson completion evidence, derived course progress, automatic enrollment completion, and count-only cohort summaries. Remaining LMS work includes private media delivery, assessments, attendance, certificates, native Flutter after macOS migration, remote CI confirmation, and closure of legacy repository-wide Ruff/MyPy debt.

@@ -635,6 +635,122 @@
         }
       }
     },
+    "/api/v1/courses/organizations/{org}/{course_id}/completion-rule": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Update Completion Rule",
+        "operationId": "update_completion_rule_api_v1_courses_organizations__org___course_id__completion_rule_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompletionRuleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/prerequisites": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Create Prerequisite",
+        "operationId": "create_prerequisite_api_v1_courses_organizations__org__prerequisites_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonPrerequisiteCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonPrerequisiteView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/courses/organizations/{org}/modules": {
       "post": {
         "tags": [
@@ -989,6 +1105,79 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CourseEnrollmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/lessons/{lesson_id}/complete": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Complete Lesson",
+        "operationId": "complete_lesson_api_v1_courses_organizations__org__my_learning__course_id__lessons__lesson_id__complete_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonCompletionCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonProgressView"
                 }
               }
             }
@@ -8369,6 +8558,27 @@
             "minLength": 1,
             "title": "Description Ta"
           },
+          "completion_rule": {
+            "type": "string",
+            "enum": [
+              "all_lessons",
+              "minimum_lessons"
+            ],
+            "title": "Completion Rule",
+            "default": "all_lessons"
+          },
+          "minimum_lessons": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minimum Lessons"
+          },
           "id": {
             "type": "string",
             "format": "uuid",
@@ -8516,6 +8726,14 @@
             },
             "type": "array",
             "title": "Materials"
+          },
+          "prerequisite_lesson_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Prerequisite Lesson Ids"
           }
         },
         "additionalProperties": false,
@@ -8531,7 +8749,8 @@
           "id",
           "organization_id",
           "created_at",
-          "materials"
+          "materials",
+          "prerequisite_lesson_ids"
         ],
         "title": "AdminLessonView"
       },
@@ -9696,6 +9915,49 @@
         ],
         "title": "Command"
       },
+      "CompletionRuleUpdate": {
+        "properties": {
+          "completion_rule": {
+            "type": "string",
+            "enum": [
+              "all_lessons",
+              "minimum_lessons"
+            ],
+            "title": "Completion Rule"
+          },
+          "minimum_lessons": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minimum Lessons"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "completion_rule",
+          "expected_version",
+          "reason"
+        ],
+        "title": "CompletionRuleUpdate"
+      },
       "ConflictCommand": {
         "properties": {
           "expected_version": {
@@ -9764,6 +10026,27 @@
             "maxLength": 5000,
             "minLength": 1,
             "title": "Description Ta"
+          },
+          "completion_rule": {
+            "type": "string",
+            "enum": [
+              "all_lessons",
+              "minimum_lessons"
+            ],
+            "title": "Completion Rule",
+            "default": "all_lessons"
+          },
+          "minimum_lessons": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minimum Lessons"
           }
         },
         "additionalProperties": false,
@@ -9854,6 +10137,84 @@
         ],
         "title": "CourseEnrollmentView"
       },
+      "CourseProgressSummary": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "assigned_learners": {
+            "type": "integer",
+            "title": "Assigned Learners"
+          },
+          "started_learners": {
+            "type": "integer",
+            "title": "Started Learners"
+          },
+          "completed_learners": {
+            "type": "integer",
+            "title": "Completed Learners"
+          },
+          "average_percent": {
+            "type": "integer",
+            "title": "Average Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "cohort_id",
+          "assigned_learners",
+          "started_learners",
+          "completed_learners",
+          "average_percent"
+        ],
+        "title": "CourseProgressSummary"
+      },
+      "CourseProgressView": {
+        "properties": {
+          "total_lessons": {
+            "type": "integer",
+            "title": "Total Lessons"
+          },
+          "required_lessons": {
+            "type": "integer",
+            "title": "Required Lessons"
+          },
+          "completed_lessons": {
+            "type": "integer",
+            "title": "Completed Lessons"
+          },
+          "percent": {
+            "type": "integer",
+            "title": "Percent"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "in_progress",
+              "completed"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_lessons",
+          "required_lessons",
+          "completed_lessons",
+          "percent",
+          "status"
+        ],
+        "title": "CourseProgressView"
+      },
       "CourseView": {
         "properties": {
           "code": {
@@ -9886,6 +10247,27 @@
             "maxLength": 5000,
             "minLength": 1,
             "title": "Description Ta"
+          },
+          "completion_rule": {
+            "type": "string",
+            "enum": [
+              "all_lessons",
+              "minimum_lessons"
+            ],
+            "title": "Completion Rule",
+            "default": "all_lessons"
+          },
+          "minimum_lessons": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minimum Lessons"
           },
           "id": {
             "type": "string",
@@ -13070,6 +13452,25 @@
             "type": "string",
             "title": "Description Ta"
           },
+          "completion_rule": {
+            "type": "string",
+            "enum": [
+              "all_lessons",
+              "minimum_lessons"
+            ],
+            "title": "Completion Rule"
+          },
+          "minimum_lessons": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minimum Lessons"
+          },
           "cohort_id": {
             "type": "string",
             "format": "uuid",
@@ -13094,6 +13495,9 @@
               }
             ]
           },
+          "progress": {
+            "$ref": "#/components/schemas/CourseProgressView"
+          },
           "modules": {
             "items": {
               "$ref": "#/components/schemas/LearnerModuleView"
@@ -13110,10 +13514,13 @@
           "title_ta",
           "description_en",
           "description_ta",
+          "completion_rule",
+          "minimum_lessons",
           "cohort_id",
           "enrollment_id",
           "position",
           "course_enrollment",
+          "progress",
           "modules"
         ],
         "title": "LearnerCourseView"
@@ -13156,6 +13563,34 @@
             ],
             "title": "Duration Minutes"
           },
+          "prerequisite_lesson_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Prerequisite Lesson Ids"
+          },
+          "locked": {
+            "type": "boolean",
+            "title": "Locked"
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
           "materials": {
             "items": {
               "$ref": "#/components/schemas/LearnerMaterialView"
@@ -13173,6 +13608,10 @@
           "body_en",
           "body_ta",
           "duration_minutes",
+          "prerequisite_lesson_ids",
+          "locked",
+          "completed",
+          "completed_at",
           "materials"
         ],
         "title": "LearnerLessonView"
@@ -13273,14 +13712,37 @@
             },
             "type": "array",
             "title": "Assignments"
+          },
+          "progress_summaries": {
+            "items": {
+              "$ref": "#/components/schemas/CourseProgressSummary"
+            },
+            "type": "array",
+            "title": "Progress Summaries"
           }
         },
         "type": "object",
         "required": [
           "courses",
-          "assignments"
+          "assignments",
+          "progress_summaries"
         ],
         "title": "LearningCatalogView"
+      },
+      "LessonCompletionCommand": {
+        "properties": {
+          "expected_course_enrollment_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Course Enrollment Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_course_enrollment_version"
+        ],
+        "title": "LessonCompletionCommand"
       },
       "LessonCreate": {
         "properties": {
@@ -13349,6 +13811,130 @@
           "body_ta"
         ],
         "title": "LessonCreate"
+      },
+      "LessonPrerequisiteCreate": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "prerequisite_lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Prerequisite Lesson Id"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "lesson_id",
+          "prerequisite_lesson_id",
+          "reason"
+        ],
+        "title": "LessonPrerequisiteCreate"
+      },
+      "LessonPrerequisiteView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "prerequisite_lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Prerequisite Lesson Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "course_id",
+          "lesson_id",
+          "prerequisite_lesson_id",
+          "created_at"
+        ],
+        "title": "LessonPrerequisiteView"
+      },
+      "LessonProgressView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "course_enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Enrollment Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Completed At"
+          },
+          "course_enrollment": {
+            "$ref": "#/components/schemas/CourseEnrollmentView"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/CourseProgressView"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "course_enrollment_id",
+          "course_id",
+          "lesson_id",
+          "completed_at",
+          "course_enrollment",
+          "progress"
+        ],
+        "title": "LessonProgressView"
       },
       "LessonView": {
         "properties": {

@@ -83,3 +83,7 @@ Apply migration 6d59d2d4f99c, rerun python -m app.modules.identity.cli seed from
 ## L01.1 local learning
 
 Apply migration 7e6ae3e5a10d, rerun python -m app.modules.identity.cli seed, and restart the API. Program Directors and Program Managers open /{locale}/admin/learning?organization=UUID; enrolled participants open /{locale}/learning?organization=UUID. Build at least one lesson in every module before publishing, then assign the published course to a planned or active cohort. Material provider keys must be synthetic in development. Learner material delivery remains unavailable until the private media adapter is configured.
+
+## L01.2 local learning
+
+Run Alembic to head before using progress APIs. Existing courses receive the all_lessons rule. Re-run OpenAPI export and npm run contracts after backend schema changes. The local PostgreSQL test database must be named edp_auth_test or edp_test; progress acceptance truncates only synthetic fixture data. No Redis or Celery worker is required for synchronous lesson completion.

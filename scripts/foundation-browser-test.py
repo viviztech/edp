@@ -7,11 +7,6 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
-from cryptography.fernet import Fernet
-from playwright.sync_api import expect, sync_playwright
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
-
 from app.modules.applications.models import Application, ApplicationForm
 from app.modules.identity.models import (
     AuthDelivery,
@@ -24,7 +19,12 @@ from app.modules.identity.models import (
 )
 from app.modules.identity.security import hasher
 from app.modules.identity.service import audit, seed_roles
-from app.modules.lms.models import CohortCourse, Course, CourseEnrollment
+from app.modules.lms.models import (
+    CohortCourse,
+    Course,
+    CourseEnrollment,
+    LessonProgress,
+)
 from app.modules.programs import service as program_service
 from app.modules.programs.models import (
     DomainOutbox,
@@ -46,6 +46,10 @@ from app.modules.selection.models import (
     SelectionCycle,
     SelectionDecision,
 )
+from cryptography.fernet import Fernet
+from playwright.sync_api import expect, sync_playwright
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
 
 engine = create_engine(os.environ["DATABASE_URL"])
 assert engine.url.database in {"edp_foundation_e2e", "edp_test"}, (
@@ -802,6 +806,10 @@ with sync_playwright() as playwright:
     page.get_by_role("button", name="Start course", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("In progress", exact=True)).to_be_visible()
+    page.get_by_role("button", name="Mark lesson complete", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Completed", exact=True).first).to_be_visible()
+    expect(page.get_by_text("100%", exact=True).first).to_be_visible()
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     page.screenshot(path=str(evidence / "learning-mobile.png"), full_page=True)
@@ -887,6 +895,14 @@ with sync_playwright() as playwright:
         assert cohort_course and cohort_course.course_id == course.id
         assert course_enrollment and course_enrollment.course_id == course.id
         assert course_enrollment.enrollment_id == enrollment.id
+        assert course_enrollment.status == "completed"
+        assert course_enrollment.completed_at is not None
+        lesson_progress = db.scalar(
+            select(LessonProgress).where(
+                LessonProgress.course_enrollment_id == course_enrollment.id
+            )
+        )
+        assert lesson_progress is not None
         assert interview and interview.status == "completed"
         assert float(interview.average_score or 0) == 84
         assert selection_cycle and selection_cycle.state == "closed"
