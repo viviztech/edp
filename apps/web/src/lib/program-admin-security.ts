@@ -5,8 +5,9 @@ export function programAdminPath(path: string[], method: string): string | null 
   const rules: Record<string, string[]> = {
     GET: [`organizations/${id}/catalog`, `organizations/${id}/my-timeline`],
     POST: [
-      `organizations/${id}/(programs|centers|cohorts|cycles|sessions)`,
+      `organizations/${id}/(programs|centers|cohorts|cycles|sessions|staff-assignments)`,
       `organizations/${id}/enrollments/convert`,
+      `organizations/${id}/staff-assignments/${id}/revoke`,
       `organizations/${id}/(programs|centers|cohorts|cycles|sessions)/${id}/state`,
       `organizations/${id}/participants/${id}/state`,
     ],

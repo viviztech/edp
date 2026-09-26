@@ -26,6 +26,9 @@ from app.modules.programs.schemas import (
     SessionCreate,
     SessionStateCommand,
     SessionView,
+    StaffAssignmentCreate,
+    StaffAssignmentRevoke,
+    StaffAssignmentView,
     StateCommand,
 )
 
@@ -35,6 +38,34 @@ router = APIRouter(prefix="/api/v1/programs/organizations/{org}", tags=["program
 @router.get("/catalog", response_model=CatalogView)
 def catalog(org: UUID, db: DB, identity: Principal) -> CatalogView:
     return service.catalog(db, org, identity[0])
+
+
+@router.post("/staff-assignments", response_model=StaffAssignmentView, status_code=201)
+def create_staff_assignment(
+    org: UUID,
+    data: StaffAssignmentCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> StaffAssignmentView:
+    return service.create_staff_assignment(db, org, identity[0], data, request.state.request_id)
+
+
+@router.post(
+    "/staff-assignments/{assignment_id}/revoke",
+    response_model=StaffAssignmentView,
+)
+def revoke_staff_assignment(
+    org: UUID,
+    assignment_id: UUID,
+    data: StaffAssignmentRevoke,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> StaffAssignmentView:
+    return service.revoke_staff_assignment(
+        db, org, assignment_id, identity[0], data, request.state.request_id
+    )
 
 
 @router.post("/programs", response_model=ProgramView, status_code=201)

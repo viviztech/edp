@@ -78,6 +78,7 @@ PROGRAM_DELIVERY_PERMISSIONS = [
     "participant.update",
     "enrollment.manage",
     "schedule.manage",
+    "staff.assignment.manage",
 ]
 PARTICIPANT_SELF_PERMISSION = "participant.self"
 SELECTION_PERMISSIONS = [
@@ -480,7 +481,14 @@ def seed_roles(db: Session) -> None:
                 "selection.interview.score",
             ]
         elif name == "Training Center Coordinator":
-            codes = ["system.access", "program.view"]
+            codes = [
+                "system.access",
+                "program.view",
+                "cohort.manage",
+                "participant.view",
+                "participant.update",
+                "schedule.manage",
+            ]
         elif name == "Marketing Executive":
             codes = ["system.access", *META_PERMISSIONS]
         elif name == "Participant":

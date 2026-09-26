@@ -12,6 +12,7 @@ from sqlalchemy import (
     Integer,
     String,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -92,6 +93,7 @@ class Cohort(Record, Base):
         UniqueConstraint("organization_id", "code"),
         UniqueConstraint("id", "organization_id"),
         UniqueConstraint("id", "program_id", "organization_id"),
+        UniqueConstraint("id", "center_id", "organization_id", name="uq_cohort_center_scope"),
         CheckConstraint(
             "state IN ('planned','active','completed','cancelled')", name="cohort_state"
         ),
@@ -100,6 +102,65 @@ class Cohort(Record, Base):
         CheckConstraint("version > 0", name="cohort_version"),
         Index("ix_cohort_program_state", "program_id", "state", "id"),
         Index("ix_cohort_center_state", "center_id", "state", "id"),
+    )
+
+
+class ProgramStaffAssignment(Record, Base):
+    __tablename__ = "program_staff_assignments"
+    organization_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="RESTRICT"), index=True
+    )
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    center_id: Mapped[UUID] = mapped_column(index=True)
+    cohort_id: Mapped[UUID | None] = mapped_column(nullable=True, index=True)
+    state: Mapped[str] = mapped_column(String(16), default="active")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["center_id", "organization_id"],
+            ["training_centers.id", "training_centers.organization_id"],
+            name="fk_program_staff_center_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["cohort_id", "center_id", "organization_id"],
+            ["cohorts.id", "cohorts.center_id", "cohorts.organization_id"],
+            name="fk_program_staff_cohort_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("id", "organization_id"),
+        CheckConstraint("state IN ('active','revoked')", name="program_staff_state"),
+        CheckConstraint("version > 0", name="program_staff_version"),
+        CheckConstraint(
+            "(state = 'active' AND revoked_at IS NULL) OR "
+            "(state = 'revoked' AND revoked_at IS NOT NULL)",
+            name="program_staff_revocation_evidence",
+        ),
+        Index(
+            "uq_program_staff_active_center",
+            "organization_id",
+            "user_id",
+            "center_id",
+            unique=True,
+            postgresql_where=text("cohort_id IS NULL AND state = 'active'"),
+        ),
+        Index(
+            "uq_program_staff_active_cohort",
+            "organization_id",
+            "user_id",
+            "cohort_id",
+            unique=True,
+            postgresql_where=text("cohort_id IS NOT NULL AND state = 'active'"),
+        ),
+        Index(
+            "ix_program_staff_scope",
+            "organization_id",
+            "center_id",
+            "cohort_id",
+            "state",
+        ),
     )
 
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../../lib/api-contracts";
@@ -29,7 +29,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
   const text = selectionMessages[locale];
   const root = `/api/selection/organizations/${org}`;
   const [workspace, setWorkspace] = useState<Workspace>(empty);
-  const [catalog, setCatalog] = useState<Catalog>({ programs: [], centers: [], cohorts: [], cycles: [], enrollment_candidates: [], participants: [], enrollments: [], sessions: [] });
+  const [catalog, setCatalog] = useState<Catalog>({ programs: [], centers: [], cohorts: [], cycles: [], enrollment_candidates: [], participants: [], enrollments: [], sessions: [], staff_assignments: [] });
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState<string>(text.loading);
   const canManageCycle = permissions.includes("selection.cycle.manage");
@@ -64,7 +64,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
       request<Workspace>(root + "/workspace"),
       permissions.includes("program.view")
         ? request<Catalog>(`/api/programs/organizations/${org}/catalog`)
-        : Promise.resolve({ programs: [], centers: [], cohorts: [], cycles: [], enrollment_candidates: [], participants: [], enrollments: [], sessions: [] } as Catalog),
+        : Promise.resolve({ programs: [], centers: [], cohorts: [], cycles: [], enrollment_candidates: [], participants: [], enrollments: [], sessions: [], staff_assignments: [] } as Catalog),
     ]);
     setWorkspace(selection);
     setCatalog(programs);
@@ -194,7 +194,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
             rubric.selection_cycle_id === item.id && rubric.state === "published"
           );
           return <li key={item.id}>
-            <Record name={locale === "ta" ? item.name_ta : item.name_en} detail={`${item.code} · ${intakeName(item.application_cycle_id)} · ${text.version} ${item.version}`} state={item.state} />
+            <Record name={locale === "ta" ? item.name_ta : item.name_en} detail={`${item.code} Â· ${intakeName(item.application_cycle_id)} Â· ${text.version} ${item.version}`} state={item.state} />
             {canManageCycle && <div className="program-actions">
               {item.state === "draft" && hasPublished && <button onClick={() => transition(item, "active")}>{text.activate}</button>}
               {item.state === "active" && canFinalize && <button onClick={() => transition(item, "closed")}>{text.finalizeCycle}</button>}
@@ -217,7 +217,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
         </form>}
         <ul className="program-list">{workspace.assignments.map((item) =>
           <li key={item.id}>
-            <Record name={item.application_number} detail={`${item.reviewer_name} · ${cycleName(item.selection_cycle_id)}`} state={item.status} />
+            <Record name={item.application_number} detail={`${item.reviewer_name} Â· ${cycleName(item.selection_cycle_id)}`} state={item.status} />
             {item.status === "completed" && <div className="selection-result">
               <strong>{text.weightedScore}: {Number(item.weighted_score).toFixed(2)}</strong>
               <span>{item.moderation_status === "included" ? text.included : text.excluded}</span>
@@ -235,7 +235,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
         <h2>{text.rubric}</h2>
         <div className="selection-rubrics">{workspace.rubrics.map((item) =>
           <article className="selection-rubric" key={item.id}>
-            <Record name={`${cycleName(item.selection_cycle_id)} · ${text.version} ${item.version_number}`}
+            <Record name={`${cycleName(item.selection_cycle_id)} Â· ${text.version} ${item.version_number}`}
               detail={item.state === "published" ? text.published : `${item.criteria.reduce((sum, criterion) => sum + criterion.weight, 0)}%`} state={item.state} />
             {item.state === "draft" && canManageRubric
               ? <RubricEditor rubric={item} locale={locale} busy={busy}
@@ -246,7 +246,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
                     expected_edit_version: item.edit_version,
                   })) : undefined} />
               : <ol className="selection-criteria">{item.criteria.map((criterion) =>
-                  <li key={criterion.id}><strong>{locale === "ta" ? criterion.label_ta : criterion.label_en}</strong><span>{criterion.weight}% · {criterion.minimum_score}–{criterion.maximum_score}</span></li>
+                  <li key={criterion.id}><strong>{locale === "ta" ? criterion.label_ta : criterion.label_en}</strong><span>{criterion.weight}% Â· {criterion.minimum_score}â€“{criterion.maximum_score}</span></li>
                 )}</ol>}
             {item.state !== "draft" && canManageRubric &&
               !workspace.rubrics.some((rubric) => rubric.selection_cycle_id === item.selection_cycle_id && rubric.state === "draft") &&
@@ -259,7 +259,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
       {canAssign && <section className="program-panel program-wide">
         <h2>{text.aggregates}</h2>
         <ul className="program-list">{workspace.aggregates.map((item) => <li key={`${item.selection_cycle_id}-${item.application_id}`}>
-          <Record name={item.application_number} detail={`${cycleName(item.selection_cycle_id)} · ${item.included_reviews}/${item.completed_reviews} ${text.includedReviews}`} state={item.aggregate_score === null ? "pending" : "completed"} />
+          <Record name={item.application_number} detail={`${cycleName(item.selection_cycle_id)} Â· ${item.included_reviews}/${item.completed_reviews} ${text.includedReviews}`} state={item.aggregate_score === null ? "pending" : "completed"} />
           <strong>{text.aggregateScore}: {item.aggregate_score === null ? text.notAvailable : Number(item.aggregate_score).toFixed(2)}</strong>
           {item.excluded_reviews > 0 && <small>{item.excluded_reviews} {text.excludedReviews}</small>}          <div className="program-actions">
             {item.application_state === "under_review" && canDecide && <button disabled={busy || item.aggregate_score === null} onClick={() => decide(item, "shortlisted")}>{text.shortlist}</button>}
@@ -297,7 +297,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
           const member = interview.panel.find((item) => item.user_id === actor);
           const allScored = interview.panel.every((item) => item.submitted_at !== null);
           return <li key={interview.id}>
-            <Record name={interview.application_number} detail={`${new Date(interview.starts_at).toLocaleString(locale)} · ${interview.mode === "online" ? text.online : text.inPerson}`} state={interview.status} />
+            <Record name={interview.application_number} detail={`${new Date(interview.starts_at).toLocaleString(locale)} Â· ${interview.mode === "online" ? text.online : text.inPerson}`} state={interview.status} />
             <p>{text.panelMembers}: {interview.panel.map((item) => item.display_name).join(", ")}</p>
             {interview.average_score !== null && <strong>{text.interviewScore}: {Number(interview.average_score).toFixed(2)}</strong>}
             {canScoreInterview && member && !member.submitted_at && interview.status === "scheduled" && <form className="program-form" onSubmit={(event) => submitPanelScore(event, interview)}>
@@ -315,9 +315,9 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
       {canAssign && <section className="program-panel program-wide">
         <h2>{text.decisionHistory}</h2>
         <ul className="program-list">{workspace.decisions.map((item) => <li key={item.id}>
-          <Record name={item.application_number} detail={`${item.from_state} → ${item.to_state}`} state={item.is_override ? "override" : item.to_state} />
+          <Record name={item.application_number} detail={`${item.from_state} â†’ ${item.to_state}`} state={item.is_override ? "override" : item.to_state} />
           <p>{item.reason}</p>
-          <small>{text.reviewScore}: {item.aggregate_score_snapshot ?? text.notAvailable} · {text.interviewScore}: {item.interview_score_snapshot ?? text.notAvailable}</small>
+          <small>{text.reviewScore}: {item.aggregate_score_snapshot ?? text.notAvailable} Â· {text.interviewScore}: {item.interview_score_snapshot ?? text.notAvailable}</small>
         </li>)}</ul>
         {!workspace.decisions.length && <p>{text.empty}</p>}
       </section>}
@@ -374,7 +374,7 @@ function ReviewEditor({ assignment, rubric, locale, busy, onSave, onSubmit }: {
   const payload = Object.entries(scores).filter(([, value]) => value !== "").map(([criterion_id, score]) => ({ criterion_id, score: Number(score) }));
   return <div className="selection-review-editor">
     {rubric.criteria.map((criterion) => <label key={criterion.id}>
-      <span>{locale === "ta" ? criterion.label_ta : criterion.label_en} <small>{criterion.weight}% · {criterion.minimum_score}–{criterion.maximum_score}</small></span>
+      <span>{locale === "ta" ? criterion.label_ta : criterion.label_en} <small>{criterion.weight}% Â· {criterion.minimum_score}â€“{criterion.maximum_score}</small></span>
       <input type="number" min={criterion.minimum_score} max={criterion.maximum_score} step="0.01"
         required={criterion.required} value={scores[criterion.id] ?? ""}
         onChange={(event) => setScores((current) => ({ ...current, [criterion.id]: event.target.value }))} />
@@ -414,7 +414,7 @@ function RubricEditor({ rubric, locale, busy, onSave, onPublish }: {
       <NumberField label={text.maximum} value={item.maximum_score} min={1} max={100} onChange={(value) => change(index, "maximum_score", value)} />
       {criteria.length > 1 && <button type="button" onClick={() => setCriteria((current) => current.filter((_, itemIndex) => itemIndex !== index))}>{text.remove}</button>}
     </div>)}
-    <p className={total === 100 ? "selection-total valid" : "selection-total"}>{total}% · {text.weights}</p>
+    <p className={total === 100 ? "selection-total valid" : "selection-total"}>{total}% Â· {text.weights}</p>
     <div className="program-actions">
       <button type="button" onClick={() => setCriteria((current) => [...current, { ...newCriterion(), weight: 1 }])}>{text.addCriterion}</button>
       <button type="button" disabled={busy || total !== 100} onClick={() => void onSave(criteria)}>{text.save}</button>

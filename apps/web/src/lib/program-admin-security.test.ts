@@ -13,6 +13,8 @@ describe("program administration BFF allowlist", () => {
   expect(programAdminPath(["organizations", org, "sessions"], "POST")).toBe(`/programs/organizations/${org}/sessions`);
   expect(programAdminPath(["organizations", org, "sessions", org, "state"], "POST")).toBe(`/programs/organizations/${org}/sessions/${org}/state`);
   expect(programAdminPath(["organizations", org, "participants", org, "state"], "POST")).toBe(`/programs/organizations/${org}/participants/${org}/state`);
+  expect(programAdminPath(["organizations", org, "staff-assignments"], "POST")).toBe(`/programs/organizations/${org}/staff-assignments`);
+  expect(programAdminPath(["organizations", org, "staff-assignments", item, "revoke"], "POST")).toBe(`/programs/organizations/${org}/staff-assignments/${item}/revoke`);
     expect(programAdminPath(["organizations", org, "programs"], "POST")).toContain("/programs/");
     expect(programAdminPath(["organizations", org, "cohorts", item], "PATCH")).toContain("/programs/");
     expect(programAdminPath(["organizations", org, "cycles", item, "state"], "POST")).toContain("/programs/");
@@ -22,5 +24,6 @@ describe("program administration BFF allowlist", () => {
     expect(programAdminPath(["organizations", org, "..", "auth"], "GET")).toBeNull();
     expect(programAdminPath(["organizations", org, "programs", item], "DELETE")).toBeNull();
     expect(programAdminPath(["organizations", org, "participants"], "POST")).toBeNull();
+    expect(programAdminPath(["organizations", org, "staff-assignments", item], "DELETE")).toBeNull();
   });
 });

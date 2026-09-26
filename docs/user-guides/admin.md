@@ -16,3 +16,8 @@ Selection: configure and publish a rubric, activate the selection cycle after in
 ## Enrollment and program schedule
 
 After a selection cycle is finalized, open Programs. Selected applicants with a cohort appear under enrollment candidates. Create enrollment only after confirming cohort capacity; the action creates the participant link and changes the applicant receipt to enrolled. Use Participants for reasoned suspend/reactivate/complete transitions. Create bilingual sessions within cohort dates and provide a location for in-person or hybrid delivery. Complete or cancel sessions with a reason.
+
+
+## Center and cohort coordinators
+
+Provision the staff account and grant Training Center Coordinator in the correct organization before assigning delivery scope. In Programs, use Center and cohort staff assignments, enter the exact account email, choose an active center and optionally one of its planned or active cohorts, then record the assignment reason. Leaving cohort blank grants every cohort at that center, including later cohorts. Selecting a cohort grants only that cohort. Revoke an assignment with a reason as soon as responsibility ends; the coordinator loses scoped catalog and mutation access on the next request. Use a new assignment instead of editing retained scope evidence.

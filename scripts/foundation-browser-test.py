@@ -11,11 +11,13 @@ from app.modules.applications.models import Application, ApplicationForm
 from app.modules.identity.models import (
     AuthDelivery,
     Organization,
+    Person,
     Role,
     User,
     UserRole,
     VerificationToken,
 )
+from app.modules.identity.security import hasher
 from app.modules.identity.service import audit, seed_roles
 from app.modules.programs import service as program_service
 from app.modules.programs.models import (
@@ -23,6 +25,7 @@ from app.modules.programs.models import (
     Enrollment,
     Participant,
     ProgramSession,
+    ProgramStaffAssignment,
 )
 from app.modules.programs.schemas import (
     CenterCreate,
@@ -50,6 +53,8 @@ base = os.environ["WEB_ORIGIN"]
 assert base.startswith(("http://127.0.0.1:", "http://localhost:"))
 email = "synthetic-" + uuid4().hex[:12] + "@example.com"
 password = secrets.token_urlsafe(24)
+coordinator_email = "coordinator-" + uuid4().hex[:12] + "@example.com"
+coordinator_password = secrets.token_urlsafe(24)
 
 
 def latest_token(purpose):
@@ -149,6 +154,28 @@ with sync_playwright() as playwright:
         db.flush()
         db.add(
             UserRole(user_id=user.id, role_id=role.id, organization_id=organization.id)
+        )
+        coordinator_person = Person(display_name="Synthetic Coordinator")
+        db.add(coordinator_person)
+        db.flush()
+        coordinator = User(
+            person_id=coordinator_person.id,
+            email=coordinator_email,
+            password_hash=hasher.hash(coordinator_password),
+            status="active",
+        )
+        db.add(coordinator)
+        db.flush()
+        coordinator_role = db.scalar(
+            select(Role).where(Role.name == "Training Center Coordinator")
+        )
+        assert coordinator_role
+        db.add(
+            UserRole(
+                user_id=coordinator.id,
+                role_id=coordinator_role.id,
+                organization_id=organization.id,
+            )
         )
         audit(
             db,
@@ -313,6 +340,18 @@ with sync_playwright() as playwright:
             ),
             "e2e-center-create",
         )
+        other_center = program_service.create_center(
+            db,
+            organization_id,
+            actor,
+            CenterCreate(
+                code="e2e-other-center",
+                name_en="E2E other center",
+                name_ta="Synthetic Tamil other center",
+                locality="Madurai",
+            ),
+            "e2e-other-center-create",
+        )
         cohort = program_service.create_cohort(
             db,
             organization_id,
@@ -328,6 +367,22 @@ with sync_playwright() as playwright:
                 capacity=20,
             ),
             "e2e-cohort-create",
+        )
+        other_cohort = program_service.create_cohort(
+            db,
+            organization_id,
+            actor,
+            CohortCreate(
+                code="e2e-other-cohort",
+                name_en="E2E other cohort",
+                name_ta="Synthetic Tamil other cohort",
+                program_id=program.id,
+                center_id=other_center.id,
+                starts_on=datetime.now(UTC).date() - timedelta(days=7),
+                ends_on=datetime.now(UTC).date() + timedelta(days=90),
+                capacity=20,
+            ),
+            "e2e-other-cohort-create",
         )
         cohort = program_service.transition_cohort(
             db,
@@ -533,6 +588,125 @@ with sync_playwright() as playwright:
     schedule_button.click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("Business foundations", exact=True)).to_be_visible()
+
+    assign_button = page.get_by_role("button", name="Assign coordinator", exact=True)
+    assignment_form = page.locator("form").filter(has=assign_button)
+    assignment_form.locator('input[name="email"]').fill(coordinator_email)
+    assignment_form.locator('select[name="center_id"]').select_option(
+        label="E2E center"
+    )
+    assignment_form.get_by_label("Assignment reason", exact=True).fill(
+        "Own E2E center delivery"
+    )
+    assign_button.click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text(coordinator_email, exact=False)).to_be_visible()
+
+    coordinator_context = browser.new_context(viewport={"width": 1280, "height": 900})
+    coordinator_page = coordinator_context.new_page()
+    coordinator_errors = []
+    coordinator_page.on(
+        "pageerror", lambda error: coordinator_errors.append(str(error))
+    )
+    coordinator_page.goto(base + "/en/account")
+    coordinator_page.wait_for_load_state("domcontentloaded")
+    coordinator_page.get_by_label("Email", exact=True).fill(coordinator_email)
+    coordinator_page.get_by_label("Password", exact=True).fill(coordinator_password)
+    coordinator_page.locator("form").get_by_role(
+        "button", name="Sign in", exact=True
+    ).click()
+    expect(
+        coordinator_page.get_by_text("Synthetic Coordinator", exact=True)
+    ).to_be_visible()
+    coordinator_page.goto(
+        base + "/en/admin/programs?organization=" + str(organization_id)
+    )
+    expect(
+        coordinator_page.get_by_role(
+            "heading", name="Program administration", exact=True
+        )
+    ).to_be_visible()
+    expect(
+        coordinator_page.locator(".program-list strong", has_text="E2E center").first
+    ).to_be_visible()
+    expect(
+        coordinator_page.locator(".program-list strong", has_text="E2E other center")
+    ).not_to_be_visible()
+    expect(
+        coordinator_page.locator(".program-list strong", has_text="E2E cohort").first
+    ).to_be_visible()
+    expect(
+        coordinator_page.locator(".program-list strong", has_text="E2E other cohort")
+    ).not_to_be_visible()
+
+    scoped_schedule_button = coordinator_page.get_by_role(
+        "button", name="Schedule session", exact=True
+    )
+    scoped_schedule_form = coordinator_page.locator("form").filter(
+        has=scoped_schedule_button
+    )
+    scoped_schedule_form.locator('select[name="cohort_id"]').select_option(
+        label="E2E cohort"
+    )
+    scoped_schedule_form.locator('input[name="title_en"]').fill("Coordinator session")
+    scoped_schedule_form.locator('input[name="title_ta"]').fill(
+        "Synthetic Tamil coordinator session"
+    )
+    scoped_start = datetime.now(UTC) + timedelta(days=2)
+    scoped_schedule_form.locator('input[name="starts_at"]').fill(
+        scoped_start.strftime("%Y-%m-%dT%H:%M")
+    )
+    scoped_schedule_form.locator('input[name="ends_at"]').fill(
+        (scoped_start + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M")
+    )
+    scoped_schedule_form.locator('select[name="mode"]').select_option("online")
+    scoped_schedule_button.click()
+    expect(coordinator_page.get_by_role("status")).to_have_text("Change saved.")
+    expect(
+        coordinator_page.get_by_text("Coordinator session", exact=True)
+    ).to_be_visible()
+
+    coordinator_csrf = coordinator_page.request.get(base + "/api/session/csrf").json()[
+        "csrf_token"
+    ]
+    denied_session = coordinator_page.request.post(
+        base + "/api/programs/organizations/" + str(organization_id) + "/sessions",
+        data={
+            "cohort_id": str(other_cohort.id),
+            "title_en": "Denied coordinator session",
+            "title_ta": "Synthetic Tamil denied session",
+            "starts_at": scoped_start.isoformat(),
+            "ends_at": (scoped_start + timedelta(hours=1)).isoformat(),
+            "mode": "online",
+            "location": None,
+        },
+        headers={
+            "Origin": base,
+            "X-CSRF-Token": coordinator_csrf,
+        },
+    )
+    assert denied_session.status == 403
+
+    coordinator_page.set_viewport_size({"width": 390, "height": 844})
+    assert coordinator_page.evaluate(
+        "document.documentElement.scrollWidth <= window.innerWidth"
+    )
+    coordinator_page.screenshot(
+        path=str(evidence / "coordinator-scope-mobile.png"), full_page=True
+    )
+    coordinator_page.set_viewport_size({"width": 1280, "height": 900})
+
+    page.once("dialog", lambda dialog: dialog.accept("E2E assignment ended"))
+    page.get_by_role("button", name="Revoke", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("revoked", exact=True)).to_be_visible()
+    coordinator_page.reload()
+    expect(coordinator_page.locator(".program-message")).to_have_text(
+        "The request could not be completed. Check your details and try again."
+    )
+    assert not coordinator_errors, coordinator_errors
+    coordinator_context.close()
+
     page.goto(base + "/en/participant?organization=" + str(organization_id))
     expect(page.get_by_role("heading", name="My program schedule")).to_be_visible()
     expect(page.get_by_text("Business foundations", exact=True).first).to_be_visible()
@@ -572,9 +746,16 @@ with sync_playwright() as playwright:
         enrollment = db.scalar(
             select(Enrollment).where(Enrollment.organization_id == organization_id)
         )
-        program_session = db.scalar(
-            select(ProgramSession).where(
-                ProgramSession.organization_id == organization_id
+        program_sessions = list(
+            db.scalars(
+                select(ProgramSession).where(
+                    ProgramSession.organization_id == organization_id
+                )
+            )
+        )
+        staff_assignment = db.scalar(
+            select(ProgramStaffAssignment).where(
+                ProgramStaffAssignment.organization_id == organization_id
             )
         )
         outbox = db.scalar(
@@ -584,7 +765,12 @@ with sync_playwright() as playwright:
         assert (
             participant and enrollment and enrollment.participant_id == participant.id
         )
-        assert program_session and program_session.title_en == "Business foundations"
+        assert {item.title_en for item in program_sessions} == {
+            "Business foundations",
+            "Coordinator session",
+        }
+        assert staff_assignment and staff_assignment.state == "revoked"
+        assert staff_assignment.revoked_at is not None
         assert outbox and outbox.event_type == "enrollment.created"
         assert interview and interview.status == "completed"
         assert float(interview.average_score or 0) == 84
@@ -637,5 +823,5 @@ with sync_playwright() as playwright:
 engine.dispose()
 print(
     "Browser E2E passed: identity, CSRF, scoped CMS, application policy "
-    "publish/versioning, immutable application submission, selection rubric/assignment/conflict/scoring/moderation/interview/decisions/finalization, enrollment/participant/session/timeline, audit, responsive layouts and session recovery; no JS errors"
+    "publish/versioning, immutable application submission, selection rubric/assignment/conflict/scoring/moderation/interview/decisions/finalization, enrollment/participant/session/timeline, center-scoped coordinator assignment/revocation, audit, responsive layouts and session recovery; no JS errors"
 )

@@ -2,12 +2,20 @@ import json
 from typing import cast
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.modules.applications.models import Application, ApplicationForm, ApplicationStatusHistory
-from app.modules.identity.models import AuditLog, Person, Role, User, UserRole, now
+from app.modules.identity.models import (
+    AuditLog,
+    Person,
+    Role,
+    RolePermission,
+    User,
+    UserRole,
+    now,
+)
 from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
 from app.modules.programs.models import (
@@ -19,6 +27,7 @@ from app.modules.programs.models import (
     ParticipantStatusHistory,
     Program,
     ProgramSession,
+    ProgramStaffAssignment,
     TrainingCenter,
 )
 from app.modules.programs.schemas import (
@@ -53,6 +62,10 @@ from app.modules.programs.schemas import (
     SessionState,
     SessionStateCommand,
     SessionView,
+    StaffAssignmentCreate,
+    StaffAssignmentRevoke,
+    StaffAssignmentState,
+    StaffAssignmentView,
     StateCommand,
     TimelineEvent,
 )
@@ -167,73 +180,189 @@ def _commit(db: Session) -> None:
         raise AuthError("version_conflict", 409) from exc
 
 
+def staff_assignment_view(db: Session, item: ProgramStaffAssignment) -> StaffAssignmentView:
+    user = db.get(User, item.user_id)
+    person = db.get(Person, user.person_id) if user else None
+    if not user or not person:
+        raise AuthError("assignment_identity_unavailable", 409)
+    return StaffAssignmentView(
+        id=item.id,
+        organization_id=item.organization_id,
+        user_id=item.user_id,
+        email=user.email,
+        display_name=person.display_name,
+        center_id=item.center_id,
+        cohort_id=item.cohort_id,
+        state=cast(StaffAssignmentState, item.state),
+        version=item.version,
+        created_at=item.created_at,
+        updated_at=item.updated_at,
+        revoked_at=item.revoked_at,
+    )
+
+
+StaffScope = tuple[set[UUID], set[UUID]]
+
+
+def _staff_scope(db: Session, org: UUID, actor: User, permission: str) -> StaffScope | None:
+    require_permission(db, actor, org, permission)
+    unrestricted = db.scalar(
+        select(UserRole.id)
+        .join(Role, Role.id == UserRole.role_id)
+        .join(RolePermission, RolePermission.role_id == Role.id)
+        .where(
+            UserRole.user_id == actor.id,
+            UserRole.organization_id == org,
+            RolePermission.permission_code == permission,
+            Role.name != "Training Center Coordinator",
+        )
+        .limit(1)
+    )
+    if unrestricted:
+        return None
+    assignments = list(
+        db.scalars(
+            select(ProgramStaffAssignment).where(
+                ProgramStaffAssignment.organization_id == org,
+                ProgramStaffAssignment.user_id == actor.id,
+                ProgramStaffAssignment.state == "active",
+            )
+        )
+    )
+    if not assignments:
+        raise AuthError("staff_scope_required", 403)
+    center_ids = {item.center_id for item in assignments if item.cohort_id is None}
+    cohort_ids = {item.cohort_id for item in assignments if item.cohort_id is not None}
+    return center_ids, cohort_ids
+
+
+def _cohort_in_scope(cohort: Cohort, scope: StaffScope | None) -> bool:
+    return scope is None or cohort.center_id in scope[0] or cohort.id in scope[1]
+
+
+def _require_cohort_scope(cohort: Cohort, scope: StaffScope | None) -> None:
+    if not _cohort_in_scope(cohort, scope):
+        raise AuthError("staff_scope_denied", 403)
+
+
+def _require_participant_scope(
+    db: Session, org: UUID, participant_id: UUID, scope: StaffScope | None
+) -> None:
+    if scope is None:
+        return
+    predicates = []
+    if scope[0]:
+        predicates.append(Cohort.center_id.in_(scope[0]))
+    if scope[1]:
+        predicates.append(Cohort.id.in_(scope[1]))
+    allowed = db.scalar(
+        select(Enrollment.id)
+        .join(Cohort, Cohort.id == Enrollment.cohort_id)
+        .where(
+            Enrollment.organization_id == org,
+            Enrollment.participant_id == participant_id,
+            or_(*predicates),
+        )
+        .limit(1)
+    )
+    if not allowed:
+        raise AuthError("staff_scope_denied", 403)
+
+
 def catalog(db: Session, org: UUID, actor: User) -> CatalogView:
-    require_permission(db, actor, org, "program.view")
+    scope = _staff_scope(db, org, actor, "program.view")
+    programs = list(
+        db.scalars(
+            select(Program)
+            .where(Program.organization_id == org)
+            .order_by(Program.created_at, Program.id)
+            .limit(100)
+        )
+    )
+    centers = list(
+        db.scalars(
+            select(TrainingCenter)
+            .where(TrainingCenter.organization_id == org)
+            .order_by(TrainingCenter.created_at, TrainingCenter.id)
+            .limit(100)
+        )
+    )
+    cohorts = list(
+        db.scalars(
+            select(Cohort)
+            .where(Cohort.organization_id == org)
+            .order_by(Cohort.starts_on, Cohort.id)
+            .limit(100)
+        )
+    )
+    if scope is not None:
+        centers = [
+            item
+            for item in centers
+            if item.id in scope[0]
+            or any(cohort.id in scope[1] and cohort.center_id == item.id for cohort in cohorts)
+        ]
+        cohorts = [item for item in cohorts if _cohort_in_scope(item, scope)]
+    cohort_ids = {item.id for item in cohorts}
+    cycles = list(
+        db.scalars(
+            select(ApplicationCycle)
+            .where(ApplicationCycle.organization_id == org)
+            .order_by(ApplicationCycle.opens_at, ApplicationCycle.id)
+            .limit(100)
+        )
+    )
+    enrollments = list(
+        db.scalars(
+            select(Enrollment)
+            .where(Enrollment.organization_id == org)
+            .order_by(Enrollment.enrolled_at, Enrollment.id)
+            .limit(100)
+        )
+    )
+    sessions = list(
+        db.scalars(
+            select(ProgramSession)
+            .where(ProgramSession.organization_id == org)
+            .order_by(ProgramSession.starts_at, ProgramSession.id)
+            .limit(200)
+        )
+    )
+    assignments = list(
+        db.scalars(
+            select(ProgramStaffAssignment)
+            .where(ProgramStaffAssignment.organization_id == org)
+            .order_by(ProgramStaffAssignment.created_at, ProgramStaffAssignment.id)
+            .limit(200)
+        )
+    )
+    candidates = _enrollment_candidates(db, org)
+    participants = list(
+        db.scalars(
+            select(Participant)
+            .where(Participant.organization_id == org)
+            .order_by(Participant.created_at, Participant.id)
+            .limit(100)
+        )
+    )
+    if scope is not None:
+        cycles = [item for item in cycles if item.cohort_id in cohort_ids]
+        enrollments = [item for item in enrollments if item.cohort_id in cohort_ids]
+        sessions = [item for item in sessions if item.cohort_id in cohort_ids]
+        candidates = []
+        participant_ids = {item.participant_id for item in enrollments}
+        participants = [item for item in participants if item.id in participant_ids]
+        assignments = [item for item in assignments if item.user_id == actor.id]
     return CatalogView(
-        programs=[
-            program_view(item)
-            for item in db.scalars(
-                select(Program)
-                .where(Program.organization_id == org)
-                .order_by(Program.created_at, Program.id)
-                .limit(100)
-            )
-        ],
-        centers=[
-            center_view(item)
-            for item in db.scalars(
-                select(TrainingCenter)
-                .where(TrainingCenter.organization_id == org)
-                .order_by(TrainingCenter.created_at, TrainingCenter.id)
-                .limit(100)
-            )
-        ],
-        cohorts=[
-            cohort_view(item)
-            for item in db.scalars(
-                select(Cohort)
-                .where(Cohort.organization_id == org)
-                .order_by(Cohort.starts_on, Cohort.id)
-                .limit(100)
-            )
-        ],
-        cycles=[
-            cycle_view(item)
-            for item in db.scalars(
-                select(ApplicationCycle)
-                .where(ApplicationCycle.organization_id == org)
-                .order_by(ApplicationCycle.opens_at, ApplicationCycle.id)
-                .limit(100)
-            )
-        ],
-        enrollment_candidates=_enrollment_candidates(db, org),
-        participants=[
-            participant_view(db, item)
-            for item in db.scalars(
-                select(Participant)
-                .where(Participant.organization_id == org)
-                .order_by(Participant.created_at, Participant.id)
-                .limit(100)
-            )
-        ],
-        enrollments=[
-            enrollment_view(item)
-            for item in db.scalars(
-                select(Enrollment)
-                .where(Enrollment.organization_id == org)
-                .order_by(Enrollment.enrolled_at, Enrollment.id)
-                .limit(100)
-            )
-        ],
-        sessions=[
-            session_view(item)
-            for item in db.scalars(
-                select(ProgramSession)
-                .where(ProgramSession.organization_id == org)
-                .order_by(ProgramSession.starts_at, ProgramSession.id)
-                .limit(200)
-            )
-        ],
+        programs=[program_view(item) for item in programs],
+        centers=[center_view(item) for item in centers],
+        cohorts=[cohort_view(item) for item in cohorts],
+        cycles=[cycle_view(item) for item in cycles],
+        enrollment_candidates=candidates,
+        participants=[participant_view(db, item) for item in participants],
+        enrollments=[enrollment_view(item) for item in enrollments],
+        sessions=[session_view(item) for item in sessions],
+        staff_assignments=[staff_assignment_view(db, item) for item in assignments],
     )
 
 
@@ -271,6 +400,114 @@ def _cycle(db: Session, org: UUID, item_id: UUID, lock: bool = False) -> Applica
     if not item:
         raise AuthError("not_found", 404)
     return item
+
+
+def create_staff_assignment(
+    db: Session,
+    org: UUID,
+    actor: User,
+    data: StaffAssignmentCreate,
+    request_id: str,
+) -> StaffAssignmentView:
+    require_permission(db, actor, org, "staff.assignment.manage")
+    center = _center(db, org, data.center_id)
+    if center.state != "active":
+        raise AuthError("inactive_dependency", 409)
+    if data.cohort_id:
+        cohort = _cohort(db, org, data.cohort_id)
+        if cohort.center_id != center.id or cohort.state in {"completed", "cancelled"}:
+            raise AuthError("invalid_assignment_scope", 422)
+    user = db.scalar(select(User).where(func.lower(User.email) == data.email.lower()))
+    if not user or user.status != "active":
+        raise AuthError("coordinator_not_found", 404)
+    coordinator_role = db.scalar(
+        select(UserRole.id)
+        .join(Role, Role.id == UserRole.role_id)
+        .where(
+            UserRole.user_id == user.id,
+            UserRole.organization_id == org,
+            Role.name == "Training Center Coordinator",
+        )
+        .limit(1)
+    )
+    if not coordinator_role:
+        raise AuthError("coordinator_role_required", 422)
+    duplicate = db.scalar(
+        select(ProgramStaffAssignment.id).where(
+            ProgramStaffAssignment.organization_id == org,
+            ProgramStaffAssignment.user_id == user.id,
+            ProgramStaffAssignment.center_id == center.id,
+            ProgramStaffAssignment.cohort_id.is_(None)
+            if data.cohort_id is None
+            else ProgramStaffAssignment.cohort_id == data.cohort_id,
+            ProgramStaffAssignment.state == "active",
+        )
+    )
+    if duplicate:
+        raise AuthError("assignment_exists", 409)
+    item = ProgramStaffAssignment(
+        organization_id=org,
+        user_id=user.id,
+        center_id=center.id,
+        cohort_id=data.cohort_id,
+    )
+    db.add(item)
+    _flush(db)
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "program_staff_assignment.created",
+        request_id,
+        1,
+        "user_id,center_id,cohort_id,state",
+        data.reason,
+    )
+    _commit(db)
+    return staff_assignment_view(db, item)
+
+
+def revoke_staff_assignment(
+    db: Session,
+    org: UUID,
+    assignment_id: UUID,
+    actor: User,
+    data: StaffAssignmentRevoke,
+    request_id: str,
+) -> StaffAssignmentView:
+    require_permission(db, actor, org, "staff.assignment.manage")
+    item = db.scalar(
+        select(ProgramStaffAssignment)
+        .where(
+            ProgramStaffAssignment.id == assignment_id,
+            ProgramStaffAssignment.organization_id == org,
+        )
+        .with_for_update()
+    )
+    if not item:
+        raise AuthError("not_found", 404)
+    if item.version != data.expected_version:
+        raise AuthError("version_conflict", 409)
+    if item.state != "active":
+        raise AuthError("invalid_transition", 409)
+    item.state = "revoked"
+    item.version += 1
+    item.revoked_at = now()
+    item.updated_at = item.revoked_at
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "program_staff_assignment.revoked",
+        request_id,
+        item.version,
+        "state,revoked_at",
+        data.reason,
+    )
+    _commit(db)
+    return staff_assignment_view(db, item)
 
 
 def create_program(
@@ -440,7 +677,9 @@ def _validate_cohort_scope(
 def create_cohort(
     db: Session, org: UUID, actor: User, data: CohortCreate, request_id: str
 ) -> CohortView:
-    require_permission(db, actor, org, "cohort.manage")
+    scope = _staff_scope(db, org, actor, "cohort.manage")
+    if scope is not None and data.center_id not in scope[0]:
+        raise AuthError("staff_scope_denied", 403)
     _validate_cohort_scope(db, org, data.program_id, data.center_id)
     item = Cohort(organization_id=org, **data.model_dump())
     db.add(item)
@@ -467,8 +706,11 @@ def update_cohort(
     data: CohortUpdate,
     request_id: str,
 ) -> CohortView:
-    require_permission(db, actor, org, "cohort.manage")
+    scope = _staff_scope(db, org, actor, "cohort.manage")
     item = _cohort(db, org, item_id, True)
+    _require_cohort_scope(item, scope)
+    if scope is not None and data.center_id not in scope[0] and item.id not in scope[1]:
+        raise AuthError("staff_scope_denied", 403)
     if item.version != data.expected_version:
         raise AuthError("version_conflict", 409)
     if item.state != "planned":
@@ -501,8 +743,9 @@ def transition_cohort(
     data: StateCommand,
     request_id: str,
 ) -> CohortView:
-    require_permission(db, actor, org, "cohort.manage")
+    scope = _staff_scope(db, org, actor, "cohort.manage")
     item = _cohort(db, org, item_id, True)
+    _require_cohort_scope(item, scope)
     allowed = {
         "planned": {"active", "cancelled"},
         "active": {"completed", "cancelled"},
@@ -899,7 +1142,7 @@ def transition_participant(
     data: ParticipantStateCommand,
     request_id: str,
 ) -> ParticipantView:
-    require_permission(db, actor, org, "participant.update")
+    scope = _staff_scope(db, org, actor, "participant.update")
     participant = db.scalar(
         select(Participant)
         .where(Participant.id == participant_id, Participant.organization_id == org)
@@ -907,6 +1150,7 @@ def transition_participant(
     )
     if not participant:
         raise AuthError("not_found", 404)
+    _require_participant_scope(db, org, participant.id, scope)
     if participant.version != data.expected_version:
         raise AuthError("version_conflict", 409)
     allowed = {
@@ -953,8 +1197,9 @@ def create_session(
     data: SessionCreate,
     request_id: str,
 ) -> SessionView:
-    require_permission(db, actor, org, "schedule.manage")
+    scope = _staff_scope(db, org, actor, "schedule.manage")
     cohort = _cohort(db, org, data.cohort_id)
+    _require_cohort_scope(cohort, scope)
     if cohort.state not in {"planned", "active"}:
         raise AuthError("cohort_not_schedulable", 409)
     if data.starts_at.date() < cohort.starts_on or data.ends_at.date() > cohort.ends_on:
@@ -984,7 +1229,7 @@ def transition_session(
     data: SessionStateCommand,
     request_id: str,
 ) -> SessionView:
-    require_permission(db, actor, org, "schedule.manage")
+    scope = _staff_scope(db, org, actor, "schedule.manage")
     item = db.scalar(
         select(ProgramSession)
         .where(ProgramSession.id == session_id, ProgramSession.organization_id == org)
@@ -992,6 +1237,8 @@ def transition_session(
     )
     if not item:
         raise AuthError("not_found", 404)
+    cohort = _cohort(db, org, item.cohort_id)
+    _require_cohort_scope(cohort, scope)
     if item.version != data.expected_version:
         raise AuthError("version_conflict", 409)
     if item.status != "scheduled":

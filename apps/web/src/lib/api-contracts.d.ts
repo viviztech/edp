@@ -1346,6 +1346,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/programs/organizations/{org}/staff-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Staff Assignment */
+        post: operations["create_staff_assignment_api_v1_programs_organizations__org__staff_assignments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/programs/organizations/{org}/staff-assignments/{assignment_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke Staff Assignment */
+        post: operations["revoke_staff_assignment_api_v1_programs_organizations__org__staff_assignments__assignment_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/programs/organizations/{org}/programs": {
         parameters: {
             query?: never;
@@ -2309,6 +2343,11 @@ export interface components {
              * @default []
              */
             sessions: components["schemas"]["app__modules__programs__schemas__SessionView"][];
+            /**
+             * Staff Assignments
+             * @default []
+             */
+            staff_assignments: components["schemas"]["StaffAssignmentView"][];
         };
         /** CenterCreate */
         CenterCreate: {
@@ -4565,6 +4604,75 @@ export interface components {
             target: "completed" | "cancelled";
             /** Reason */
             reason: string;
+        };
+        /** StaffAssignmentCreate */
+        StaffAssignmentCreate: {
+            /** Email */
+            email: string;
+            /**
+             * Center Id
+             * Format: uuid
+             */
+            center_id: string;
+            /** Cohort Id */
+            cohort_id?: string | null;
+            /** Reason */
+            reason: string;
+        };
+        /** StaffAssignmentRevoke */
+        StaffAssignmentRevoke: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** StaffAssignmentView */
+        StaffAssignmentView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+            /** Email */
+            email: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Center Id
+             * Format: uuid
+             */
+            center_id: string;
+            /** Cohort Id */
+            cohort_id: string | null;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "revoked";
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Revoked At */
+            revoked_at: string | null;
         };
         /** StaffView */
         StaffView: {
@@ -8029,6 +8137,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CatalogView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_staff_assignment_api_v1_programs_organizations__org__staff_assignments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffAssignmentCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffAssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_staff_assignment_api_v1_programs_organizations__org__staff_assignments__assignment_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffAssignmentRevoke"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffAssignmentView"];
                 };
             };
             /** @description Validation Error */

@@ -11,11 +11,12 @@ type Cohort = components["schemas"]["CohortView"];
 type Cycle = components["schemas"]["CycleView"];
 type Participant = components["schemas"]["ParticipantView"];
 type Session = components["schemas"]["app__modules__programs__schemas__SessionView"];
+type StaffAssignment = components["schemas"]["StaffAssignmentView"];
 type Definition = components["schemas"]["DefinitionView"];
 type Locale = "en" | "ta";
-type Resource = "programs" | "centers" | "cohorts" | "cycles" | "sessions";
+type Resource = "programs" | "centers" | "cohorts" | "cycles" | "sessions" | "staff-assignments";
 
-const empty: Catalog = { programs: [], centers: [], cohorts: [], cycles: [], enrollment_candidates: [], participants: [], enrollments: [], sessions: [] };
+const empty: Catalog = { programs: [], centers: [], cohorts: [], cycles: [], enrollment_candidates: [], participants: [], enrollments: [], sessions: [], staff_assignments: [] };
 
 export default function ProgramWorkspace({ org, locale, permissions }: { org: string; locale: Locale; permissions: string[] }) {
   const text = programMessages[locale];
@@ -30,6 +31,7 @@ export default function ProgramWorkspace({ org, locale, permissions }: { org: st
   const canEnroll = permissions.includes("enrollment.manage");
   const canParticipant = permissions.includes("participant.update");
   const canSchedule = permissions.includes("schedule.manage");
+  const canAssignStaff = permissions.includes("staff.assignment.manage");
 
   const request = useCallback(async <T,>(path: string, method = "GET", data?: unknown): Promise<T> => {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -93,6 +95,15 @@ export default function ProgramWorkspace({ org, locale, permissions }: { org: st
     void run(() => request(`${root}/enrollments/convert`, "POST", { application_id: applicationId, expected_application_version: version, reason: reason.trim() }));
   }
 
+  function revokeAssignment(item: StaffAssignment) {
+    const reason = window.prompt(text.reason);
+    if (!reason || reason.trim().length < 3) return;
+    void run(() => request(root + "/staff-assignments/" + item.id + "/revoke", "POST", {
+      expected_version: item.version,
+      reason: reason.trim(),
+    }));
+  }
+
   function participantState(item: Participant, target: string) {
     const reason = window.prompt(text.reason);
     if (!reason || reason.trim().length < 3) return;
@@ -118,6 +129,14 @@ export default function ProgramWorkspace({ org, locale, permissions }: { org: st
       <section className="program-panel"><h2>{text.centers}</h2>
         {canProgram && <form className="program-form" onSubmit={(event) => create("centers", event)}>{field(text.code, "code")}{field(text.englishName, "name_en")}{field(text.tamilName, "name_ta")}{field(text.locality, "locality")}<button disabled={busy}>{text.create}</button></form>}
         <ul className="program-list">{catalog.centers.map((item) => <li key={item.id}><Record name={name(item)} code={item.code} state={item.state} version={item.version} label={text.version} /><small>{item.locality}</small>{canProgram && <div className="program-actions"><button onClick={() => transition("centers", item, item.state === "active" ? "inactive" : "active")}>{item.state === "active" ? text.deactivate : text.activate}</button></div>}</li>)}</ul>{!catalog.centers.length && <p>{text.empty}</p>}
+      </section>
+      <section className="program-panel program-wide"><h2>{text.staffAssignments}</h2>
+        {canAssignStaff && <form className="program-form program-form-wide" onSubmit={(event) => create("staff-assignments", event, (data) => ({ ...data, cohort_id: data.cohort_id || null }))}>{field(text.coordinatorEmail, "email", "email")}<Select label={text.center} name="center_id" options={catalog.centers.filter((item) => item.state === "active").map((item) => [item.id, name(item)])} choose={text.choose} /><Select label={text.assignmentCohort} name="cohort_id" options={catalog.cohorts.filter((item) => ["planned", "active"].includes(item.state)).map((item) => [item.id, name(item)])} choose={text.allCenterCohorts} required={false} />{field(text.assignmentReason, "reason")}<button disabled={busy}>{text.assign}</button></form>}
+        <ul className="program-list">{catalog.staff_assignments.map((item) => {
+          const center = catalog.centers.find((candidate) => candidate.id === item.center_id);
+          const cohort = catalog.cohorts.find((candidate) => candidate.id === item.cohort_id);
+          return <li key={item.id}><Record name={item.display_name} code={item.email} state={item.state} version={item.version} label={text.version} /><small>{center ? name(center) : item.center_id} ? {cohort ? name(cohort) : text.allCenterCohorts}</small>{canAssignStaff && item.state === "active" && <div className="program-actions"><button className="danger-button" onClick={() => revokeAssignment(item)}>{text.revoke}</button></div>}</li>;
+        })}</ul>{!catalog.staff_assignments.length && <p>{text.empty}</p>}
       </section>
       <section className="program-panel program-wide"><h2>{text.cohorts}</h2>
         {canCohort && <form className="program-form program-form-wide" onSubmit={(event) => create("cohorts", event, (data) => ({ ...data, capacity: data.capacity ? Number(data.capacity) : null }))}>{field(text.code, "code")}{field(text.englishName, "name_en")}{field(text.tamilName, "name_ta")}<Select label={text.program} name="program_id" options={catalog.programs.filter((item) => item.state === "active").map((item) => [item.id, name(item)])} choose={text.choose} /><Select label={text.center} name="center_id" options={catalog.centers.filter((item) => item.state === "active").map((item) => [item.id, name(item)])} choose={text.choose} />{field(text.starts, "starts_on", "date")}{field(text.ends, "ends_on", "date")}{field(text.capacity, "capacity", "number", false)}<button disabled={busy}>{text.create}</button></form>}

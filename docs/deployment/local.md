@@ -74,3 +74,8 @@ Apply migration d5a6b7c8d9e0 and rerun python -m app.modules.identity.cli seed f
 ## Applicant submission development
 
 Apply migration `e6b7c8d9e0f1`, rerun the identity permission seed, and use the program administration workspace to create and open an application cycle whose published form includes at least one required declaration and one required consent. An authenticated applicant opens `/{locale}/applications?organization=UUID`, selects the open cycle, saves required answers, accepts the policy and submits. The receipt is read-only and its application number is server-generated. Existing form-only development drafts cannot submit; create a cycle draft from the current workspace. Do not use real applicant data until submitted-answer retention is approved. Document upload remains disabled pending A01.3.
+
+
+## P01.3 local coordinator bindings
+
+Apply migration 6d59d2d4f99c, rerun python -m app.modules.identity.cli seed from apps/api, and restart the API before testing coordinator access. Create the coordinator account and organization role through the trusted operator procedure, then assign a center or cohort from the Programs workspace. A coordinator with the role but no active assignment is deliberately denied. Use synthetic accounts only.

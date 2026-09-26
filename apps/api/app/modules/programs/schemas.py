@@ -12,6 +12,7 @@ ParticipantState = Literal["active", "suspended", "completed", "withdrawn"]
 EnrollmentState = Literal["active", "completed", "withdrawn"]
 SessionState = Literal["scheduled", "completed", "cancelled"]
 SessionMode = Literal["in_person", "online", "hybrid"]
+StaffAssignmentState = Literal["active", "revoked"]
 
 
 class NamedCreate(BaseModel):
@@ -160,6 +161,45 @@ class CycleView(CycleCreate):
     updated_at: datetime
 
 
+class StaffAssignmentCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    email: str = Field(min_length=3, max_length=254)
+    center_id: UUID
+    cohort_id: UUID | None = None
+    reason: str = Field(min_length=3, max_length=500)
+
+    @field_validator("email", "reason")
+    @classmethod
+    def strip_assignment_text(cls, value: str) -> str:
+        return value.strip()
+
+
+class StaffAssignmentRevoke(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_version: int = Field(ge=1)
+    reason: str = Field(min_length=3, max_length=500)
+
+    @field_validator("reason")
+    @classmethod
+    def strip_revoke_reason(cls, value: str) -> str:
+        return value.strip()
+
+
+class StaffAssignmentView(BaseModel):
+    id: UUID
+    organization_id: UUID
+    user_id: UUID
+    email: str
+    display_name: str
+    center_id: UUID
+    cohort_id: UUID | None
+    state: StaffAssignmentState
+    version: int
+    created_at: datetime
+    updated_at: datetime
+    revoked_at: datetime | None
+
+
 class EnrollmentCandidateView(BaseModel):
     application_id: UUID
     application_number: str
@@ -300,3 +340,4 @@ class CatalogView(BaseModel):
     participants: list[ParticipantView] = []
     enrollments: list[EnrollmentView] = []
     sessions: list[SessionView] = []
+    staff_assignments: list[StaffAssignmentView] = []

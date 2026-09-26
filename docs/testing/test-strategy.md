@@ -61,3 +61,8 @@ PostgreSQL tests cover evidence-backed shortlisting, unauthorized reviewer decis
 ## P01.2 program delivery coverage
 
 PostgreSQL acceptance continues the real A02.3 workflow through finalized selected application conversion, capacity and duplicate guards, Person reuse, participant role creation, enrolled status receipt, atomic audit/outbox evidence, session date/mode validation, self-only schedule projection, chronological lifecycle events and immutable participant history. Migration verification uses populated downgrade/re-upgrade/drift. Web gates cover the exact BFF allowlist, generated contracts, strict TypeScript, ESLint, Vitest and production build.
+
+
+## P01.3 coordinator scope coverage
+
+PostgreSQL/API tests create two centers and cohorts, prove that an unassigned coordinator is denied, create a center binding, and confirm that catalog and schedule access include only the assigned center. Negative cases cover wrong-cohort mutation, duplicate active assignment, incompatible account role and direct database scope tampering. Revocation is optimistic, audited and immediately removes access. Route coverage exercises assignment creation/revocation through authenticated HTTP. Migration verification downgrades to P01.2, upgrades to head and checks metadata drift. Web tests pin the exact BFF allowlist; strict TypeScript, ESLint, Vitest, production build and authenticated responsive browser acceptance remain the UI gates.

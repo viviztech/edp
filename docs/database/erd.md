@@ -263,3 +263,8 @@ Migration `b2c3d4e5f6a7` implements Interview, InterviewPanelMember and Selectio
 ## P01.2 participant and program-delivery evidence
 
 Migration `5c48c1c3e88b` implements Participant as an organization/person projection, Enrollment as the unique application and participant/cohort membership, ProgramSession as the cohort schedule source, append-only ParticipantStatusHistory and minimal-ID DomainOutbox. Composite foreign keys bind every record to the same organization, program and cohort. Application now permits only selected-to-enrolled as the conversion transition. ProgramCalendar is derived from ProgramSession.
+
+
+## P01.3 scoped staff-assignment evidence
+
+Migration 6d59d2d4f99c implements ProgramStaffAssignment as an organization/user/center binding with optional cohort scope, state, optimistic version and revoked timestamp. A composite (cohort_id, center_id, organization_id) foreign key prevents mismatched scope. Partial unique indexes permit only one active binding for a user at a center or cohort while retaining revoked history. A PostgreSQL trigger freezes user and scope identifiers and accepts only the versioned active-to-revoked transition.

@@ -30,7 +30,7 @@ Configurable seed roles, no role-name conditionals. `view`, `create`, `update`, 
 | Support Executive | ticket.view/assign/update | Assigned queue/tickets; internal comments protected |
 | Participant | own profile/application/learning/bookmark/ticket actions | Self and active enrollment; no staff notes |
 
-Implemented binding stores organization; program/center scopes are deferred and not granted implicitly. Future binding design supports optional program/center; self/assigned are permission policy modes, not user-chosen filters. Cross-program users require independent bindings. Authorization test matrix: anonymous, inactive, wrong permission, correct permission/wrong scope, correct scope, revoked role, alternate channel and export routes.
+UserRole stores organization membership. ProgramStaffAssignment now supplies an explicit center or cohort boundary for Training Center Coordinators; no program/center scope is inferred from a request parameter. Self/assigned remain permission policy modes, not user-chosen filters. Cross-program users require independent bindings. Authorization test matrix: anonymous, inactive, wrong permission, correct permission/wrong scope, correct scope, revoked role, alternate channel and export routes.
 
 ## Threats and evidence
 
@@ -59,7 +59,7 @@ Application definition administration separates view, create, update and publish
 
 ## P01.1 program administration
 
-Implemented permissions are program.view, program.manage, cohort.manage and application.cycle.manage at organization scope. Program Directors and Program Managers receive all four; Training Center Coordinators receive view only until center-scoped bindings exist. Composite database keys block cross-organization and cross-program links. Versioned state commands require audit reasons, and audit rows exclude bilingual names and application policy content.
+Implemented permissions are program.view, program.manage, cohort.manage and application.cycle.manage. Program Directors and Program Managers receive organization-wide rights; Training Center Coordinators receive program view and selected delivery mutations only through an active center/cohort binding. Composite database keys block cross-organization and cross-program links. Versioned state commands require audit reasons, and audit rows exclude bilingual names and application policy content.
 
 ## A01.4 submission controls
 
@@ -78,4 +78,9 @@ Implemented permissions are selection.cycle.view/manage, selection.rubric.manage
 
 ## P01.2 authorization
 
-`enrollment.manage`, `participant.view`, `participant.update` and `schedule.manage` are organization-scoped staff permissions granted to Program Directors, Program Managers and Super Admins. `participant.self` is granted only to the Participant role and every query also matches `Participant.person_id` to the authenticated User. Conversion derives Person, program and cohort from the immutable selected application and finalized cycle. Training Center Coordinators do not receive mutation permissions until center/cohort bindings prevent organization-wide access. Participant responses exclude scores, comments, decision reasons and staff audit evidence.
+`enrollment.manage`, `participant.view`, `participant.update` and `schedule.manage` are organization-scoped staff permissions granted to Program Directors, Program Managers and Super Admins. `participant.self` is granted only to the Participant role and every query also matches `Participant.person_id` to the authenticated User. Conversion derives Person, program and cohort from the immutable selected application and finalized cycle. Training Center Coordinators receive participant and schedule mutation permissions only when an active ProgramStaffAssignment covers the participant enrollment or session cohort. Participant responses exclude scores, comments, decision reasons and staff audit evidence.
+
+
+## P01.3 coordinator scope enforcement
+
+staff.assignment.manage is limited to Program Managers, Program Directors and Super Admins. A target account must already be active and hold the Training Center Coordinator role in the same organization. The service first checks the requested permission, then distinguishes an unrestricted role grant from the coordinator grant and resolves active assignments. Catalog queries filter centers, cohorts, cycles, enrollments, participants and sessions before serialization. Each cohort, participant and schedule command repeats the scope check after loading the organization-bound resource. Revocation immediately removes access because permissions are resolved on every request. Assignment rows and audit records contain IDs and reasons only; they do not duplicate Person or participant data.
