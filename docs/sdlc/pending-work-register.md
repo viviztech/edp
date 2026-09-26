@@ -90,5 +90,5 @@ Update this register whenever an item is completed, deferred by an approved deci
 - P01.3 and its flow documentation were committed and pushed to origin/main in commit ae7cff4.
 - Repository-wide Ruff was verified and reports 166 pre-existing legacy CMS and early-migration findings; strict MyPy also contains documented CMS and selection debt. Focused P01.3 and L01.1 checks pass.
 - Superseded P01.2 coordinator wording was reconciled.
-- L01.1 course catalog and enrollment access is implemented and locally accepted. It remains uncommitted at the time of this update; remote CI therefore remains pending.
+- L01.1 course catalog and enrollment access was committed on `main` as `8b075ee`; remote CI remains pending until the pushed commit completes its workflow.
 - Later L01 work includes lesson progress, prerequisites, trainer bindings and signed media delivery.
