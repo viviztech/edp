@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     bff_key: SecretStr | None = Field(default=None, min_length=32)
     auth_delivery_key: SecretStr | None = None
     asset_scanner_key: SecretStr | None = Field(default=None, min_length=16)
+    lms_material_root: str | None = None
+    lms_material_signing_key: SecretStr | None = Field(default=None, min_length=32)
+    lms_material_access_seconds: int = Field(default=300, ge=60, le=900)
     meta_secret_key: SecretStr | None = None
     meta_graph_api_version: str | None = Field(default=None, pattern=r"^v[0-9]{1,2}\.[0-9]{1,2}$")
     meta_graph_base_url: Literal["https://graph.facebook.com"] = "https://graph.facebook.com"
@@ -29,6 +32,8 @@ class Settings(BaseSettings):
         "bff_key",
         "auth_delivery_key",
         "asset_scanner_key",
+        "lms_material_root",
+        "lms_material_signing_key",
         "meta_secret_key",
         "meta_graph_api_version",
         "meta_event_retention_days",

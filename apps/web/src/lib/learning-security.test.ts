@@ -3,9 +3,10 @@ import { learningPath } from "./learning-security";
 
 const org = "123e4567-e89b-42d3-a456-426614174000";
 const course = "123e4567-e89b-42d3-a456-426614174001";
+const material = "123e4567-e89b-42d3-a456-426614174002";
 
 describe("learning BFF allowlist", () => {
-  it("allows the explicit staff and learner routes", () => {
+  it("allows the explicit staff, trainer, learner and material routes", () => {
     expect(learningPath(["organizations", org, "catalog"], "GET"))
       .toBe(`/courses/organizations/${org}/catalog`);
     expect(learningPath(["organizations", org], "POST"))
@@ -16,8 +17,19 @@ describe("learning BFF allowlist", () => {
       .toBe(`/courses/organizations/${org}/${course}/publish`);
     expect(learningPath(["organizations", org, "my-learning"], "GET"))
       .toBe(`/courses/organizations/${org}/my-learning`);
+    expect(learningPath(["organizations", org, "trainer-delivery"], "GET"))
+      .toBe(`/courses/organizations/${org}/trainer-delivery`);
     expect(learningPath(["organizations", org, "my-learning", course, "start"], "POST"))
       .toBe(`/courses/organizations/${org}/my-learning/${course}/start`);
+    expect(learningPath([
+      "organizations", org, "my-learning", course, "materials", material, "access",
+    ], "POST")).not.toBeNull();
+    expect(learningPath([
+      "organizations", org, "trainer-delivery", course, "materials", material, "access",
+    ], "POST")).not.toBeNull();
+    expect(learningPath([
+      "organizations", org, "material-delivery", "payload.signature",
+    ], "GET")).not.toBeNull();
     expect(learningPath(["organizations", org, "prerequisites"], "POST")).not.toBeNull();
     expect(learningPath(["organizations", org, course, "completion-rule"], "POST")).not.toBeNull();
     expect(learningPath([
@@ -25,8 +37,9 @@ describe("learning BFF allowlist", () => {
     ], "POST")).not.toBeNull();
   });
 
-  it("rejects traversal, deletes and unknown commands", () => {
+  it("rejects traversal, malformed tokens, deletes and unknown commands", () => {
     expect(learningPath(["organizations", org, "..", "auth"], "GET")).toBeNull();
+    expect(learningPath(["organizations", org, "material-delivery", "bad.token.extra"], "GET")).toBeNull();
     expect(learningPath(["organizations", org, course], "DELETE")).toBeNull();
     expect(learningPath(["organizations", org, course, "complete"], "POST")).toBeNull();
   });

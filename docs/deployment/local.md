@@ -87,3 +87,7 @@ Apply migration 7e6ae3e5a10d, rerun python -m app.modules.identity.cli seed, and
 ## L01.2 local learning
 
 Run Alembic to head before using progress APIs. Existing courses receive the all_lessons rule. Re-run OpenAPI export and npm run contracts after backend schema changes. The local PostgreSQL test database must be named edp_auth_test or edp_test; progress acceptance truncates only synthetic fixture data. No Redis or Celery worker is required for synchronous lesson completion.
+
+## L01.3 local private materials
+
+Apply migration `a19d7a38e40b`, rerun `python -m app.modules.identity.cli seed`, and restart API/web. Set `LMS_MATERIAL_ROOT` in the host API environment to a private local directory. Place only synthetic development files beneath it and store their relative path as LessonMaterial.provider_key. Compose mounts `./.local/lms-materials` read-only at `/private-materials`. `LMS_MATERIAL_ACCESS_SECONDS` defaults to 300 and is restricted to 60-900 seconds. Local/test may fall back to BFF_KEY for signing; production must set a separate `LMS_MATERIAL_SIGNING_KEY` of at least 32 characters and an approved private object/video adapter before release. Do not place the material root under the web public directory.

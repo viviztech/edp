@@ -6,8 +6,9 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
-from test_identity import auth, signed_in  # noqa: F401
+from test_identity import account, auth, signed_in  # noqa: F401
 
+from app.core.config import get_settings
 from app.modules.applications.models import Application, ApplicationForm
 from app.modules.identity.models import AuditLog, Organization, Role, User, UserRole, now
 from app.modules.lms.models import CourseEnrollment, CourseModule, LessonProgress
@@ -17,6 +18,7 @@ from app.modules.programs.models import (
     Enrollment,
     Participant,
     Program,
+    ProgramStaffAssignment,
     TrainingCenter,
 )
 
@@ -135,11 +137,16 @@ def learning_context(request):
         )
 
 
-def test_lms_author_publish_assign_and_enrollment_scoped_access(request) -> None:
+def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_path) -> None:
     auth_context, headers, org_id, other_id, cohort_id, enrollment_id, user_id = learning_context(
         request
     )
     client, engine, _, _ = auth_context
+    material_root = tmp_path / "lms-materials"
+    material_file = material_root / "private" / "lms" / "customer-worksheet.pdf"
+    material_file.parent.mkdir(parents=True)
+    material_file.write_bytes(b"%PDF-1.4 synthetic LMS material")
+    get_settings().lms_material_root = str(material_root)
     root = f"/api/v1/courses/organizations/{org_id}"
 
     assert (
@@ -314,6 +321,54 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request) -> None
         == 409
     )
 
+    trainer_credentials = account(auth_context, "trainer@example.com")
+    with Session(engine) as db:
+        trainer = db.scalar(select(User).where(User.email == "trainer@example.com"))
+        trainer_role = db.scalar(select(Role).where(Role.name == "Trainer"))
+        cohort = db.get(Cohort, cohort_id)
+        assert trainer and trainer_role and cohort
+        db.add(UserRole(user_id=trainer.id, role_id=trainer_role.id, organization_id=org_id))
+        db.commit()
+    trainer_login = client.post("/api/v1/auth/login", json=trainer_credentials)
+    assert trainer_login.status_code == 200
+    trainer_headers = {"Authorization": "Bearer " + trainer_login.json()["access_token"]}
+    unscoped = client.get(root + "/trainer-delivery", headers=trainer_headers)
+    assert unscoped.status_code == 403
+    assert unscoped.json()["error"]["code"] == "staff_scope_required"
+    with Session(engine) as db:
+        trainer = db.scalar(select(User).where(User.email == "trainer@example.com"))
+        cohort = db.get(Cohort, cohort_id)
+        assert trainer and cohort
+        trainer_assignment = ProgramStaffAssignment(
+            organization_id=org_id,
+            user_id=trainer.id,
+            center_id=cohort.center_id,
+            cohort_id=cohort.id,
+        )
+        db.add(trainer_assignment)
+        db.commit()
+        trainer_assignment_id = trainer_assignment.id
+
+    trainer_delivery = client.get(root + "/trainer-delivery", headers=trainer_headers)
+    assert trainer_delivery.status_code == 200
+    trainer_course = trainer_delivery.json()["courses"][0]
+    assert trainer_course["course_id"] == course["id"]
+    assert trainer_course["learners"][0]["display_name"] == "Synthetic Learner"
+    trainer_material = trainer_course["modules"][0]["lessons"][0]["materials"][0]
+    assert trainer_material["available"] is True
+    assert "provider_key" not in trainer_material
+    trainer_access = client.post(
+        root + f"/trainer-delivery/{course['id']}/materials/{material.json()['id']}/access",
+        headers=trainer_headers,
+    )
+    assert trainer_access.status_code == 200
+    trainer_delivery_path = trainer_access.json()["url"].replace(
+        "/api/courses/", "/api/v1/courses/"
+    )
+    trainer_file = client.get(trainer_delivery_path, headers=trainer_headers)
+    assert trainer_file.status_code == 200
+    assert trainer_file.content.startswith(b"%PDF-1.4")
+
     learning = client.get(root + "/my-learning", headers=headers)
     assert learning.status_code == 200
     learner_course = learning.json()["courses"][0]
@@ -330,6 +385,22 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request) -> None
     assert started.json()["id"] == repeated.json()["id"]
     assert started.json()["enrollment_id"] == str(enrollment_id)
     assert client.post(root + f"/my-learning/{uuid4()}/start", headers=headers).status_code == 403
+    started_learning = client.get(root + "/my-learning", headers=headers).json()["courses"][0]
+    assert started_learning["modules"][0]["lessons"][0]["materials"][0]["available"] is True
+    learner_access = client.post(
+        root + f"/my-learning/{course['id']}/materials/{material.json()['id']}/access",
+        headers=headers,
+    )
+    assert learner_access.status_code == 200
+    assert "private/lms" not in learner_access.text
+    learner_delivery_path = learner_access.json()["url"].replace(
+        "/api/courses/", "/api/v1/courses/"
+    )
+    learner_file = client.get(learner_delivery_path, headers=headers)
+    assert learner_file.status_code == 200
+    assert learner_file.content.startswith(b"%PDF-1.4")
+    tampered = learner_delivery_path[:-1] + ("A" if learner_delivery_path[-1] != "A" else "B")
+    assert client.get(tampered, headers=headers).status_code == 403
 
     blocked = client.post(
         root + f"/my-learning/{course['id']}/lessons/{second_lesson_data['id']}/complete",
@@ -377,6 +448,18 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request) -> None
     assert summary["started_learners"] == 1
     assert summary["completed_learners"] == 1
     assert summary["average_percent"] == 100
+
+    with Session(engine) as db:
+        trainer_assignment = db.get(ProgramStaffAssignment, trainer_assignment_id)
+        assert trainer_assignment
+        trainer_assignment.state = "revoked"
+        trainer_assignment.version += 1
+        trainer_assignment.revoked_at = now()
+        trainer_assignment.updated_at = trainer_assignment.revoked_at
+        db.commit()
+    revoked_delivery = client.get(root + "/trainer-delivery", headers=trainer_headers)
+    assert revoked_delivery.status_code == 403
+    assert revoked_delivery.json()["error"]["code"] == "staff_scope_required"
 
     with Session(engine) as db:
         assert (

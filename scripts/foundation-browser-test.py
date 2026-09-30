@@ -61,6 +61,8 @@ email = "synthetic-" + uuid4().hex[:12] + "@example.com"
 password = secrets.token_urlsafe(24)
 coordinator_email = "coordinator-" + uuid4().hex[:12] + "@example.com"
 coordinator_password = secrets.token_urlsafe(24)
+trainer_email = "trainer-" + uuid4().hex[:12] + "@example.com"
+trainer_password = secrets.token_urlsafe(24)
 
 
 def latest_token(purpose):
@@ -180,6 +182,26 @@ with sync_playwright() as playwright:
             UserRole(
                 user_id=coordinator.id,
                 role_id=coordinator_role.id,
+                organization_id=organization.id,
+            )
+        )
+        trainer_person = Person(display_name="Synthetic Trainer")
+        db.add(trainer_person)
+        db.flush()
+        trainer = User(
+            person_id=trainer_person.id,
+            email=trainer_email,
+            password_hash=hasher.hash(trainer_password),
+            status="active",
+        )
+        db.add(trainer)
+        db.flush()
+        trainer_role = db.scalar(select(Role).where(Role.name == "Trainer"))
+        assert trainer_role
+        db.add(
+            UserRole(
+                user_id=trainer.id,
+                role_id=trainer_role.id,
                 organization_id=organization.id,
             )
         )
@@ -596,7 +618,9 @@ with sync_playwright() as playwright:
     expect(page.get_by_text("Business foundations", exact=True)).to_be_visible()
 
     page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
-    expect(page.get_by_role("heading", name="Course studio", exact=True)).to_be_visible()
+    expect(
+        page.get_by_role("heading", name="Course studio", exact=True)
+    ).to_be_visible()
     course_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Create course", exact=True)
     )
@@ -637,9 +661,7 @@ with sync_playwright() as playwright:
     lesson_form.locator('textarea[name="body_en"]').fill(
         "Describe the customer problem in observable terms."
     )
-    lesson_form.locator('textarea[name="body_ta"]').fill(
-        "Synthetic Tamil lesson body."
-    )
+    lesson_form.locator('textarea[name="body_ta"]').fill("Synthetic Tamil lesson body.")
     lesson_form.get_by_role("button", name="Create", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
 
@@ -653,9 +675,7 @@ with sync_playwright() as playwright:
     )
     material_form.locator('input[name="position"]').fill("1")
     material_form.locator('input[name="label_en"]').fill("Customer worksheet")
-    material_form.locator('input[name="label_ta"]').fill(
-        "Synthetic Tamil worksheet"
-    )
+    material_form.locator('input[name="label_ta"]').fill("Synthetic Tamil worksheet")
     material_form.locator('input[name="provider_key"]').fill(
         "private/e2e/customer-worksheet.pdf"
     )
@@ -680,7 +700,7 @@ with sync_playwright() as playwright:
     expect(
         page.get_by_role("heading", name="Program administration", exact=True)
     ).to_be_visible()
-    assign_button = page.get_by_role("button", name="Assign coordinator", exact=True)
+    assign_button = page.get_by_role("button", name="Assign delivery staff", exact=True)
     assignment_form = page.locator("form").filter(has=assign_button)
     assignment_form.locator('input[name="email"]').fill(coordinator_email)
     assignment_form.locator('select[name="center_id"]').select_option(
@@ -692,6 +712,48 @@ with sync_playwright() as playwright:
     assign_button.click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text(coordinator_email, exact=False)).to_be_visible()
+
+    assignment_form.locator('input[name="email"]').fill(trainer_email)
+    assignment_form.locator('select[name="center_id"]').select_option(
+        label="E2E center"
+    )
+    assignment_form.locator('select[name="cohort_id"]').select_option(
+        label="E2E cohort"
+    )
+    assignment_form.get_by_label("Assignment reason", exact=True).fill(
+        "Own E2E cohort learning delivery"
+    )
+    assign_button.click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text(trainer_email, exact=False)).to_be_visible()
+
+    trainer_context = browser.new_context(viewport={"width": 1280, "height": 900})
+    trainer_page = trainer_context.new_page()
+    trainer_errors = []
+    trainer_page.on("pageerror", lambda error: trainer_errors.append(str(error)))
+    trainer_page.goto(base + "/en/account")
+    trainer_page.wait_for_load_state("domcontentloaded")
+    trainer_page.get_by_label("Email", exact=True).fill(trainer_email)
+    trainer_page.get_by_label("Password", exact=True).fill(trainer_password)
+    trainer_page.locator("form").get_by_role(
+        "button", name="Sign in", exact=True
+    ).click()
+    expect(trainer_page.get_by_text("Synthetic Trainer", exact=True)).to_be_visible()
+    trainer_page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
+    expect(
+        trainer_page.get_by_role("heading", name="Trainer delivery", exact=True)
+    ).to_be_visible()
+    expect(
+        trainer_page.get_by_text("Enterprise foundations", exact=True)
+    ).to_be_visible()
+    expect(trainer_page.get_by_text("Synthetic E2E", exact=True)).to_be_visible()
+    expect(trainer_page.get_by_text("Not started", exact=True)).to_be_visible()
+    with trainer_page.expect_download() as trainer_download:
+        trainer_page.get_by_role("button", name="Open material", exact=True).click()
+    assert trainer_download.value.suggested_filename == "customer-worksheet.pdf"
+    assert Path(trainer_download.value.path()).read_bytes().startswith(b"%PDF-1.4")
+    assert not trainer_errors, trainer_errors
+    trainer_context.close()
 
     coordinator_context = browser.new_context(viewport={"width": 1280, "height": 900})
     coordinator_page = coordinator_context.new_page()
@@ -788,7 +850,9 @@ with sync_playwright() as playwright:
     coordinator_page.set_viewport_size({"width": 1280, "height": 900})
 
     page.once("dialog", lambda dialog: dialog.accept("E2E assignment ended"))
-    page.get_by_role("button", name="Revoke", exact=True).click()
+    page.locator(".program-list li").filter(has_text=coordinator_email).get_by_role(
+        "button", name="Revoke", exact=True
+    ).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("revoked", exact=True)).to_be_visible()
     coordinator_page.reload()
@@ -799,13 +863,21 @@ with sync_playwright() as playwright:
     coordinator_context.close()
 
     page.goto(base + "/en/learning?organization=" + str(organization_id))
-    expect(page.get_by_role("heading", name="My learning path", exact=True)).to_be_visible()
+    expect(
+        page.get_by_role("heading", name="My learning path", exact=True)
+    ).to_be_visible()
     expect(page.get_by_text("Enterprise foundations", exact=True)).to_be_visible()
     expect(page.get_by_text("Customer problem", exact=True)).to_be_visible()
-    expect(page.get_by_text("private/e2e/customer-worksheet.pdf", exact=True)).not_to_be_visible()
+    expect(
+        page.get_by_text("private/e2e/customer-worksheet.pdf", exact=True)
+    ).not_to_be_visible()
     page.get_by_role("button", name="Start course", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("In progress", exact=True)).to_be_visible()
+    with page.expect_download() as learner_download:
+        page.get_by_role("button", name="Open material", exact=True).click()
+    assert learner_download.value.suggested_filename == "customer-worksheet.pdf"
+    assert Path(learner_download.value.path()).read_bytes().startswith(b"%PDF-1.4")
     page.get_by_role("button", name="Mark lesson complete", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("Completed", exact=True).first).to_be_visible()
@@ -862,8 +934,19 @@ with sync_playwright() as playwright:
             )
         )
         staff_assignment = db.scalar(
-            select(ProgramStaffAssignment).where(
-                ProgramStaffAssignment.organization_id == organization_id
+            select(ProgramStaffAssignment)
+            .join(User, User.id == ProgramStaffAssignment.user_id)
+            .where(
+                ProgramStaffAssignment.organization_id == organization_id,
+                User.email == coordinator_email,
+            )
+        )
+        trainer_assignment = db.scalar(
+            select(ProgramStaffAssignment)
+            .join(User, User.id == ProgramStaffAssignment.user_id)
+            .where(
+                ProgramStaffAssignment.organization_id == organization_id,
+                User.email == trainer_email,
             )
         )
         outbox = db.scalar(
@@ -890,6 +973,7 @@ with sync_playwright() as playwright:
         }
         assert staff_assignment and staff_assignment.state == "revoked"
         assert staff_assignment.revoked_at is not None
+        assert trainer_assignment and trainer_assignment.state == "active"
         assert outbox and outbox.event_type == "enrollment.created"
         assert course and course.state == "published"
         assert cohort_course and cohort_course.course_id == course.id
@@ -956,7 +1040,8 @@ print(
     "Browser E2E passed: identity, CSRF, scoped CMS, application policy "
     "publish/versioning, immutable application submission, selection rubric/assignment/"
     "conflict/scoring/moderation/interview/decisions/finalization, enrollment/participant/"
-    "session/timeline, center-scoped coordinator assignment/revocation, learning authoring/"
-    "publication/cohort access/start, audit, responsive layouts and session recovery; "
+    "session/timeline, center-scoped coordinator assignment/revocation, trainer-scoped "
+    "delivery, learner/trainer private-material downloads, learning authoring/publication/"
+    "cohort access/start/completion, audit, responsive layouts and session recovery; "
     "no JS errors"
 )

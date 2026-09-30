@@ -9,6 +9,29 @@ const fail = (code: string, status: number) => NextResponse.json(
   { status, headers: { "Cache-Control": "no-store" } },
 );
 
+function upstreamResponse(upstream: Response) {
+  const contentType = upstream.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    return upstream.json().then((body) => NextResponse.json(body, {
+      status: upstream.status,
+      headers: {
+        "Cache-Control": "private, no-store",
+        "X-Robots-Tag": "noindex, nofollow",
+      },
+    }));
+  }
+  const headers = new Headers({
+    "Cache-Control": "private, no-store",
+    "X-Content-Type-Options": "nosniff",
+    "X-Robots-Tag": "noindex, nofollow",
+  });
+  for (const name of ["content-type", "content-length", "content-disposition", "accept-ranges"]) {
+    const value = upstream.headers.get(name);
+    if (value) headers.set(name, value);
+  }
+  return Promise.resolve(new Response(upstream.body, { status: upstream.status, headers }));
+}
+
 async function handle(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },
@@ -50,25 +73,20 @@ async function handle(
         }
       }
     }
+    const headers: Record<string, string> = {
+      "X-BFF-Key": config.key,
+      "X-Browser-Session": jar.get(cookieName)?.value ?? "",
+      "X-CSRF-Token": request.headers.get("x-csrf-token") ?? "",
+    };
+    if (body !== undefined) headers["Content-Type"] = "application/json";
     const upstream = await fetch(config.api + "/api/v1" + path, {
       method: request.method,
       body,
       cache: "no-store",
       signal: AbortSignal.timeout(15000),
-      headers: {
-        "Content-Type": "application/json",
-        "X-BFF-Key": config.key,
-        "X-Browser-Session": jar.get(cookieName)?.value ?? "",
-        "X-CSRF-Token": request.headers.get("x-csrf-token") ?? "",
-      },
+      headers,
     });
-    return NextResponse.json(await upstream.json(), {
-      status: upstream.status,
-      headers: {
-        "Cache-Control": "private, no-store",
-        "X-Robots-Tag": "noindex, nofollow",
-      },
-    });
+    return await upstreamResponse(upstream);
   } catch {
     return fail("service_unavailable", 503);
   }

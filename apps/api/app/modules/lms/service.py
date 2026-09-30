@@ -5,9 +5,25 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.modules.identity.models import AuditLog, User, now
+from app.core.config import get_settings
+from app.modules.identity.models import (
+    AuditLog,
+    Person,
+    Role,
+    RolePermission,
+    User,
+    UserRole,
+    now,
+)
 from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
+from app.modules.lms.material_access import (
+    AccessMode,
+    LocalMaterial,
+    issue_access,
+    resolve_local_material,
+    verify_access,
+)
 from app.modules.lms.models import (
     CohortCourse,
     Course,
@@ -44,6 +60,7 @@ from app.modules.lms.schemas import (
     LessonPrerequisiteView,
     LessonProgressView,
     LessonView,
+    MaterialAccessView,
     MaterialAdminView,
     MaterialCreate,
     MaterialKind,
@@ -52,8 +69,18 @@ from app.modules.lms.schemas import (
     MyLearningView,
     ProgressState,
     PublishCourse,
+    TrainerCourseDeliveryView,
+    TrainerDeliveryView,
+    TrainerLearnerProgressView,
+    TrainerLessonView,
+    TrainerModuleView,
 )
-from app.modules.programs.models import Cohort, Enrollment, Participant
+from app.modules.programs.models import (
+    Cohort,
+    Enrollment,
+    Participant,
+    ProgramStaffAssignment,
+)
 
 
 def _audit(
@@ -805,7 +832,8 @@ def _learner_structure(
                                 kind=material.kind,
                                 label_en=material.label_en,
                                 label_ta=material.label_ta,
-                                available=False,
+                                available=started is not None
+                                and set(lesson.prerequisite_lesson_ids).issubset(completed),
                             )
                             for material in lesson.materials
                         ],
@@ -1011,3 +1039,368 @@ def complete_lesson(
         course_enrollment=course_enrollment_view(course_enrollment),
         progress=progress,
     )
+
+
+def _learner_material_context(
+    db: Session,
+    org: UUID,
+    course_id: UUID,
+    material_id: UUID,
+    actor: User,
+) -> tuple[Course, CourseEnrollment, LessonMaterial]:
+    eligible = next(
+        (row for row in _learner_courses(db, org, actor) if row[2].id == course_id),
+        None,
+    )
+    if not eligible:
+        raise AuthError("course_access_denied", 403)
+    enrollment, _, course = eligible
+    course_enrollment = db.scalar(
+        select(CourseEnrollment).where(
+            CourseEnrollment.enrollment_id == enrollment.id,
+            CourseEnrollment.course_id == course.id,
+        )
+    )
+    if not course_enrollment:
+        raise AuthError("course_not_started", 409)
+    material = db.scalar(
+        select(LessonMaterial).where(
+            LessonMaterial.id == material_id,
+            LessonMaterial.course_id == course.id,
+            LessonMaterial.organization_id == org,
+        )
+    )
+    if not material:
+        raise AuthError("not_found", 404)
+    required = set(
+        db.scalars(
+            select(LessonPrerequisite.prerequisite_lesson_id).where(
+                LessonPrerequisite.lesson_id == material.lesson_id,
+                LessonPrerequisite.course_id == course.id,
+            )
+        )
+    )
+    completed = set(
+        db.scalars(
+            select(LessonProgress.lesson_id).where(
+                LessonProgress.course_enrollment_id == course_enrollment.id
+            )
+        )
+    )
+    if not required.issubset(completed):
+        raise AuthError("lesson_prerequisite_incomplete", 409)
+    return course, course_enrollment, material
+
+
+def _trainer_cohort_ids(
+    db: Session,
+    org: UUID,
+    actor: User,
+) -> set[UUID] | None:
+    require_permission(db, actor, org, "lms.delivery.view")
+    unrestricted = db.scalar(
+        select(UserRole.id)
+        .join(Role, Role.id == UserRole.role_id)
+        .join(RolePermission, RolePermission.role_id == Role.id)
+        .where(
+            UserRole.user_id == actor.id,
+            UserRole.organization_id == org,
+            RolePermission.permission_code == "lms.delivery.view",
+            Role.name != "Trainer",
+        )
+        .limit(1)
+    )
+    if unrestricted:
+        return None
+    assignments = list(
+        db.scalars(
+            select(ProgramStaffAssignment).where(
+                ProgramStaffAssignment.organization_id == org,
+                ProgramStaffAssignment.user_id == actor.id,
+                ProgramStaffAssignment.state == "active",
+            )
+        )
+    )
+    if not assignments:
+        raise AuthError("staff_scope_required", 403)
+    center_ids = {item.center_id for item in assignments if item.cohort_id is None}
+    cohort_ids = {item.cohort_id for item in assignments if item.cohort_id is not None}
+    if center_ids:
+        cohort_ids.update(
+            db.scalars(
+                select(Cohort.id).where(
+                    Cohort.organization_id == org,
+                    Cohort.center_id.in_(center_ids),
+                    Cohort.state != "cancelled",
+                )
+            )
+        )
+    return {item for item in cohort_ids if item is not None}
+
+
+def _trainer_course_rows(
+    db: Session,
+    org: UUID,
+    actor: User,
+) -> list[tuple[CohortCourse, Course, Cohort]]:
+    cohort_ids = _trainer_cohort_ids(db, org, actor)
+    statement = (
+        select(CohortCourse, Course, Cohort)
+        .join(
+            Course,
+            (Course.id == CohortCourse.course_id)
+            & (Course.organization_id == CohortCourse.organization_id),
+        )
+        .join(
+            Cohort,
+            (Cohort.id == CohortCourse.cohort_id)
+            & (Cohort.organization_id == CohortCourse.organization_id),
+        )
+        .where(
+            CohortCourse.organization_id == org,
+            Course.state == "published",
+        )
+        .order_by(Cohort.starts_on, CohortCourse.position, Course.id)
+        .limit(250)
+    )
+    if cohort_ids is not None:
+        if not cohort_ids:
+            return []
+        statement = statement.where(CohortCourse.cohort_id.in_(cohort_ids))
+    return [(row[0], row[1], row[2]) for row in db.execute(statement).all()]
+
+
+def _require_trainer_course(
+    db: Session,
+    org: UUID,
+    course_id: UUID,
+    actor: User,
+) -> Course:
+    row = next(
+        (item for item in _trainer_course_rows(db, org, actor) if item[1].id == course_id),
+        None,
+    )
+    if not row:
+        raise AuthError("staff_scope_denied", 403)
+    return row[1]
+
+
+def _trainer_modules(db: Session, course: Course) -> list[TrainerModuleView]:
+    admin = _admin_structure(db, course)
+    return [
+        TrainerModuleView(
+            id=module.id,
+            position=module.position,
+            title_en=module.title_en,
+            title_ta=module.title_ta,
+            lessons=[
+                TrainerLessonView(
+                    id=lesson.id,
+                    position=lesson.position,
+                    title_en=lesson.title_en,
+                    title_ta=lesson.title_ta,
+                    duration_minutes=lesson.duration_minutes,
+                    materials=[
+                        LearnerMaterialView(
+                            id=material.id,
+                            position=material.position,
+                            kind=material.kind,
+                            label_en=material.label_en,
+                            label_ta=material.label_ta,
+                            available=True,
+                        )
+                        for material in lesson.materials
+                    ],
+                )
+                for lesson in module.lessons
+            ],
+        )
+        for module in admin.modules
+    ]
+
+
+def trainer_delivery(
+    db: Session,
+    org: UUID,
+    actor: User,
+) -> TrainerDeliveryView:
+    courses: list[TrainerCourseDeliveryView] = []
+    for assignment, course, cohort in _trainer_course_rows(db, org, actor):
+        total = len(list(db.scalars(select(Lesson.id).where(Lesson.course_id == course.id))))
+        learners: list[TrainerLearnerProgressView] = []
+        enrollment_rows = db.execute(
+            select(Enrollment, Participant, Person)
+            .join(Participant, Participant.id == Enrollment.participant_id)
+            .join(Person, Person.id == Participant.person_id)
+            .where(
+                Enrollment.organization_id == org,
+                Enrollment.cohort_id == assignment.cohort_id,
+                Enrollment.status == "active",
+                Participant.status == "active",
+            )
+            .order_by(Person.display_name, Participant.id)
+            .limit(500)
+        ).all()
+        for enrollment, participant, person in enrollment_rows:
+            started = db.scalar(
+                select(CourseEnrollment).where(
+                    CourseEnrollment.enrollment_id == enrollment.id,
+                    CourseEnrollment.course_id == course.id,
+                )
+            )
+            completed = (
+                len(
+                    list(
+                        db.scalars(
+                            select(LessonProgress.id).where(
+                                LessonProgress.course_enrollment_id == started.id
+                            )
+                        )
+                    )
+                )
+                if started
+                else 0
+            )
+            learners.append(
+                TrainerLearnerProgressView(
+                    participant_id=participant.id,
+                    display_name=person.display_name,
+                    course_enrollment=course_enrollment_view(started) if started else None,
+                    progress=_progress_view(course, total, completed, started is not None),
+                )
+            )
+        courses.append(
+            TrainerCourseDeliveryView(
+                course_id=course.id,
+                cohort_id=cohort.id,
+                course_code=course.code,
+                title_en=course.title_en,
+                title_ta=course.title_ta,
+                cohort_name_en=cohort.name_en,
+                cohort_name_ta=cohort.name_ta,
+                modules=_trainer_modules(db, course),
+                learners=learners,
+            )
+        )
+    return TrainerDeliveryView(courses=courses)
+
+
+def _material_access_view(
+    org: UUID,
+    actor: User,
+    course: Course,
+    material: LessonMaterial,
+    mode: str,
+) -> MaterialAccessView:
+    settings = get_settings()
+    token, expires_at = issue_access(
+        settings,
+        org,
+        actor.id,
+        course.id,
+        material.id,
+        cast(AccessMode, mode),
+    )
+    return MaterialAccessView(
+        url=f"/api/courses/organizations/{org}/material-delivery/{token}",
+        expires_at=expires_at,
+    )
+
+
+def learner_material_access(
+    db: Session,
+    org: UUID,
+    course_id: UUID,
+    material_id: UUID,
+    actor: User,
+    request_id: str,
+) -> MaterialAccessView:
+    course, _, material = _learner_material_context(db, org, course_id, material_id, actor)
+    view = _material_access_view(org, actor, course, material, "learner")
+    _audit(
+        db,
+        actor,
+        org,
+        material.id,
+        "lms.material.access_issued",
+        request_id,
+        1,
+        "course_id,material_id,expires_at",
+    )
+    _commit(db)
+    return view
+
+
+def trainer_material_access(
+    db: Session,
+    org: UUID,
+    course_id: UUID,
+    material_id: UUID,
+    actor: User,
+    request_id: str,
+) -> MaterialAccessView:
+    course = _require_trainer_course(db, org, course_id, actor)
+    material = db.scalar(
+        select(LessonMaterial).where(
+            LessonMaterial.id == material_id,
+            LessonMaterial.course_id == course.id,
+            LessonMaterial.organization_id == org,
+        )
+    )
+    if not material:
+        raise AuthError("not_found", 404)
+    view = _material_access_view(org, actor, course, material, "trainer")
+    _audit(
+        db,
+        actor,
+        org,
+        material.id,
+        "lms.material.access_issued",
+        request_id,
+        1,
+        "course_id,material_id,expires_at",
+    )
+    _commit(db)
+    return view
+
+
+def deliver_material(
+    db: Session,
+    org: UUID,
+    token: str,
+    actor: User,
+    request_id: str,
+) -> LocalMaterial:
+    settings = get_settings()
+    claims = verify_access(settings, token)
+    if claims.organization_id != org or claims.actor_id != actor.id:
+        raise AuthError("material_access_invalid", 403)
+    if claims.mode == "learner":
+        course, _, material = _learner_material_context(
+            db, org, claims.course_id, claims.material_id, actor
+        )
+    else:
+        course = _require_trainer_course(db, org, claims.course_id, actor)
+        trainer_material = db.scalar(
+            select(LessonMaterial).where(
+                LessonMaterial.id == claims.material_id,
+                LessonMaterial.course_id == course.id,
+                LessonMaterial.organization_id == org,
+            )
+        )
+        if not trainer_material:
+            raise AuthError("not_found", 404)
+        material = trainer_material
+    resolved = resolve_local_material(settings, material.provider_key)
+    _audit(
+        db,
+        actor,
+        org,
+        material.id,
+        "lms.material.delivered",
+        request_id,
+        1,
+        "course_id,material_id",
+    )
+    _commit(db)
+    return resolved

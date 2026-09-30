@@ -76,3 +76,7 @@ Migration 7e6ae3e5a10d passes downgrade to P01.3, re-upgrade and Alembic drift c
 ## L01.2 evidence
 
 The PostgreSQL LMS acceptance test covers reverse prerequisite rejection, blocked out-of-order completion, idempotent retry, 50% aggregation, automatic final completion, cohort summary aggregation, audit evidence, and database rejection of completion-evidence mutation. Migration downgrade/upgrade/drift, focused Ruff and strict MyPy, the full API suite, TypeScript, ESLint, Vitest, Next production build, and authenticated browser acceptance form the release gate.
+
+## L01.3 delivery evidence
+
+PostgreSQL/API acceptance creates a Trainer role and proves denial without a staff assignment, cohort-bounded visibility after assignment, provider-key non-disclosure, learner progress visibility, learner and trainer material issuance/delivery, signed-token tamper rejection and immediate denial after assignment revocation. Additional negative checks cover missing provider configuration and confined path resolution. Web tests pin exact trainer/access/delivery BFF paths and malformed-token rejection. Strict TypeScript, ESLint, Vitest, production build and authenticated browser material download are release gates. Migration validation runs upgrade, downgrade to L01.2, re-upgrade and drift against the disposable `edp_test` database.

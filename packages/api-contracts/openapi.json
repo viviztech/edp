@@ -1195,6 +1195,220 @@
         }
       }
     },
+    "/api/v1/courses/organizations/{org}/trainer-delivery": {
+      "get": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Trainer Delivery",
+        "operationId": "trainer_delivery_api_v1_courses_organizations__org__trainer_delivery_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainerDeliveryView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/materials/{material_id}/access": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Learner Material Access",
+        "operationId": "learner_material_access_api_v1_courses_organizations__org__my_learning__course_id__materials__material_id__access_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialAccessView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/trainer-delivery/{course_id}/materials/{material_id}/access": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Trainer Material Access",
+        "operationId": "trainer_material_access_api_v1_courses_organizations__org__trainer_delivery__course_id__materials__material_id__access_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialAccessView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/material-delivery/{token}": {
+      "get": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Material Delivery",
+        "operationId": "material_delivery_api_v1_courses_organizations__org__material_delivery__token__get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/applications/organizations/{org}/form": {
       "get": {
         "tags": [
@@ -14242,6 +14456,25 @@
         ],
         "title": "MarkRead"
       },
+      "MaterialAccessView": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "expires_at"
+        ],
+        "title": "MaterialAccessView"
+      },
       "MaterialAdminView": {
         "properties": {
           "course_id": {
@@ -16621,6 +16854,203 @@
           "expires_in"
         ],
         "title": "Tokens"
+      },
+      "TrainerCourseDeliveryView": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "course_code": {
+            "type": "string",
+            "title": "Course Code"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "cohort_name_en": {
+            "type": "string",
+            "title": "Cohort Name En"
+          },
+          "cohort_name_ta": {
+            "type": "string",
+            "title": "Cohort Name Ta"
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/TrainerModuleView"
+            },
+            "type": "array",
+            "title": "Modules"
+          },
+          "learners": {
+            "items": {
+              "$ref": "#/components/schemas/TrainerLearnerProgressView"
+            },
+            "type": "array",
+            "title": "Learners"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "cohort_id",
+          "course_code",
+          "title_en",
+          "title_ta",
+          "cohort_name_en",
+          "cohort_name_ta",
+          "modules",
+          "learners"
+        ],
+        "title": "TrainerCourseDeliveryView"
+      },
+      "TrainerDeliveryView": {
+        "properties": {
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/TrainerCourseDeliveryView"
+            },
+            "type": "array",
+            "title": "Courses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "courses"
+        ],
+        "title": "TrainerDeliveryView"
+      },
+      "TrainerLearnerProgressView": {
+        "properties": {
+          "participant_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Participant Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "course_enrollment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseEnrollmentView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "progress": {
+            "$ref": "#/components/schemas/CourseProgressView"
+          }
+        },
+        "type": "object",
+        "required": [
+          "participant_id",
+          "display_name",
+          "course_enrollment",
+          "progress"
+        ],
+        "title": "TrainerLearnerProgressView"
+      },
+      "TrainerLessonView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          },
+          "materials": {
+            "items": {
+              "$ref": "#/components/schemas/LearnerMaterialView"
+            },
+            "type": "array",
+            "title": "Materials"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "position",
+          "title_en",
+          "title_ta",
+          "duration_minutes",
+          "materials"
+        ],
+        "title": "TrainerLessonView"
+      },
+      "TrainerModuleView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "lessons": {
+            "items": {
+              "$ref": "#/components/schemas/TrainerLessonView"
+            },
+            "type": "array",
+            "title": "Lessons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "position",
+          "title_en",
+          "title_ta",
+          "lessons"
+        ],
+        "title": "TrainerModuleView"
       },
       "TranslationView": {
         "properties": {

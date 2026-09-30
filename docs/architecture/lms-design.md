@@ -1,6 +1,6 @@
 # LMS design
 
-Status: L01.1 and L01.2 implementation design.
+Status: L01.1, L01.2 and L01.3 implementation design.
 
 ## Boundary
 
@@ -14,14 +14,14 @@ A course starts in draft. Ordered modules, lessons and private material referenc
 
 - Super Admin, Program Director and Program Manager: view, manage, publish and assign courses within an organization grant.
 - Participant: view/start published courses reachable through their own active Enrollment.
-- Trainer: no LMS permission until a course/cohort trainer-binding model enforces assigned scope.
+- Trainer: read-only delivery access to published courses, safe materials and learner progress for cohorts covered by an active ProgramStaffAssignment.
 - Training Center Coordinator: no LMS permission in L01.1.
 
 Every learner lookup resolves User -> Person -> Participant -> active Enrollment -> CohortCourse -> published Course. A caller-supplied enrollment identifier never establishes ownership.
 
 ## Materials
 
-LessonMaterial stores a private provider reference and localized label. Learner DTOs omit the provider reference and report provider-pending availability. A future storage/video adapter will issue short-lived signed URLs after repeating the enrollment and lesson authorization check. L01.1 does not proxy arbitrary URLs or build video streaming.
+LessonMaterial stores a private provider reference and localized label. Learner and trainer DTOs omit provider references. L01.3 uses a local-filesystem adapter for local/test development and issues short-lived, actor-bound HMAC access tokens only after authorization. Delivery repeats current enrollment or trainer-scope authorization. The adapter boundary can be replaced by approved object/video hosting without exposing provider keys or building a streaming platform.
 
 ## Integrity
 
@@ -34,3 +34,9 @@ LessonPrerequisite links lessons inside the same organization and course. Author
 LessonProgress is one immutable completion record per course enrollment and lesson. Composite foreign keys prove that enrollment, course, lesson, and organization share one scope. The course progress view is derived from immutable lesson rows. CourseEnrollment is the mutable lifecycle aggregate: each new completion increments its version and transitions once from in_progress to completed when the frozen rule is met.
 
 A course rule is either all_lessons or minimum_lessons. Rule changes require draft state, an exact course version, a reason, permission, and audit evidence. Publication rejects a minimum above the lesson count. Participant commands derive identity from the signed-in person and active participant enrollment, enforce prerequisites server-side, and are idempotent for an already-completed lesson. Staff catalog summaries expose cohort counts and percentages without participant identity.
+
+## L01.3 trainer delivery and private materials
+
+ProgramStaffAssignment is reused as the center/cohort trainer boundary. A Trainer role grant alone does not expose LMS data: an active assignment must cover the course cohort. Program Directors, Program Managers and Super Admins retain organization-wide delivery visibility. The trainer projection is read-only and includes published course structure, safe material metadata, learner display name and derived course progress. It does not expose person records, provider keys, applicant evidence or authoring commands.
+
+Material access is a two-step capability flow. The authenticated learner or trainer requests access for a specific course/material pair; the service verifies current scope and returns a short-lived BFF-relative URL signed with organization, actor, course, material, mode and expiry. Delivery validates the signature and authenticated actor, then repeats the current scope check before resolving a provider key below the configured root. Absolute paths, traversal, missing files and root escapes fail closed. Production requires a dedicated signing key; local/test may reuse the local BFF key. Every issuance and successful delivery is audited without token or filesystem path values.

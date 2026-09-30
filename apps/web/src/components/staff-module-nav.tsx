@@ -31,7 +31,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     meta: "\u0bb5\u0bbe\u0baf\u0bcd\u0baa\u0bcd\u0baa\u0bc1 \u0baa\u0b9f\u0bbf\u0bb5\u0b99\u0bcd\u0b95\u0bb3\u0bc8\u0baf\u0bc1\u0bae\u0bcd \u0bb5\u0bb0\u0bb5\u0bc8\u0baf\u0bc1\u0bae\u0bcd \u0b95\u0ba3\u0bcd\u0b95\u0bbe\u0ba3\u0bbf\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
     applicationDefinitions: "\u0b87\u0bb0\u0bc1\u0bae\u0bca\u0bb4\u0bbf \u0bb5\u0bbf\u0ba3\u0bcd\u0ba3\u0baa\u0bcd\u0baa\u0baa\u0bcd \u0baa\u0b9f\u0bbf\u0bb5\u0b95\u0bcd \u0b95\u0bca\u0bb3\u0bcd\u0b95\u0bc8\u0baf\u0bc8\u0baa\u0bcd \u0baa\u0ba4\u0bbf\u0baa\u0bcd\u0baa\u0bc1\u0b95\u0bb3\u0bbe\u0b95 \u0bae\u0bc7\u0bb2\u0bbe\u0ba3\u0bcd\u0bae\u0bc8 \u0b9a\u0bc6\u0baf\u0bcd\u0baf\u0bb5\u0bc1\u0bae\u0bcd.",
     programs: "\u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0b99\u0bcd\u0b95\u0bb3\u0bcd, \u0bae\u0bc8\u0baf\u0b99\u0bcd\u0b95\u0bb3\u0bcd, \u0b95\u0bc1\u0bb4\u0bc1\u0b95\u0bcd\u0b95\u0bb3\u0bcd \u0bae\u0bb1\u0bcd\u0bb1\u0bc1\u0bae\u0bcd \u0bb5\u0bbf\u0ba3\u0bcd\u0ba3\u0baa\u0bcd\u0baa\u0b95\u0bcd \u0b95\u0bbe\u0bb2\u0b99\u0bcd\u0b95\u0bb3\u0bc8\u0ba4\u0bcd \u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0bae\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
-    selection: "மதிப்பீட்டுப் பட்டியலை அமைத்து விண்ணப்பங்களை ஒதுக்கவும்.",
+    selection: "à®®à®¤à®¿à®ªà¯à®ªà¯€à®Ÿà¯à®Ÿà¯à®ªà¯ à®ªà®Ÿà¯à®Ÿà®¿à®¯à®²à¯ˆ à®…à®®à¯ˆà®¤à¯à®¤à¯ à®µà®¿à®£à¯à®£à®ªà¯à®ªà®™à¯à®•à®³à¯ˆ à®’à®¤à¯à®•à¯à®•à®µà¯à®®à¯.",
     learning: "\u0baa\u0bbe\u0b9f\u0ba8\u0bc6\u0bb1\u0bbf\u0b95\u0bb3\u0bc8 \u0b89\u0bb0\u0bc1\u0bb5\u0bbe\u0b95\u0bcd\u0b95\u0bbf \u0b95\u0bc1\u0bb4\u0bc1 \u0baa\u0bbe\u0ba4\u0bc8\u0b95\u0bb3\u0bbf\u0bb2\u0bcd \u0bb5\u0bc8\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
   },
 };
@@ -66,6 +66,7 @@ export function StaffModuleNav({ locale, organization, permissions, variant = "t
   };
   const available = modules.filter((module) =>
     permissions.includes(module.permission)
+    || (module.key === "learning" && permissions.includes("lms.delivery.view"))
     || (module.key === "notifications" && permissions.includes("notification.operations.view"))
   );
   if (available.length === 0) return null;

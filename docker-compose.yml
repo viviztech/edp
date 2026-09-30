@@ -3,10 +3,15 @@ x-api: &api
   build:
     context: .
     dockerfile: infra/docker/api.Dockerfile
+  volumes:
+    - ./.local/lms-materials:/private-materials:ro
   environment: &api-env
     APP_ENV: local
     BFF_KEY: ${BFF_KEY:?Generate a server-only BFF key in .env}
     AUTH_DELIVERY_KEY: ${AUTH_DELIVERY_KEY:-}
+    LMS_MATERIAL_ROOT: /private-materials
+    LMS_MATERIAL_SIGNING_KEY: ${LMS_MATERIAL_SIGNING_KEY:-}
+    LMS_MATERIAL_ACCESS_SECONDS: ${LMS_MATERIAL_ACCESS_SECONDS:-300}
     META_SECRET_KEY: ${META_SECRET_KEY:-}
     META_GRAPH_API_VERSION: ${META_GRAPH_API_VERSION:-}
     META_EVENT_RETENTION_DAYS: ${META_EVENT_RETENTION_DAYS:-}

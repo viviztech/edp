@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Request
+from fastapi.responses import FileResponse
 
 from app.modules.identity.routes import DB, Principal
 from app.modules.lms import service
@@ -18,12 +19,14 @@ from app.modules.lms.schemas import (
     LessonPrerequisiteView,
     LessonProgressView,
     LessonView,
+    MaterialAccessView,
     MaterialAdminView,
     MaterialCreate,
     ModuleCreate,
     ModuleView,
     MyLearningView,
     PublishCourse,
+    TrainerDeliveryView,
 )
 
 router = APIRouter(prefix="/api/v1/courses/organizations/{org}", tags=["learning"])
@@ -170,4 +173,63 @@ def complete_lesson(
 ) -> LessonProgressView:
     return service.complete_lesson(
         db, org, course_id, lesson_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.get("/trainer-delivery", response_model=TrainerDeliveryView)
+def trainer_delivery(org: UUID, db: DB, identity: Principal) -> TrainerDeliveryView:
+    return service.trainer_delivery(db, org, identity[0])
+
+
+@router.post(
+    "/my-learning/{course_id}/materials/{material_id}/access",
+    response_model=MaterialAccessView,
+)
+def learner_material_access(
+    org: UUID,
+    course_id: UUID,
+    material_id: UUID,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> MaterialAccessView:
+    return service.learner_material_access(
+        db, org, course_id, material_id, identity[0], request.state.request_id
+    )
+
+
+@router.post(
+    "/trainer-delivery/{course_id}/materials/{material_id}/access",
+    response_model=MaterialAccessView,
+)
+def trainer_material_access(
+    org: UUID,
+    course_id: UUID,
+    material_id: UUID,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> MaterialAccessView:
+    return service.trainer_material_access(
+        db, org, course_id, material_id, identity[0], request.state.request_id
+    )
+
+
+@router.get("/material-delivery/{token}", response_class=FileResponse)
+def material_delivery(
+    org: UUID,
+    token: str,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> FileResponse:
+    material = service.deliver_material(db, org, token, identity[0], request.state.request_id)
+    return FileResponse(
+        material.path,
+        media_type=material.media_type,
+        filename=material.filename,
+        headers={
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+        },
     )

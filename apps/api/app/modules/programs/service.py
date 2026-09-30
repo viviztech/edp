@@ -426,12 +426,12 @@ def create_staff_assignment(
         .where(
             UserRole.user_id == user.id,
             UserRole.organization_id == org,
-            Role.name == "Training Center Coordinator",
+            Role.name.in_(["Training Center Coordinator", "Trainer"]),
         )
         .limit(1)
     )
     if not coordinator_role:
-        raise AuthError("coordinator_role_required", 422)
+        raise AuthError("delivery_role_required", 422)
     duplicate = db.scalar(
         select(ProgramStaffAssignment.id).where(
             ProgramStaffAssignment.organization_id == org,

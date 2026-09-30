@@ -8,6 +8,7 @@ import { learningMessages } from "../../../lib/learning-messages";
 type Locale = "en" | "ta";
 type Learning = components["schemas"]["MyLearningView"];
 type Course = components["schemas"]["LearnerCourseView"];
+type Access = components["schemas"]["MaterialAccessView"];
 
 export default function LearnerWorkspace({ org, locale }: { org: string; locale: Locale }) {
   const text = learningMessages[locale];
@@ -67,6 +68,28 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
       expected_course_enrollment_version: course.course_enrollment.version,
     });
   };
+  async function openMaterial(courseId: string, materialId: string) {
+    setBusy(true);
+    try {
+      const csrf = await fetch("/api/session/csrf", { cache: "no-store" });
+      if (!csrf.ok) throw new Error();
+      const response = await fetch(
+        root + `/my-learning/${courseId}/materials/${materialId}/access`,
+        {
+          method: "POST",
+          headers: { "x-csrf-token": (await csrf.json()).csrf_token },
+        },
+      );
+      if (!response.ok) throw new Error();
+      const access = await response.json() as Access;
+      window.location.assign(access.url);
+    } catch {
+      setMessage(text.error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const value = (en: string, ta: string) => locale === "ta" ? ta : en;
 
   return <>
@@ -112,7 +135,14 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
                   </button>}
                 {lesson.materials.map((material) => <p className="learning-private" key={material.id}>
                   <strong>{value(material.label_en, material.label_ta)}</strong>
-                  <small>{text.privatePending}</small>
+                  {material.available
+                    ? <button
+                        disabled={busy}
+                        onClick={() => void openMaterial(course.id, material.id)}
+                      >
+                        {text.openMaterial}
+                      </button>
+                    : <small>{text.materialUnavailable}</small>}
                 </p>)}
               </li>)}</ol>
             </li>)}

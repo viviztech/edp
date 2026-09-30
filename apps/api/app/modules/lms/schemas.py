@@ -301,3 +301,48 @@ class LearnerCourseView(BaseModel):
 
 class MyLearningView(BaseModel):
     courses: list[LearnerCourseView]
+
+
+class MaterialAccessView(BaseModel):
+    url: str
+    expires_at: datetime
+
+
+class TrainerLessonView(BaseModel):
+    id: UUID
+    position: int
+    title_en: str
+    title_ta: str
+    duration_minutes: int | None
+    materials: list[LearnerMaterialView]
+
+
+class TrainerModuleView(BaseModel):
+    id: UUID
+    position: int
+    title_en: str
+    title_ta: str
+    lessons: list[TrainerLessonView]
+
+
+class TrainerLearnerProgressView(BaseModel):
+    participant_id: UUID
+    display_name: str
+    course_enrollment: CourseEnrollmentView | None
+    progress: CourseProgressView
+
+
+class TrainerCourseDeliveryView(BaseModel):
+    course_id: UUID
+    cohort_id: UUID
+    course_code: str
+    title_en: str
+    title_ta: str
+    cohort_name_en: str
+    cohort_name_ta: str
+    modules: list[TrainerModuleView]
+    learners: list[TrainerLearnerProgressView]
+
+
+class TrainerDeliveryView(BaseModel):
+    courses: list[TrainerCourseDeliveryView]

@@ -94,3 +94,9 @@ Published structures are protected by PostgreSQL triggers from module, lesson or
 ## L01.2 progress controls
 
 The server derives learner scope from User -> Person -> active Participant -> active Enrollment -> assigned published Course. Client IDs never grant access. Composite foreign keys prevent cross-course or cross-organization progress rows. Published prerequisites and completion rules are database-protected, and lesson completion rows reject update and delete. Audit logs record rule changes, prerequisite creation, lesson completion, and course completion without copying lesson content or personal details. Staff summaries contain counts only.
+
+## L01.3 trainer and private-material controls
+
+`lms.delivery.view` is read-only. Trainers need both the organization role grant and an active ProgramStaffAssignment covering the center/cohort; assignment revocation is effective on the next request. Managers/directors/super admins with the permission are organization-wide. Trainer responses are limited to published delivery structure, safe material labels, learner display names and derived progress.
+
+Material capabilities are short lived and HMAC signed over organization, actor, course, material, access mode and expiry. Issuance and delivery each repeat domain authorization. The filesystem adapter resolves only relative provider keys below the configured root and rejects traversal, absolute paths, root escapes and missing objects. Production requires `LMS_MATERIAL_SIGNING_KEY`; the local/test BFF-key fallback is not enabled in production. Provider keys, resolved paths and capability values are excluded from DTOs and audit payloads. The production object/video adapter must provide private storage, TLS, content controls, retention and provider-specific revocation evidence before release.

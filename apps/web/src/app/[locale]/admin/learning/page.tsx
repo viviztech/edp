@@ -5,6 +5,7 @@ import type { components } from "../../../../lib/api-contracts";
 import { learningMessages } from "../../../../lib/learning-messages";
 import { isLocale } from "../../../../lib/messages";
 import { serverApi } from "../../../../lib/server-api";
+import TrainerLearningWorkspace from "./trainer-view";
 import LearningWorkspace from "./view";
 
 export const metadata = { robots: { index: false, follow: false } };
@@ -30,12 +31,14 @@ export default async function LearningAdminPage({
   const profile = await response.json() as components["schemas"]["Profile"];
   const requested = (await searchParams).organization;
   const grants = profile.grants.filter((grant) =>
-    grant.permissions.includes("lms.course.view"));
+    grant.permissions.includes("lms.course.view")
+    || grant.permissions.includes("lms.delivery.view"));
   const grant = grants.find((item) => !requested || item.organization_id === requested);
   if (!grant) {
     return <main><h1>{text.workspace}</h1><p>{text.error}</p>
       <Link href={`/${locale}/admin`}>Admin</Link></main>;
   }
+  const canAuthor = grant.permissions.includes("lms.course.view");
   return <main className="learning-main">
     <StaffModuleNav
       locale={locale}
@@ -44,14 +47,18 @@ export default async function LearningAdminPage({
       active="learning"
     />
     <header className="learning-heading">
-      <div><p className="eyebrow">{text.eyebrow}</p><h1>{text.title}</h1>
-        <p>{text.intro}</p></div>
+      <div><p className="eyebrow">{text.eyebrow}</p>
+        <h1>{canAuthor ? text.title : text.trainerTitle}</h1>
+        <p>{canAuthor ? text.intro : text.trainerIntro}</p>
+      </div>
       <Link href={`/${locale}/admin?organization=${grant.organization_id}`}>Admin</Link>
     </header>
-    <LearningWorkspace
-      org={grant.organization_id}
-      locale={locale}
-      permissions={grant.permissions}
-    />
+    {canAuthor
+      ? <LearningWorkspace
+          org={grant.organization_id}
+          locale={locale}
+          permissions={grant.permissions}
+        />
+      : <TrainerLearningWorkspace org={grant.organization_id} locale={locale} />}
   </main>;
 }

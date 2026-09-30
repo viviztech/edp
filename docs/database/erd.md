@@ -279,3 +279,7 @@ Migration 7e6ae3e5a10d implements Course, CourseModule, Lesson, LessonMaterial, 
 - lessons 1--many lesson_prerequisites as target and prerequisite; both composite foreign keys include course and organization.
 - course_enrollments 1--many lesson_progress; lesson_progress also references lessons through course and organization.
 - lesson_progress rows are immutable completion evidence. Course progress is calculated, while course_enrollments store the versioned lifecycle and completion timestamp.
+
+## L01.3 delivery scope and material access
+
+L01.3 adds no domain tables. `ProgramStaffAssignment.user_role_id` now accepts an active organization UserRole whose Role is Training Center Coordinator or Trainer; its existing center/cohort and revocation fields remain the single delivery-scope source. The permission migration adds `lms.delivery.view` grants. Material capabilities are intentionally ephemeral signed values and are not persisted. LessonMaterial.provider_key remains server-only and resolves through the configured adapter after authorization.

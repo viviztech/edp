@@ -71,9 +71,8 @@ The open-questions register still requires decisions or confirmed owners for:
 
 The following are future implementation slices and are not defects or unfinished acceptance criteria in already completed slices:
 
-- L01 learning management
-- L02 assessments
-- L03 certificates
+- L02 assessments and certificates
+- L03 attendance and QR check-in
 - M01 mentoring
 - K01 knowledge resources
 - S01 schemes and opportunities
@@ -81,7 +80,7 @@ The following are future implementation slices and are not defects or unfinished
 
 ## Recommended continuation rule
 
-Before starting L01, commit and push the current changes and obtain remote CI results. Repository-wide CMS Ruff/MyPy debt is verified and remains tracked for remediation; it must not be attributed to later focused modules. Native macOS validation, live-provider work, staging, and production gates may remain explicitly deferred while local feature development continues.
+Before the next Phase 6 slice, commit and push the current changes and obtain remote CI results. Repository-wide CMS Ruff/MyPy debt is verified and remains tracked for remediation; it must not be attributed to later focused modules. Native macOS validation, live-provider work, staging, and production gates may remain explicitly deferred while local feature development continues.
 
 Update this register whenever an item is completed, deferred by an approved decision, or superseded. Link the supporting commit, CI run, ADR, test evidence, or release record in the corresponding row.
 
@@ -91,8 +90,12 @@ Update this register whenever an item is completed, deferred by an approved deci
 - Repository-wide Ruff was verified and reports 166 pre-existing legacy CMS and early-migration findings; strict MyPy also contains documented CMS and selection debt. Focused P01.3 and L01.1 checks pass.
 - Superseded P01.2 coordinator wording was reconciled.
 - L01.1 course catalog and enrollment access was committed on `main` as `8b075ee`; remote CI remains pending until the pushed commit completes its workflow.
-- Later L01 work includes lesson progress, prerequisites, trainer bindings and signed media delivery.
+- L01.1-L01.3 now cover catalog/access, progress/prerequisites/completion, trainer scope and local/test signed material delivery.
 
 ## L01.2 completion record
 
-L01.2 adds ordered prerequisites, draft-only completion rules, immutable lesson completion evidence, derived course progress, automatic enrollment completion, and count-only cohort summaries. Remaining LMS work includes private media delivery, assessments, attendance, certificates, native Flutter after macOS migration, remote CI confirmation, and closure of legacy repository-wide Ruff/MyPy debt.
+L01.2 adds ordered prerequisites, draft-only completion rules, immutable lesson completion evidence, derived course progress, automatic enrollment completion, and count-only cohort summaries. L01.3 completes the remaining trainer and local/test private-media scope. Assessments, attendance, certificates, native Flutter after macOS migration, remote CI confirmation, and closure of legacy repository-wide Ruff/MyPy debt remain open.
+
+## L01.3 completion record
+
+L01.3 adds trainer-scoped published course delivery, cohort learner progress, short-lived private material capabilities, a confined local/test file adapter, BFF binary delivery and English/Tamil web states. Production private object/video hosting, storage retention and operational acceptance remain open release gates. Future Phase 6 work is L02 assessments, attendance/QR, certificates, native Flutter after macOS migration, remote CI confirmation and closure of separately recorded legacy Ruff/MyPy debt.

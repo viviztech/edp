@@ -446,6 +446,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/organizations/{org}/trainer-delivery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Trainer Delivery */
+        get: operations["trainer_delivery_api_v1_courses_organizations__org__trainer_delivery_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/materials/{material_id}/access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Learner Material Access */
+        post: operations["learner_material_access_api_v1_courses_organizations__org__my_learning__course_id__materials__material_id__access_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/trainer-delivery/{course_id}/materials/{material_id}/access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Trainer Material Access */
+        post: operations["trainer_material_access_api_v1_courses_organizations__org__trainer_delivery__course_id__materials__material_id__access_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/material-delivery/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Material Delivery */
+        get: operations["material_delivery_api_v1_courses_organizations__org__material_delivery__token__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/applications/organizations/{org}/form": {
         parameters: {
             query?: never;
@@ -4784,6 +4852,16 @@ export interface components {
             /** Expected Version */
             expected_version: number;
         };
+        /** MaterialAccessView */
+        MaterialAccessView: {
+            /** Url */
+            url: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+        };
         /** MaterialAdminView */
         MaterialAdminView: {
             /**
@@ -5792,6 +5870,84 @@ export interface components {
             /** Expires In */
             expires_in: number;
         };
+        /** TrainerCourseDeliveryView */
+        TrainerCourseDeliveryView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Course Code */
+            course_code: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Cohort Name En */
+            cohort_name_en: string;
+            /** Cohort Name Ta */
+            cohort_name_ta: string;
+            /** Modules */
+            modules: components["schemas"]["TrainerModuleView"][];
+            /** Learners */
+            learners: components["schemas"]["TrainerLearnerProgressView"][];
+        };
+        /** TrainerDeliveryView */
+        TrainerDeliveryView: {
+            /** Courses */
+            courses: components["schemas"]["TrainerCourseDeliveryView"][];
+        };
+        /** TrainerLearnerProgressView */
+        TrainerLearnerProgressView: {
+            /**
+             * Participant Id
+             * Format: uuid
+             */
+            participant_id: string;
+            /** Display Name */
+            display_name: string;
+            course_enrollment: components["schemas"]["CourseEnrollmentView"] | null;
+            progress: components["schemas"]["CourseProgressView"];
+        };
+        /** TrainerLessonView */
+        TrainerLessonView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Duration Minutes */
+            duration_minutes: number | null;
+            /** Materials */
+            materials: components["schemas"]["LearnerMaterialView"][];
+        };
+        /** TrainerModuleView */
+        TrainerModuleView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Lessons */
+            lessons: components["schemas"]["TrainerLessonView"][];
+        };
         /** TranslationView */
         TranslationView: {
             /** Title */
@@ -6745,6 +6901,133 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["LessonProgressView"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trainer_delivery_api_v1_courses_organizations__org__trainer_delivery_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainerDeliveryView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_material_access_api_v1_courses_organizations__org__my_learning__course_id__materials__material_id__access_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialAccessView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trainer_material_access_api_v1_courses_organizations__org__trainer_delivery__course_id__materials__material_id__access_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialAccessView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    material_delivery_api_v1_courses_organizations__org__material_delivery__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

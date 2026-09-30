@@ -1,6 +1,6 @@
 # Milestone 6 implementation report
 
-Status: L01.1 and L01.2 implemented and locally accepted; Milestone 6 remains in progress.
+Status: L01.1, L01.2 and L01.3 implemented and locally accepted; Milestone 6 remains in progress.
 
 ## Delivered behavior
 
@@ -8,7 +8,7 @@ Migration 7e6ae3e5a10d adds organization-scoped Course, ordered CourseModule, Le
 
 Program Directors, Program Managers and Super Admins can author bilingual course structure, publish a complete draft with an exact version and reason, and assign the published course to a planned or active cohort. Participants receive lms.learn, but the service derives access through the authenticated Person, active Participant, active program Enrollment, cohort assignment and published Course. Starting is idempotent. Learner DTOs omit the private provider key.
 
-The Next.js staff course studio and learner pathway provide English/Tamil loading, error and empty states, permission-aware navigation, CSRF-protected fixed BFF routes and responsive ordered course spines. Signed media delivery remains unavailable pending an approved provider adapter.
+The Next.js staff course studio and learner pathway provide English/Tamil loading, error and empty states, permission-aware navigation, CSRF-protected fixed BFF routes and responsive ordered course spines. Local/test private material delivery is implemented through a confined filesystem adapter; production object/video hosting remains a release gate.
 
 ## Definition of Done evidence
 
@@ -33,8 +33,14 @@ The Next.js staff course studio and learner pathway provide English/Tamil loadin
 
 ## Remaining L01 scope
 
-Lesson progress, course-progress projection, prerequisites, trainer-scoped bindings, signed media access, Flutter learning screens and full course completion rules remain open. Quizzes, assignments and grading belong to L02.
+Flutter learning screens remain deferred under ADR 0004. Quizzes, assignments and grading belong to L02; attendance and certificates remain later Phase 6 slices. Production object/video hosting and remote CI evidence remain release gates.
 
 ## L01.2 implementation
 
 Implemented ordered lesson prerequisites, all-lessons/minimum-lessons completion rules, immutable lesson evidence, versioned course-enrollment aggregation, automatic completion, participant progress UI, and count-only staff cohort summaries. Local PostgreSQL acceptance proves prerequisite enforcement, idempotency, aggregation, finalization, and database immutability. Verification passed: both L01.2 migrations upgrade cleanly; the base migration and trigger-only hardening rollback/reapply without drift; focused Ruff and strict MyPy pass; the full API suite passes 84 tests; TypeScript, ESLint, 32 Vitest tests, and the Next 16 production build pass; authenticated Chrome acceptance completes a lesson, reaches 100% course completion, validates responsive layout, and reports no JavaScript errors. The generated OpenAPI and TypeScript contracts are current. Native Flutter remains deferred under ADR 0004, remote CI confirmation remains open, and existing repository-wide CMS/early-migration Ruff/MyPy debt is unchanged.
+
+## L01.3 implementation
+
+Implemented `lms.delivery.view`, Trainer grants, active center/cohort assignment enforcement, a bounded trainer delivery projection, learner and trainer material-access commands, actor-bound HMAC capabilities, reauthorization at file delivery, confined local-file resolution, audit evidence, binary BFF streaming and English/Tamil trainer and learner interfaces. ProgramStaffAssignment now accepts accounts holding either Training Center Coordinator or Trainer without creating duplicate scope tables. The migration adds permission catalog and role grants only; existing LMS entities remain unchanged.
+
+Focused PostgreSQL acceptance proves unassigned denial, assigned cohort visibility, safe material metadata, trainer and learner file delivery, token tamper rejection and immediate revocation. Migration downgrade/re-upgrade/drift is clean. Focused Ruff and strict MyPy pass; the full API suite passes 86 tests; TypeScript, ESLint, 32 Vitest tests and the Next 16 production build pass. Authenticated Chrome proves trainer cohort scope, trainer and learner private-material downloads, progress completion, responsive layouts and no JavaScript errors. OpenAPI and generated TypeScript contracts are current. Production private object/video hosting, remote CI, native Flutter and legacy repository-wide CMS/MyPy debt remain open gates outside this slice.
