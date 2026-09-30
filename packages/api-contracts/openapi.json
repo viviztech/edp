@@ -1409,6 +1409,238 @@
         }
       }
     },
+    "/api/v1/courses/organizations/{org}/quizzes": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Create Quiz",
+        "operationId": "create_quiz_api_v1_courses_organizations__org__quizzes_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/quiz-questions": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Create Quiz Question",
+        "operationId": "create_quiz_question_api_v1_courses_organizations__org__quiz_questions_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizQuestionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizQuestionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/quiz-choices": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Create Quiz Choice",
+        "operationId": "create_quiz_choice_api_v1_courses_organizations__org__quiz_choices_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizChoiceCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizChoiceAdminView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/quizzes/{quiz_id}/attempts": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Submit Quiz Attempt",
+        "operationId": "submit_quiz_attempt_api_v1_courses_organizations__org__my_learning__course_id__quizzes__quiz_id__attempts_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "quiz_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quiz Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizAttemptSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizAttemptView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/applications/organizations/{org}/form": {
       "get": {
         "tags": [
@@ -8948,6 +9180,13 @@
             },
             "type": "array",
             "title": "Prerequisite Lesson Ids"
+          },
+          "quizzes": {
+            "items": {
+              "$ref": "#/components/schemas/QuizAdminView"
+            },
+            "type": "array",
+            "title": "Quizzes"
           }
         },
         "additionalProperties": false,
@@ -8964,7 +9203,8 @@
           "organization_id",
           "created_at",
           "materials",
-          "prerequisite_lesson_ids"
+          "prerequisite_lesson_ids",
+          "quizzes"
         ],
         "title": "AdminLessonView"
       },
@@ -13811,6 +14051,13 @@
             },
             "type": "array",
             "title": "Materials"
+          },
+          "quizzes": {
+            "items": {
+              "$ref": "#/components/schemas/LearnerQuizView"
+            },
+            "type": "array",
+            "title": "Quizzes"
           }
         },
         "type": "object",
@@ -13826,7 +14073,8 @@
           "locked",
           "completed",
           "completed_at",
-          "materials"
+          "materials",
+          "quizzes"
         ],
         "title": "LearnerLessonView"
       },
@@ -13910,6 +14158,166 @@
           "lessons"
         ],
         "title": "LearnerModuleView"
+      },
+      "LearnerQuizChoiceView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "label_en": {
+            "type": "string",
+            "title": "Label En"
+          },
+          "label_ta": {
+            "type": "string",
+            "title": "Label Ta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "position",
+          "label_en",
+          "label_ta"
+        ],
+        "title": "LearnerQuizChoiceView"
+      },
+      "LearnerQuizQuestionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "prompt_en": {
+            "type": "string",
+            "title": "Prompt En"
+          },
+          "prompt_ta": {
+            "type": "string",
+            "title": "Prompt Ta"
+          },
+          "points": {
+            "type": "integer",
+            "title": "Points"
+          },
+          "choices": {
+            "items": {
+              "$ref": "#/components/schemas/LearnerQuizChoiceView"
+            },
+            "type": "array",
+            "title": "Choices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "position",
+          "prompt_en",
+          "prompt_ta",
+          "points",
+          "choices"
+        ],
+        "title": "LearnerQuizQuestionView"
+      },
+      "LearnerQuizView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "instructions_en": {
+            "type": "string",
+            "title": "Instructions En"
+          },
+          "instructions_ta": {
+            "type": "string",
+            "title": "Instructions Ta"
+          },
+          "passing_percent": {
+            "type": "integer",
+            "title": "Passing Percent"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "title": "Max Attempts"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "remaining_attempts": {
+            "type": "integer",
+            "title": "Remaining Attempts"
+          },
+          "best_percent": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Percent"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/LearnerQuizQuestionView"
+            },
+            "type": "array",
+            "title": "Questions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "position",
+          "title_en",
+          "title_ta",
+          "instructions_en",
+          "instructions_ta",
+          "passing_percent",
+          "max_attempts",
+          "attempt_count",
+          "remaining_attempts",
+          "best_percent",
+          "passed",
+          "available",
+          "questions"
+        ],
+        "title": "LearnerQuizView"
       },
       "LearningCatalogView": {
         "properties": {
@@ -15675,6 +16083,702 @@
         ],
         "title": "PublishCourse"
       },
+      "QuizAdminView": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "instructions_en": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions En"
+          },
+          "instructions_ta": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions Ta"
+          },
+          "passing_percent": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Passing Percent"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Attempts"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/QuizQuestionAdminView"
+            },
+            "type": "array",
+            "title": "Questions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "lesson_id",
+          "position",
+          "title_en",
+          "title_ta",
+          "instructions_en",
+          "instructions_ta",
+          "passing_percent",
+          "max_attempts",
+          "id",
+          "organization_id",
+          "created_at",
+          "questions"
+        ],
+        "title": "QuizAdminView"
+      },
+      "QuizAnswerSelection": {
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "choice_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Choice Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "question_id",
+          "choice_id"
+        ],
+        "title": "QuizAnswerSelection"
+      },
+      "QuizAttemptAnswerView": {
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "selected_choice_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selected Choice Id"
+          },
+          "is_correct": {
+            "type": "boolean",
+            "title": "Is Correct"
+          },
+          "points_awarded": {
+            "type": "integer",
+            "title": "Points Awarded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_id",
+          "selected_choice_id",
+          "is_correct",
+          "points_awarded"
+        ],
+        "title": "QuizAttemptAnswerView"
+      },
+      "QuizAttemptSubmit": {
+        "properties": {
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/QuizAnswerSelection"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Answers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "answers"
+        ],
+        "title": "QuizAttemptSubmit"
+      },
+      "QuizAttemptView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "quiz_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quiz Id"
+          },
+          "course_enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Enrollment Id"
+          },
+          "attempt_number": {
+            "type": "integer",
+            "title": "Attempt Number"
+          },
+          "score_points": {
+            "type": "integer",
+            "title": "Score Points"
+          },
+          "maximum_points": {
+            "type": "integer",
+            "title": "Maximum Points"
+          },
+          "percent": {
+            "type": "integer",
+            "title": "Percent"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Submitted At"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/QuizAttemptAnswerView"
+            },
+            "type": "array",
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "quiz_id",
+          "course_enrollment_id",
+          "attempt_number",
+          "score_points",
+          "maximum_points",
+          "percent",
+          "passed",
+          "submitted_at",
+          "answers"
+        ],
+        "title": "QuizAttemptView"
+      },
+      "QuizChoiceAdminView": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "quiz_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quiz Id"
+          },
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "label_en": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Label En"
+          },
+          "label_ta": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Label Ta"
+          },
+          "is_correct": {
+            "type": "boolean",
+            "title": "Is Correct"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "quiz_id",
+          "question_id",
+          "position",
+          "label_en",
+          "label_ta",
+          "is_correct",
+          "id",
+          "organization_id",
+          "created_at"
+        ],
+        "title": "QuizChoiceAdminView"
+      },
+      "QuizChoiceCreate": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "quiz_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quiz Id"
+          },
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "label_en": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Label En"
+          },
+          "label_ta": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Label Ta"
+          },
+          "is_correct": {
+            "type": "boolean",
+            "title": "Is Correct"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "quiz_id",
+          "question_id",
+          "position",
+          "label_en",
+          "label_ta",
+          "is_correct"
+        ],
+        "title": "QuizChoiceCreate"
+      },
+      "QuizCreate": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "instructions_en": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions En"
+          },
+          "instructions_ta": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions Ta"
+          },
+          "passing_percent": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Passing Percent"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Attempts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "lesson_id",
+          "position",
+          "title_en",
+          "title_ta",
+          "instructions_en",
+          "instructions_ta",
+          "passing_percent",
+          "max_attempts"
+        ],
+        "title": "QuizCreate"
+      },
+      "QuizQuestionAdminView": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "quiz_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quiz Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "prompt_en": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Prompt En"
+          },
+          "prompt_ta": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Prompt Ta"
+          },
+          "points": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Points"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "choices": {
+            "items": {
+              "$ref": "#/components/schemas/QuizChoiceAdminView"
+            },
+            "type": "array",
+            "title": "Choices"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "quiz_id",
+          "position",
+          "prompt_en",
+          "prompt_ta",
+          "points",
+          "id",
+          "organization_id",
+          "created_at",
+          "choices"
+        ],
+        "title": "QuizQuestionAdminView"
+      },
+      "QuizQuestionCreate": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "quiz_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quiz Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "prompt_en": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Prompt En"
+          },
+          "prompt_ta": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Prompt Ta"
+          },
+          "points": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Points"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "quiz_id",
+          "position",
+          "prompt_en",
+          "prompt_ta",
+          "points"
+        ],
+        "title": "QuizQuestionCreate"
+      },
+      "QuizQuestionView": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "quiz_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quiz Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "prompt_en": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Prompt En"
+          },
+          "prompt_ta": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Prompt Ta"
+          },
+          "points": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Points"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "quiz_id",
+          "position",
+          "prompt_en",
+          "prompt_ta",
+          "points",
+          "id",
+          "organization_id",
+          "created_at"
+        ],
+        "title": "QuizQuestionView"
+      },
+      "QuizView": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "instructions_en": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions En"
+          },
+          "instructions_ta": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions Ta"
+          },
+          "passing_percent": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Passing Percent"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Attempts"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "lesson_id",
+          "position",
+          "title_en",
+          "title_ta",
+          "instructions_en",
+          "instructions_ta",
+          "passing_percent",
+          "max_attempts",
+          "id",
+          "organization_id",
+          "created_at"
+        ],
+        "title": "QuizView"
+      },
       "Register": {
         "properties": {
           "password": {
@@ -16955,6 +18059,13 @@
           },
           "progress": {
             "$ref": "#/components/schemas/CourseProgressView"
+          },
+          "quiz_results": {
+            "items": {
+              "$ref": "#/components/schemas/TrainerQuizResultView"
+            },
+            "type": "array",
+            "title": "Quiz Results"
           }
         },
         "type": "object",
@@ -16962,7 +18073,8 @@
           "participant_id",
           "display_name",
           "course_enrollment",
-          "progress"
+          "progress",
+          "quiz_results"
         ],
         "title": "TrainerLearnerProgressView"
       },
@@ -17051,6 +18163,65 @@
           "lessons"
         ],
         "title": "TrainerModuleView"
+      },
+      "TrainerQuizResultView": {
+        "properties": {
+          "quiz_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quiz Id"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "best_percent": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Percent"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "last_submitted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Submitted At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quiz_id",
+          "title_en",
+          "title_ta",
+          "attempt_count",
+          "best_percent",
+          "passed",
+          "last_submitted_at"
+        ],
+        "title": "TrainerQuizResultView"
       },
       "TranslationView": {
         "properties": {

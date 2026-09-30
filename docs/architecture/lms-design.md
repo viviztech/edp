@@ -1,10 +1,10 @@
 # LMS design
 
-Status: L01.1, L01.2 and L01.3 implementation design.
+Status: L01.1-L01.3 and L02.1 implementation design.
 
 ## Boundary
 
-The LMS module owns Course, CourseModule, Lesson, LessonMaterial, CohortCourse and CourseEnrollment. Programs owns cohorts, participants and the source Enrollment. Identity owns users, roles, permissions and audit evidence. LMS reads those boundaries through stable identifiers and never duplicates person data.
+The LMS module owns Course, CourseModule, Lesson, LessonMaterial, CohortCourse, CourseEnrollment, Quiz, QuizQuestion, QuizChoice, QuizAttempt and QuizAttemptAnswer. Programs owns cohorts, participants and the source Enrollment. Identity owns users, roles, permissions and audit evidence. LMS reads those boundaries through stable identifiers and never duplicates person data.
 
 ## Lifecycle
 
@@ -40,3 +40,11 @@ A course rule is either all_lessons or minimum_lessons. Rule changes require dra
 ProgramStaffAssignment is reused as the center/cohort trainer boundary. A Trainer role grant alone does not expose LMS data: an active assignment must cover the course cohort. Program Directors, Program Managers and Super Admins retain organization-wide delivery visibility. The trainer projection is read-only and includes published course structure, safe material metadata, learner display name and derived course progress. It does not expose person records, provider keys, applicant evidence or authoring commands.
 
 Material access is a two-step capability flow. The authenticated learner or trainer requests access for a specific course/material pair; the service verifies current scope and returns a short-lived BFF-relative URL signed with organization, actor, course, material, mode and expiry. Delivery validates the signature and authenticated actor, then repeats the current scope check before resolving a provider key below the configured root. Absolute paths, traversal, missing files and root escapes fail closed. Production requires a dedicated signing key; local/test may reuse the local BFF key. Every issuance and successful delivery is audited without token or filesystem path values.
+
+## L02.1 quizzes and automatic grading
+
+A draft course may contain ordered bilingual quizzes attached to lessons. Each quiz defines a pass mark and an attempt limit from 1 to 10. Questions carry positive integer points and ordered bilingual choices. Publication rejects a quiz with no questions, fewer than two choices for a question, or anything other than one correct choice. Published structure triggers prevent insert, update or delete of quiz definitions.
+
+The learner projection exposes question and choice text without the correctness flag. Attempt submission derives the participant, enrollment and course from the authenticated user, requires the course to be started, enforces lesson prerequisites, locks the course enrollment, and accepts exactly one choice for every question. The server calculates score, maximum points, rounded percentage and pass/fail. A pass or exhausted limit closes further attempts. Attempts and answer evidence are immutable.
+
+Trainer results are read-only summaries limited by the existing active ProgramStaffAssignment cohort boundary. They show attempt count, best percentage, pass state and last submission time without selected answers or the answer key. Quiz results do not yet change lesson-based course completion; assessment-based completion and certificates remain later L02 slices.

@@ -33,6 +33,11 @@ from app.modules.lms.models import (
     LessonMaterial,
     LessonPrerequisite,
     LessonProgress,
+    Quiz,
+    QuizAttempt,
+    QuizAttemptAnswer,
+    QuizChoice,
+    QuizQuestion,
 )
 from app.modules.lms.schemas import (
     AdminCourseView,
@@ -53,6 +58,9 @@ from app.modules.lms.schemas import (
     LearnerLessonView,
     LearnerMaterialView,
     LearnerModuleView,
+    LearnerQuizChoiceView,
+    LearnerQuizQuestionView,
+    LearnerQuizView,
     LearningCatalogView,
     LessonCompletionCommand,
     LessonCreate,
@@ -69,11 +77,23 @@ from app.modules.lms.schemas import (
     MyLearningView,
     ProgressState,
     PublishCourse,
+    QuizAdminView,
+    QuizAttemptAnswerView,
+    QuizAttemptSubmit,
+    QuizAttemptView,
+    QuizChoiceAdminView,
+    QuizChoiceCreate,
+    QuizCreate,
+    QuizQuestionAdminView,
+    QuizQuestionCreate,
+    QuizQuestionView,
+    QuizView,
     TrainerCourseDeliveryView,
     TrainerDeliveryView,
     TrainerLearnerProgressView,
     TrainerLessonView,
     TrainerModuleView,
+    TrainerQuizResultView,
 )
 from app.modules.programs.models import (
     Cohort,
@@ -179,6 +199,18 @@ def material_admin_view(item: LessonMaterial) -> MaterialAdminView:
     )
 
 
+def quiz_view(item: Quiz) -> QuizView:
+    return QuizView.model_validate(item, from_attributes=True)
+
+
+def quiz_question_view(item: QuizQuestion) -> QuizQuestionView:
+    return QuizQuestionView.model_validate(item, from_attributes=True)
+
+
+def quiz_choice_admin_view(item: QuizChoice) -> QuizChoiceAdminView:
+    return QuizChoiceAdminView.model_validate(item, from_attributes=True)
+
+
 def assignment_view(item: CohortCourse) -> CohortCourseView:
     return CohortCourseView(
         id=item.id,
@@ -252,6 +284,27 @@ def _admin_structure(db: Session, item: Course) -> AdminCourseView:
             .order_by(LessonPrerequisite.lesson_id, LessonPrerequisite.prerequisite_lesson_id)
         )
     )
+    quizzes = list(
+        db.scalars(
+            select(Quiz)
+            .where(Quiz.course_id == item.id)
+            .order_by(Quiz.lesson_id, Quiz.position, Quiz.id)
+        )
+    )
+    questions = list(
+        db.scalars(
+            select(QuizQuestion)
+            .where(QuizQuestion.course_id == item.id)
+            .order_by(QuizQuestion.quiz_id, QuizQuestion.position, QuizQuestion.id)
+        )
+    )
+    choices = list(
+        db.scalars(
+            select(QuizChoice)
+            .where(QuizChoice.course_id == item.id)
+            .order_by(QuizChoice.question_id, QuizChoice.position, QuizChoice.id)
+        )
+    )
     prerequisite_map: dict[UUID, list[UUID]] = {}
     for prerequisite in prerequisites:
         prerequisite_map.setdefault(prerequisite.lesson_id, []).append(
@@ -260,6 +313,25 @@ def _admin_structure(db: Session, item: Course) -> AdminCourseView:
     material_map: dict[UUID, list[MaterialAdminView]] = {}
     for material in materials:
         material_map.setdefault(material.lesson_id, []).append(material_admin_view(material))
+    choice_map: dict[UUID, list[QuizChoiceAdminView]] = {}
+    for choice in choices:
+        choice_map.setdefault(choice.question_id, []).append(quiz_choice_admin_view(choice))
+    question_map: dict[UUID, list[QuizQuestionAdminView]] = {}
+    for question in questions:
+        question_map.setdefault(question.quiz_id, []).append(
+            QuizQuestionAdminView(
+                **quiz_question_view(question).model_dump(),
+                choices=choice_map.get(question.id, []),
+            )
+        )
+    quiz_map: dict[UUID, list[QuizAdminView]] = {}
+    for quiz in quizzes:
+        quiz_map.setdefault(quiz.lesson_id, []).append(
+            QuizAdminView(
+                **quiz_view(quiz).model_dump(),
+                questions=question_map.get(quiz.id, []),
+            )
+        )
     lesson_map: dict[UUID, list[AdminLessonView]] = {}
     for lesson in lessons:
         lesson_map.setdefault(lesson.module_id, []).append(
@@ -267,6 +339,7 @@ def _admin_structure(db: Session, item: Course) -> AdminCourseView:
                 **lesson_view(lesson).model_dump(),
                 materials=material_map.get(lesson.id, []),
                 prerequisite_lesson_ids=prerequisite_map.get(lesson.id, []),
+                quizzes=quiz_map.get(lesson.id, []),
             )
         )
     return AdminCourseView(
@@ -651,6 +724,7 @@ def publish_course(
         item.minimum_lessons is None or item.minimum_lessons > lesson_count
     ):
         raise AuthError("completion_rule_invalid", 422)
+    _validate_quizzes_for_publish(db, item.id)
     item.state = "published"
     item.version += 1
     item.published_at = now()
@@ -836,6 +910,16 @@ def _learner_structure(
                                 and set(lesson.prerequisite_lesson_ids).issubset(completed),
                             )
                             for material in lesson.materials
+                        ],
+                        quizzes=[
+                            _learner_quiz_view(
+                                db,
+                                quiz,
+                                started,
+                                started is not None
+                                and set(lesson.prerequisite_lesson_ids).issubset(completed),
+                            )
+                            for quiz in lesson.quizzes
                         ],
                     )
                     for lesson in module.lessons
@@ -1267,6 +1351,7 @@ def trainer_delivery(
                     display_name=person.display_name,
                     course_enrollment=course_enrollment_view(started) if started else None,
                     progress=_progress_view(course, total, completed, started is not None),
+                    quiz_results=_trainer_quiz_results(db, course.id, started),
                 )
             )
         courses.append(
@@ -1404,3 +1489,399 @@ def deliver_material(
     )
     _commit(db)
     return resolved
+
+
+def create_quiz(
+    db: Session,
+    org: UUID,
+    actor: User,
+    data: QuizCreate,
+    request_id: str,
+) -> QuizView:
+    require_permission(db, actor, org, "lms.assessment.manage")
+    course = _course(db, org, data.course_id, lock=True)
+    _require_draft(course)
+    lesson = db.scalar(
+        select(Lesson).where(
+            Lesson.id == data.lesson_id,
+            Lesson.course_id == course.id,
+            Lesson.organization_id == org,
+        )
+    )
+    if not lesson:
+        raise AuthError("not_found", 404)
+    item = Quiz(organization_id=org, **data.model_dump())
+    db.add(item)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("quiz_position_exists", 409) from exc
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "lms.quiz.created",
+        request_id,
+        course.version,
+        "course_id,lesson_id,position,title_en,title_ta,instructions_en,"
+        "instructions_ta,passing_percent,max_attempts",
+    )
+    _commit(db)
+    return quiz_view(item)
+
+
+def create_quiz_question(
+    db: Session,
+    org: UUID,
+    actor: User,
+    data: QuizQuestionCreate,
+    request_id: str,
+) -> QuizQuestionView:
+    require_permission(db, actor, org, "lms.assessment.manage")
+    course = _course(db, org, data.course_id, lock=True)
+    _require_draft(course)
+    quiz = db.scalar(
+        select(Quiz).where(
+            Quiz.id == data.quiz_id,
+            Quiz.course_id == course.id,
+            Quiz.organization_id == org,
+        )
+    )
+    if not quiz:
+        raise AuthError("not_found", 404)
+    item = QuizQuestion(organization_id=org, **data.model_dump())
+    db.add(item)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("quiz_question_position_exists", 409) from exc
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "lms.quiz.question_created",
+        request_id,
+        course.version,
+        "course_id,quiz_id,position,prompt_en,prompt_ta,points",
+    )
+    _commit(db)
+    return quiz_question_view(item)
+
+
+def create_quiz_choice(
+    db: Session,
+    org: UUID,
+    actor: User,
+    data: QuizChoiceCreate,
+    request_id: str,
+) -> QuizChoiceAdminView:
+    require_permission(db, actor, org, "lms.assessment.manage")
+    course = _course(db, org, data.course_id, lock=True)
+    _require_draft(course)
+    question = db.scalar(
+        select(QuizQuestion).where(
+            QuizQuestion.id == data.question_id,
+            QuizQuestion.quiz_id == data.quiz_id,
+            QuizQuestion.course_id == course.id,
+            QuizQuestion.organization_id == org,
+        )
+    )
+    if not question:
+        raise AuthError("not_found", 404)
+    item = QuizChoice(organization_id=org, **data.model_dump())
+    db.add(item)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("quiz_choice_position_exists", 409) from exc
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "lms.quiz.choice_created",
+        request_id,
+        course.version,
+        "course_id,quiz_id,question_id,position,label_en,label_ta,is_correct",
+    )
+    _commit(db)
+    return quiz_choice_admin_view(item)
+
+
+def _validate_quizzes_for_publish(db: Session, course_id: UUID) -> None:
+    quizzes = list(db.scalars(select(Quiz).where(Quiz.course_id == course_id)))
+    for quiz in quizzes:
+        questions = list(db.scalars(select(QuizQuestion).where(QuizQuestion.quiz_id == quiz.id)))
+        if not questions:
+            raise AuthError("quiz_structure_incomplete", 422)
+        for question in questions:
+            choices = list(
+                db.scalars(select(QuizChoice).where(QuizChoice.question_id == question.id))
+            )
+            if len(choices) < 2 or sum(choice.is_correct for choice in choices) != 1:
+                raise AuthError("quiz_structure_incomplete", 422)
+
+
+def _learner_quiz_view(
+    db: Session,
+    quiz: QuizAdminView,
+    course_enrollment: CourseEnrollment | None,
+    available: bool,
+) -> LearnerQuizView:
+    attempts = (
+        list(
+            db.scalars(
+                select(QuizAttempt)
+                .where(
+                    QuizAttempt.course_enrollment_id == course_enrollment.id,
+                    QuizAttempt.quiz_id == quiz.id,
+                )
+                .order_by(QuizAttempt.attempt_number)
+            )
+        )
+        if course_enrollment
+        else []
+    )
+    passed = any(attempt.passed for attempt in attempts)
+    return LearnerQuizView(
+        id=quiz.id,
+        position=quiz.position,
+        title_en=quiz.title_en,
+        title_ta=quiz.title_ta,
+        instructions_en=quiz.instructions_en,
+        instructions_ta=quiz.instructions_ta,
+        passing_percent=quiz.passing_percent,
+        max_attempts=quiz.max_attempts,
+        attempt_count=len(attempts),
+        remaining_attempts=0 if passed else max(0, quiz.max_attempts - len(attempts)),
+        best_percent=max((attempt.percent for attempt in attempts), default=None),
+        passed=passed,
+        available=available,
+        questions=[
+            LearnerQuizQuestionView(
+                id=question.id,
+                position=question.position,
+                prompt_en=question.prompt_en,
+                prompt_ta=question.prompt_ta,
+                points=question.points,
+                choices=[
+                    LearnerQuizChoiceView(
+                        id=choice.id,
+                        position=choice.position,
+                        label_en=choice.label_en,
+                        label_ta=choice.label_ta,
+                    )
+                    for choice in question.choices
+                ],
+            )
+            for question in quiz.questions
+        ],
+    )
+
+
+def submit_quiz_attempt(
+    db: Session,
+    org: UUID,
+    course_id: UUID,
+    quiz_id: UUID,
+    actor: User,
+    data: QuizAttemptSubmit,
+    request_id: str,
+) -> QuizAttemptView:
+    eligible = next(
+        (row for row in _learner_courses(db, org, actor) if row[2].id == course_id),
+        None,
+    )
+    if not eligible:
+        raise AuthError("course_access_denied", 403)
+    enrollment, _, course = eligible
+    course_enrollment = db.scalar(
+        select(CourseEnrollment)
+        .where(
+            CourseEnrollment.enrollment_id == enrollment.id,
+            CourseEnrollment.course_id == course.id,
+        )
+        .with_for_update()
+    )
+    if not course_enrollment:
+        raise AuthError("course_not_started", 409)
+    quiz = db.scalar(
+        select(Quiz).where(
+            Quiz.id == quiz_id,
+            Quiz.course_id == course.id,
+            Quiz.organization_id == org,
+        )
+    )
+    if not quiz:
+        raise AuthError("not_found", 404)
+    prerequisites = set(
+        db.scalars(
+            select(LessonPrerequisite.prerequisite_lesson_id).where(
+                LessonPrerequisite.lesson_id == quiz.lesson_id,
+                LessonPrerequisite.course_id == course.id,
+            )
+        )
+    )
+    completed = set(
+        db.scalars(
+            select(LessonProgress.lesson_id).where(
+                LessonProgress.course_enrollment_id == course_enrollment.id
+            )
+        )
+    )
+    if not prerequisites.issubset(completed):
+        raise AuthError("lesson_prerequisite_incomplete", 409)
+    attempts = list(
+        db.scalars(
+            select(QuizAttempt)
+            .where(
+                QuizAttempt.course_enrollment_id == course_enrollment.id,
+                QuizAttempt.quiz_id == quiz.id,
+            )
+            .order_by(QuizAttempt.attempt_number)
+        )
+    )
+    if any(attempt.passed for attempt in attempts):
+        raise AuthError("quiz_already_passed", 409)
+    if len(attempts) >= quiz.max_attempts:
+        raise AuthError("quiz_attempt_limit_reached", 409)
+    questions = list(
+        db.scalars(
+            select(QuizQuestion)
+            .where(QuizQuestion.quiz_id == quiz.id)
+            .order_by(QuizQuestion.position, QuizQuestion.id)
+        )
+    )
+    selections = {answer.question_id: answer.choice_id for answer in data.answers}
+    if set(selections) != {question.id for question in questions}:
+        raise AuthError("quiz_answers_incomplete", 422)
+    choices = list(
+        db.scalars(
+            select(QuizChoice).where(
+                QuizChoice.quiz_id == quiz.id,
+                QuizChoice.id.in_(selections.values()),
+            )
+        )
+    )
+    by_id = {choice.id: choice for choice in choices}
+    if len(by_id) != len(questions):
+        raise AuthError("quiz_choice_invalid", 422)
+    maximum = sum(question.points for question in questions)
+    score = 0
+    graded: list[tuple[QuizQuestion, QuizChoice, bool]] = []
+    for question in questions:
+        choice = by_id[selections[question.id]]
+        if choice.question_id != question.id:
+            raise AuthError("quiz_choice_invalid", 422)
+        correct = choice.is_correct
+        if correct:
+            score += question.points
+        graded.append((question, choice, correct))
+    percent = round(score * 100 / maximum)
+    attempt = QuizAttempt(
+        organization_id=org,
+        course_id=course.id,
+        course_enrollment_id=course_enrollment.id,
+        quiz_id=quiz.id,
+        attempt_number=len(attempts) + 1,
+        score_points=score,
+        maximum_points=maximum,
+        percent=percent,
+        passed=percent >= quiz.passing_percent,
+    )
+    db.add(attempt)
+    db.flush()
+    answers: list[QuizAttemptAnswer] = []
+    for question, choice, correct in graded:
+        answer = QuizAttemptAnswer(
+            organization_id=org,
+            course_id=course.id,
+            quiz_id=quiz.id,
+            quiz_attempt_id=attempt.id,
+            question_id=question.id,
+            selected_choice_id=choice.id,
+            question_points=question.points,
+            points_awarded=question.points if correct else 0,
+            is_correct=correct,
+        )
+        db.add(answer)
+        answers.append(answer)
+    _audit(
+        db,
+        actor,
+        org,
+        attempt.id,
+        "lms.quiz.attempt_submitted",
+        request_id,
+        attempt.attempt_number,
+        "course_enrollment_id,quiz_id,attempt_number,score_points,"
+        "maximum_points,percent,passed,submitted_at",
+    )
+    _commit(db)
+    return QuizAttemptView(
+        id=attempt.id,
+        quiz_id=attempt.quiz_id,
+        course_enrollment_id=attempt.course_enrollment_id,
+        attempt_number=attempt.attempt_number,
+        score_points=attempt.score_points,
+        maximum_points=attempt.maximum_points,
+        percent=attempt.percent,
+        passed=attempt.passed,
+        submitted_at=attempt.submitted_at,
+        answers=[
+            QuizAttemptAnswerView(
+                question_id=answer.question_id,
+                selected_choice_id=answer.selected_choice_id,
+                is_correct=answer.is_correct,
+                points_awarded=answer.points_awarded,
+            )
+            for answer in answers
+        ],
+    )
+
+
+def _trainer_quiz_results(
+    db: Session,
+    course_id: UUID,
+    course_enrollment: CourseEnrollment | None,
+) -> list[TrainerQuizResultView]:
+    quizzes = list(
+        db.scalars(
+            select(Quiz)
+            .where(Quiz.course_id == course_id)
+            .order_by(Quiz.lesson_id, Quiz.position, Quiz.id)
+        )
+    )
+    result: list[TrainerQuizResultView] = []
+    for quiz in quizzes:
+        attempts = (
+            list(
+                db.scalars(
+                    select(QuizAttempt)
+                    .where(
+                        QuizAttempt.course_enrollment_id == course_enrollment.id,
+                        QuizAttempt.quiz_id == quiz.id,
+                    )
+                    .order_by(QuizAttempt.attempt_number)
+                )
+            )
+            if course_enrollment
+            else []
+        )
+        result.append(
+            TrainerQuizResultView(
+                quiz_id=quiz.id,
+                title_en=quiz.title_en,
+                title_ta=quiz.title_ta,
+                attempt_count=len(attempts),
+                best_percent=max((attempt.percent for attempt in attempts), default=None),
+                passed=any(attempt.passed for attempt in attempts),
+                last_submitted_at=attempts[-1].submitted_at if attempts else None,
+            )
+        )
+    return result

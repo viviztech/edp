@@ -32,3 +32,7 @@ Criterion scores, weighted totals and internal reviewer comments are confidentia
 Panel scores/comments, interview averages, decision reasons and evidence snapshots are confidential selection records. Applicant receipts expose status only. Submitted panel evidence, completed interviews and decision history are immutable; authorized overrides add history instead of rewriting it. Retention, subject-access and bulk-communication policy remain deployment prerequisites before real applicant data is used.
 
 P01.2 Participant stores only organization, Person reference, lifecycle status and version; it does not copy name, email or contact data. Enrollment stores lifecycle identifiers and timestamps. ProgramSession contains bilingual schedule content and location/joining details, so staff must not place secrets in that field. The participant timeline excludes reviewer comments, scores, decision reasons and audit records. The enrollment outbox payload contains UUID references only.
+
+## L02.1 quiz evidence
+
+Quiz attempts retain enrollment, quiz, submitted choices, awarded points, calculated percentage, pass state and submission time. Learners see their own summary and immediate grading result. Trainers see only attempt count, best percentage, pass state and last submission time for learners in assigned cohorts; answer selections and answer keys are excluded. Audit does not copy question, choice or grade values. Assessment retention and subject-access policy remain required before real participant use.

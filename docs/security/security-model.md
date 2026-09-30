@@ -22,7 +22,7 @@ Configurable seed roles, no role-name conditionals. `view`, `create`, `update`, 
 | CRM Executive | crm.lead.view/create/update, follow-up manage | Assigned leads; assign/export separate grants |
 | Marketing Executive | campaign manage, attribution reports | Campaign scope; no applicant documents |
 | Selection Committee | application.view/review, selection.score | Assigned reviews; no finalization by default |
-| Trainer | lms.course.manage, attendance.manage, assessment.manage | Assigned courses/cohorts; certificate.issue separate |
+| Trainer | lms.delivery.view, lms.assessment.view | Active assigned centers/cohorts; read-only delivery and result summaries |
 | Mentor | mentor.session/note/goal manage | Assigned participants, note visibility; no identity documents |
 | Training Center Coordinator | schedule manage, attendance.manage, participant.view | Assigned center and cohorts |
 | Funding Coordinator | scheme/funding/opportunity manage, funding.case.update | Assigned cases; no automatic approval decisions |
@@ -100,3 +100,9 @@ The server derives learner scope from User -> Person -> active Participant -> ac
 `lms.delivery.view` is read-only. Trainers need both the organization role grant and an active ProgramStaffAssignment covering the center/cohort; assignment revocation is effective on the next request. Managers/directors/super admins with the permission are organization-wide. Trainer responses are limited to published delivery structure, safe material labels, learner display names and derived progress.
 
 Material capabilities are short lived and HMAC signed over organization, actor, course, material, access mode and expiry. Issuance and delivery each repeat domain authorization. The filesystem adapter resolves only relative provider keys below the configured root and rejects traversal, absolute paths, root escapes and missing objects. Production requires `LMS_MATERIAL_SIGNING_KEY`; the local/test BFF-key fallback is not enabled in production. Provider keys, resolved paths and capability values are excluded from DTOs and audit payloads. The production object/video adapter must provide private storage, TLS, content controls, retention and provider-specific revocation evidence before release.
+
+## L02.1 assessment controls
+
+lms.assessment.manage is granted to Program Managers, Program Directors and Super Admins for draft quiz authoring. Trainers receive lms.assessment.view; their result projection still requires active center/cohort delivery scope. Participants do not receive answer-key permissions. Their attempt command derives ownership through User, Person, Participant, active Enrollment, assigned published Course and CourseEnrollment.
+
+Correct choices never appear in learner DTOs or browser state. The service requires one answer per question, verifies each choice belongs to that question, and calculates all grade fields server-side while holding the enrollment row lock. Published definitions and submitted attempts are database-immutable. Audit stores identifiers and changed-field names without question text, choices, selected answers or grade values.

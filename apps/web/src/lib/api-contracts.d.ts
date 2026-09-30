@@ -514,6 +514,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/organizations/{org}/quizzes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Quiz */
+        post: operations["create_quiz_api_v1_courses_organizations__org__quizzes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/quiz-questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Quiz Question */
+        post: operations["create_quiz_question_api_v1_courses_organizations__org__quiz_questions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/quiz-choices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Quiz Choice */
+        post: operations["create_quiz_choice_api_v1_courses_organizations__org__quiz_choices_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/quizzes/{quiz_id}/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Quiz Attempt */
+        post: operations["submit_quiz_attempt_api_v1_courses_organizations__org__my_learning__course_id__quizzes__quiz_id__attempts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/applications/organizations/{org}/form": {
         parameters: {
             query?: never;
@@ -2454,6 +2522,8 @@ export interface components {
             materials: components["schemas"]["MaterialAdminView"][];
             /** Prerequisite Lesson Ids */
             prerequisite_lesson_ids: string[];
+            /** Quizzes */
+            quizzes: components["schemas"]["QuizAdminView"][];
         };
         /** AdminModuleView */
         AdminModuleView: {
@@ -4552,6 +4622,8 @@ export interface components {
             completed_at: string | null;
             /** Materials */
             materials: components["schemas"]["LearnerMaterialView"][];
+            /** Quizzes */
+            quizzes: components["schemas"]["LearnerQuizView"][];
         };
         /** LearnerMaterialView */
         LearnerMaterialView: {
@@ -4592,6 +4664,72 @@ export interface components {
             title_ta: string;
             /** Lessons */
             lessons: components["schemas"]["LearnerLessonView"][];
+        };
+        /** LearnerQuizChoiceView */
+        LearnerQuizChoiceView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+        };
+        /** LearnerQuizQuestionView */
+        LearnerQuizQuestionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            /** Prompt En */
+            prompt_en: string;
+            /** Prompt Ta */
+            prompt_ta: string;
+            /** Points */
+            points: number;
+            /** Choices */
+            choices: components["schemas"]["LearnerQuizChoiceView"][];
+        };
+        /** LearnerQuizView */
+        LearnerQuizView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Instructions En */
+            instructions_en: string;
+            /** Instructions Ta */
+            instructions_ta: string;
+            /** Passing Percent */
+            passing_percent: number;
+            /** Max Attempts */
+            max_attempts: number;
+            /** Attempt Count */
+            attempt_count: number;
+            /** Remaining Attempts */
+            remaining_attempts: number;
+            /** Best Percent */
+            best_percent: number | null;
+            /** Passed */
+            passed: boolean;
+            /** Available */
+            available: boolean;
+            /** Questions */
+            questions: components["schemas"]["LearnerQuizQuestionView"][];
         };
         /** LearningCatalogView */
         LearningCatalogView: {
@@ -5365,6 +5503,351 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** QuizAdminView */
+        QuizAdminView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Instructions En */
+            instructions_en: string;
+            /** Instructions Ta */
+            instructions_ta: string;
+            /** Passing Percent */
+            passing_percent: number;
+            /** Max Attempts */
+            max_attempts: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Questions */
+            questions: components["schemas"]["QuizQuestionAdminView"][];
+        };
+        /** QuizAnswerSelection */
+        QuizAnswerSelection: {
+            /**
+             * Question Id
+             * Format: uuid
+             */
+            question_id: string;
+            /**
+             * Choice Id
+             * Format: uuid
+             */
+            choice_id: string;
+        };
+        /** QuizAttemptAnswerView */
+        QuizAttemptAnswerView: {
+            /**
+             * Question Id
+             * Format: uuid
+             */
+            question_id: string;
+            /**
+             * Selected Choice Id
+             * Format: uuid
+             */
+            selected_choice_id: string;
+            /** Is Correct */
+            is_correct: boolean;
+            /** Points Awarded */
+            points_awarded: number;
+        };
+        /** QuizAttemptSubmit */
+        QuizAttemptSubmit: {
+            /** Answers */
+            answers: components["schemas"]["QuizAnswerSelection"][];
+        };
+        /** QuizAttemptView */
+        QuizAttemptView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Quiz Id
+             * Format: uuid
+             */
+            quiz_id: string;
+            /**
+             * Course Enrollment Id
+             * Format: uuid
+             */
+            course_enrollment_id: string;
+            /** Attempt Number */
+            attempt_number: number;
+            /** Score Points */
+            score_points: number;
+            /** Maximum Points */
+            maximum_points: number;
+            /** Percent */
+            percent: number;
+            /** Passed */
+            passed: boolean;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+            /** Answers */
+            answers: components["schemas"]["QuizAttemptAnswerView"][];
+        };
+        /** QuizChoiceAdminView */
+        QuizChoiceAdminView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Quiz Id
+             * Format: uuid
+             */
+            quiz_id: string;
+            /**
+             * Question Id
+             * Format: uuid
+             */
+            question_id: string;
+            /** Position */
+            position: number;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /** Is Correct */
+            is_correct: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** QuizChoiceCreate */
+        QuizChoiceCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Quiz Id
+             * Format: uuid
+             */
+            quiz_id: string;
+            /**
+             * Question Id
+             * Format: uuid
+             */
+            question_id: string;
+            /** Position */
+            position: number;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /** Is Correct */
+            is_correct: boolean;
+        };
+        /** QuizCreate */
+        QuizCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Instructions En */
+            instructions_en: string;
+            /** Instructions Ta */
+            instructions_ta: string;
+            /** Passing Percent */
+            passing_percent: number;
+            /** Max Attempts */
+            max_attempts: number;
+        };
+        /** QuizQuestionAdminView */
+        QuizQuestionAdminView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Quiz Id
+             * Format: uuid
+             */
+            quiz_id: string;
+            /** Position */
+            position: number;
+            /** Prompt En */
+            prompt_en: string;
+            /** Prompt Ta */
+            prompt_ta: string;
+            /** Points */
+            points: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Choices */
+            choices: components["schemas"]["QuizChoiceAdminView"][];
+        };
+        /** QuizQuestionCreate */
+        QuizQuestionCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Quiz Id
+             * Format: uuid
+             */
+            quiz_id: string;
+            /** Position */
+            position: number;
+            /** Prompt En */
+            prompt_en: string;
+            /** Prompt Ta */
+            prompt_ta: string;
+            /** Points */
+            points: number;
+        };
+        /** QuizQuestionView */
+        QuizQuestionView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Quiz Id
+             * Format: uuid
+             */
+            quiz_id: string;
+            /** Position */
+            position: number;
+            /** Prompt En */
+            prompt_en: string;
+            /** Prompt Ta */
+            prompt_ta: string;
+            /** Points */
+            points: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** QuizView */
+        QuizView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Instructions En */
+            instructions_en: string;
+            /** Instructions Ta */
+            instructions_ta: string;
+            /** Passing Percent */
+            passing_percent: number;
+            /** Max Attempts */
+            max_attempts: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /** Register */
         Register: {
             /**
@@ -5913,6 +6396,8 @@ export interface components {
             display_name: string;
             course_enrollment: components["schemas"]["CourseEnrollmentView"] | null;
             progress: components["schemas"]["CourseProgressView"];
+            /** Quiz Results */
+            quiz_results: components["schemas"]["TrainerQuizResultView"][];
         };
         /** TrainerLessonView */
         TrainerLessonView: {
@@ -5947,6 +6432,26 @@ export interface components {
             title_ta: string;
             /** Lessons */
             lessons: components["schemas"]["TrainerLessonView"][];
+        };
+        /** TrainerQuizResultView */
+        TrainerQuizResultView: {
+            /**
+             * Quiz Id
+             * Format: uuid
+             */
+            quiz_id: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Attempt Count */
+            attempt_count: number;
+            /** Best Percent */
+            best_percent: number | null;
+            /** Passed */
+            passed: boolean;
+            /** Last Submitted At */
+            last_submitted_at: string | null;
         };
         /** TranslationView */
         TranslationView: {
@@ -7028,6 +7533,148 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_quiz_api_v1_courses_organizations__org__quizzes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuizCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_quiz_question_api_v1_courses_organizations__org__quiz_questions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuizQuestionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizQuestionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_quiz_choice_api_v1_courses_organizations__org__quiz_choices_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuizChoiceCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizChoiceAdminView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_quiz_attempt_api_v1_courses_organizations__org__my_learning__course_id__quizzes__quiz_id__attempts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                quiz_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuizAttemptSubmit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizAttemptView"];
+                };
             };
             /** @description Validation Error */
             422: {

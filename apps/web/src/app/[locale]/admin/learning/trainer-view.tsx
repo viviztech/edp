@@ -101,16 +101,24 @@ export default function TrainerLearningWorkspace({
           </ol>
           <section aria-label={text.learners}>
             <h3>{text.learners}</h3>
-            {course.learners.map((learner) => <div className="course-meter" key={learner.participant_id}>
-              <div>
-                <strong>{learner.display_name}</strong>
-                <span>{learner.course_enrollment
-                  ? `${learner.progress.completed_lessons} / ${learner.progress.required_lessons} ${text.lessons}`
-                  : text.notStarted}</span>
+            {course.learners.map((learner) => <div key={learner.participant_id}>
+              <div className="course-meter">
+                <div>
+                  <strong>{learner.display_name}</strong>
+                  <span>{learner.course_enrollment
+                    ? `${learner.progress.completed_lessons} / ${learner.progress.required_lessons} ${text.lessons}`
+                    : text.notStarted}</span>
+                </div>
+                <progress max="100" value={learner.progress.percent}>
+                  {learner.progress.percent}%
+                </progress>
               </div>
-              <progress max="100" value={learner.progress.percent}>
-                {learner.progress.percent}%
-              </progress>
+              <ul>{learner.quiz_results.map((result) => <li key={result.quiz_id}>
+                <strong>{value(result.title_en, result.title_ta)}</strong>{" "}
+                <span>{result.attempt_count} {text.attempts} - {
+                  result.best_percent === null ? text.notAttempted : `${text.bestScore}: ${result.best_percent}%`
+                } - {result.passed ? text.passed : text.notPassed}</span>
+              </li>)}</ul>
             </div>)}
           </section>
         </article>

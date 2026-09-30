@@ -11,7 +11,7 @@ from test_identity import account, auth, signed_in  # noqa: F401
 from app.core.config import get_settings
 from app.modules.applications.models import Application, ApplicationForm
 from app.modules.identity.models import AuditLog, Organization, Role, User, UserRole, now
-from app.modules.lms.models import CourseEnrollment, CourseModule, LessonProgress
+from app.modules.lms.models import CourseEnrollment, CourseModule, LessonProgress, QuizAttempt
 from app.modules.programs.models import (
     ApplicationCycle,
     Cohort,
@@ -275,6 +275,71 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     assert material.status_code == 201
     assert material.json()["provider_key"].startswith("private/")
 
+    quiz = client.post(
+        root + "/quizzes",
+        headers=headers,
+        json={
+            "course_id": course["id"],
+            "lesson_id": lesson_data["id"],
+            "position": 1,
+            "title_en": "Customer check",
+            "title_ta": "Synthetic Tamil quiz",
+            "instructions_en": "Choose the strongest customer statement.",
+            "instructions_ta": "Synthetic Tamil quiz instructions.",
+            "passing_percent": 60,
+            "max_attempts": 2,
+        },
+    )
+    assert quiz.status_code == 201
+    question = client.post(
+        root + "/quiz-questions",
+        headers=headers,
+        json={
+            "course_id": course["id"],
+            "quiz_id": quiz.json()["id"],
+            "position": 1,
+            "prompt_en": "Which statement is observable?",
+            "prompt_ta": "Synthetic Tamil question",
+            "points": 10,
+        },
+    )
+    assert question.status_code == 201
+    wrong_choice = client.post(
+        root + "/quiz-choices",
+        headers=headers,
+        json={
+            "course_id": course["id"],
+            "quiz_id": quiz.json()["id"],
+            "question_id": question.json()["id"],
+            "position": 1,
+            "label_en": "Customers probably want it.",
+            "label_ta": "Synthetic Tamil wrong choice",
+            "is_correct": False,
+        },
+    )
+    assert wrong_choice.status_code == 201
+    incomplete_quiz = client.post(
+        root + f"/{course['id']}/publish",
+        headers=headers,
+        json={"expected_version": 2, "reason": "Reject incomplete assessment"},
+    )
+    assert incomplete_quiz.status_code == 422
+    assert incomplete_quiz.json()["error"]["code"] == "quiz_structure_incomplete"
+    correct_choice = client.post(
+        root + "/quiz-choices",
+        headers=headers,
+        json={
+            "course_id": course["id"],
+            "quiz_id": quiz.json()["id"],
+            "question_id": question.json()["id"],
+            "position": 2,
+            "label_en": "Five customers reported the same problem.",
+            "label_ta": "Synthetic Tamil correct choice",
+            "is_correct": True,
+        },
+    )
+    assert correct_choice.status_code == 201
+
     published = client.post(
         root + f"/{course['id']}/publish",
         headers=headers,
@@ -357,6 +422,7 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     trainer_material = trainer_course["modules"][0]["lessons"][0]["materials"][0]
     assert trainer_material["available"] is True
     assert "provider_key" not in trainer_material
+    assert trainer_course["learners"][0]["quiz_results"][0]["attempt_count"] == 0
     trainer_access = client.post(
         root + f"/trainer-delivery/{course['id']}/materials/{material.json()['id']}/access",
         headers=trainer_headers,
@@ -387,6 +453,62 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     assert client.post(root + f"/my-learning/{uuid4()}/start", headers=headers).status_code == 403
     started_learning = client.get(root + "/my-learning", headers=headers).json()["courses"][0]
     assert started_learning["modules"][0]["lessons"][0]["materials"][0]["available"] is True
+    learner_quiz = started_learning["modules"][0]["lessons"][0]["quizzes"][0]
+    assert learner_quiz["available"] is True
+    assert learner_quiz["remaining_attempts"] == 2
+    assert "is_correct" not in learner_quiz["questions"][0]["choices"][0]
+    first_attempt = client.post(
+        root + f"/my-learning/{course['id']}/quizzes/{quiz.json()['id']}/attempts",
+        headers=headers,
+        json={
+            "answers": [
+                {
+                    "question_id": question.json()["id"],
+                    "choice_id": wrong_choice.json()["id"],
+                }
+            ]
+        },
+    )
+    assert first_attempt.status_code == 201
+    assert first_attempt.json()["attempt_number"] == 1
+    assert first_attempt.json()["percent"] == 0
+    assert first_attempt.json()["passed"] is False
+    second_attempt = client.post(
+        root + f"/my-learning/{course['id']}/quizzes/{quiz.json()['id']}/attempts",
+        headers=headers,
+        json={
+            "answers": [
+                {
+                    "question_id": question.json()["id"],
+                    "choice_id": correct_choice.json()["id"],
+                }
+            ]
+        },
+    )
+    assert second_attempt.status_code == 201
+    assert second_attempt.json()["attempt_number"] == 2
+    assert second_attempt.json()["percent"] == 100
+    assert second_attempt.json()["passed"] is True
+    passed_learning = client.get(root + "/my-learning", headers=headers).json()["courses"][0]
+    passed_quiz = passed_learning["modules"][0]["lessons"][0]["quizzes"][0]
+    assert passed_quiz["attempt_count"] == 2
+    assert passed_quiz["remaining_attempts"] == 0
+    assert passed_quiz["best_percent"] == 100
+    assert passed_quiz["passed"] is True
+    repeated_attempt = client.post(
+        root + f"/my-learning/{course['id']}/quizzes/{quiz.json()['id']}/attempts",
+        headers=headers,
+        json={
+            "answers": [
+                {
+                    "question_id": question.json()["id"],
+                    "choice_id": correct_choice.json()["id"],
+                }
+            ]
+        },
+    )
+    assert repeated_attempt.status_code == 409
+    assert repeated_attempt.json()["error"]["code"] == "quiz_already_passed"
     learner_access = client.post(
         root + f"/my-learning/{course['id']}/materials/{material.json()['id']}/access",
         headers=headers,
@@ -448,6 +570,11 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     assert summary["started_learners"] == 1
     assert summary["completed_learners"] == 1
     assert summary["average_percent"] == 100
+    graded_delivery = client.get(root + "/trainer-delivery", headers=trainer_headers).json()
+    graded_result = graded_delivery["courses"][0]["learners"][0]["quiz_results"][0]
+    assert graded_result["attempt_count"] == 2
+    assert graded_result["best_percent"] == 100
+    assert graded_result["passed"] is True
 
     with Session(engine) as db:
         trainer_assignment = db.get(ProgramStaffAssignment, trainer_assignment_id)
@@ -476,6 +603,20 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
                 AuditLog.action == "lms.course.started",
             )
         )
+        assert db.scalar(
+            select(AuditLog.id).where(
+                AuditLog.actor_id == user_id,
+                AuditLog.action == "lms.quiz.attempt_submitted",
+            )
+        )
+        attempt = db.scalar(
+            select(QuizAttempt).where(QuizAttempt.id == second_attempt.json()["id"])
+        )
+        assert attempt
+        attempt.percent = 50
+        with pytest.raises(DBAPIError):
+            db.commit()
+        db.rollback()
         db.add(
             CourseModule(
                 organization_id=org_id,

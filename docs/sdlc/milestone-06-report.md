@@ -1,6 +1,6 @@
 # Milestone 6 implementation report
 
-Status: L01.1, L01.2 and L01.3 implemented and locally accepted; Milestone 6 remains in progress.
+Status: L01.1-L01.3 and L02.1 implemented and locally accepted; Milestone 6 remains in progress.
 
 ## Delivered behavior
 
@@ -33,7 +33,7 @@ The Next.js staff course studio and learner pathway provide English/Tamil loadin
 
 ## Remaining L01 scope
 
-Flutter learning screens remain deferred under ADR 0004. Quizzes, assignments and grading belong to L02; attendance and certificates remain later Phase 6 slices. Production object/video hosting and remote CI evidence remain release gates.
+Flutter learning screens remain deferred under ADR 0004. L02.1 quizzes and automatic grading are complete; assignments, manual grading, attendance and certificates remain later Phase 6 slices. Production object/video hosting and remote CI evidence remain release gates.
 
 ## L01.2 implementation
 
@@ -44,3 +44,9 @@ Implemented ordered lesson prerequisites, all-lessons/minimum-lessons completion
 Implemented `lms.delivery.view`, Trainer grants, active center/cohort assignment enforcement, a bounded trainer delivery projection, learner and trainer material-access commands, actor-bound HMAC capabilities, reauthorization at file delivery, confined local-file resolution, audit evidence, binary BFF streaming and English/Tamil trainer and learner interfaces. ProgramStaffAssignment now accepts accounts holding either Training Center Coordinator or Trainer without creating duplicate scope tables. The migration adds permission catalog and role grants only; existing LMS entities remain unchanged.
 
 Focused PostgreSQL acceptance proves unassigned denial, assigned cohort visibility, safe material metadata, trainer and learner file delivery, token tamper rejection and immediate revocation. Migration downgrade/re-upgrade/drift is clean. Focused Ruff and strict MyPy pass; the full API suite passes 86 tests; TypeScript, ESLint, 32 Vitest tests and the Next 16 production build pass. Authenticated Chrome proves trainer cohort scope, trainer and learner private-material downloads, progress completion, responsive layouts and no JavaScript errors. OpenAPI and generated TypeScript contracts are current. Production private object/video hosting, remote CI, native Flutter and legacy repository-wide CMS/MyPy debt remain open gates outside this slice.
+
+## L02.1 implementation
+
+Migration b2a8d4e6f901 adds organization-scoped quizzes, questions, choices, attempts and answer evidence with composite scope constraints, bounded values, immutable submissions and published-definition protection. Managers author bilingual single-choice quizzes; publication validates complete answer keys. Learners receive no correctness flags and submit through an enrollment-scoped command that derives score, percentage and pass state. Trainers see only bounded cohort result summaries.
+
+Local acceptance passed: the full backend suite reports 86 tests; focused Ruff and strict MyPy pass; migration downgrade/re-upgrade/drift is clean; OpenAPI and TypeScript contracts are current; ESLint, TypeScript, all 32 Vitest tests and the Next 16 production build pass. Authenticated Chrome creates and publishes a quiz, submits failed and passing attempts, confirms automatic grading and persisted evidence, and reports no JavaScript errors. The local Next build uses one page-data worker because the Windows host cannot commit memory for the default 15 workers. Remote CI remains pending. L02.2 assignments/manual grading, completion eligibility and certificates remain open.

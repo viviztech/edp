@@ -40,6 +40,7 @@ export default function LearningWorkspace({
   const canManage = permissions.includes("lms.course.manage");
   const canPublish = permissions.includes("lms.course.publish");
   const canAssign = permissions.includes("lms.course.assign");
+  const canAssess = permissions.includes("lms.assessment.manage");
 
   const request = useCallback(async <T,>(
     path: string,
@@ -131,6 +132,11 @@ export default function LearningWorkspace({
   })));
   const draftLessons = draftModules.flatMap(({ course, module }) =>
     module.lessons.map((lesson) => ({ course, module, lesson })));
+
+  const draftQuizzes = draftLessons.flatMap(({ course, module, lesson }) =>
+    lesson.quizzes.map((quiz) => ({ course, module, lesson, quiz })));
+  const draftQuestions = draftQuizzes.flatMap(({ course, module, lesson, quiz }) =>
+    quiz.questions.map((question) => ({ course, module, lesson, quiz, question })));
 
   return <div aria-busy={busy}>
     <p className="learning-message" role="status">{busy ? text.loading : message}</p>
@@ -239,6 +245,80 @@ export default function LearningWorkspace({
         <Field label={text.reason} name="reason" />
         <button disabled={busy}>{text.saveRule}</button>
       </form>
+      {canAssess && <form onSubmit={(event) => submit(event, "/quizzes", (data) => {
+        const key = String(data.lesson_key).split(":");
+        return {
+          course_id: key[0],
+          lesson_id: key[1],
+          position: Number(data.position),
+          title_en: data.title_en,
+          title_ta: data.title_ta,
+          instructions_en: data.instructions_en,
+          instructions_ta: data.instructions_ta,
+          passing_percent: Number(data.passing_percent),
+          max_attempts: Number(data.max_attempts),
+        };
+      })}>
+        <h2>{text.addQuiz}</h2>
+        <Select label={text.lesson} name="lesson_key" choose={text.choose}
+          options={draftLessons.map(({ course, module, lesson }) => [
+            `${course.id}:${lesson.id}`, `${title(course)} / ${title(module)} / ${title(lesson)}`,
+          ])} />
+        <Field label={text.position} name="position" type="number" />
+        <Field label={text.englishTitle} name="title_en" />
+        <Field label={text.tamilTitle} name="title_ta" />
+        <Area label={text.englishInstructions} name="instructions_en" />
+        <Area label={text.tamilInstructions} name="instructions_ta" />
+        <label>{text.passingPercent}<input name="passing_percent" type="number" min="0" max="100" required /></label>
+        <label>{text.maxAttempts}<input name="max_attempts" type="number" min="1" max="10" required /></label>
+        <button disabled={busy}>{text.create}</button>
+      </form>}
+      {canAssess && <form onSubmit={(event) => submit(event, "/quiz-questions", (data) => {
+        const key = String(data.quiz_key).split(":");
+        return {
+          course_id: key[0],
+          quiz_id: key[1],
+          position: Number(data.position),
+          prompt_en: data.prompt_en,
+          prompt_ta: data.prompt_ta,
+          points: Number(data.points),
+        };
+      })}>
+        <h2>{text.addQuestion}</h2>
+        <Select label={text.quiz} name="quiz_key" choose={text.choose}
+          options={draftQuizzes.map(({ course, lesson, quiz }) => [
+            `${course.id}:${quiz.id}`, `${title(course)} / ${title(lesson)} / ${title(quiz)}`,
+          ])} />
+        <Field label={text.position} name="position" type="number" />
+        <Area label={text.englishQuestion} name="prompt_en" />
+        <Area label={text.tamilQuestion} name="prompt_ta" />
+        <Field label={text.points} name="points" type="number" />
+        <button disabled={busy}>{text.create}</button>
+      </form>}
+      {canAssess && <form onSubmit={(event) => submit(event, "/quiz-choices", (data) => {
+        const key = String(data.question_key).split(":");
+        return {
+          course_id: key[0],
+          quiz_id: key[1],
+          question_id: key[2],
+          position: Number(data.position),
+          label_en: data.label_en,
+          label_ta: data.label_ta,
+          is_correct: data.is_correct === "on",
+        };
+      })}>
+        <h2>{text.addChoice}</h2>
+        <Select label={text.question} name="question_key" choose={text.choose}
+          options={draftQuestions.map(({ course, quiz, question }) => [
+            `${course.id}:${quiz.id}:${question.id}`,
+            `${title(course)} / ${title(quiz)} / ${locale === "ta" ? question.prompt_ta : question.prompt_en}`,
+          ])} />
+        <Field label={text.position} name="position" type="number" />
+        <Field label={text.englishChoice} name="label_en" />
+        <Field label={text.tamilChoice} name="label_ta" />
+        <label><input name="is_correct" type="checkbox" /> {text.correctChoice}</label>
+        <button disabled={busy}>{text.create}</button>
+      </form>}
       <form onSubmit={(event) => submit(event, "/materials", (data) => {
         const key = String(data.lesson_key).split(":");
         return {
@@ -299,6 +379,9 @@ export default function LearningWorkspace({
                     <small>{text.prerequisite}: {lesson.prerequisite_lesson_ids.length}</small>}
                   {lesson.materials.map((material) =>
                     <small key={material.id}>{material.kind}: {locale === "ta" ? material.label_ta : material.label_en}</small>)}
+                  {lesson.quizzes.map((quiz) => <small key={quiz.id}>
+                    {text.quiz}: {title(quiz)} - {quiz.questions.length} {text.questions} - {quiz.passing_percent}%
+                  </small>)}
                 </li>)}</ol>
               </li>)}
             </ol>}
@@ -395,4 +478,3 @@ function Select({
     {options.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
   </select></label>;
 }
-

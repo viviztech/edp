@@ -26,6 +26,14 @@ from app.modules.lms.schemas import (
     ModuleView,
     MyLearningView,
     PublishCourse,
+    QuizAttemptSubmit,
+    QuizAttemptView,
+    QuizChoiceAdminView,
+    QuizChoiceCreate,
+    QuizCreate,
+    QuizQuestionCreate,
+    QuizQuestionView,
+    QuizView,
     TrainerDeliveryView,
 )
 
@@ -232,4 +240,62 @@ def material_delivery(
             "Cache-Control": "private, no-store",
             "X-Content-Type-Options": "nosniff",
         },
+    )
+
+
+@router.post("/quizzes", response_model=QuizView, status_code=201)
+def create_quiz(
+    org: UUID,
+    data: QuizCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> QuizView:
+    return service.create_quiz(db, org, identity[0], data, request.state.request_id)
+
+
+@router.post("/quiz-questions", response_model=QuizQuestionView, status_code=201)
+def create_quiz_question(
+    org: UUID,
+    data: QuizQuestionCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> QuizQuestionView:
+    return service.create_quiz_question(db, org, identity[0], data, request.state.request_id)
+
+
+@router.post("/quiz-choices", response_model=QuizChoiceAdminView, status_code=201)
+def create_quiz_choice(
+    org: UUID,
+    data: QuizChoiceCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> QuizChoiceAdminView:
+    return service.create_quiz_choice(db, org, identity[0], data, request.state.request_id)
+
+
+@router.post(
+    "/my-learning/{course_id}/quizzes/{quiz_id}/attempts",
+    response_model=QuizAttemptView,
+    status_code=201,
+)
+def submit_quiz_attempt(
+    org: UUID,
+    course_id: UUID,
+    quiz_id: UUID,
+    data: QuizAttemptSubmit,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> QuizAttemptView:
+    return service.submit_quiz_attempt(
+        db,
+        org,
+        course_id,
+        quiz_id,
+        identity[0],
+        data,
+        request.state.request_id,
     )

@@ -80,3 +80,7 @@ The PostgreSQL LMS acceptance test covers reverse prerequisite rejection, blocke
 ## L01.3 delivery evidence
 
 PostgreSQL/API acceptance creates a Trainer role and proves denial without a staff assignment, cohort-bounded visibility after assignment, provider-key non-disclosure, learner progress visibility, learner and trainer material issuance/delivery, signed-token tamper rejection and immediate denial after assignment revocation. Additional negative checks cover missing provider configuration and confined path resolution. Web tests pin exact trainer/access/delivery BFF paths and malformed-token rejection. Strict TypeScript, ESLint, Vitest, production build and authenticated browser material download are release gates. Migration validation runs upgrade, downgrade to L01.2, re-upgrade and drift against the disposable `edp_test` database.
+
+## L02.1 assessment evidence
+
+PostgreSQL/API acceptance covers draft authoring, incomplete publication rejection, answer-key validation, learner answer-key non-disclosure, started-course and prerequisite gates, failed and passing attempts, bounded retries, server-derived scores, trainer cohort summaries, audit evidence and database rejection of attempt mutation. Migration validation performs downgrade to L01.3, re-upgrade and metadata drift checks. Web coverage includes exact BFF paths, bilingual admin/learner/trainer states, strict TypeScript, ESLint, 32 Vitest tests, a single-worker production build for the constrained local host, and authenticated Chrome authoring plus two automatically graded attempts.

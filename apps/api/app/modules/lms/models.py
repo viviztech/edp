@@ -240,3 +240,166 @@ class LessonProgress(Record, Base):
         UniqueConstraint("course_enrollment_id", "lesson_id"),
         Index("ix_lesson_progress_rollup", "course_enrollment_id", "course_id"),
     )
+
+
+class Quiz(Record, Base):
+    __tablename__ = "quizzes"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    lesson_id: Mapped[UUID] = mapped_column(index=True)
+    position: Mapped[int] = mapped_column(Integer)
+    title_en: Mapped[str] = mapped_column(String(200))
+    title_ta: Mapped[str] = mapped_column(String(200))
+    instructions_en: Mapped[str] = mapped_column(Text)
+    instructions_ta: Mapped[str] = mapped_column(Text)
+    passing_percent: Mapped[int] = mapped_column(Integer)
+    max_attempts: Mapped[int] = mapped_column(Integer)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["lesson_id", "course_id", "organization_id"],
+            ["lessons.id", "lessons.course_id", "lessons.organization_id"],
+            name="fk_quiz_lesson_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("lesson_id", "position"),
+        UniqueConstraint("id", "course_id", "organization_id"),
+        CheckConstraint("position > 0", name="quiz_position"),
+        CheckConstraint("passing_percent BETWEEN 0 AND 100", name="quiz_passing_percent"),
+        CheckConstraint("max_attempts BETWEEN 1 AND 10", name="quiz_max_attempts"),
+    )
+
+
+class QuizQuestion(Record, Base):
+    __tablename__ = "quiz_questions"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    quiz_id: Mapped[UUID] = mapped_column(index=True)
+    position: Mapped[int] = mapped_column(Integer)
+    prompt_en: Mapped[str] = mapped_column(Text)
+    prompt_ta: Mapped[str] = mapped_column(Text)
+    points: Mapped[int] = mapped_column(Integer)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["quiz_id", "course_id", "organization_id"],
+            ["quizzes.id", "quizzes.course_id", "quizzes.organization_id"],
+            name="fk_quiz_question_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("quiz_id", "position"),
+        UniqueConstraint("id", "quiz_id", "course_id", "organization_id"),
+        CheckConstraint("position > 0", name="quiz_question_position"),
+        CheckConstraint("points BETWEEN 1 AND 100", name="quiz_question_points"),
+    )
+
+
+class QuizChoice(Record, Base):
+    __tablename__ = "quiz_choices"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    quiz_id: Mapped[UUID] = mapped_column(index=True)
+    question_id: Mapped[UUID] = mapped_column(index=True)
+    position: Mapped[int] = mapped_column(Integer)
+    label_en: Mapped[str] = mapped_column(String(500))
+    label_ta: Mapped[str] = mapped_column(String(500))
+    is_correct: Mapped[bool] = mapped_column(Boolean, default=False)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["question_id", "quiz_id", "course_id", "organization_id"],
+            [
+                "quiz_questions.id",
+                "quiz_questions.quiz_id",
+                "quiz_questions.course_id",
+                "quiz_questions.organization_id",
+            ],
+            name="fk_quiz_choice_question_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("question_id", "position"),
+        UniqueConstraint("id", "question_id", "quiz_id", "course_id", "organization_id"),
+        CheckConstraint("position > 0", name="quiz_choice_position"),
+    )
+
+
+class QuizAttempt(Record, Base):
+    __tablename__ = "quiz_attempts"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    course_enrollment_id: Mapped[UUID] = mapped_column(index=True)
+    quiz_id: Mapped[UUID] = mapped_column(index=True)
+    attempt_number: Mapped[int] = mapped_column(Integer)
+    score_points: Mapped[int] = mapped_column(Integer)
+    maximum_points: Mapped[int] = mapped_column(Integer)
+    percent: Mapped[int] = mapped_column(Integer)
+    passed: Mapped[bool] = mapped_column(Boolean)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["course_enrollment_id", "course_id", "organization_id"],
+            [
+                "course_enrollments.id",
+                "course_enrollments.course_id",
+                "course_enrollments.organization_id",
+            ],
+            name="fk_quiz_attempt_enrollment_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["quiz_id", "course_id", "organization_id"],
+            ["quizzes.id", "quizzes.course_id", "quizzes.organization_id"],
+            name="fk_quiz_attempt_quiz_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("course_enrollment_id", "quiz_id", "attempt_number"),
+        UniqueConstraint("id", "quiz_id", "course_id", "organization_id"),
+        CheckConstraint("attempt_number > 0", name="quiz_attempt_number"),
+        CheckConstraint("maximum_points > 0", name="quiz_attempt_maximum"),
+        CheckConstraint("score_points BETWEEN 0 AND maximum_points", name="quiz_attempt_score"),
+        CheckConstraint("percent BETWEEN 0 AND 100", name="quiz_attempt_percent"),
+        Index(
+            "ix_quiz_attempt_learner",
+            "course_enrollment_id",
+            "quiz_id",
+            "attempt_number",
+        ),
+    )
+
+
+class QuizAttemptAnswer(Record, Base):
+    __tablename__ = "quiz_attempt_answers"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    quiz_id: Mapped[UUID] = mapped_column(index=True)
+    quiz_attempt_id: Mapped[UUID] = mapped_column(index=True)
+    question_id: Mapped[UUID] = mapped_column(index=True)
+    selected_choice_id: Mapped[UUID] = mapped_column(index=True)
+    question_points: Mapped[int] = mapped_column(Integer)
+    points_awarded: Mapped[int] = mapped_column(Integer)
+    is_correct: Mapped[bool] = mapped_column(Boolean)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["quiz_attempt_id", "quiz_id", "course_id", "organization_id"],
+            [
+                "quiz_attempts.id",
+                "quiz_attempts.quiz_id",
+                "quiz_attempts.course_id",
+                "quiz_attempts.organization_id",
+            ],
+            name="fk_quiz_answer_attempt_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["selected_choice_id", "question_id", "quiz_id", "course_id", "organization_id"],
+            [
+                "quiz_choices.id",
+                "quiz_choices.question_id",
+                "quiz_choices.quiz_id",
+                "quiz_choices.course_id",
+                "quiz_choices.organization_id",
+            ],
+            name="fk_quiz_answer_choice_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("quiz_attempt_id", "question_id"),
+        CheckConstraint("question_points BETWEEN 1 AND 100", name="quiz_answer_points"),
+        CheckConstraint("points_awarded BETWEEN 0 AND question_points", name="quiz_answer_awarded"),
+    )

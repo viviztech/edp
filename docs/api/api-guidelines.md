@@ -55,3 +55,9 @@ Staff use POST /prerequisites and POST /{course}/completion-rule while a course 
 ## L01.3 trainer delivery and material endpoints
 
 `GET /api/v1/courses/organizations/{org}/trainer-delivery` returns only published courses in the caller's active delivery scope, safe material metadata and bounded learner progress. `POST /my-learning/{course}/materials/{material}/access` and `POST /trainer-delivery/{course}/materials/{material}/access` return a short-lived BFF-relative URL after current authorization. `GET /material-delivery/{token}` requires the same authenticated actor, validates the signed capability and repeats current enrollment or assignment authorization before returning the file with attachment, private no-store and nosniff headers. Tokens and provider keys are never response fields. The browser BFF allowlists the exact UUID/token shapes, applies CSRF to access issuance and streams non-JSON responses.
+
+## L02.1 quiz and automatic-grading endpoints
+
+Authorized assessment managers use POST /api/v1/courses/organizations/{org}/quizzes, /quiz-questions, and /quiz-choices while the course is draft. Correct-answer flags appear only in the staff catalog. Course publication returns quiz_structure_incomplete unless every quiz has a question and every question has at least two choices and exactly one correct answer.
+
+Participants submit POST /my-learning/{course}/quizzes/{quiz}/attempts with one question and choice pair per question. Identity, enrollment scope, prerequisites, attempt number, score, percentage and pass state are server-derived. GET /my-learning omits answer keys and returns attempt count, remaining attempts, best percentage and pass state. Trainer delivery returns only cohort-scoped result summaries.

@@ -1,6 +1,6 @@
 # Milestone 6 plan
 
-Status: L01.1, L01.2 and L01.3 implemented and locally accepted; remote CI and later Phase 6 slices remain open.
+Status: L01.1-L01.3 and L02.1 implemented and locally accepted; remote CI and later Phase 6 slices remain open.
 
 ## L01.1 course catalog and enrollment access
 
@@ -45,3 +45,20 @@ Acceptance criteria:
 7. OpenAPI/contracts, English/Tamil web states, fixed BFF paths, PostgreSQL acceptance, focused lint/type checks, migration round trip, production build and authenticated browser evidence satisfy the shared Definition of Done.
 
 Excluded: trainer authoring, public material URLs, custom video streaming, quizzes/assignments, attendance, certificates and native Flutter learning screens under ADR 0004.
+
+## L02.1 quizzes and automatic grading
+
+Scope: draft-only bilingual quiz/question/choice authoring, answer-key publication validation, immutable published definitions, enrollment-scoped attempts, server-derived scores, pass marks, attempt limits, safe learner projections and cohort-scoped trainer summaries.
+
+Acceptance criteria:
+
+1. Only lms.assessment.manage can create quiz definitions, and only while the course is draft.
+2. Publication requires at least one question per quiz and at least two choices with exactly one correct choice per question.
+3. Learner APIs and browser state never expose correct-choice flags.
+4. Attempts require a started eligible course, satisfied prerequisites, one valid choice per question and available attempts.
+5. The server derives attempt order, score, maximum, percentage and pass state.
+6. Attempts and answer evidence are immutable and submissions are audited without answer content.
+7. Trainer summaries require delivery scope and expose no answer key or selected-answer detail.
+8. PostgreSQL, migrations, contracts, web checks, build and authenticated browser acceptance pass.
+
+Excluded: free-text/file assignments, manual grading, assessment-based completion, certificates, attendance and native Flutter screens under ADR 0004.

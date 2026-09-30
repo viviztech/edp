@@ -283,3 +283,9 @@ Migration 7e6ae3e5a10d implements Course, CourseModule, Lesson, LessonMaterial, 
 ## L01.3 delivery scope and material access
 
 L01.3 adds no domain tables. `ProgramStaffAssignment.user_role_id` now accepts an active organization UserRole whose Role is Training Center Coordinator or Trainer; its existing center/cohort and revocation fields remain the single delivery-scope source. The permission migration adds `lms.delivery.view` grants. Material capabilities are intentionally ephemeral signed values and are not persisted. LessonMaterial.provider_key remains server-only and resolves through the configured adapter after authorization.
+
+## L02.1 physical assessment extension
+
+Course 1--many Quiz; Lesson 1--many Quiz; Quiz 1--many QuizQuestion; QuizQuestion 1--many QuizChoice; CourseEnrollment 1--many QuizAttempt; QuizAttempt 1--many QuizAttemptAnswer. Each answer references its question and selected choice.
+
+Migration b2a8d4e6f901 implements these five assessment tables. Composite foreign keys carry organization, course, quiz and question scope through every relationship. Unique keys enforce quiz/question/choice order, one attempt number per enrollment and quiz, and one answer per attempt and question. Check constraints bound pass marks, attempt limits, points, awarded points and percentages. Publication validates the complete answer-key structure, then database triggers freeze definitions. Attempt and answer rows reject update and delete.

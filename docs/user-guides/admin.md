@@ -31,3 +31,7 @@ Participants with an active enrollment open My learning path. They see only publ
 ## Configure course completion
 
 In Learning, create all modules and lessons in their final order. Add a prerequisite only from an earlier lesson to a later lesson. Choose Complete every lesson or set a positive minimum lesson count, record the reason, and publish only after review. Published rules and prerequisites cannot be edited. The cohort pathway shows assigned, started, completed, and average progress counts.
+
+## Configure a quiz
+
+Before publishing a course, open Learning and add a quiz to a lesson. Set its bilingual title and instructions, pass mark, maximum attempts and order. Add each bilingual question with points, then add at least two choices and mark exactly one as correct. Review the answer key before publication because the published quiz cannot be edited. Publication is blocked when a quiz has no questions or a question has an incomplete answer key.

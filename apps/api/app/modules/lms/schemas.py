@@ -195,9 +195,85 @@ class CohortCourseView(BaseModel):
     created_at: datetime
 
 
+class QuizCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    course_id: UUID
+    lesson_id: UUID
+    position: int = Field(ge=1)
+    title_en: str = Field(min_length=1, max_length=200)
+    title_ta: str = Field(min_length=1, max_length=200)
+    instructions_en: str = Field(min_length=1, max_length=5000)
+    instructions_ta: str = Field(min_length=1, max_length=5000)
+    passing_percent: int = Field(ge=0, le=100)
+    max_attempts: int = Field(ge=1, le=10)
+
+    @field_validator("title_en", "title_ta", "instructions_en", "instructions_ta")
+    @classmethod
+    def strip_quiz_text(cls, value: str) -> str:
+        return value.strip()
+
+
+class QuizView(QuizCreate):
+    id: UUID
+    organization_id: UUID
+    created_at: datetime
+
+
+class QuizQuestionCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    course_id: UUID
+    quiz_id: UUID
+    position: int = Field(ge=1)
+    prompt_en: str = Field(min_length=1, max_length=5000)
+    prompt_ta: str = Field(min_length=1, max_length=5000)
+    points: int = Field(ge=1, le=100)
+
+    @field_validator("prompt_en", "prompt_ta")
+    @classmethod
+    def strip_question_text(cls, value: str) -> str:
+        return value.strip()
+
+
+class QuizQuestionView(QuizQuestionCreate):
+    id: UUID
+    organization_id: UUID
+    created_at: datetime
+
+
+class QuizChoiceCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    course_id: UUID
+    quiz_id: UUID
+    question_id: UUID
+    position: int = Field(ge=1)
+    label_en: str = Field(min_length=1, max_length=500)
+    label_ta: str = Field(min_length=1, max_length=500)
+    is_correct: bool
+
+    @field_validator("label_en", "label_ta")
+    @classmethod
+    def strip_choice_text(cls, value: str) -> str:
+        return value.strip()
+
+
+class QuizChoiceAdminView(QuizChoiceCreate):
+    id: UUID
+    organization_id: UUID
+    created_at: datetime
+
+
+class QuizQuestionAdminView(QuizQuestionView):
+    choices: list[QuizChoiceAdminView]
+
+
+class QuizAdminView(QuizView):
+    questions: list[QuizQuestionAdminView]
+
+
 class AdminLessonView(LessonView):
     materials: list[MaterialAdminView]
     prerequisite_lesson_ids: list[UUID]
+    quizzes: list[QuizAdminView]
 
 
 class AdminModuleView(ModuleView):
@@ -259,6 +335,76 @@ class LessonProgressView(BaseModel):
     progress: CourseProgressView
 
 
+class LearnerQuizChoiceView(BaseModel):
+    id: UUID
+    position: int
+    label_en: str
+    label_ta: str
+
+
+class LearnerQuizQuestionView(BaseModel):
+    id: UUID
+    position: int
+    prompt_en: str
+    prompt_ta: str
+    points: int
+    choices: list[LearnerQuizChoiceView]
+
+
+class LearnerQuizView(BaseModel):
+    id: UUID
+    position: int
+    title_en: str
+    title_ta: str
+    instructions_en: str
+    instructions_ta: str
+    passing_percent: int
+    max_attempts: int
+    attempt_count: int
+    remaining_attempts: int
+    best_percent: int | None
+    passed: bool
+    available: bool
+    questions: list[LearnerQuizQuestionView]
+
+
+class QuizAnswerSelection(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    question_id: UUID
+    choice_id: UUID
+
+
+class QuizAttemptSubmit(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    answers: list[QuizAnswerSelection] = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def unique_questions(self) -> "QuizAttemptSubmit":
+        if len({answer.question_id for answer in self.answers}) != len(self.answers):
+            raise ValueError("Each question may be answered once")
+        return self
+
+
+class QuizAttemptAnswerView(BaseModel):
+    question_id: UUID
+    selected_choice_id: UUID
+    is_correct: bool
+    points_awarded: int
+
+
+class QuizAttemptView(BaseModel):
+    id: UUID
+    quiz_id: UUID
+    course_enrollment_id: UUID
+    attempt_number: int
+    score_points: int
+    maximum_points: int
+    percent: int
+    passed: bool
+    submitted_at: datetime
+    answers: list[QuizAttemptAnswerView]
+
+
 class LearnerLessonView(BaseModel):
     id: UUID
     position: int
@@ -272,6 +418,7 @@ class LearnerLessonView(BaseModel):
     completed: bool
     completed_at: datetime | None
     materials: list[LearnerMaterialView]
+    quizzes: list[LearnerQuizView]
 
 
 class LearnerModuleView(BaseModel):
@@ -325,11 +472,22 @@ class TrainerModuleView(BaseModel):
     lessons: list[TrainerLessonView]
 
 
+class TrainerQuizResultView(BaseModel):
+    quiz_id: UUID
+    title_en: str
+    title_ta: str
+    attempt_count: int
+    best_percent: int | None
+    passed: bool
+    last_submitted_at: datetime | None
+
+
 class TrainerLearnerProgressView(BaseModel):
     participant_id: UUID
     display_name: str
     course_enrollment: CourseEnrollmentView | None
     progress: CourseProgressView
+    quiz_results: list[TrainerQuizResultView]
 
 
 class TrainerCourseDeliveryView(BaseModel):

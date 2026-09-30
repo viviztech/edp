@@ -24,6 +24,7 @@ from app.modules.lms.models import (
     Course,
     CourseEnrollment,
     LessonProgress,
+    QuizAttempt,
 )
 from app.modules.programs import service as program_service
 from app.modules.programs.models import (
@@ -682,6 +683,65 @@ with sync_playwright() as playwright:
     material_form.get_by_role("button", name="Create", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
 
+    quiz_form = page.locator("form").filter(
+        has=page.get_by_role("heading", name="Add quiz", exact=True)
+    )
+    quiz_form.locator('select[name="lesson_key"]').select_option(
+        label="Enterprise foundations / Know the customer / Customer problem"
+    )
+    quiz_form.locator('input[name="position"]').fill("1")
+    quiz_form.locator('input[name="title_en"]').fill("Customer check")
+    quiz_form.locator('input[name="title_ta"]').fill("Synthetic Tamil quiz")
+    quiz_form.locator('textarea[name="instructions_en"]').fill(
+        "Choose the strongest customer statement."
+    )
+    quiz_form.locator('textarea[name="instructions_ta"]').fill(
+        "Synthetic Tamil quiz instructions."
+    )
+    quiz_form.locator('input[name="passing_percent"]').fill("60")
+    quiz_form.locator('input[name="max_attempts"]').fill("2")
+    quiz_form.get_by_role("button", name="Create", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+
+    question_form = page.locator("form").filter(
+        has=page.get_by_role("heading", name="Add question", exact=True)
+    )
+    question_form.locator('select[name="quiz_key"]').select_option(
+        label="Enterprise foundations / Customer problem / Customer check"
+    )
+    question_form.locator('input[name="position"]').fill("1")
+    question_form.locator('textarea[name="prompt_en"]').fill(
+        "Which statement is observable?"
+    )
+    question_form.locator('textarea[name="prompt_ta"]').fill("Synthetic Tamil question")
+    question_form.locator('input[name="points"]').fill("10")
+    question_form.get_by_role("button", name="Create", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+
+    choice_form = page.locator("form").filter(
+        has=page.get_by_role("heading", name="Add answer choice", exact=True)
+    )
+    choice_form.locator('select[name="question_key"]').select_option(
+        label="Enterprise foundations / Customer check / Which statement is observable?"
+    )
+    choice_form.locator('input[name="position"]').fill("1")
+    choice_form.locator('input[name="label_en"]').fill("Customers probably want it.")
+    choice_form.locator('input[name="label_ta"]').fill("Synthetic Tamil wrong choice")
+    choice_form.get_by_role("button", name="Create", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+
+    choice_form.locator('select[name="question_key"]').select_option(
+        label="Enterprise foundations / Customer check / Which statement is observable?"
+    )
+    choice_form.locator('input[name="position"]').fill("2")
+    choice_form.locator('input[name="label_en"]').fill(
+        "Five customers reported the same problem."
+    )
+    choice_form.locator('input[name="label_ta"]').fill("Synthetic Tamil correct choice")
+    choice_form.locator('input[name="is_correct"]').check()
+    choice_form.get_by_role("button", name="Create", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+
     page.once("dialog", lambda dialog: dialog.accept("E2E content approved"))
     page.get_by_role("button", name="Publish course", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
@@ -748,6 +808,7 @@ with sync_playwright() as playwright:
     ).to_be_visible()
     expect(trainer_page.get_by_text("Synthetic E2E", exact=True)).to_be_visible()
     expect(trainer_page.get_by_text("Not started", exact=True)).to_be_visible()
+    expect(trainer_page.get_by_text("Not attempted", exact=False)).to_be_visible()
     with trainer_page.expect_download() as trainer_download:
         trainer_page.get_by_role("button", name="Open material", exact=True).click()
     assert trainer_download.value.suggested_filename == "customer-worksheet.pdf"
@@ -878,6 +939,16 @@ with sync_playwright() as playwright:
         page.get_by_role("button", name="Open material", exact=True).click()
     assert learner_download.value.suggested_filename == "customer-worksheet.pdf"
     assert Path(learner_download.value.path()).read_bytes().startswith(b"%PDF-1.4")
+    expect(page.get_by_text("Customer check", exact=True)).to_be_visible()
+    page.get_by_label("Customers probably want it.", exact=True).check()
+    page.get_by_role("button", name="Submit quiz", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Best score: 0%", exact=False)).to_be_visible()
+    page.get_by_label("Five customers reported the same problem.", exact=True).check()
+    page.get_by_role("button", name="Submit quiz", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Passed", exact=True)).to_be_visible()
+    expect(page.get_by_text("Best score: 100%", exact=False)).to_be_visible()
     page.get_by_role("button", name="Mark lesson complete", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("Completed", exact=True).first).to_be_visible()
@@ -981,6 +1052,16 @@ with sync_playwright() as playwright:
         assert course_enrollment.enrollment_id == enrollment.id
         assert course_enrollment.status == "completed"
         assert course_enrollment.completed_at is not None
+        quiz_attempts = list(
+            db.scalars(
+                select(QuizAttempt).where(
+                    QuizAttempt.course_enrollment_id == course_enrollment.id
+                )
+            )
+        )
+        assert len(quiz_attempts) == 2
+        assert [attempt.percent for attempt in quiz_attempts] == [0, 100]
+        assert quiz_attempts[-1].passed is True
         lesson_progress = db.scalar(
             select(LessonProgress).where(
                 LessonProgress.course_enrollment_id == course_enrollment.id
@@ -1042,6 +1123,6 @@ print(
     "conflict/scoring/moderation/interview/decisions/finalization, enrollment/participant/"
     "session/timeline, center-scoped coordinator assignment/revocation, trainer-scoped "
     "delivery, learner/trainer private-material downloads, learning authoring/publication/"
-    "cohort access/start/completion, audit, responsive layouts and session recovery; "
+    "cohort access/start/quiz grading/completion, audit, responsive layouts and session recovery; "
     "no JS errors"
 )

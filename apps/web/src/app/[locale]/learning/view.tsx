@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../lib/api-contracts";
 import { learningMessages } from "../../../lib/learning-messages";
 
@@ -68,6 +68,18 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
       expected_course_enrollment_version: course.course_enrollment.version,
     });
   };
+  function submitQuiz(
+    event: FormEvent<HTMLFormElement>,
+    courseId: string,
+    quizId: string,
+  ) {
+    event.preventDefault();
+    const answers = Array.from(new FormData(event.currentTarget).entries()).map(
+      ([question_id, choice_id]) => ({ question_id, choice_id }),
+    );
+    void mutate(`/my-learning/${courseId}/quizzes/${quizId}/attempts`, { answers });
+  }
+
   async function openMaterial(courseId: string, materialId: string) {
     setBusy(true);
     try {
@@ -144,6 +156,36 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
                       </button>
                     : <small>{text.materialUnavailable}</small>}
                 </p>)}
+                {lesson.quizzes.map((quiz) => <form
+                  className="learning-private"
+                  key={quiz.id}
+                  onSubmit={(event) => submitQuiz(event, course.id, quiz.id)}
+                >
+                  <strong>{value(quiz.title_en, quiz.title_ta)}</strong>
+                  <p>{value(quiz.instructions_en, quiz.instructions_ta)}</p>
+                  <small>
+                    {text.passMark}: {quiz.passing_percent}% - {text.attempts}: {quiz.attempt_count}/{quiz.max_attempts}
+                    {quiz.best_percent !== null && ` - ${text.bestScore}: ${quiz.best_percent}%`}
+                  </small>
+                  {quiz.questions.map((question) => <fieldset key={question.id}>
+                    <legend>{question.position}. {value(question.prompt_en, question.prompt_ta)} ({question.points} {text.points})</legend>
+                    {question.choices.map((choice) => <label key={choice.id}>
+                      <input
+                        disabled={busy || !quiz.available || quiz.passed || quiz.remaining_attempts === 0}
+                        name={question.id}
+                        type="radio"
+                        value={choice.id}
+                        required
+                      />
+                      {value(choice.label_en, choice.label_ta)}
+                    </label>)}
+                  </fieldset>)}
+                  {quiz.passed
+                    ? <strong>{text.passed}</strong>
+                    : quiz.available && quiz.remaining_attempts > 0
+                      ? <button disabled={busy} type="submit">{text.submitQuiz}</button>
+                      : <small>{text.quizUnavailable}</small>}
+                </form>)}
               </li>)}</ol>
             </li>)}
           </ol>
