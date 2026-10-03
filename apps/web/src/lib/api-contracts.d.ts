@@ -242,6 +242,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/attendance/organizations/{org}/staff-workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Staff Workspace */
+        get: operations["staff_workspace_api_v1_attendance_organizations__org__staff_workspace_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/organizations/{org}/policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Policy */
+        put: operations["update_policy_api_v1_attendance_organizations__org__policy_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/organizations/{org}/windows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Window */
+        post: operations["create_window_api_v1_attendance_organizations__org__windows_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/organizations/{org}/windows/{window_id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close Window */
+        post: operations["close_window_api_v1_attendance_organizations__org__windows__window_id__close_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/organizations/{org}/sessions/{session_id}/records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Manual Mark */
+        post: operations["manual_mark_api_v1_attendance_organizations__org__sessions__session_id__records_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/organizations/{org}/records/{record_id}/correct": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Correct Record */
+        post: operations["correct_record_api_v1_attendance_organizations__org__records__record_id__correct_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/organizations/{org}/my-attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Attendance */
+        get: operations["my_attendance_api_v1_attendance_organizations__org__my_attendance_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/organizations/{org}/check-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check In */
+        post: operations["check_in_api_v1_attendance_organizations__org__check_in_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/courses/organizations/{org}/catalog": {
         parameters: {
             query?: never;
@@ -2957,6 +3093,21 @@ export interface components {
              */
             updated_at: string;
         };
+        /** AttendanceSummary */
+        AttendanceSummary: {
+            /** Attended */
+            attended: number;
+            /** Required */
+            required: number;
+            /** Excused */
+            excused: number;
+            /** Percent */
+            percent: number;
+            /** Threshold Percent */
+            threshold_percent: number;
+            /** Low Attendance */
+            low_attendance: boolean;
+        };
         /** AuditView */
         AuditView: {
             /**
@@ -3241,6 +3392,11 @@ export interface components {
             /** Revoked At */
             revoked_at: string | null;
         };
+        /** CheckInCommand */
+        CheckInCommand: {
+            /** Token */
+            token: string;
+        };
         /** CohortCourseCreate */
         CohortCourseCreate: {
             /**
@@ -3443,6 +3599,18 @@ export interface components {
             status: "clear" | "conflict";
             /** Note */
             note?: string | null;
+        };
+        /** CorrectionCommand */
+        CorrectionCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "present" | "absent" | "late" | "excused";
+            /** Reason */
+            reason: string;
         };
         /** CourseCreate */
         CourseCreate: {
@@ -4945,6 +5113,26 @@ export interface components {
             /** Submissions */
             submissions: components["schemas"]["AssignmentSubmissionView"][];
         };
+        /** LearnerAttendanceView */
+        LearnerAttendanceView: {
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Cohort Name En */
+            cohort_name_en: string;
+            /** Cohort Name Ta */
+            cohort_name_ta: string;
+            summary: components["schemas"]["AttendanceSummary"];
+            /** Sessions */
+            sessions: components["schemas"]["LearnerSessionAttendance"][];
+        };
         /** LearnerCourseView */
         LearnerCourseView: {
             /**
@@ -5127,6 +5315,34 @@ export interface components {
             available: boolean;
             /** Questions */
             questions: components["schemas"]["LearnerQuizQuestionView"][];
+        };
+        /** LearnerSessionAttendance */
+        LearnerSessionAttendance: {
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Session Status
+             * @enum {string}
+             */
+            session_status: "scheduled" | "completed" | "cancelled";
+            record: components["schemas"]["RecordView"] | null;
         };
         /** LearningAssignmentView */
         LearningAssignmentView: {
@@ -5354,6 +5570,21 @@ export interface components {
              */
             device_name: string;
         };
+        /** ManualMark */
+        ManualMark: {
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "present" | "absent" | "late" | "excused";
+            /** Reason */
+            reason: string;
+        };
         /** MappingCreate */
         MappingCreate: {
             /** Form Id */
@@ -5575,6 +5806,11 @@ export interface components {
              */
             created_at: string;
         };
+        /** MyAttendanceView */
+        MyAttendanceView: {
+            /** Enrollments */
+            enrollments: components["schemas"]["LearnerAttendanceView"][];
+        };
         /** MyLearningView */
         MyLearningView: {
             /** Courses */
@@ -5705,6 +5941,22 @@ export interface components {
             /** Comment */
             comment?: string | null;
         };
+        /** ParticipantAttendanceView */
+        ParticipantAttendanceView: {
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /**
+             * Participant Id
+             * Format: uuid
+             */
+            participant_id: string;
+            /** Display Name */
+            display_name: string;
+            record: components["schemas"]["RecordView"] | null;
+        };
         /** ParticipantStateCommand */
         ParticipantStateCommand: {
             /** Expected Version */
@@ -5758,6 +6010,54 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** PolicyUpdate */
+        PolicyUpdate: {
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Expected Version */
+            expected_version?: number | null;
+            /** Threshold Percent */
+            threshold_percent: number;
+            /** Late After Minutes */
+            late_after_minutes: number;
+            /** Opens Before Minutes */
+            opens_before_minutes: number;
+            /** Closes After Minutes */
+            closes_after_minutes: number;
+            /** Reason */
+            reason: string;
+        };
+        /** PolicyView */
+        PolicyView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Threshold Percent */
+            threshold_percent: number;
+            /** Late After Minutes */
+            late_after_minutes: number;
+            /** Opens Before Minutes */
+            opens_before_minutes: number;
+            /** Closes After Minutes */
+            closes_after_minutes: number;
+            /** Version */
+            version: number;
             /**
              * Updated At
              * Format: date-time
@@ -6318,6 +6618,41 @@ export interface components {
              */
             created_at: string;
         };
+        /** RecordView */
+        RecordView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "present" | "absent" | "late" | "excused";
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "manual" | "qr";
+            /**
+             * Marked At
+             * Format: date-time
+             */
+            marked_at: string;
+            /** Version */
+            version: number;
+        };
         /** Register */
         Register: {
             /**
@@ -6539,6 +6874,42 @@ export interface components {
             /** Decisions */
             decisions: components["schemas"]["DecisionView"][];
         };
+        /** SessionAttendanceView */
+        SessionAttendanceView: {
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Session Status
+             * @enum {string}
+             */
+            session_status: "scheduled" | "completed" | "cancelled";
+            policy: components["schemas"]["PolicyView"] | null;
+            window: components["schemas"]["WindowView"] | null;
+            /** Participants */
+            participants: components["schemas"]["ParticipantAttendanceView"][];
+        };
         /** SessionCreate */
         SessionCreate: {
             /**
@@ -6648,6 +7019,11 @@ export interface components {
             updated_at: string;
             /** Revoked At */
             revoked_at: string | null;
+        };
+        /** StaffAttendanceWorkspace */
+        StaffAttendanceWorkspace: {
+            /** Sessions */
+            sessions: components["schemas"]["SessionAttendanceView"][];
         };
         /** StaffView */
         StaffView: {
@@ -7018,6 +7394,101 @@ export interface components {
             accepted: number;
             /** Duplicates */
             duplicates: number;
+        };
+        /** WindowClose */
+        WindowClose: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** WindowCreate */
+        WindowCreate: {
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+            /** Reason */
+            reason: string;
+        };
+        /** WindowCreatedView */
+        WindowCreatedView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+            /**
+             * Opens At
+             * Format: date-time
+             */
+            opens_at: string;
+            /**
+             * Closes At
+             * Format: date-time
+             */
+            closes_at: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "closed";
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Closed At */
+            closed_at: string | null;
+            /** Check In Token */
+            check_in_token: string;
+            /** Qr Svg Data Url */
+            qr_svg_data_url: string;
+        };
+        /** WindowView */
+        WindowView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+            /**
+             * Opens At
+             * Format: date-time
+             */
+            opens_at: string;
+            /**
+             * Closes At
+             * Format: date-time
+             */
+            closes_at: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "closed";
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Closed At */
+            closed_at: string | null;
         };
         /** SessionView */
         app__modules__identity__schemas__SessionView: {
@@ -7549,6 +8020,281 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    staff_workspace_api_v1_attendance_organizations__org__staff_workspace_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffAttendanceWorkspace"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_policy_api_v1_attendance_organizations__org__policy_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PolicyUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_window_api_v1_attendance_organizations__org__windows_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WindowCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WindowCreatedView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    close_window_api_v1_attendance_organizations__org__windows__window_id__close_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                window_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WindowClose"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WindowView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    manual_mark_api_v1_attendance_organizations__org__sessions__session_id__records_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualMark"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    correct_record_api_v1_attendance_organizations__org__records__record_id__correct_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                record_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectionCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_attendance_api_v1_attendance_organizations__org__my_attendance_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyAttendanceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_in_api_v1_attendance_organizations__org__check_in_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckInCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordView"];
                 };
             };
             /** @description Validation Error */

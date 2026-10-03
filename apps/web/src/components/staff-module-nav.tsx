@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowUpRight, Bell, BookOpen, Building2, ClipboardList, FilePenLine, ListChecks, Network, UsersRound } from "lucide-react";
+import { ArrowUpRight, Bell, BookOpen, Building2, ClipboardList, FilePenLine, ListChecks, Network, ScanLine, UsersRound } from "lucide-react";
+import { attendanceMessages } from "../lib/attendance-messages";
 import { applicationAdminMessages } from "../lib/application-admin-messages";
 import { authMessages } from "../lib/auth-messages";
 import { cmsMessages } from "../lib/cms-messages";
@@ -10,7 +11,7 @@ import { notificationMessages } from "../lib/notification-messages";
 import { programMessages } from "../lib/program-messages";
 import { selectionMessages } from "../lib/selection-messages";
 
-type ModuleKey = "pages" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning";
+type ModuleKey = "pages" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning" | "attendance";
 type Locale = "en" | "ta";
 
 const descriptions: Record<Locale, Record<ModuleKey, string>> = {
@@ -23,6 +24,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     programs: "Plan programs, centers, cohorts and intake cycles.",
     selection: "Configure rubrics and assign submitted applications.",
     learning: "Build courses and place them in cohort pathways.",
+    attendance: "Open check-in windows and maintain session registers.",
   },
   ta: {
     pages: "\u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0baa\u0bcd \u0baa\u0b95\u0bcd\u0b95\u0b99\u0bcd\u0b95\u0bb3\u0bc8 \u0b89\u0bb0\u0bc1\u0bb5\u0bbe\u0b95\u0bcd\u0b95\u0bbf \u0bb5\u0bc6\u0bb3\u0bbf\u0baf\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
@@ -33,6 +35,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     programs: "\u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0b99\u0bcd\u0b95\u0bb3\u0bcd, \u0bae\u0bc8\u0baf\u0b99\u0bcd\u0b95\u0bb3\u0bcd, \u0b95\u0bc1\u0bb4\u0bc1\u0b95\u0bcd\u0b95\u0bb3\u0bcd \u0bae\u0bb1\u0bcd\u0bb1\u0bc1\u0bae\u0bcd \u0bb5\u0bbf\u0ba3\u0bcd\u0ba3\u0baa\u0bcd\u0baa\u0b95\u0bcd \u0b95\u0bbe\u0bb2\u0b99\u0bcd\u0b95\u0bb3\u0bc8\u0ba4\u0bcd \u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0bae\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
     selection: "à®®à®¤à®¿à®ªà¯à®ªà¯€à®Ÿà¯à®Ÿà¯à®ªà¯ à®ªà®Ÿà¯à®Ÿà®¿à®¯à®²à¯ˆ à®…à®®à¯ˆà®¤à¯à®¤à¯ à®µà®¿à®£à¯à®£à®ªà¯à®ªà®™à¯à®•à®³à¯ˆ à®’à®¤à¯à®•à¯à®•à®µà¯à®®à¯.",
     learning: "\u0baa\u0bbe\u0b9f\u0ba8\u0bc6\u0bb1\u0bbf\u0b95\u0bb3\u0bc8 \u0b89\u0bb0\u0bc1\u0bb5\u0bbe\u0b95\u0bcd\u0b95\u0bbf \u0b95\u0bc1\u0bb4\u0bc1 \u0baa\u0bbe\u0ba4\u0bc8\u0b95\u0bb3\u0bbf\u0bb2\u0bcd \u0bb5\u0bc8\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
+    attendance: "\u0b85\u0bae\u0bb0\u0bcd\u0bb5\u0bc1 \u0bb5\u0bb0\u0bc1\u0b95\u0bc8\u0baf\u0bc8 \u0ba4\u0bbf\u0bb1\u0ba8\u0bcd\u0ba4\u0bc1 \u0baa\u0ba4\u0bbf\u0bb5\u0bc7\u0b9f\u0bc1\u0b95\u0bb3\u0bc8 \u0ba8\u0bbf\u0bb0\u0bcd\u0bb5\u0b95\u0bbf\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
   },
 };
 
@@ -45,6 +48,7 @@ const modules = [
   { key: "programs", route: "programs", permission: "program.view", Icon: Building2 },
   { key: "selection", route: "selection", permission: "selection.cycle.view", Icon: ListChecks },
   { key: "learning", route: "learning", permission: "lms.course.view", Icon: BookOpen },
+  { key: "attendance", route: "attendance", permission: "attendance.view", Icon: ScanLine },
 ] as const;
 
 export function StaffModuleNav({ locale, organization, permissions, variant = "tabs", active }: {
@@ -63,6 +67,7 @@ export function StaffModuleNav({ locale, organization, permissions, variant = "t
     programs: programMessages[locale].workspace,
     selection: selectionMessages[locale].workspace,
     learning: learningMessages[locale].workspace,
+    attendance: attendanceMessages[locale].workspace,
   };
   const available = modules.filter((module) =>
     permissions.includes(module.permission)

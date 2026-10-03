@@ -72,7 +72,6 @@ The open-questions register still requires decisions or confirmed owners for:
 The following are future implementation slices and are not defects or unfinished acceptance criteria in already completed slices:
 
 - L02 follow-up: secure assignment file evidence, approved certificate signatories/PDF presentation and any attendance gate; L02.3 core eligibility/issuance/verification is complete locally
-- L03 attendance and QR check-in
 - M01 mentoring
 - K01 knowledge resources
 - S01 schemes and opportunities
@@ -94,11 +93,11 @@ Update this register whenever an item is completed, deferred by an approved deci
 
 ## L01.2 completion record
 
-L01.2 adds ordered prerequisites, draft-only completion rules, immutable lesson completion evidence, derived course progress, automatic enrollment completion, and count-only cohort summaries. L01.3 completes the remaining trainer and local/test private-media scope. L02.1 quiz assessment, L02.2 text assignments/manual grading and L02.3 certificate eligibility/issuance/verification are complete locally. Secure assignment file evidence, attendance, approved signatories/PDF presentation, native Flutter after macOS migration, remote CI confirmation, and closure of legacy repository-wide Ruff/MyPy debt remain open.
+L01.2 adds ordered prerequisites, draft-only completion rules, immutable lesson completion evidence, derived course progress, automatic enrollment completion, and count-only cohort summaries. L01.3 completes the remaining trainer and local/test private-media scope. L02.1 quiz assessment, L02.2 text assignments/manual grading, L02.3 certificate eligibility/issuance/verification, and L03 attendance/QR are complete locally. Secure assignment file evidence, an approved certificate attendance gate and signatories/PDF presentation, native Flutter after macOS migration, remote CI confirmation, and closure of legacy repository-wide Ruff/MyPy debt remain open.
 
 ## L01.3 completion record
 
-L01.3 adds trainer-scoped published course delivery, cohort learner progress, short-lived private material capabilities, a confined local/test file adapter, BFF binary delivery and English/Tamil web states. Production private object/video hosting, storage retention and operational acceptance remain open release gates. Future Phase 6 work is L03 attendance/QR, secure assignment file evidence, approved certificate signatories/PDF presentation, native Flutter after macOS migration, remote CI confirmation and closure of separately recorded legacy Ruff/MyPy debt.
+L01.3 adds trainer-scoped published course delivery, cohort learner progress, short-lived private material capabilities, a confined local/test file adapter, BFF binary delivery and English/Tamil web states. Production private object/video hosting, storage retention and operational acceptance remain open release gates. Future work is M01 mentoring, secure assignment file evidence, approved certificate attendance/signatory/PDF policy, native Flutter after macOS migration, remote CI confirmation and closure of separately recorded legacy Ruff/MyPy debt.
 
 ## L02.1 completion record
 
@@ -110,4 +109,8 @@ L02.2 adds draft-only bilingual text assignments, immutable sequential submissio
 
 ## L02.3 completion record
 
-L02.3 adds derived lesson/quiz/assignment eligibility, versioned bilingual templates, manual permissioned issuance, immutable snapshots, reasoned revocation, random identifiers, SVG QR and privacy-minimized anonymous verification. PostgreSQL/API, migration, contract, web and authenticated/anonymous browser gates pass locally. Remaining certificate release work is approved signatory/PDF presentation and any future L03 attendance gate; secure assignment file evidence remains deferred to the shared upload pipeline.
+L02.3 adds derived lesson/quiz/assignment eligibility, versioned bilingual templates, manual permissioned issuance, immutable snapshots, reasoned revocation, random identifiers, SVG QR and privacy-minimized anonymous verification. PostgreSQL/API, migration, contract, web and authenticated/anonymous browser gates pass locally. Remaining certificate release work is approved signatory/PDF presentation and an approved L03 attendance gate; secure assignment file evidence remains deferred to the shared upload pipeline.
+
+## L03 completion record
+
+L03 adds versioned cohort policy, scoped manual attendance, digest-only time-limited QR windows, participant check-in, duplicate prevention, immutable corrections, derived percentages and low-attendance status, and English/Tamil staff/participant web flows. No location, biometric, or device-fingerprint data is collected. Final threshold approval, outbound alert delivery, any certificate attendance gate, native Flutter, remote CI, and production operational acceptance remain open. The next scheduled module is M01 mentoring.

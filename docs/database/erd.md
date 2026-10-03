@@ -301,3 +301,9 @@ Migration `c3b9e5f7a012` implements the three assignment tables. Composite forei
 Course 1--many CertificateTemplate; CourseEnrollment 1--many Certificate; CertificateTemplate 1--many Certificate. Migration `d4c0f6a8b123` adds both tables plus `certificate.manage` and `certificate.issue`. Composite foreign keys keep template, enrollment and certificate in one organization/course. Partial unique indexes allow one published template per course and one valid certificate per enrollment; verification identifiers are unique.
 
 Published template content is database-immutable. Certificate snapshots and identifiers are immutable; the only update is valid-to-revoked with a reason, timestamp and exact version increment. Deletes are rejected. Eligibility remains derived from immutable lesson, quiz and assignment evidence and is recalculated transactionally before issuance rather than persisted as a mutable boolean.
+
+## L03 physical attendance extension
+
+Migration `e5d1a7b9c234` adds `AttendancePolicy`, `AttendanceWindow`, `AttendanceRecord`, and `AttendanceCorrection`. Policy is unique per cohort. Window belongs to one ProgramSession, stores only a unique token digest, and has a partial unique index allowing one active window per session. Record is unique by `(session_id, enrollment_id)` and uses composite organization foreign keys to both source records. Correction is unique by record/version.
+
+Record and correction triggers preserve attendance evidence: identifiers, source, and creation evidence cannot change; a record update must increment the version and change status; correction rows are append-only. The service verifies that the enrollment belongs to the session cohort because PostgreSQL cannot express that relationship across the two independent foreign keys. Percentages and alerts are derived rather than stored.

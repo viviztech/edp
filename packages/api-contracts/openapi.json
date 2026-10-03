@@ -539,6 +539,440 @@
         }
       }
     },
+    "/api/v1/attendance/organizations/{org}/staff-workspace": {
+      "get": {
+        "tags": [
+          "attendance"
+        ],
+        "summary": "Staff Workspace",
+        "operationId": "staff_workspace_api_v1_attendance_organizations__org__staff_workspace_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffAttendanceWorkspace"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attendance/organizations/{org}/policy": {
+      "put": {
+        "tags": [
+          "attendance"
+        ],
+        "summary": "Update Policy",
+        "operationId": "update_policy_api_v1_attendance_organizations__org__policy_put",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicyUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attendance/organizations/{org}/windows": {
+      "post": {
+        "tags": [
+          "attendance"
+        ],
+        "summary": "Create Window",
+        "operationId": "create_window_api_v1_attendance_organizations__org__windows_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WindowCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WindowCreatedView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attendance/organizations/{org}/windows/{window_id}/close": {
+      "post": {
+        "tags": [
+          "attendance"
+        ],
+        "summary": "Close Window",
+        "operationId": "close_window_api_v1_attendance_organizations__org__windows__window_id__close_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "window_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Window Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WindowClose"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WindowView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attendance/organizations/{org}/sessions/{session_id}/records": {
+      "post": {
+        "tags": [
+          "attendance"
+        ],
+        "summary": "Manual Mark",
+        "operationId": "manual_mark_api_v1_attendance_organizations__org__sessions__session_id__records_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualMark"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attendance/organizations/{org}/records/{record_id}/correct": {
+      "post": {
+        "tags": [
+          "attendance"
+        ],
+        "summary": "Correct Record",
+        "operationId": "correct_record_api_v1_attendance_organizations__org__records__record_id__correct_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Record Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectionCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attendance/organizations/{org}/my-attendance": {
+      "get": {
+        "tags": [
+          "attendance"
+        ],
+        "summary": "My Attendance",
+        "operationId": "my_attendance_api_v1_attendance_organizations__org__my_attendance_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyAttendanceView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attendance/organizations/{org}/check-in": {
+      "post": {
+        "tags": [
+          "attendance"
+        ],
+        "summary": "Check In",
+        "operationId": "check_in_api_v1_attendance_organizations__org__check_in_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/courses/organizations/{org}/catalog": {
       "get": {
         "tags": [
@@ -10368,6 +10802,44 @@
         ],
         "title": "AssignmentView"
       },
+      "AttendanceSummary": {
+        "properties": {
+          "attended": {
+            "type": "integer",
+            "title": "Attended"
+          },
+          "required": {
+            "type": "integer",
+            "title": "Required"
+          },
+          "excused": {
+            "type": "integer",
+            "title": "Excused"
+          },
+          "percent": {
+            "type": "integer",
+            "title": "Percent"
+          },
+          "threshold_percent": {
+            "type": "integer",
+            "title": "Threshold Percent"
+          },
+          "low_attendance": {
+            "type": "boolean",
+            "title": "Low Attendance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attended",
+          "required",
+          "excused",
+          "percent",
+          "threshold_percent",
+          "low_attendance"
+        ],
+        "title": "AttendanceSummary"
+      },
       "AuditView": {
         "properties": {
           "id": {
@@ -11057,6 +11529,23 @@
         ],
         "title": "CertificateView"
       },
+      "CheckInCommand": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 32,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Token"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "CheckInCommand"
+      },
       "CohortCourseCreate": {
         "properties": {
           "course_id": {
@@ -11472,6 +11961,39 @@
           "status"
         ],
         "title": "ConflictCommand"
+      },
+      "CorrectionCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "present",
+              "absent",
+              "late",
+              "excused"
+            ],
+            "title": "Status"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "status",
+          "reason"
+        ],
+        "title": "CorrectionCommand"
       },
       "CourseCreate": {
         "properties": {
@@ -14976,6 +15498,48 @@
         ],
         "title": "LearnerAssignmentView"
       },
+      "LearnerAttendanceView": {
+        "properties": {
+          "enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Enrollment Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "cohort_name_en": {
+            "type": "string",
+            "title": "Cohort Name En"
+          },
+          "cohort_name_ta": {
+            "type": "string",
+            "title": "Cohort Name Ta"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AttendanceSummary"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/LearnerSessionAttendance"
+            },
+            "type": "array",
+            "title": "Sessions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enrollment_id",
+          "cohort_id",
+          "cohort_name_en",
+          "cohort_name_ta",
+          "summary",
+          "sessions"
+        ],
+        "title": "LearnerAttendanceView"
+      },
       "LearnerCourseView": {
         "properties": {
           "id": {
@@ -15439,6 +16003,63 @@
         ],
         "title": "LearnerQuizView"
       },
+      "LearnerSessionAttendance": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "session_status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Session Status"
+          },
+          "record": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "title_en",
+          "title_ta",
+          "starts_at",
+          "ends_at",
+          "session_status",
+          "record"
+        ],
+        "title": "LearnerSessionAttendance"
+      },
       "LearningAssignmentView": {
         "properties": {
           "course_id": {
@@ -15896,6 +16517,39 @@
           "email"
         ],
         "title": "Login"
+      },
+      "ManualMark": {
+        "properties": {
+          "enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Enrollment Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "present",
+              "absent",
+              "late",
+              "excused"
+            ],
+            "title": "Status"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "enrollment_id",
+          "status",
+          "reason"
+        ],
+        "title": "ManualMark"
       },
       "MappingCreate": {
         "properties": {
@@ -16374,6 +17028,22 @@
         ],
         "title": "ModuleView"
       },
+      "MyAttendanceView": {
+        "properties": {
+          "enrollments": {
+            "items": {
+              "$ref": "#/components/schemas/LearnerAttendanceView"
+            },
+            "type": "array",
+            "title": "Enrollments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enrollments"
+        ],
+        "title": "MyAttendanceView"
+      },
       "MyLearningView": {
         "properties": {
           "courses": {
@@ -16742,6 +17412,42 @@
         ],
         "title": "PanelScoreSubmit"
       },
+      "ParticipantAttendanceView": {
+        "properties": {
+          "enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Enrollment Id"
+          },
+          "participant_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Participant Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "record": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "enrollment_id",
+          "participant_id",
+          "display_name",
+          "record"
+        ],
+        "title": "ParticipantAttendanceView"
+      },
       "ParticipantStateCommand": {
         "properties": {
           "expected_version": {
@@ -16869,6 +17575,119 @@
           "updated_at"
         ],
         "title": "ParticipantView"
+      },
+      "PolicyUpdate": {
+        "properties": {
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "threshold_percent": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Threshold Percent"
+          },
+          "late_after_minutes": {
+            "type": "integer",
+            "maximum": 240.0,
+            "minimum": 0.0,
+            "title": "Late After Minutes"
+          },
+          "opens_before_minutes": {
+            "type": "integer",
+            "maximum": 1440.0,
+            "minimum": 0.0,
+            "title": "Opens Before Minutes"
+          },
+          "closes_after_minutes": {
+            "type": "integer",
+            "maximum": 1440.0,
+            "minimum": 0.0,
+            "title": "Closes After Minutes"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cohort_id",
+          "threshold_percent",
+          "late_after_minutes",
+          "opens_before_minutes",
+          "closes_after_minutes",
+          "reason"
+        ],
+        "title": "PolicyUpdate"
+      },
+      "PolicyView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "threshold_percent": {
+            "type": "integer",
+            "title": "Threshold Percent"
+          },
+          "late_after_minutes": {
+            "type": "integer",
+            "title": "Late After Minutes"
+          },
+          "opens_before_minutes": {
+            "type": "integer",
+            "title": "Opens Before Minutes"
+          },
+          "closes_after_minutes": {
+            "type": "integer",
+            "title": "Closes After Minutes"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "cohort_id",
+          "threshold_percent",
+          "late_after_minutes",
+          "opens_before_minutes",
+          "closes_after_minutes",
+          "version",
+          "updated_at"
+        ],
+        "title": "PolicyView"
       },
       "PreferenceEdit": {
         "properties": {
@@ -18067,6 +18886,63 @@
         ],
         "title": "QuizView"
       },
+      "RecordView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Enrollment Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "present",
+              "absent",
+              "late",
+              "excused"
+            ],
+            "title": "Status"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "qr"
+            ],
+            "title": "Source"
+          },
+          "marked_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Marked At"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "session_id",
+          "enrollment_id",
+          "status",
+          "source",
+          "marked_at",
+          "version"
+        ],
+        "title": "RecordView"
+      },
       "Register": {
         "properties": {
           "password": {
@@ -18610,6 +19486,88 @@
         ],
         "title": "SelectionWorkspace"
       },
+      "SessionAttendanceView": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "session_status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Session Status"
+          },
+          "policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PolicyView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "window": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WindowView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "participants": {
+            "items": {
+              "$ref": "#/components/schemas/ParticipantAttendanceView"
+            },
+            "type": "array",
+            "title": "Participants"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "cohort_id",
+          "title_en",
+          "title_ta",
+          "starts_at",
+          "ends_at",
+          "session_status",
+          "policy",
+          "window",
+          "participants"
+        ],
+        "title": "SessionAttendanceView"
+      },
       "SessionCreate": {
         "properties": {
           "cohort_id": {
@@ -18860,6 +19818,22 @@
           "revoked_at"
         ],
         "title": "StaffAssignmentView"
+      },
+      "StaffAttendanceWorkspace": {
+        "properties": {
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/SessionAttendanceView"
+            },
+            "type": "array",
+            "title": "Sessions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sessions"
+        ],
+        "title": "StaffAttendanceWorkspace"
       },
       "StaffView": {
         "properties": {
@@ -19742,6 +20716,190 @@
           "duplicates"
         ],
         "title": "WebhookAccepted"
+      },
+      "WindowClose": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "reason"
+        ],
+        "title": "WindowClose"
+      },
+      "WindowCreate": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "session_id",
+          "reason"
+        ],
+        "title": "WindowCreate"
+      },
+      "WindowCreatedView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "opens_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opens At"
+          },
+          "closes_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Closes At"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "check_in_token": {
+            "type": "string",
+            "title": "Check In Token"
+          },
+          "qr_svg_data_url": {
+            "type": "string",
+            "title": "Qr Svg Data Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "session_id",
+          "opens_at",
+          "closes_at",
+          "state",
+          "version",
+          "created_at",
+          "closed_at",
+          "check_in_token",
+          "qr_svg_data_url"
+        ],
+        "title": "WindowCreatedView"
+      },
+      "WindowView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "opens_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opens At"
+          },
+          "closes_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Closes At"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "session_id",
+          "opens_at",
+          "closes_at",
+          "state",
+          "version",
+          "created_at",
+          "closed_at"
+        ],
+        "title": "WindowView"
       },
       "app__modules__identity__schemas__SessionView": {
         "properties": {

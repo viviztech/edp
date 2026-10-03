@@ -32,3 +32,9 @@ Start the course and complete the assignment lesson's prerequisites. Enter the r
 ## Certificate eligibility and verification
 
 The course shows separate lesson, quiz and assignment requirements. You become certificate-eligible after the course completion rule is met and every quiz and assignment has passing evidence. Authorized staff issue the certificate manually. When issued, your learning page shows its private details, QR code and verification link. The public verification page shows course, issuer, date and valid/revoked status but does not expose your name, scores, responses or feedback.
+
+## Check in and review attendance
+
+Open **My attendance** from the participant portal. Scan the QR shown by the trainer with a compatible app and paste its `edp-attendance:` value, or enter the provided check-in code. Check-in works only during the session window and only for your active enrollment. Repeating a successful check-in is rejected.
+
+The page shows Present, Late, Absent, Excused, or Unmarked for each session and calculates your percentage. Present and Late count as attended; Excused sessions are removed from the counted total. A warning appears when the result is below the cohort threshold. Ask authorized staff to correct an error; the original record remains in the audit history. No location is collected.

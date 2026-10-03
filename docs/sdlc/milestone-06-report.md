@@ -1,6 +1,6 @@
 # Milestone 6 implementation report
 
-Status: L01.1-L01.3 and L02.1-L02.3 implemented and locally accepted; Milestone 6 remains in progress.
+Status: L01.1-L01.3, L02.1-L02.3, and L03 implemented and locally accepted; Milestone 6 remains open for remote CI and deferred native-client gates.
 
 ## Delivered behavior
 
@@ -31,9 +31,9 @@ The Next.js staff course studio and learner pathway provide English/Tamil loadin
 | Remote CI | Pending until this change is pushed |
 | Native Flutter | Deferred under ADR 0004; no Flutter feature included in L01.1 |
 
-## Remaining L01 scope
+## Remaining release scope
 
-Flutter learning screens remain deferred under ADR 0004. L02.1 quizzes/automatic grading, L02.2 assignments/manual grading and L02.3 eligibility/certificates are complete locally. Attendance remains a later Phase 6 slice. Production object/video hosting, signatory/attendance policy and remote CI evidence remain release gates.
+Flutter learning and attendance screens remain deferred under ADR 0004. L02.1 quizzes/automatic grading, L02.2 assignments/manual grading, L02.3 eligibility/certificates, and L03 attendance/QR are complete locally. Production object/video hosting, secure assignment files, final attendance threshold, outbound low-attendance delivery, certificate attendance/signatory/PDF policy, and remote CI evidence remain release gates.
 
 ## L01.2 implementation
 
@@ -62,3 +62,9 @@ Local acceptance passed for the focused PostgreSQL workflow, migration downgrade
 Migration `d4c0f6a8b123` adds versioned certificate templates and immutable certificate snapshots with composite scope keys, one-published-template/one-valid-certificate partial indexes, unique verification codes, protected publication and reasoned revocation. Eligibility is derived from the frozen lesson rule plus every quiz and assignment passing. Program Managers can prepare templates; Program Directors/Super Admins publish, issue and revoke manually. Anonymous JSON/QR verification excludes recipient identity and assessment evidence.
 
 Local acceptance passes all 86 backend tests, the migration round trip/drift check, focused Ruff/strict MyPy, generated contracts, ESLint/TypeScript, 34 Vitest tests and the Next production build. Authenticated Chrome publishes a template, completes quiz/assignment/lesson gates and issues the certificate; a separate anonymous context verifies its QR-linked public record with no JavaScript errors. Remote CI remains open. Automatic issuance, attendance, signatories, PDF rendering, assignment files and native Flutter remain outside this slice.
+
+## L03 implementation
+
+Migration `e5d1a7b9c234` adds one versioned attendance policy per cohort, digest-only time-limited QR windows, one current record per session/enrollment, and immutable correction evidence. Program Directors, Program Managers, and Super Admins operate organization-wide; Trainers and Training Center Coordinators require an active delivery assignment. Participants check in through their own derived active enrollment. The server derives Present/Late, rejects duplicates and closed/invalid windows, and calculates percentage plus low-attendance state without storing client calculations. Present and Late count as attended, Excused is removed from the denominator, and unmarked elapsed sessions count as missed. No location, biometric, or device fingerprint is accepted or stored.
+
+Local acceptance passes all 87 backend tests, migration downgrade to L02.3/re-upgrade/drift, focused Ruff and strict MyPy, regenerated OpenAPI/TypeScript contracts, ESLint, TypeScript, all 36 Vitest tests, and the Next 16 production build. Authenticated Chrome saves policy, opens the QR window, performs participant check-in, confirms persisted QR evidence, verifies the responsive participant page, and reports no JavaScript errors. Remote CI, native Flutter under ADR 0004, final policy approval, outbound alert delivery, and certificate attendance integration remain open.

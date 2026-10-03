@@ -7,12 +7,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
-from cryptography.fernet import Fernet
-from playwright.sync_api import expect, sync_playwright
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
-
 from app.modules.applications.models import Application, ApplicationForm
+from app.modules.attendance.models import AttendancePolicy, AttendanceRecord
 from app.modules.identity.models import (
     AuthDelivery,
     Organization,
@@ -56,6 +52,10 @@ from app.modules.selection.models import (
     SelectionCycle,
     SelectionDecision,
 )
+from cryptography.fernet import Fernet
+from playwright.sync_api import expect, sync_playwright
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
 
 engine = create_engine(os.environ["DATABASE_URL"])
 assert engine.url.database in {"edp_foundation_e2e", "edp_test"}, (
@@ -623,6 +623,61 @@ with sync_playwright() as playwright:
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("Business foundations", exact=True)).to_be_visible()
 
+    with Session(engine) as db:
+        attendance_session = ProgramSession(
+            organization_id=organization_id,
+            cohort_id=cohort.id,
+            title_en="Attendance check-in lab",
+            title_ta="Synthetic Tamil attendance session",
+            starts_at=datetime.now(UTC) + timedelta(minutes=5),
+            ends_at=datetime.now(UTC) + timedelta(hours=1),
+            mode="in_person",
+            location="E2E training room",
+        )
+        db.add(attendance_session)
+        db.commit()
+        attendance_session_id = attendance_session.id
+
+    page.goto(base + "/en/admin/attendance?organization=" + str(organization_id))
+    expect(
+        page.get_by_role("heading", name="Attendance control", exact=True)
+    ).to_be_visible()
+    attendance_card = page.locator("article").filter(
+        has=page.get_by_role("heading", name="Attendance check-in lab", exact=True)
+    )
+    policy_form = attendance_card.locator("form").first
+    policy_form.locator('input[name="threshold_percent"]').fill("80")
+    policy_form.locator('input[name="late_after_minutes"]').fill("10")
+    policy_form.locator('input[name="opens_before_minutes"]').fill("15")
+    policy_form.locator('input[name="closes_after_minutes"]').fill("30")
+    policy_form.locator('input[name="reason"]').fill(
+        "Synthetic approved attendance policy"
+    )
+    policy_form.get_by_role("button", name="Save policy", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Attendance saved.")
+    attendance_card.get_by_role("button", name="Open QR check-in", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Attendance saved.")
+    qr_url = attendance_card.locator('object[type="image/svg+xml"]').get_attribute(
+        "data"
+    )
+    assert qr_url and qr_url.startswith("data:image/svg+xml;base64,")
+    check_in_token = attendance_card.locator("[data-check-in-token]").text_content()
+    assert check_in_token
+
+    page.goto(base + "/en/attendance?organization=" + str(organization_id))
+    expect(
+        page.get_by_role("heading", name="My attendance", exact=True)
+    ).to_be_visible()
+    page.get_by_label("Check-in code", exact=True).fill(check_in_token)
+    page.get_by_role("button", name="Check in", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Attendance saved.")
+    expect(page.get_by_text("Present", exact=True)).to_be_visible()
+    expect(page.get_by_text("Attendance is on track", exact=True)).to_be_visible()
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.screenshot(path=str(evidence / "attendance-mobile.png"), full_page=True)
+    page.set_viewport_size({"width": 1280, "height": 900})
+
     page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
     expect(
         page.get_by_role("heading", name="Course studio", exact=True)
@@ -780,9 +835,7 @@ with sync_playwright() as playwright:
     )
     template_form.locator('input[name="code"]').fill("e2e-completion")
     template_form.locator('input[name="title_en"]').fill("Certificate of Completion")
-    template_form.locator('input[name="title_ta"]').fill(
-        "Synthetic Tamil certificate"
-    )
+    template_form.locator('input[name="title_ta"]').fill("Synthetic Tamil certificate")
     template_form.locator('textarea[name="statement_en"]').fill(
         "has completed the Enterprise foundations course"
     )
@@ -1050,11 +1103,15 @@ with sync_playwright() as playwright:
     expect(page.get_by_text("100%", exact=True).first).to_be_visible()
     expect(page.get_by_text("Eligible for certificate", exact=True)).to_be_visible()
     page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
-    expect(page.get_by_text("Eligible for certificate", exact=False).last).to_be_visible()
+    expect(
+        page.get_by_text("Eligible for certificate", exact=False).last
+    ).to_be_visible()
     page.once("dialog", lambda dialog: dialog.accept("E2E completion verified"))
     page.get_by_role("button", name="Issue certificate", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
-    expect(page.get_by_text("Certificate status: valid", exact=False).first).to_be_visible()
+    expect(
+        page.get_by_text("Certificate status: valid", exact=False).first
+    ).to_be_visible()
     page.goto(base + "/en/learning?organization=" + str(organization_id))
     verify_link = page.get_by_role("link", name="Verify certificate", exact=True)
     expect(verify_link).to_be_visible()
@@ -1066,14 +1123,18 @@ with sync_playwright() as playwright:
     expect(
         public_page.get_by_role("heading", name="Certificate of Completion", exact=True)
     ).to_be_visible()
-    expect(public_page.get_by_text("Certificate status: Valid", exact=True)).to_be_visible()
+    expect(
+        public_page.get_by_text("Certificate status: Valid", exact=True)
+    ).to_be_visible()
     public_context.close()
     verify_link.click()
     expect(
         page.get_by_role("heading", name="Certificate of Completion", exact=True)
     ).to_be_visible()
     expect(page.get_by_text("Certificate status: Valid", exact=True)).to_be_visible()
-    expect(page.get_by_alt_text("Certificate verification QR code", exact=True)).to_be_visible()
+    expect(
+        page.get_by_alt_text("Certificate verification QR code", exact=True)
+    ).to_be_visible()
     page.goto(base + "/en/learning?organization=" + str(organization_id))
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
@@ -1163,6 +1224,7 @@ with sync_playwright() as playwright:
         assert {item.title_en for item in program_sessions} == {
             "Business foundations",
             "Coordinator session",
+            "Attendance check-in lab",
         }
         assert staff_assignment and staff_assignment.state == "revoked"
         assert staff_assignment.revoked_at is not None
@@ -1213,9 +1275,23 @@ with sync_playwright() as playwright:
         certificate = db.scalar(
             select(Certificate).where(Certificate.organization_id == organization_id)
         )
+        attendance_policy = db.scalar(
+            select(AttendancePolicy).where(
+                AttendancePolicy.organization_id == organization_id
+            )
+        )
+        attendance_record = db.scalar(
+            select(AttendanceRecord).where(
+                AttendanceRecord.organization_id == organization_id,
+                AttendanceRecord.session_id == attendance_session_id,
+            )
+        )
         assert certificate_template and certificate_template.state == "published"
         assert certificate and certificate.status == "valid"
         assert certificate.course_enrollment_id == course_enrollment.id
+        assert attendance_policy and attendance_policy.threshold_percent == 80
+        assert attendance_record and attendance_record.source == "qr"
+        assert attendance_record.status == "present"
         assert interview and interview.status == "completed"
         assert float(interview.average_score or 0) == 84
         assert selection_cycle and selection_cycle.state == "closed"
@@ -1272,7 +1348,7 @@ print(
     "session/timeline, center-scoped coordinator assignment/revocation, trainer-scoped "
     "delivery, learner/trainer private-material downloads, learning authoring/publication/"
     "cohort access/start/quiz grading/assignment grading and feedback/completion/"
-    "certificate eligibility/issuance/public QR verification, audit, "
+    "certificate eligibility/issuance/public QR verification, attendance policy/QR check-in, audit, "
     "responsive layouts and session recovery; "
     "no JS errors"
 )

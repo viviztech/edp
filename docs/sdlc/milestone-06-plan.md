@@ -96,3 +96,20 @@ Acceptance criteria:
 8. Migrations/contracts, PostgreSQL/API/web tests, lint/types, production build and authenticated plus anonymous browser acceptance pass.
 
 Excluded: automatic issuance, attendance gates, signatory rendering, PDF download, assignment files and native Flutter screens under ADR 0004.
+
+## L03 attendance and QR check-in
+
+Scope: cohort attendance policy, scoped manual marking, immutable correction evidence, time-limited digest-only QR windows, participant check-in, duplicate prevention, derived percentages and low-attendance state, bilingual responsive web flows, audit, contracts, migration rollback, and acceptance evidence.
+
+Acceptance criteria:
+
+1. Only authorized staff can view/manage attendance; Trainers and Training Center Coordinators also require an active center/cohort assignment.
+2. Policy values are bounded and optimistic-versioned; one active QR window is allowed per scheduled session.
+3. Raw QR token material is returned once, stored only as a digest, omitted from audit/normal reads, and rejected outside the exact window.
+4. Check-in derives participant, active enrollment, session and Present/Late state on the server and rejects duplicate or wrong-cohort evidence.
+5. Manual records support Present, Absent, Late and Excused; changes require exact version and reason and append immutable correction evidence.
+6. Percentages count Present/Late, exclude Excused from the denominator, treat unmarked elapsed sessions as missed, and derive the low-attendance state from policy.
+7. No precise location, biometric, or device-fingerprint data is accepted or stored.
+8. PostgreSQL/API, migration, contracts, web checks, production build and authenticated browser acceptance satisfy the shared Definition of Done.
+
+Excluded: location enforcement, biometrics, automatic certificate attendance gating, outbound low-attendance notification delivery, native Flutter attendance screens under ADR 0004, and remote CI.

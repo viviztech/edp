@@ -118,3 +118,9 @@ Responses are limited to 10,000 characters and feedback to 5,000 characters. Rev
 `certificate.manage` permits draft template preparation. `certificate.issue` is limited to Program Directors and Super Admins and controls template publication, issuance and revocation. No Trainer or participant grant can issue a certificate. Issuance locks the course enrollment and derives the lesson, quiz and assignment gates from stored evidence; client claims cannot override eligibility.
 
 Private learner/staff projections may include the recipient snapshot and statement. Anonymous verification is deliberately smaller: verification identifier, certificate/course titles, issuer, issue/revocation dates and valid/revoked state only. It excludes recipient identity, internal IDs, statement, scores and feedback. QR output encodes the bounded public verification URL. Audit rows contain identifiers, state fields and reasons without recipient names or assessment values. Database triggers preserve published templates and certificate evidence.
+
+## L03 attendance controls
+
+`attendance.view` and `attendance.manage` are organization-wide for Program Directors, Program Managers, and Super Admins. Trainers and Training Center Coordinators require a current center/cohort staff assignment in addition to the permission. Participants use `participant.self`; enrollment identity and cohort are server-derived. Cross-organization, unassigned-cohort, cancelled-session, withdrawn-enrollment, stale-version, duplicate, invalid-token, and closed-window operations fail closed.
+
+QR tokens use cryptographic randomness and are stored only as SHA-256 digests. Raw tokens are returned once, are absent from normal reads/audit/log payloads, and reveal no participant or session data. Mutations use browser CSRF validation or mobile bearer authentication. The API does not accept or store attendance location, device fingerprint, or biometric data.

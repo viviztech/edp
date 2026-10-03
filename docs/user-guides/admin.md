@@ -45,3 +45,9 @@ Before publishing a course, add an assignment to its lesson. Enter the bilingual
 After publishing the course, create its bilingual certificate template with a unique code, statement and approved issuer name. Program Managers may prepare the draft; a Program Director or Super Admin must publish it with a reason. Only one template can be published for a course.
 
 The Certificate eligibility section recalculates lesson completion and passed quiz/assignment counts. Issue only when it shows eligible and record the operational reason. Issuance is manual because attendance thresholds and signatories are not approved. A certificate cannot be edited. If it must no longer verify as valid, revoke it with the exact reason; the public verification page will show revoked without disclosing the learner's identity.
+
+## Manage attendance
+
+Open **Attendance** after program sessions and delivery staff assignments exist. Save the cohort policy before opening check-in. Confirm the threshold, late boundary, opening offset, and closing offset with the program owner and record the approval reason.
+
+For a scheduled session, open its QR window and immediately show the generated QR to enrolled participants; the raw token is displayed only during that browser session. Close the window as soon as check-in finishes. Mark any remaining participant as Present, Absent, Late, or Excused. An existing mark must be changed through **Correct** with the exact reason; corrections retain the prior value and actor. Never enter medical details in the reason. The platform does not collect participant location.
