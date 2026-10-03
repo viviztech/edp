@@ -14,6 +14,8 @@ from app.modules.identity.models import AuditLog, Organization, Role, User, User
 from app.modules.lms.models import (
     AssignmentGrade,
     AssignmentSubmission,
+    Certificate,
+    CertificateTemplate,
     CourseEnrollment,
     CourseModule,
     LessonProgress,
@@ -386,6 +388,29 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     assert frozen_rule.status_code == 409
     assert frozen_rule.json()["error"]["code"] == "course_structure_frozen"
 
+    certificate_template = client.post(
+        root + "/certificate-templates",
+        headers=headers,
+        json={
+            "course_id": course["id"],
+            "code": "enterprise-completion",
+            "title_en": "Certificate of Completion",
+            "title_ta": "Synthetic Tamil certificate title",
+            "statement_en": "has completed the Enterprise foundations course",
+            "statement_ta": "Synthetic Tamil certificate statement",
+            "issuer_name": "Center for Social Justice and Equity",
+        },
+    )
+    assert certificate_template.status_code == 201
+    assert certificate_template.json()["state"] == "draft"
+    published_template = client.post(
+        root + f"/certificate-templates/{certificate_template.json()['id']}/publish",
+        headers=headers,
+        json={"expected_version": 1, "reason": "Approved completion certificate"},
+    )
+    assert published_template.status_code == 200
+    assert published_template.json()["state"] == "published"
+
     assignment = client.post(
         root + "/cohort-assignments",
         headers=headers,
@@ -477,6 +502,27 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     assert started.json()["id"] == repeated.json()["id"]
     assert started.json()["enrollment_id"] == str(enrollment_id)
     assert client.post(root + f"/my-learning/{uuid4()}/start", headers=headers).status_code == 403
+    ineligible_certificate = client.post(
+        root + "/certificates/issue",
+        headers=headers,
+        json={
+            "course_enrollment_id": started.json()["id"],
+            "template_id": published_template.json()["id"],
+            "reason": "Eligibility must be complete",
+        },
+    )
+    assert ineligible_certificate.status_code == 409
+    assert ineligible_certificate.json()["error"]["code"] == "certificate_not_eligible"
+    trainer_issue = client.post(
+        root + "/certificates/issue",
+        headers=trainer_headers,
+        json={
+            "course_enrollment_id": started.json()["id"],
+            "template_id": published_template.json()["id"],
+            "reason": "Trainer must not issue certificates",
+        },
+    )
+    assert trainer_issue.status_code == 403
     started_learning = client.get(root + "/my-learning", headers=headers).json()["courses"][0]
     assert started_learning["modules"][0]["lessons"][0]["materials"][0]["available"] is True
     learner_quiz = started_learning["modules"][0]["lessons"][0]["quizzes"][0]
@@ -663,6 +709,71 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     assignment_results = graded_delivery["courses"][0]["learners"][0]["assignment_submissions"]
     assert len(assignment_results) == 2
     assert assignment_results[-1]["grade"]["score_points"] == 18
+    eligibility = graded_delivery["courses"][0]["learners"][0]["certificate_eligibility"]
+    assert eligibility == {
+        "course_enrollment_id": started.json()["id"],
+        "lesson_completion_met": True,
+        "required_quizzes": 1,
+        "passed_quizzes": 1,
+        "required_assignments": 1,
+        "passed_assignments": 1,
+        "eligible": True,
+        "blocking_reasons": [],
+    }
+    issued_certificate = client.post(
+        root + "/certificates/issue",
+        headers=headers,
+        json={
+            "course_enrollment_id": started.json()["id"],
+            "template_id": published_template.json()["id"],
+            "reason": "Verified completion evidence",
+        },
+    )
+    assert issued_certificate.status_code == 201
+    certificate = issued_certificate.json()
+    assert certificate["status"] == "valid"
+    assert certificate["recipient_name"] == "Synthetic Learner"
+    duplicate_certificate = client.post(
+        root + "/certificates/issue",
+        headers=headers,
+        json={
+            "course_enrollment_id": started.json()["id"],
+            "template_id": published_template.json()["id"],
+            "reason": "Duplicate must be rejected",
+        },
+    )
+    assert duplicate_certificate.status_code == 409
+    assert duplicate_certificate.json()["error"]["code"] == "certificate_already_issued"
+    verification = client.get(
+        f"/api/v1/certificates/verify/{certificate['verification_code']}"
+    )
+    assert verification.status_code == 200
+    assert verification.json()["status"] == "valid"
+    assert "recipient_name" not in verification.json()
+    assert "statement_en" not in verification.json()
+    assert "organization_id" not in verification.json()
+    qr = client.get(
+        f"/api/v1/certificates/verify/{certificate['verification_code']}/qr"
+    )
+    assert qr.status_code == 200
+    assert qr.headers["content-type"].startswith("image/svg+xml")
+    assert b"<svg" in qr.content
+    learner_certificate = client.get(root + "/my-learning", headers=headers).json()["courses"][0]
+    assert (
+        learner_certificate["certificate"]["verification_code"]
+        == certificate["verification_code"]
+    )
+    revoked_certificate = client.post(
+        root + f"/certificates/{certificate['id']}/revoke",
+        headers=headers,
+        json={"expected_version": 1, "reason": "Synthetic revocation test"},
+    )
+    assert revoked_certificate.status_code == 200
+    assert revoked_certificate.json()["status"] == "revoked"
+    revoked_verification = client.get(
+        f"/api/v1/certificates/verify/{certificate['verification_code']}"
+    )
+    assert revoked_verification.json()["status"] == "revoked"
 
     with Session(engine) as db:
         trainer_assignment = db.get(ProgramStaffAssignment, trainer_assignment_id)
@@ -731,6 +842,18 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
         )
         assert assignment_grade
         assignment_grade.feedback = "Forbidden feedback rewrite"
+        with pytest.raises(DBAPIError):
+            db.commit()
+        db.rollback()
+        template_evidence = db.get(CertificateTemplate, published_template.json()["id"])
+        assert template_evidence
+        template_evidence.title_en = "Forbidden template rewrite"
+        with pytest.raises(DBAPIError):
+            db.commit()
+        db.rollback()
+        certificate_evidence = db.get(Certificate, certificate["id"])
+        assert certificate_evidence
+        certificate_evidence.recipient_name = "Forbidden recipient rewrite"
         with pytest.raises(DBAPIError):
             db.commit()
         db.rollback()

@@ -94,6 +94,7 @@ LMS_ASSESSMENT_PERMISSIONS = [
     "lms.assessment.manage",
     "lms.assessment.grade",
 ]
+CERTIFICATE_PERMISSIONS = ["certificate.manage", "certificate.issue"]
 SELECTION_PERMISSIONS = [
     "selection.cycle.view",
     "selection.cycle.manage",
@@ -132,6 +133,7 @@ PERMISSIONS = [
     LMS_LEARN_PERMISSION,
     *LMS_TRAINER_PERMISSIONS,
     *LMS_ASSESSMENT_PERMISSIONS,
+    *CERTIFICATE_PERMISSIONS,
     *SELECTION_PERMISSIONS,
 ]
 
@@ -477,6 +479,7 @@ def seed_roles(db: Session) -> None:
                 *LMS_STAFF_PERMISSIONS,
                 *LMS_TRAINER_PERMISSIONS,
                 *LMS_ASSESSMENT_PERMISSIONS,
+                *CERTIFICATE_PERMISSIONS,
                 *SELECTION_PERMISSIONS,
             ]
         elif name == "Program Manager":
@@ -489,6 +492,7 @@ def seed_roles(db: Session) -> None:
                 *LMS_STAFF_PERMISSIONS,
                 *LMS_TRAINER_PERMISSIONS,
                 *LMS_ASSESSMENT_PERMISSIONS,
+                "certificate.manage",
                 "selection.cycle.view",
                 "selection.cycle.manage",
                 "selection.rubric.manage",

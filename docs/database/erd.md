@@ -295,3 +295,9 @@ Migration b2a8d4e6f901 implements these five assessment tables. Composite foreig
 Lesson 1--many LearningAssignment; LearningAssignment 1--many AssignmentSubmission; CourseEnrollment 1--many AssignmentSubmission; AssignmentSubmission 1--0..1 AssignmentGrade. The submission key `(course_enrollment_id, assignment_id, revision)` preserves every learner revision.
 
 Migration `c3b9e5f7a012` implements the three assignment tables. Composite foreign keys bind definition, submission and grade to one organization and course. Checks bound points, submission count, response length and feedback length. A database trigger freezes assignment definitions with the published course structure. Submission triggers enforce sequential revisions within the frozen limit and reject update/delete; grade triggers validate score and derived pass state and reject update/delete. One unique grade is allowed per submission.
+
+## L02.3 physical certificate extension
+
+Course 1--many CertificateTemplate; CourseEnrollment 1--many Certificate; CertificateTemplate 1--many Certificate. Migration `d4c0f6a8b123` adds both tables plus `certificate.manage` and `certificate.issue`. Composite foreign keys keep template, enrollment and certificate in one organization/course. Partial unique indexes allow one published template per course and one valid certificate per enrollment; verification identifiers are unique.
+
+Published template content is database-immutable. Certificate snapshots and identifiers are immutable; the only update is valid-to-revoked with a reason, timestamp and exact version increment. Deletes are rejected. Eligibility remains derived from immutable lesson, quiz and assignment evidence and is recalculated transactionally before issuance rather than persisted as a mutable boolean.

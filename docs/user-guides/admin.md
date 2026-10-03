@@ -39,3 +39,9 @@ Before publishing a course, open Learning and add a quiz to a lesson. Set its bi
 ## Configure an assignment
 
 Before publishing a course, add an assignment to its lesson. Enter the bilingual title and instructions, maximum and passing points, order, and the number of allowed submissions. Review these settings before publication because the definition is frozen with the course. This release accepts text responses only; do not request files or sensitive personal evidence in the instructions.
+
+## Publish and issue certificates
+
+After publishing the course, create its bilingual certificate template with a unique code, statement and approved issuer name. Program Managers may prepare the draft; a Program Director or Super Admin must publish it with a reason. Only one template can be published for a course.
+
+The Certificate eligibility section recalculates lesson completion and passed quiz/assignment counts. Issue only when it shows eligible and record the operational reason. Issuance is manual because attendance thresholds and signatories are not approved. A certificate cannot be edited. If it must no longer verify as valid, revoke it with the exact reason; the public verification page will show revoked without disclosing the learner's identity.

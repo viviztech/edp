@@ -32,6 +32,15 @@ describe("learning BFF allowlist", () => {
     ], "GET")).not.toBeNull();
     expect(learningPath(["organizations", org, "prerequisites"], "POST")).not.toBeNull();
     expect(learningPath(["organizations", org, "assignments"], "POST")).not.toBeNull();
+    expect(learningPath(["organizations", org, "certificate-templates"], "POST")).not.toBeNull();
+    expect(learningPath([
+      "organizations", org, "certificate-templates", course, "publish",
+    ], "POST")).not.toBeNull();
+    expect(learningPath(["organizations", org, "certificates", "issue"], "POST"))
+      .not.toBeNull();
+    expect(learningPath([
+      "organizations", org, "certificates", course, "revoke",
+    ], "POST")).not.toBeNull();
     expect(learningPath(["organizations", org, "quizzes"], "POST")).not.toBeNull();
     expect(learningPath(["organizations", org, "quiz-questions"], "POST")).not.toBeNull();
     expect(learningPath(["organizations", org, "quiz-choices"], "POST")).not.toBeNull();

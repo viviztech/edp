@@ -28,3 +28,7 @@ Start the assigned course and complete any prerequisite lesson shown for the qui
 ## Submit an assignment
 
 Start the course and complete the assignment lesson's prerequisites. Enter the requested text response and submit it when ready. A submitted revision cannot be edited. Wait for trainer feedback before sending another revision; the page shows the score, pass state, feedback and remaining submissions. File attachments are not available in this release. Assignment results do not yet change the course completion percentage.
+
+## Certificate eligibility and verification
+
+The course shows separate lesson, quiz and assignment requirements. You become certificate-eligible after the course completion rule is met and every quiz and assignment has passing evidence. Authorized staff issue the certificate manually. When issued, your learning page shows its private details, QR code and verification link. The public verification page shows course, issuer, date and valid/revoked status but does not expose your name, scores, responses or feedback.

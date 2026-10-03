@@ -1,6 +1,6 @@
 # Milestone 6 plan
 
-Status: L01.1-L01.3 and L02.1-L02.2 implemented and locally accepted; remote CI and later Phase 6 slices remain open.
+Status: L01.1-L01.3 and L02.1-L02.3 implemented and locally accepted; remote CI and later Phase 6 slices remain open.
 
 ## L01.1 course catalog and enrollment access
 
@@ -79,3 +79,20 @@ Acceptance criteria:
 8. Migrations, contracts, backend/web checks, production build and authenticated browser acceptance pass.
 
 Excluded: file uploads, grade amendment workflow, assessment-based completion eligibility, certificates, attendance and native Flutter screens under ADR 0004.
+
+## L02.3 assessment completion eligibility and certificates
+
+Scope: derived lesson/quiz/assignment eligibility, versioned bilingual certificate templates, manual permissioned issuance, immutable certificate snapshots, reasoned revocation, unique verification identifiers, SVG QR codes, privacy-minimized public verification, and bilingual staff/learner/public web states.
+
+Acceptance criteria:
+
+1. Eligibility requires the course lesson rule and every configured quiz and assignment to have passing evidence.
+2. Clients cannot set eligibility, pass state, recipient identity, snapshot text or verification identifiers.
+3. Program Managers may prepare templates; only Program Directors/Super Admins may publish, issue or revoke.
+4. One published template per course, one valid certificate per enrollment and unique verification identifiers are enforced.
+5. Issuance is manual, recalculates eligibility under lock, and records reasoned audit evidence without personal/score payloads.
+6. Certificates are immutable except exact versioned valid-to-revoked transition; database triggers reject rewrites/deletes.
+7. Anonymous verification and QR omit recipient identity, internal IDs, statement, scores, responses and feedback.
+8. Migrations/contracts, PostgreSQL/API/web tests, lint/types, production build and authenticated plus anonymous browser acceptance pass.
+
+Excluded: automatic issuance, attendance gates, signatory rendering, PDF download, assignment files and native Flutter screens under ADR 0004.

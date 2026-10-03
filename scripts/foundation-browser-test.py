@@ -27,6 +27,8 @@ from app.modules.identity.service import audit, seed_roles
 from app.modules.lms.models import (
     AssignmentGrade,
     AssignmentSubmission,
+    Certificate,
+    CertificateTemplate,
     CohortCourse,
     Course,
     CourseEnrollment,
@@ -769,14 +771,41 @@ with sync_playwright() as playwright:
     page.once("dialog", lambda dialog: dialog.accept("E2E content approved"))
     page.get_by_role("button", name="Publish course", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
-    pathway_form = page.locator(".learning-assignment form")
+    template_button = page.get_by_role(
+        "button", name="Create certificate template", exact=True
+    )
+    template_form = page.locator("form").filter(has=template_button)
+    template_form.locator('select[name="course_id"]').select_option(
+        label="Enterprise foundations"
+    )
+    template_form.locator('input[name="code"]').fill("e2e-completion")
+    template_form.locator('input[name="title_en"]').fill("Certificate of Completion")
+    template_form.locator('input[name="title_ta"]').fill(
+        "Synthetic Tamil certificate"
+    )
+    template_form.locator('textarea[name="statement_en"]').fill(
+        "has completed the Enterprise foundations course"
+    )
+    template_form.locator('textarea[name="statement_ta"]').fill(
+        "Synthetic Tamil certificate statement"
+    )
+    template_form.locator('input[name="issuer_name"]').fill(
+        "Center for Social Justice and Equity"
+    )
+    template_button.click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    page.once("dialog", lambda dialog: dialog.accept("E2E certificate approved"))
+    page.get_by_role("button", name="Publish template", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    pathway_button = page.get_by_role("button", name="Add to cohort", exact=True)
+    pathway_form = page.locator("form").filter(has=pathway_button)
     pathway_form.locator('select[name="course_id"]').select_option(
         label="Enterprise foundations"
     )
     pathway_form.locator('select[name="cohort_id"]').select_option(label="E2E cohort")
     pathway_form.locator('input[name="position"]').fill("1")
     pathway_form.locator('input[name="reason"]').fill("E2E cohort pathway approved")
-    pathway_form.get_by_role("button", name="Add to cohort", exact=True).click()
+    pathway_button.click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("Enterprise foundations", exact=True).first).to_be_visible()
 
@@ -1019,6 +1048,33 @@ with sync_playwright() as playwright:
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("Completed", exact=True).first).to_be_visible()
     expect(page.get_by_text("100%", exact=True).first).to_be_visible()
+    expect(page.get_by_text("Eligible for certificate", exact=True)).to_be_visible()
+    page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
+    expect(page.get_by_text("Eligible for certificate", exact=False).last).to_be_visible()
+    page.once("dialog", lambda dialog: dialog.accept("E2E completion verified"))
+    page.get_by_role("button", name="Issue certificate", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Certificate status: valid", exact=False).first).to_be_visible()
+    page.goto(base + "/en/learning?organization=" + str(organization_id))
+    verify_link = page.get_by_role("link", name="Verify certificate", exact=True)
+    expect(verify_link).to_be_visible()
+    verification_href = verify_link.get_attribute("href")
+    assert verification_href
+    public_context = browser.new_context(viewport={"width": 1280, "height": 900})
+    public_page = public_context.new_page()
+    public_page.goto(base + verification_href)
+    expect(
+        public_page.get_by_role("heading", name="Certificate of Completion", exact=True)
+    ).to_be_visible()
+    expect(public_page.get_by_text("Certificate status: Valid", exact=True)).to_be_visible()
+    public_context.close()
+    verify_link.click()
+    expect(
+        page.get_by_role("heading", name="Certificate of Completion", exact=True)
+    ).to_be_visible()
+    expect(page.get_by_text("Certificate status: Valid", exact=True)).to_be_visible()
+    expect(page.get_by_alt_text("Certificate verification QR code", exact=True)).to_be_visible()
+    page.goto(base + "/en/learning?organization=" + str(organization_id))
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     page.screenshot(path=str(evidence / "learning-mobile.png"), full_page=True)
@@ -1149,6 +1205,17 @@ with sync_playwright() as playwright:
             )
         )
         assert lesson_progress is not None
+        certificate_template = db.scalar(
+            select(CertificateTemplate).where(
+                CertificateTemplate.organization_id == organization_id
+            )
+        )
+        certificate = db.scalar(
+            select(Certificate).where(Certificate.organization_id == organization_id)
+        )
+        assert certificate_template and certificate_template.state == "published"
+        assert certificate and certificate.status == "valid"
+        assert certificate.course_enrollment_id == course_enrollment.id
         assert interview and interview.status == "completed"
         assert float(interview.average_score or 0) == 84
         assert selection_cycle and selection_cycle.state == "closed"
@@ -1204,7 +1271,8 @@ print(
     "conflict/scoring/moderation/interview/decisions/finalization, enrollment/participant/"
     "session/timeline, center-scoped coordinator assignment/revocation, trainer-scoped "
     "delivery, learner/trainer private-material downloads, learning authoring/publication/"
-    "cohort access/start/quiz grading/assignment grading and feedback/completion, audit, "
+    "cohort access/start/quiz grading/assignment grading and feedback/completion/"
+    "certificate eligibility/issuance/public QR verification, audit, "
     "responsive layouts and session recovery; "
     "no JS errors"
 )

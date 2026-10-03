@@ -1,6 +1,6 @@
 # LMS design
 
-Status: L01.1-L01.3 and L02.1-L02.2 implementation design.
+Status: L01.1-L01.3 and L02.1-L02.3 implementation design.
 
 ## Boundary
 
@@ -47,7 +47,7 @@ A draft course may contain ordered bilingual quizzes attached to lessons. Each q
 
 The learner projection exposes question and choice text without the correctness flag. Attempt submission derives the participant, enrollment and course from the authenticated user, requires the course to be started, enforces lesson prerequisites, locks the course enrollment, and accepts exactly one choice for every question. The server calculates score, maximum points, rounded percentage and pass/fail. A pass or exhausted limit closes further attempts. Attempts and answer evidence are immutable.
 
-Trainer results are read-only summaries limited by the existing active ProgramStaffAssignment cohort boundary. They show attempt count, best percentage, pass state and last submission time without selected answers or the answer key. Quiz results do not yet change lesson-based course completion; assessment-based completion and certificates remain later L02 slices.
+Trainer results are read-only summaries limited by the existing active ProgramStaffAssignment cohort boundary. They show attempt count, best percentage, pass state and last submission time without selected answers or the answer key. Quiz results remain separate from lesson-based course completion and feed the certificate eligibility projection implemented in L02.3.
 
 ## L02.2 assignments, submissions and manual grading
 
@@ -56,3 +56,11 @@ A draft course may contain ordered bilingual assignment definitions attached to 
 The learner command derives ownership through the signed-in person, active participant enrollment and started course, then enforces lesson prerequisites. Each submission is an immutable numbered revision. A learner may submit a later revision only after the preceding revision has a grade and while the frozen limit remains. The service locks the course enrollment, while PostgreSQL independently rejects skipped or over-limit revisions.
 
 Manual grading requires `lms.assessment.grade`. A Trainer must also hold an active staff assignment covering the exact course cohort; organization-wide assessment staff retain their existing scope. The server bounds the score by the frozen maximum and derives pass state from the passing threshold. One immutable grade and bounded feedback record is allowed per submission. Learners see only their own response and feedback; trainers see only submissions in their delivery scope. Assignment grades do not yet change course completion.
+
+## L02.3 assessment eligibility and certificates
+
+Certificate eligibility is a derived projection, not a client-controlled flag. It requires the frozen lesson completion rule, at least one passing attempt for every quiz, and at least one passing grade for every assignment in the course. A later ungraded revision does not erase previously earned passing evidence. Attendance is excluded until L03 defines its policy.
+
+CertificateTemplate is course-scoped and versioned. Program Managers may prepare a bilingual draft; only `certificate.issue` may publish it after the course is published. One published template is allowed per course. Signatories remain unconfigured pending program-owner approval, so templates store a bounded issuer name and issuance remains manual.
+
+Program Directors and Super Admins may issue only after recalculating eligibility under a row lock. Certificate snapshots preserve the recipient name, bilingual course/title/statement, issuer, template version and a random verification identifier. Evidence is immutable except for a versioned, reasoned valid-to-revoked transition. The owning learner sees the private certificate. Anonymous verification and QR expose only the identifier, titles, issuer, issue/revocation dates and validity state; recipient identity and statement are excluded.

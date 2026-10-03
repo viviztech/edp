@@ -23,6 +23,7 @@ from app.modules.cms.routes import router as cms_router
 from app.modules.crm.routes import router as crm_router
 from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
+from app.modules.lms.routes import public_router as certificates_router
 from app.modules.lms.routes import router as lms_router
 from app.modules.meta.routes import router as meta_router
 from app.modules.notifications.routes import router as notifications_router
@@ -83,6 +84,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(identity_router)
     app.include_router(lms_router)
+    app.include_router(certificates_router)
     app.include_router(applications_router)
     app.include_router(cms_router)
     app.include_router(crm_router)

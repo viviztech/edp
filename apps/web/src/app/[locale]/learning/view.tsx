@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../lib/api-contracts";
@@ -141,6 +142,33 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
               <span>{course.progress.completed_lessons} / {course.progress.required_lessons} {text.lessons}</span></div>
             <progress max="100" value={course.progress.percent}>{course.progress.percent}%</progress>
           </div>
+          <section className="learning-private" aria-label={text.certificateEligibility}>
+            <strong>{text.certificateEligibility}</strong>
+            <p>{course.certificate_eligibility.eligible ? text.eligible : text.notEligible}</p>
+            <small>{text.quiz}: {course.certificate_eligibility.passed_quizzes}/
+              {course.certificate_eligibility.required_quizzes} | {text.assignment}: {
+                course.certificate_eligibility.passed_assignments}/
+              {course.certificate_eligibility.required_assignments}</small>
+            {course.certificate && <article className="certificate-card">
+              <Image
+                alt={text.certificateQr}
+                height="120"
+                src={`/api/certificates/verify/${course.certificate.verification_code}/qr`}
+                unoptimized
+                width="120"
+              />
+              <div>
+                <strong>{value(
+                  course.certificate.certificate_title_en,
+                  course.certificate.certificate_title_ta,
+                )}</strong>
+                <p>{text.certificateStatus}: {course.certificate.status}</p>
+                <Link href={`/${locale}/certificates/${course.certificate.verification_code}`}>
+                  {text.verifyCertificate}
+                </Link>
+              </div>
+            </article>}
+          </section>
           <p>{value(course.description_en, course.description_ta)}</p>
           <ol className="learner-modules">
             {course.modules.map((module) => <li key={module.id}>

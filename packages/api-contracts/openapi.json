@@ -1840,6 +1840,321 @@
         }
       }
     },
+    "/api/v1/courses/organizations/{org}/certificate-templates": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Create Certificate Template",
+        "operationId": "create_certificate_template_api_v1_courses_organizations__org__certificate_templates_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificateTemplateCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificateTemplateView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/certificate-templates/{template_id}/publish": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Publish Certificate Template",
+        "operationId": "publish_certificate_template_api_v1_courses_organizations__org__certificate_templates__template_id__publish_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "template_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Template Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificateTemplatePublish"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificateTemplateView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/certificates/issue": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Issue Certificate",
+        "operationId": "issue_certificate_api_v1_courses_organizations__org__certificates_issue_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificateIssueCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificateView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/certificates/{certificate_id}/revoke": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Revoke Certificate",
+        "operationId": "revoke_certificate_api_v1_courses_organizations__org__certificates__certificate_id__revoke_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "certificate_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Certificate Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificateRevokeCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificateView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/certificates/verify/{verification_code}": {
+      "get": {
+        "tags": [
+          "certificates"
+        ],
+        "summary": "Verify Certificate",
+        "operationId": "verify_certificate_api_v1_certificates_verify__verification_code__get",
+        "parameters": [
+          {
+            "name": "verification_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 48,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Verification Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicCertificateView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/certificates/verify/{verification_code}/qr": {
+      "get": {
+        "tags": [
+          "certificates"
+        ],
+        "summary": "Certificate Qr",
+        "operationId": "certificate_qr_api_v1_certificates_verify__verification_code__qr_get",
+        "parameters": [
+          {
+            "name": "verification_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 48,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Verification Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/applications/organizations/{org}/form": {
       "get": {
         "tags": [
@@ -10339,6 +10654,409 @@
         ],
         "title": "CenterView"
       },
+      "CertificateEligibilityView": {
+        "properties": {
+          "course_enrollment_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Enrollment Id"
+          },
+          "lesson_completion_met": {
+            "type": "boolean",
+            "title": "Lesson Completion Met"
+          },
+          "required_quizzes": {
+            "type": "integer",
+            "title": "Required Quizzes"
+          },
+          "passed_quizzes": {
+            "type": "integer",
+            "title": "Passed Quizzes"
+          },
+          "required_assignments": {
+            "type": "integer",
+            "title": "Required Assignments"
+          },
+          "passed_assignments": {
+            "type": "integer",
+            "title": "Passed Assignments"
+          },
+          "eligible": {
+            "type": "boolean",
+            "title": "Eligible"
+          },
+          "blocking_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Blocking Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_enrollment_id",
+          "lesson_completion_met",
+          "required_quizzes",
+          "passed_quizzes",
+          "required_assignments",
+          "passed_assignments",
+          "eligible",
+          "blocking_reasons"
+        ],
+        "title": "CertificateEligibilityView"
+      },
+      "CertificateIssueCommand": {
+        "properties": {
+          "course_enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Enrollment Id"
+          },
+          "template_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Template Id"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_enrollment_id",
+          "template_id",
+          "reason"
+        ],
+        "title": "CertificateIssueCommand"
+      },
+      "CertificateRevokeCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "reason"
+        ],
+        "title": "CertificateRevokeCommand"
+      },
+      "CertificateTemplateCreate": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "statement_en": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Statement En"
+          },
+          "statement_ta": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Statement Ta"
+          },
+          "issuer_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Issuer Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "code",
+          "title_en",
+          "title_ta",
+          "statement_en",
+          "statement_ta",
+          "issuer_name"
+        ],
+        "title": "CertificateTemplateCreate"
+      },
+      "CertificateTemplatePublish": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "reason"
+        ],
+        "title": "CertificateTemplatePublish"
+      },
+      "CertificateTemplateView": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "statement_en": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Statement En"
+          },
+          "statement_ta": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Statement Ta"
+          },
+          "issuer_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Issuer Name"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "retired"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "code",
+          "title_en",
+          "title_ta",
+          "statement_en",
+          "statement_ta",
+          "issuer_name",
+          "id",
+          "organization_id",
+          "state",
+          "version",
+          "published_at",
+          "created_at"
+        ],
+        "title": "CertificateTemplateView"
+      },
+      "CertificateView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "course_enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Enrollment Id"
+          },
+          "template_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Template Id"
+          },
+          "verification_code": {
+            "type": "string",
+            "title": "Verification Code"
+          },
+          "recipient_name": {
+            "type": "string",
+            "title": "Recipient Name"
+          },
+          "course_title_en": {
+            "type": "string",
+            "title": "Course Title En"
+          },
+          "course_title_ta": {
+            "type": "string",
+            "title": "Course Title Ta"
+          },
+          "certificate_title_en": {
+            "type": "string",
+            "title": "Certificate Title En"
+          },
+          "certificate_title_ta": {
+            "type": "string",
+            "title": "Certificate Title Ta"
+          },
+          "statement_en": {
+            "type": "string",
+            "title": "Statement En"
+          },
+          "statement_ta": {
+            "type": "string",
+            "title": "Statement Ta"
+          },
+          "issuer_name": {
+            "type": "string",
+            "title": "Issuer Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "revoked"
+            ],
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Issued At"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "course_id",
+          "course_enrollment_id",
+          "template_id",
+          "verification_code",
+          "recipient_name",
+          "course_title_en",
+          "course_title_ta",
+          "certificate_title_en",
+          "certificate_title_ta",
+          "statement_en",
+          "statement_ta",
+          "issuer_name",
+          "status",
+          "version",
+          "issued_at",
+          "revoked_at"
+        ],
+        "title": "CertificateView"
+      },
       "CohortCourseCreate": {
         "properties": {
           "course_id": {
@@ -14331,6 +15049,19 @@
           "progress": {
             "$ref": "#/components/schemas/CourseProgressView"
           },
+          "certificate_eligibility": {
+            "$ref": "#/components/schemas/CertificateEligibilityView"
+          },
+          "certificate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CertificateView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "modules": {
             "items": {
               "$ref": "#/components/schemas/LearnerModuleView"
@@ -14354,6 +15085,8 @@
           "position",
           "course_enrollment",
           "progress",
+          "certificate_eligibility",
+          "certificate",
           "modules"
         ],
         "title": "LearnerCourseView"
@@ -14822,13 +15555,21 @@
             },
             "type": "array",
             "title": "Progress Summaries"
+          },
+          "certificate_templates": {
+            "items": {
+              "$ref": "#/components/schemas/CertificateTemplateView"
+            },
+            "type": "array",
+            "title": "Certificate Templates"
           }
         },
         "type": "object",
         "required": [
           "courses",
           "assignments",
-          "progress_summaries"
+          "progress_summaries",
+          "certificate_templates"
         ],
         "title": "LearningCatalogView"
       },
@@ -16300,6 +17041,72 @@
           "updated_at"
         ],
         "title": "ProgramView"
+      },
+      "PublicCertificateView": {
+        "properties": {
+          "verification_code": {
+            "type": "string",
+            "title": "Verification Code"
+          },
+          "course_title_en": {
+            "type": "string",
+            "title": "Course Title En"
+          },
+          "course_title_ta": {
+            "type": "string",
+            "title": "Course Title Ta"
+          },
+          "certificate_title_en": {
+            "type": "string",
+            "title": "Certificate Title En"
+          },
+          "certificate_title_ta": {
+            "type": "string",
+            "title": "Certificate Title Ta"
+          },
+          "issuer_name": {
+            "type": "string",
+            "title": "Issuer Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "revoked"
+            ],
+            "title": "Status"
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Issued At"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "verification_code",
+          "course_title_en",
+          "course_title_ta",
+          "certificate_title_en",
+          "certificate_title_ta",
+          "issuer_name",
+          "status",
+          "issued_at",
+          "revoked_at"
+        ],
+        "title": "PublicCertificateView"
       },
       "PublicEditorial": {
         "properties": {
@@ -18614,6 +19421,19 @@
           "progress": {
             "$ref": "#/components/schemas/CourseProgressView"
           },
+          "certificate_eligibility": {
+            "$ref": "#/components/schemas/CertificateEligibilityView"
+          },
+          "certificate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CertificateView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "quiz_results": {
             "items": {
               "$ref": "#/components/schemas/TrainerQuizResultView"
@@ -18635,6 +19455,8 @@
           "display_name",
           "course_enrollment",
           "progress",
+          "certificate_eligibility",
+          "certificate",
           "quiz_results",
           "assignment_submissions"
         ],

@@ -1,6 +1,6 @@
 # Milestone 6 implementation report
 
-Status: L01.1-L01.3 and L02.1-L02.2 implemented and locally accepted; Milestone 6 remains in progress.
+Status: L01.1-L01.3 and L02.1-L02.3 implemented and locally accepted; Milestone 6 remains in progress.
 
 ## Delivered behavior
 
@@ -33,7 +33,7 @@ The Next.js staff course studio and learner pathway provide English/Tamil loadin
 
 ## Remaining L01 scope
 
-Flutter learning screens remain deferred under ADR 0004. L02.1 quizzes/automatic grading and L02.2 assignments/manual grading are complete; assessment completion eligibility, attendance and certificates remain later Phase 6 slices. Production object/video hosting and remote CI evidence remain release gates.
+Flutter learning screens remain deferred under ADR 0004. L02.1 quizzes/automatic grading, L02.2 assignments/manual grading and L02.3 eligibility/certificates are complete locally. Attendance remains a later Phase 6 slice. Production object/video hosting, signatory/attendance policy and remote CI evidence remain release gates.
 
 ## L01.2 implementation
 
@@ -49,10 +49,16 @@ Focused PostgreSQL acceptance proves unassigned denial, assigned cohort visibili
 
 Migration b2a8d4e6f901 adds organization-scoped quizzes, questions, choices, attempts and answer evidence with composite scope constraints, bounded values, immutable submissions and published-definition protection. Managers author bilingual single-choice quizzes; publication validates complete answer keys. Learners receive no correctness flags and submit through an enrollment-scoped command that derives score, percentage and pass state. Trainers see only bounded cohort result summaries.
 
-Local acceptance passed: the full backend suite reports 86 tests; focused Ruff and strict MyPy pass; migration downgrade/re-upgrade/drift is clean; OpenAPI and TypeScript contracts are current; ESLint, TypeScript, all 32 Vitest tests and the Next 16 production build pass. Authenticated Chrome creates and publishes a quiz, submits failed and passing attempts, confirms automatic grading and persisted evidence, and reports no JavaScript errors. The local Next build uses one page-data worker because the Windows host cannot commit memory for the default 15 workers. Remote CI remains pending. The assignment/manual-grading work that followed is recorded in L02.2 below; completion eligibility and certificates remain open.
+Local acceptance passed: the full backend suite reports 86 tests; focused Ruff and strict MyPy pass; migration downgrade/re-upgrade/drift is clean; OpenAPI and TypeScript contracts are current; ESLint, TypeScript, all 32 Vitest tests and the Next 16 production build pass. Authenticated Chrome creates and publishes a quiz, submits failed and passing attempts, confirms automatic grading and persisted evidence, and reports no JavaScript errors. The local Next build uses one page-data worker because the Windows host cannot commit memory for the default 15 workers. Remote CI remains pending. Assignment/manual grading and certificate eligibility that followed are recorded in L02.2 and L02.3 below.
 
 ## L02.2 implementation
 
 Migration `c3b9e5f7a012` adds organization-scoped assignment definitions, immutable learner revisions and immutable manual grades. Managers author bilingual text assignments before publication. Learner commands derive enrollment, enforce prerequisites and submission limits, and require grading before a later revision. Trainers grade only learners covered by their active cohort assignment; the server validates score bounds and derives pass state. Learner and trainer views expose scoped response/feedback evidence, while audit payloads omit that content.
 
-Local acceptance passed for the focused PostgreSQL workflow, migration downgrade/re-upgrade/drift, focused Ruff and strict MyPy, generated OpenAPI and TypeScript contracts, ESLint, strict TypeScript, all 32 Vitest tests and the Next 16 production build. Authenticated Chrome creates an assignment, submits a learner response, records a trainer grade and confirms learner feedback visibility with no JavaScript errors. Text submission is complete; file uploads remain blocked on the shared secure-upload pipeline. Remote CI, assessment-based completion eligibility and certificates remain open.
+Local acceptance passed for the focused PostgreSQL workflow, migration downgrade/re-upgrade/drift, focused Ruff and strict MyPy, generated OpenAPI and TypeScript contracts, ESLint, strict TypeScript, all 32 Vitest tests and the Next 16 production build. Authenticated Chrome creates an assignment, submits a learner response, records a trainer grade and confirms learner feedback visibility with no JavaScript errors. Text submission is complete; file uploads remain blocked on the shared secure-upload pipeline. Eligibility and certificates that followed are recorded in L02.3 below; remote CI remains open.
+
+## L02.3 implementation
+
+Migration `d4c0f6a8b123` adds versioned certificate templates and immutable certificate snapshots with composite scope keys, one-published-template/one-valid-certificate partial indexes, unique verification codes, protected publication and reasoned revocation. Eligibility is derived from the frozen lesson rule plus every quiz and assignment passing. Program Managers can prepare templates; Program Directors/Super Admins publish, issue and revoke manually. Anonymous JSON/QR verification excludes recipient identity and assessment evidence.
+
+Local acceptance passes all 86 backend tests, the migration round trip/drift check, focused Ruff/strict MyPy, generated contracts, ESLint/TypeScript, 34 Vitest tests and the Next production build. Authenticated Chrome publishes a template, completes quiz/assignment/lesson gates and issues the certificate; a separate anonymous context verifies its QR-linked public record with no JavaScript errors. Remote CI remains open. Automatic issuance, attendance, signatories, PDF rendering, assignment files and native Flutter remain outside this slice.

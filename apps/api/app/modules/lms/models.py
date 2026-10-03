@@ -11,6 +11,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -515,5 +516,107 @@ class AssignmentGrade(Record, Base):
         CheckConstraint(
             "char_length(feedback) BETWEEN 1 AND 5000",
             name="assignment_grade_feedback",
+        ),
+    )
+
+
+class CertificateTemplate(Record, Base):
+    __tablename__ = "certificate_templates"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    code: Mapped[str] = mapped_column(String(60))
+    title_en: Mapped[str] = mapped_column(String(200))
+    title_ta: Mapped[str] = mapped_column(String(200))
+    statement_en: Mapped[str] = mapped_column(Text)
+    statement_ta: Mapped[str] = mapped_column(Text)
+    issuer_name: Mapped[str] = mapped_column(String(200))
+    state: Mapped[str] = mapped_column(String(16), default="draft")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["course_id", "organization_id"],
+            ["courses.id", "courses.organization_id"],
+            name="fk_certificate_template_course_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("organization_id", "code"),
+        UniqueConstraint("id", "course_id", "organization_id"),
+        CheckConstraint(
+            "state IN ('draft','published','retired')",
+            name="certificate_template_state",
+        ),
+        CheckConstraint("version > 0", name="certificate_template_version"),
+        CheckConstraint(
+            "(state = 'draft' AND published_at IS NULL) OR "
+            "(state IN ('published','retired') AND published_at IS NOT NULL)",
+            name="certificate_template_publication_evidence",
+        ),
+        Index(
+            "uq_certificate_template_published_course",
+            "course_id",
+            unique=True,
+            postgresql_where=text("state = 'published'"),
+        ),
+    )
+
+
+class Certificate(Record, Base):
+    __tablename__ = "certificates"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    course_enrollment_id: Mapped[UUID] = mapped_column(index=True)
+    template_id: Mapped[UUID] = mapped_column(index=True)
+    issued_by_user_id: Mapped[UUID] = mapped_column(index=True)
+    verification_code: Mapped[str] = mapped_column(String(48), unique=True, index=True)
+    recipient_name: Mapped[str] = mapped_column(String(200))
+    course_title_en: Mapped[str] = mapped_column(String(200))
+    course_title_ta: Mapped[str] = mapped_column(String(200))
+    certificate_title_en: Mapped[str] = mapped_column(String(200))
+    certificate_title_ta: Mapped[str] = mapped_column(String(200))
+    statement_en: Mapped[str] = mapped_column(Text)
+    statement_ta: Mapped[str] = mapped_column(Text)
+    issuer_name: Mapped[str] = mapped_column(String(200))
+    template_version: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(16), default="valid")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoke_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["course_enrollment_id", "course_id", "organization_id"],
+            [
+                "course_enrollments.id",
+                "course_enrollments.course_id",
+                "course_enrollments.organization_id",
+            ],
+            name="fk_certificate_enrollment_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["template_id", "course_id", "organization_id"],
+            [
+                "certificate_templates.id",
+                "certificate_templates.course_id",
+                "certificate_templates.organization_id",
+            ],
+            name="fk_certificate_template_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(["issued_by_user_id"], ["users.id"], ondelete="RESTRICT"),
+        CheckConstraint("status IN ('valid','revoked')", name="certificate_status"),
+        CheckConstraint("version > 0", name="certificate_version"),
+        CheckConstraint("template_version > 0", name="certificate_template_version_snapshot"),
+        CheckConstraint(
+            "(status = 'valid' AND revoked_at IS NULL AND revoke_reason IS NULL) OR "
+            "(status = 'revoked' AND revoked_at IS NOT NULL AND revoke_reason IS NOT NULL)",
+            name="certificate_revocation_evidence",
+        ),
+        Index(
+            "uq_certificate_valid_enrollment",
+            "course_enrollment_id",
+            unique=True,
+            postgresql_where=text("status = 'valid'"),
         ),
     )

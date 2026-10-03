@@ -69,3 +69,11 @@ Authorized assessment managers use `POST /api/v1/courses/organizations/{org}/ass
 Participants use `POST /my-learning/{course}/assignments/{assignment}/submissions` with a bounded text response. The server derives the enrollment and revision. It returns `assignment_review_pending` when the latest revision has no grade and `assignment_submission_limit_reached` when the frozen limit is exhausted. `GET /my-learning` returns only the learner's revisions, grade, pass state and feedback.
 
 Authorized graders use `POST /trainer-delivery/{course}/assignment-submissions/{submission}/grade` with score points and bounded feedback. The server verifies exact cohort delivery scope, derives pass state, and permits one immutable grade. `GET /trainer-delivery` returns text submissions and grades only for authorized learners. File-upload fields and routes are intentionally absent until the shared secure-upload pipeline is approved.
+
+## L02.3 eligibility and certificate endpoints
+
+`GET /my-learning` and `GET /trainer-delivery` include a server-derived certificate eligibility projection with lesson-rule state, required/passed quiz and assignment counts, stable blocking reasons, and any issued certificate visible within the caller's existing scope.
+
+`certificate.manage` uses `POST /certificate-templates` for bilingual drafts. `certificate.issue` uses `POST /certificate-templates/{template}/publish`, `POST /certificates/issue`, and `POST /certificates/{certificate}/revoke`; publish/revoke are optimistic and all commands require an audit reason. Issuance accepts only enrollment and published-template identifiers and recalculates eligibility server-side. Stable conflicts include `certificate_not_eligible`, `certificate_template_unavailable`, `certificate_already_issued`, and `certificate_already_revoked`.
+
+Anonymous `GET /api/v1/certificates/verify/{code}` and `/qr` are read-only, length/pattern bounded, and return minimal verification fields. They omit recipient identity, organization identifiers, enrollment identifiers and certificate statement. The QR is an SVG encoding the public verification endpoint.

@@ -9,6 +9,8 @@ MaterialKind = Literal["video", "document", "link"]
 CourseEnrollmentState = Literal["in_progress", "completed"]
 CompletionRule = Literal["all_lessons", "minimum_lessons"]
 ProgressState = Literal["not_started", "in_progress", "completed"]
+CertificateTemplateState = Literal["draft", "published", "retired"]
+CertificateState = Literal["valid", "revoked"]
 
 
 class CourseCreate(BaseModel):
@@ -390,6 +392,7 @@ class LearningCatalogView(BaseModel):
     courses: list[AdminCourseView]
     assignments: list[CohortCourseView]
     progress_summaries: list[CourseProgressSummary]
+    certificate_templates: list["CertificateTemplateView"]
 
 
 class CourseEnrollmentView(BaseModel):
@@ -411,6 +414,108 @@ class CourseProgressView(BaseModel):
     completed_lessons: int
     percent: int
     status: ProgressState
+
+
+class CertificateEligibilityView(BaseModel):
+    course_enrollment_id: UUID | None
+    lesson_completion_met: bool
+    required_quizzes: int
+    passed_quizzes: int
+    required_assignments: int
+    passed_assignments: int
+    eligible: bool
+    blocking_reasons: list[str]
+
+
+class CertificateTemplateCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    course_id: UUID
+    code: str = Field(min_length=1, max_length=60, pattern=r"^[a-z][a-z0-9_-]*$")
+    title_en: str = Field(min_length=1, max_length=200)
+    title_ta: str = Field(min_length=1, max_length=200)
+    statement_en: str = Field(min_length=1, max_length=2000)
+    statement_ta: str = Field(min_length=1, max_length=2000)
+    issuer_name: str = Field(min_length=1, max_length=200)
+
+    @field_validator("code", "title_en", "title_ta", "statement_en", "statement_ta", "issuer_name")
+    @classmethod
+    def strip_certificate_template_text(cls, value: str) -> str:
+        return value.strip()
+
+
+class CertificateTemplateView(CertificateTemplateCreate):
+    id: UUID
+    organization_id: UUID
+    state: CertificateTemplateState
+    version: int
+    published_at: datetime | None
+    created_at: datetime
+
+
+class CertificateTemplatePublish(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_version: int = Field(ge=1)
+    reason: str = Field(min_length=3, max_length=500)
+
+    @field_validator("reason")
+    @classmethod
+    def strip_template_publish_reason(cls, value: str) -> str:
+        return value.strip()
+
+
+class CertificateIssueCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    course_enrollment_id: UUID
+    template_id: UUID
+    reason: str = Field(min_length=3, max_length=500)
+
+    @field_validator("reason")
+    @classmethod
+    def strip_issue_reason(cls, value: str) -> str:
+        return value.strip()
+
+
+class CertificateRevokeCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_version: int = Field(ge=1)
+    reason: str = Field(min_length=3, max_length=500)
+
+    @field_validator("reason")
+    @classmethod
+    def strip_revoke_reason(cls, value: str) -> str:
+        return value.strip()
+
+
+class CertificateView(BaseModel):
+    id: UUID
+    course_id: UUID
+    course_enrollment_id: UUID
+    template_id: UUID
+    verification_code: str
+    recipient_name: str
+    course_title_en: str
+    course_title_ta: str
+    certificate_title_en: str
+    certificate_title_ta: str
+    statement_en: str
+    statement_ta: str
+    issuer_name: str
+    status: CertificateState
+    version: int
+    issued_at: datetime
+    revoked_at: datetime | None
+
+
+class PublicCertificateView(BaseModel):
+    verification_code: str
+    course_title_en: str
+    course_title_ta: str
+    certificate_title_en: str
+    certificate_title_ta: str
+    issuer_name: str
+    status: CertificateState
+    issued_at: datetime
+    revoked_at: datetime | None
 
 
 class LessonCompletionCommand(BaseModel):
@@ -537,6 +642,8 @@ class LearnerCourseView(BaseModel):
     position: int
     course_enrollment: CourseEnrollmentView | None
     progress: CourseProgressView
+    certificate_eligibility: CertificateEligibilityView
+    certificate: CertificateView | None
     modules: list[LearnerModuleView]
 
 
@@ -581,6 +688,8 @@ class TrainerLearnerProgressView(BaseModel):
     display_name: str
     course_enrollment: CourseEnrollmentView | None
     progress: CourseProgressView
+    certificate_eligibility: CertificateEligibilityView
+    certificate: CertificateView | None
     quiz_results: list[TrainerQuizResultView]
     assignment_submissions: list[TrainerAssignmentSubmissionView]
 

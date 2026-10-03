@@ -1,3 +1,4 @@
+from secrets import token_urlsafe
 from typing import cast
 from uuid import UUID
 
@@ -27,6 +28,8 @@ from app.modules.lms.material_access import (
 from app.modules.lms.models import (
     AssignmentGrade,
     AssignmentSubmission,
+    Certificate,
+    CertificateTemplate,
     CohortCourse,
     Course,
     CourseEnrollment,
@@ -51,6 +54,15 @@ from app.modules.lms.schemas import (
     AssignmentGradeView,
     AssignmentSubmissionCreate,
     AssignmentSubmissionView,
+    CertificateEligibilityView,
+    CertificateIssueCommand,
+    CertificateRevokeCommand,
+    CertificateState,
+    CertificateTemplateCreate,
+    CertificateTemplatePublish,
+    CertificateTemplateState,
+    CertificateTemplateView,
+    CertificateView,
     CohortCourseCreate,
     CohortCourseView,
     CompletionRule,
@@ -86,6 +98,7 @@ from app.modules.lms.schemas import (
     ModuleView,
     MyLearningView,
     ProgressState,
+    PublicCertificateView,
     PublishCourse,
     QuizAdminView,
     QuizAttemptAnswerView,
@@ -242,6 +255,46 @@ def assignment_submission_view(
         response_text=item.response_text,
         submitted_at=item.submitted_at,
         grade=assignment_grade_view(grade) if grade else None,
+    )
+
+
+def certificate_template_view(item: CertificateTemplate) -> CertificateTemplateView:
+    return CertificateTemplateView(
+        id=item.id,
+        organization_id=item.organization_id,
+        course_id=item.course_id,
+        code=item.code,
+        title_en=item.title_en,
+        title_ta=item.title_ta,
+        statement_en=item.statement_en,
+        statement_ta=item.statement_ta,
+        issuer_name=item.issuer_name,
+        state=cast(CertificateTemplateState, item.state),
+        version=item.version,
+        published_at=item.published_at,
+        created_at=item.created_at,
+    )
+
+
+def certificate_view(item: Certificate) -> CertificateView:
+    return CertificateView(
+        id=item.id,
+        course_id=item.course_id,
+        course_enrollment_id=item.course_enrollment_id,
+        template_id=item.template_id,
+        verification_code=item.verification_code,
+        recipient_name=item.recipient_name,
+        course_title_en=item.course_title_en,
+        course_title_ta=item.course_title_ta,
+        certificate_title_en=item.certificate_title_en,
+        certificate_title_ta=item.certificate_title_ta,
+        statement_en=item.statement_en,
+        statement_ta=item.statement_ta,
+        issuer_name=item.issuer_name,
+        status=cast(CertificateState, item.status),
+        version=item.version,
+        issued_at=item.issued_at,
+        revoked_at=item.revoked_at,
     )
 
 
@@ -512,6 +565,15 @@ def catalog(db: Session, org: UUID, actor: User) -> LearningCatalogView:
         progress_summaries=_progress_summaries(
             db, assignments, {item.id: item for item in courses}
         ),
+        certificate_templates=[
+            certificate_template_view(item)
+            for item in db.scalars(
+                select(CertificateTemplate)
+                .where(CertificateTemplate.organization_id == org)
+                .order_by(CertificateTemplate.created_at, CertificateTemplate.id)
+                .limit(100)
+            )
+        ],
     )
 
 
@@ -912,6 +974,7 @@ def _learner_structure(
     )
     completed = {item.lesson_id: item for item in progress_rows}
     total_lessons = sum(len(module.lessons) for module in admin.modules)
+    eligibility = _certificate_eligibility(db, course, started)
     return LearnerCourseView(
         id=course.id,
         code=course.code,
@@ -926,6 +989,10 @@ def _learner_structure(
         position=assignment.position,
         course_enrollment=course_enrollment_view(started) if started else None,
         progress=_progress_view(course, total_lessons, len(completed), started is not None),
+        certificate_eligibility=eligibility,
+        certificate=certificate_view(certificate)
+        if (certificate := _certificate_for_enrollment(db, started))
+        else None,
         modules=[
             LearnerModuleView(
                 id=module.id,
@@ -986,6 +1053,70 @@ def _learner_structure(
             )
             for module in admin.modules
         ],
+    )
+
+
+def _certificate_for_enrollment(
+    db: Session, course_enrollment: CourseEnrollment | None
+) -> Certificate | None:
+    if not course_enrollment:
+        return None
+    return db.scalar(
+        select(Certificate)
+        .where(Certificate.course_enrollment_id == course_enrollment.id)
+        .order_by(Certificate.issued_at.desc(), Certificate.id.desc())
+    )
+
+
+def _certificate_eligibility(
+    db: Session,
+    course: Course,
+    course_enrollment: CourseEnrollment | None,
+) -> CertificateEligibilityView:
+    quiz_ids = list(db.scalars(select(Quiz.id).where(Quiz.course_id == course.id)))
+    assignment_ids = list(
+        db.scalars(select(LearningAssignment.id).where(LearningAssignment.course_id == course.id))
+    )
+    passed_quizzes: set[UUID] = set()
+    passed_assignments: set[UUID] = set()
+    if course_enrollment:
+        passed_quizzes = set(
+            db.scalars(
+                select(QuizAttempt.quiz_id).where(
+                    QuizAttempt.course_enrollment_id == course_enrollment.id,
+                    QuizAttempt.passed.is_(True),
+                )
+            )
+        )
+        passed_assignments = set(
+            db.scalars(
+                select(AssignmentSubmission.assignment_id)
+                .join(AssignmentGrade, AssignmentGrade.submission_id == AssignmentSubmission.id)
+                .where(
+                    AssignmentSubmission.course_enrollment_id == course_enrollment.id,
+                    AssignmentGrade.passed.is_(True),
+                )
+            )
+        )
+    lesson_met = bool(course_enrollment and course_enrollment.status == "completed")
+    quiz_met = set(quiz_ids).issubset(passed_quizzes)
+    assignment_met = set(assignment_ids).issubset(passed_assignments)
+    reasons: list[str] = []
+    if not lesson_met:
+        reasons.append("course_completion_incomplete")
+    if not quiz_met:
+        reasons.append("quiz_requirements_incomplete")
+    if not assignment_met:
+        reasons.append("assignment_requirements_incomplete")
+    return CertificateEligibilityView(
+        course_enrollment_id=course_enrollment.id if course_enrollment else None,
+        lesson_completion_met=lesson_met,
+        required_quizzes=len(quiz_ids),
+        passed_quizzes=len(set(quiz_ids) & passed_quizzes),
+        required_assignments=len(assignment_ids),
+        passed_assignments=len(set(assignment_ids) & passed_assignments),
+        eligible=not reasons,
+        blocking_reasons=reasons,
     )
 
 
@@ -1410,6 +1541,10 @@ def trainer_delivery(
                     display_name=person.display_name,
                     course_enrollment=course_enrollment_view(started) if started else None,
                     progress=_progress_view(course, total, completed, started is not None),
+                    certificate_eligibility=_certificate_eligibility(db, course, started),
+                    certificate=certificate_view(certificate)
+                    if (certificate := _certificate_for_enrollment(db, started))
+                    else None,
                     quiz_results=_trainer_quiz_results(db, course.id, started),
                     assignment_submissions=_trainer_assignment_submissions(db, course.id, started),
                 )
@@ -2244,3 +2379,234 @@ def grade_assignment_submission(
     )
     _commit(db)
     return assignment_grade_view(grade)
+
+
+def create_certificate_template(
+    db: Session,
+    org: UUID,
+    actor: User,
+    data: CertificateTemplateCreate,
+    request_id: str,
+) -> CertificateTemplateView:
+    require_permission(db, actor, org, "certificate.manage")
+    _course(db, org, data.course_id)
+    item = CertificateTemplate(organization_id=org, **data.model_dump())
+    db.add(item)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("certificate_template_code_exists", 409) from exc
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "lms.certificate_template.created",
+        request_id,
+        item.version,
+        "course_id,code,title_en,title_ta,statement_en,statement_ta,issuer_name,state",
+    )
+    _commit(db)
+    return certificate_template_view(item)
+
+
+def publish_certificate_template(
+    db: Session,
+    org: UUID,
+    template_id: UUID,
+    actor: User,
+    data: CertificateTemplatePublish,
+    request_id: str,
+) -> CertificateTemplateView:
+    require_permission(db, actor, org, "certificate.issue")
+    item = db.scalar(
+        select(CertificateTemplate)
+        .where(
+            CertificateTemplate.id == template_id,
+            CertificateTemplate.organization_id == org,
+        )
+        .with_for_update()
+    )
+    if not item:
+        raise AuthError("not_found", 404)
+    if item.state != "draft":
+        raise AuthError("certificate_template_not_draft", 409)
+    if item.version != data.expected_version:
+        raise AuthError("version_conflict", 409)
+    course = _course(db, org, item.course_id)
+    if course.state != "published":
+        raise AuthError("course_not_published", 409)
+    published = db.scalar(
+        select(CertificateTemplate.id).where(
+            CertificateTemplate.course_id == item.course_id,
+            CertificateTemplate.state == "published",
+        )
+    )
+    if published:
+        raise AuthError("certificate_template_already_published", 409)
+    item.state = "published"
+    item.published_at = now()
+    item.version += 1
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "lms.certificate_template.published",
+        request_id,
+        item.version,
+        "state,published_at,version",
+        data.reason,
+    )
+    _commit(db)
+    return certificate_template_view(item)
+
+
+def issue_certificate(
+    db: Session,
+    org: UUID,
+    actor: User,
+    data: CertificateIssueCommand,
+    request_id: str,
+) -> CertificateView:
+    require_permission(db, actor, org, "certificate.issue")
+    course_enrollment = db.scalar(
+        select(CourseEnrollment)
+        .where(
+            CourseEnrollment.id == data.course_enrollment_id,
+            CourseEnrollment.organization_id == org,
+        )
+        .with_for_update()
+    )
+    if not course_enrollment:
+        raise AuthError("not_found", 404)
+    template = db.scalar(
+        select(CertificateTemplate).where(
+            CertificateTemplate.id == data.template_id,
+            CertificateTemplate.organization_id == org,
+            CertificateTemplate.course_id == course_enrollment.course_id,
+            CertificateTemplate.state == "published",
+        )
+    )
+    if not template:
+        raise AuthError("certificate_template_unavailable", 409)
+    if db.scalar(
+        select(Certificate.id).where(
+            Certificate.course_enrollment_id == course_enrollment.id,
+            Certificate.status == "valid",
+        )
+    ):
+        raise AuthError("certificate_already_issued", 409)
+    course = _course(db, org, course_enrollment.course_id)
+    eligibility = _certificate_eligibility(db, course, course_enrollment)
+    if not eligibility.eligible:
+        raise AuthError("certificate_not_eligible", 409)
+    person = db.scalar(
+        select(Person)
+        .join(Participant, Participant.person_id == Person.id)
+        .join(Enrollment, Enrollment.participant_id == Participant.id)
+        .where(
+            Enrollment.id == course_enrollment.enrollment_id,
+            Enrollment.organization_id == org,
+            Enrollment.status == "active",
+            Participant.status == "active",
+        )
+    )
+    if not person:
+        raise AuthError("certificate_recipient_unavailable", 409)
+    item = Certificate(
+        organization_id=org,
+        course_id=course.id,
+        course_enrollment_id=course_enrollment.id,
+        template_id=template.id,
+        issued_by_user_id=actor.id,
+        verification_code=token_urlsafe(24),
+        recipient_name=person.display_name,
+        course_title_en=course.title_en,
+        course_title_ta=course.title_ta,
+        certificate_title_en=template.title_en,
+        certificate_title_ta=template.title_ta,
+        statement_en=template.statement_en,
+        statement_ta=template.statement_ta,
+        issuer_name=template.issuer_name,
+        template_version=template.version,
+    )
+    db.add(item)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("certificate_conflict", 409) from exc
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "lms.certificate.issued",
+        request_id,
+        item.version,
+        "course_id,course_enrollment_id,template_id,issued_by_user_id,"
+        "verification_code,status,issued_at",
+        data.reason,
+    )
+    _commit(db)
+    return certificate_view(item)
+
+
+def revoke_certificate(
+    db: Session,
+    org: UUID,
+    certificate_id: UUID,
+    actor: User,
+    data: CertificateRevokeCommand,
+    request_id: str,
+) -> CertificateView:
+    require_permission(db, actor, org, "certificate.issue")
+    item = db.scalar(
+        select(Certificate)
+        .where(Certificate.id == certificate_id, Certificate.organization_id == org)
+        .with_for_update()
+    )
+    if not item:
+        raise AuthError("not_found", 404)
+    if item.status != "valid":
+        raise AuthError("certificate_already_revoked", 409)
+    if item.version != data.expected_version:
+        raise AuthError("version_conflict", 409)
+    item.status = "revoked"
+    item.revoked_at = now()
+    item.revoke_reason = data.reason
+    item.version += 1
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "lms.certificate.revoked",
+        request_id,
+        item.version,
+        "status,revoked_at,revoke_reason,version",
+        data.reason,
+    )
+    _commit(db)
+    return certificate_view(item)
+
+
+def verify_certificate(db: Session, verification_code: str) -> PublicCertificateView:
+    item = db.scalar(
+        select(Certificate).where(Certificate.verification_code == verification_code)
+    )
+    if not item:
+        raise AuthError("certificate_not_found", 404)
+    return PublicCertificateView(
+        verification_code=item.verification_code,
+        course_title_en=item.course_title_en,
+        course_title_ta=item.course_title_ta,
+        certificate_title_en=item.certificate_title_en,
+        certificate_title_ta=item.certificate_title_ta,
+        issuer_name=item.issuer_name,
+        status=cast(CertificateState, item.status),
+        issued_at=item.issued_at,
+        revoked_at=item.revoked_at,
+    )

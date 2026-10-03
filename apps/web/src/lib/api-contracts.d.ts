@@ -633,6 +633,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/organizations/{org}/certificate-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Certificate Template */
+        post: operations["create_certificate_template_api_v1_courses_organizations__org__certificate_templates_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/certificate-templates/{template_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Certificate Template */
+        post: operations["publish_certificate_template_api_v1_courses_organizations__org__certificate_templates__template_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/certificates/issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue Certificate */
+        post: operations["issue_certificate_api_v1_courses_organizations__org__certificates_issue_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/certificates/{certificate_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke Certificate */
+        post: operations["revoke_certificate_api_v1_courses_organizations__org__certificates__certificate_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/certificates/verify/{verification_code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Verify Certificate */
+        get: operations["verify_certificate_api_v1_certificates_verify__verification_code__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/certificates/verify/{verification_code}/qr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Certificate Qr */
+        get: operations["certificate_qr_api_v1_certificates_verify__verification_code__qr_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/applications/organizations/{org}/form": {
         parameters: {
             query?: never;
@@ -2972,6 +3074,173 @@ export interface components {
              */
             updated_at: string;
         };
+        /** CertificateEligibilityView */
+        CertificateEligibilityView: {
+            /** Course Enrollment Id */
+            course_enrollment_id: string | null;
+            /** Lesson Completion Met */
+            lesson_completion_met: boolean;
+            /** Required Quizzes */
+            required_quizzes: number;
+            /** Passed Quizzes */
+            passed_quizzes: number;
+            /** Required Assignments */
+            required_assignments: number;
+            /** Passed Assignments */
+            passed_assignments: number;
+            /** Eligible */
+            eligible: boolean;
+            /** Blocking Reasons */
+            blocking_reasons: string[];
+        };
+        /** CertificateIssueCommand */
+        CertificateIssueCommand: {
+            /**
+             * Course Enrollment Id
+             * Format: uuid
+             */
+            course_enrollment_id: string;
+            /**
+             * Template Id
+             * Format: uuid
+             */
+            template_id: string;
+            /** Reason */
+            reason: string;
+        };
+        /** CertificateRevokeCommand */
+        CertificateRevokeCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** CertificateTemplateCreate */
+        CertificateTemplateCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /** Code */
+            code: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Statement En */
+            statement_en: string;
+            /** Statement Ta */
+            statement_ta: string;
+            /** Issuer Name */
+            issuer_name: string;
+        };
+        /** CertificateTemplatePublish */
+        CertificateTemplatePublish: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** CertificateTemplateView */
+        CertificateTemplateView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /** Code */
+            code: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Statement En */
+            statement_en: string;
+            /** Statement Ta */
+            statement_ta: string;
+            /** Issuer Name */
+            issuer_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "published" | "retired";
+            /** Version */
+            version: number;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** CertificateView */
+        CertificateView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Course Enrollment Id
+             * Format: uuid
+             */
+            course_enrollment_id: string;
+            /**
+             * Template Id
+             * Format: uuid
+             */
+            template_id: string;
+            /** Verification Code */
+            verification_code: string;
+            /** Recipient Name */
+            recipient_name: string;
+            /** Course Title En */
+            course_title_en: string;
+            /** Course Title Ta */
+            course_title_ta: string;
+            /** Certificate Title En */
+            certificate_title_en: string;
+            /** Certificate Title Ta */
+            certificate_title_ta: string;
+            /** Statement En */
+            statement_en: string;
+            /** Statement Ta */
+            statement_ta: string;
+            /** Issuer Name */
+            issuer_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "valid" | "revoked";
+            /** Version */
+            version: number;
+            /**
+             * Issued At
+             * Format: date-time
+             */
+            issued_at: string;
+            /** Revoked At */
+            revoked_at: string | null;
+        };
         /** CohortCourseCreate */
         CohortCourseCreate: {
             /**
@@ -4714,6 +4983,8 @@ export interface components {
             position: number;
             course_enrollment: components["schemas"]["CourseEnrollmentView"] | null;
             progress: components["schemas"]["CourseProgressView"];
+            certificate_eligibility: components["schemas"]["CertificateEligibilityView"];
+            certificate: components["schemas"]["CertificateView"] | null;
             /** Modules */
             modules: components["schemas"]["LearnerModuleView"][];
         };
@@ -4909,6 +5180,8 @@ export interface components {
             assignments: components["schemas"]["CohortCourseView"][];
             /** Progress Summaries */
             progress_summaries: components["schemas"]["CourseProgressSummary"][];
+            /** Certificate Templates */
+            certificate_templates: components["schemas"]["CertificateTemplateView"][];
         };
         /** LessonCompletionCommand */
         LessonCompletionCommand: {
@@ -5570,6 +5843,33 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** PublicCertificateView */
+        PublicCertificateView: {
+            /** Verification Code */
+            verification_code: string;
+            /** Course Title En */
+            course_title_en: string;
+            /** Course Title Ta */
+            course_title_ta: string;
+            /** Certificate Title En */
+            certificate_title_en: string;
+            /** Certificate Title Ta */
+            certificate_title_ta: string;
+            /** Issuer Name */
+            issuer_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "valid" | "revoked";
+            /**
+             * Issued At
+             * Format: date-time
+             */
+            issued_at: string;
+            /** Revoked At */
+            revoked_at: string | null;
         };
         /** PublicEditorial */
         PublicEditorial: {
@@ -6602,6 +6902,8 @@ export interface components {
             display_name: string;
             course_enrollment: components["schemas"]["CourseEnrollmentView"] | null;
             progress: components["schemas"]["CourseProgressView"];
+            certificate_eligibility: components["schemas"]["CertificateEligibilityView"];
+            certificate: components["schemas"]["CertificateView"] | null;
             /** Quiz Results */
             quiz_results: components["schemas"]["TrainerQuizResultView"][];
             /** Assignment Submissions */
@@ -8039,6 +8341,208 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AssignmentGradeView"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_certificate_template_api_v1_courses_organizations__org__certificate_templates_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CertificateTemplateCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CertificateTemplateView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_certificate_template_api_v1_courses_organizations__org__certificate_templates__template_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                template_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CertificateTemplatePublish"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CertificateTemplateView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    issue_certificate_api_v1_courses_organizations__org__certificates_issue_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CertificateIssueCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CertificateView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_certificate_api_v1_courses_organizations__org__certificates__certificate_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                certificate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CertificateRevokeCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CertificateView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_certificate_api_v1_certificates_verify__verification_code__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                verification_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCertificateView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    certificate_qr_api_v1_certificates_verify__verification_code__qr_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                verification_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

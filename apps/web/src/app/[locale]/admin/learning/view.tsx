@@ -7,9 +7,14 @@ import { learningMessages } from "../../../../lib/learning-messages";
 type Locale = "en" | "ta";
 type Catalog = components["schemas"]["LearningCatalogView"];
 type Course = components["schemas"]["AdminCourseView"];
+type CertificateTemplate = components["schemas"]["CertificateTemplateView"];
+type Delivery = components["schemas"]["TrainerDeliveryView"];
 type ProgramCatalog = components["schemas"]["CatalogView"];
 
-const empty: Catalog = { courses: [], assignments: [], progress_summaries: [] };
+const empty: Catalog = {
+  courses: [], assignments: [], progress_summaries: [], certificate_templates: [],
+};
+const emptyDelivery: Delivery = { courses: [] };
 const emptyPrograms: ProgramCatalog = {
   programs: [],
   centers: [],
@@ -35,12 +40,15 @@ export default function LearningWorkspace({
   const root = `/api/courses/organizations/${org}`;
   const [catalog, setCatalog] = useState<Catalog>(empty);
   const [programs, setPrograms] = useState<ProgramCatalog>(emptyPrograms);
+  const [delivery, setDelivery] = useState<Delivery>(emptyDelivery);
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState<string>(text.loading);
   const canManage = permissions.includes("lms.course.manage");
   const canPublish = permissions.includes("lms.course.publish");
   const canAssign = permissions.includes("lms.course.assign");
   const canAssess = permissions.includes("lms.assessment.manage");
+  const canManageCertificates = permissions.includes("certificate.manage");
+  const canIssueCertificates = permissions.includes("certificate.issue");
 
   const request = useCallback(async <T,>(
     path: string,
@@ -65,13 +73,17 @@ export default function LearningWorkspace({
   }, []);
 
   const load = useCallback(async () => {
-    const [learning, programCatalog] = await Promise.all([
+    const [learning, programCatalog, deliveryCatalog] = await Promise.all([
       request<Catalog>(root + "/catalog"),
       request<ProgramCatalog>(`/api/programs/organizations/${org}/catalog`),
+      canIssueCertificates
+        ? request<Delivery>(root + "/trainer-delivery")
+        : Promise.resolve(emptyDelivery),
     ]);
     setCatalog(learning);
     setPrograms(programCatalog);
-  }, [org, request, root]);
+    setDelivery(deliveryCatalog);
+  }, [canIssueCertificates, org, request, root]);
 
   useEffect(() => {
     let active = true;
@@ -123,9 +135,39 @@ export default function LearningWorkspace({
     ));
   }
 
+  function publishTemplate(template: CertificateTemplate) {
+    const reason = window.prompt(text.reason);
+    if (!reason || reason.trim().length < 3) return;
+    void run(() => request(
+      root + `/certificate-templates/${template.id}/publish`,
+      "POST",
+      { expected_version: template.version, reason: reason.trim() },
+    ));
+  }
+
+  function issueCertificate(courseEnrollmentId: string, templateId: string) {
+    const reason = window.prompt(text.reason);
+    if (!reason || reason.trim().length < 3) return;
+    void run(() => request(root + "/certificates/issue", "POST", {
+      course_enrollment_id: courseEnrollmentId,
+      template_id: templateId,
+      reason: reason.trim(),
+    }));
+  }
+
+  function revokeCertificate(certificateId: string, version: number) {
+    const reason = window.prompt(text.reason);
+    if (!reason || reason.trim().length < 3) return;
+    void run(() => request(root + `/certificates/${certificateId}/revoke`, "POST", {
+      expected_version: version,
+      reason: reason.trim(),
+    }));
+  }
+
   const title = (item: { title_en: string; title_ta: string }) =>
     locale === "ta" ? item.title_ta : item.title_en;
   const draftCourses = catalog.courses.filter((course) => course.state === "draft");
+  const publishedCourses = catalog.courses.filter((course) => course.state === "published");
   const draftModules = draftCourses.flatMap((course) => course.modules.map((module) => ({
     course,
     module,
@@ -425,6 +467,67 @@ export default function LearningWorkspace({
         </li>)}
       </ol>
     </section>
+
+    {canManageCertificates && <section className="learning-assignment">
+      <h2>{text.certificateTemplates}</h2>
+      <form onSubmit={(event) => submit(event, "/certificate-templates", (data) => ({
+        course_id: data.course_id,
+        code: data.code,
+        title_en: data.title_en,
+        title_ta: data.title_ta,
+        statement_en: data.statement_en,
+        statement_ta: data.statement_ta,
+        issuer_name: data.issuer_name,
+      }))}>
+        <Select label={text.course} name="course_id" choose={text.choose}
+          options={publishedCourses.map((course) => [course.id, title(course)])} />
+        <Field label={text.templateCode} name="code" />
+        <Field label={text.englishTitle} name="title_en" />
+        <Field label={text.tamilTitle} name="title_ta" />
+        <Area label={text.englishStatement} name="statement_en" />
+        <Area label={text.tamilStatement} name="statement_ta" />
+        <Field label={text.issuerName} name="issuer_name" />
+        <button disabled={busy}>{text.createTemplate}</button>
+      </form>
+      <ul>{catalog.certificate_templates.map((template) => <li key={template.id}>
+        <strong>{title(template)}</strong>
+        <span>{template.code} - {template.state}</span>
+        {canIssueCertificates && template.state === "draft" &&
+          <button disabled={busy} onClick={() => publishTemplate(template)}>
+            {text.publishTemplate}
+          </button>}
+      </li>)}</ul>
+    </section>}
+
+    {canIssueCertificates && <section className="learning-assignment">
+      <h2>{text.certificateEligibility}</h2>
+      {delivery.courses.flatMap((course) => course.learners.map((learner) => {
+        const template = catalog.certificate_templates.find((item) =>
+          item.course_id === course.course_id && item.state === "published");
+        return <article key={`${course.course_id}:${learner.participant_id}`}>
+          <strong>{learner.display_name}</strong>
+          <p>{course.course_code} - {learner.certificate_eligibility.eligible
+            ? text.eligible : text.notEligible}</p>
+          <small>{text.quiz}: {learner.certificate_eligibility.passed_quizzes}/
+            {learner.certificate_eligibility.required_quizzes} | {text.assignment}: {
+              learner.certificate_eligibility.passed_assignments}/
+            {learner.certificate_eligibility.required_assignments}</small>
+          {learner.certificate
+            ? <p>{text.certificateStatus}: {learner.certificate.status}
+              {learner.certificate.status === "valid" && <button
+                disabled={busy}
+                onClick={() => revokeCertificate(
+                  learner.certificate!.id, learner.certificate!.version,
+                )}
+              >{text.revokeCertificate}</button>}</p>
+            : learner.certificate_eligibility.eligible && learner.course_enrollment && template
+              ? <button disabled={busy} onClick={() => issueCertificate(
+                learner.course_enrollment!.id, template.id,
+              )}>{text.issueCertificate}</button>
+              : null}
+        </article>;
+      }))}
+    </section>}
 
     {canAssign && <section className="learning-assignment">
       <h2>{text.assignments}</h2>

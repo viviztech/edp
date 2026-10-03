@@ -40,3 +40,7 @@ Quiz attempts retain enrollment, quiz, submitted choices, awarded points, calcul
 ## L02.2 assignment evidence
 
 Assignment submissions retain the learner's course-enrollment reference, assignment, immutable revision text and submission time. Grades retain grader identity, points, derived pass state, feedback and grading time. The owning learner and currently authorized cohort delivery staff can view this evidence; other learners and out-of-scope trainers cannot. Audit records identifiers and changed fields without response text, feedback or score values. File evidence is not accepted. Assessment retention, export, correction and subject-access policy remain required before real participant use.
+
+## L02.3 certificate evidence
+
+Private Certificate rows snapshot recipient name, bilingual certificate/course text, issuer, template version, verification identifier, issuer actor and issue/revocation evidence. The snapshot preserves the issued record when profile or template text later changes. Learners see their own record; authorized learning staff see scoped eligibility and certificate state. Anonymous verification excludes recipient name, statement, organization/enrollment IDs, scores and feedback. Retention, subject access, signatory policy and revocation operations require program/privacy approval before production use.

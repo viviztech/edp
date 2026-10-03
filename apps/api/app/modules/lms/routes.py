@@ -1,7 +1,10 @@
+from io import BytesIO
 from uuid import UUID
 
-from fastapi import APIRouter, Request
-from fastapi.responses import FileResponse
+import qrcode
+import qrcode.image.svg
+from fastapi import APIRouter, Path, Request
+from fastapi.responses import FileResponse, Response
 
 from app.modules.identity.routes import DB, Principal
 from app.modules.lms import service
@@ -11,6 +14,12 @@ from app.modules.lms.schemas import (
     AssignmentGradeView,
     AssignmentSubmissionCreate,
     AssignmentSubmissionView,
+    CertificateIssueCommand,
+    CertificateRevokeCommand,
+    CertificateTemplateCreate,
+    CertificateTemplatePublish,
+    CertificateTemplateView,
+    CertificateView,
     CohortCourseCreate,
     CohortCourseView,
     CompletionRuleUpdate,
@@ -31,6 +40,7 @@ from app.modules.lms.schemas import (
     ModuleCreate,
     ModuleView,
     MyLearningView,
+    PublicCertificateView,
     PublishCourse,
     QuizAttemptSubmit,
     QuizAttemptView,
@@ -44,6 +54,7 @@ from app.modules.lms.schemas import (
 )
 
 router = APIRouter(prefix="/api/v1/courses/organizations/{org}", tags=["learning"])
+public_router = APIRouter(prefix="/api/v1/certificates", tags=["certificates"])
 
 
 @router.get("/catalog", response_model=LearningCatalogView)
@@ -365,4 +376,88 @@ def grade_assignment_submission(
         identity[0],
         data,
         request.state.request_id,
+    )
+
+
+@router.post("/certificate-templates", response_model=CertificateTemplateView, status_code=201)
+def create_certificate_template(
+    org: UUID,
+    data: CertificateTemplateCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> CertificateTemplateView:
+    return service.create_certificate_template(
+        db, org, identity[0], data, request.state.request_id
+    )
+
+
+@router.post(
+    "/certificate-templates/{template_id}/publish",
+    response_model=CertificateTemplateView,
+)
+def publish_certificate_template(
+    org: UUID,
+    template_id: UUID,
+    data: CertificateTemplatePublish,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> CertificateTemplateView:
+    return service.publish_certificate_template(
+        db, org, template_id, identity[0], data, request.state.request_id
+    )
+
+
+@router.post("/certificates/issue", response_model=CertificateView, status_code=201)
+def issue_certificate(
+    org: UUID,
+    data: CertificateIssueCommand,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> CertificateView:
+    return service.issue_certificate(db, org, identity[0], data, request.state.request_id)
+
+
+@router.post("/certificates/{certificate_id}/revoke", response_model=CertificateView)
+def revoke_certificate(
+    org: UUID,
+    certificate_id: UUID,
+    data: CertificateRevokeCommand,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> CertificateView:
+    return service.revoke_certificate(
+        db, org, certificate_id, identity[0], data, request.state.request_id
+    )
+
+
+@public_router.get("/verify/{verification_code}", response_model=PublicCertificateView)
+def verify_certificate(
+    db: DB,
+    verification_code: str = Path(min_length=20, max_length=48, pattern=r"^[A-Za-z0-9_-]+$"),
+) -> PublicCertificateView:
+    return service.verify_certificate(db, verification_code)
+
+
+@public_router.get("/verify/{verification_code}/qr", response_class=Response)
+def certificate_qr(
+    request: Request,
+    db: DB,
+    verification_code: str = Path(min_length=20, max_length=48, pattern=r"^[A-Za-z0-9_-]+$"),
+) -> Response:
+    service.verify_certificate(db, verification_code)
+    target = str(request.url_for("verify_certificate", verification_code=verification_code))
+    image = qrcode.make(target, image_factory=qrcode.image.svg.SvgPathImage)
+    output = BytesIO()
+    image.save(output)
+    return Response(
+        content=output.getvalue(),
+        media_type="image/svg+xml",
+        headers={
+            "Cache-Control": "public, max-age=300",
+            "X-Content-Type-Options": "nosniff",
+        },
     )

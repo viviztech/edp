@@ -13,3 +13,7 @@ The learner section shows each quiz's attempt count, best percentage and pass st
 ## Grade assignments
 
 The learner section lists text assignment submissions for participants in your assigned cohort. For an ungraded revision, enter points within the displayed maximum and useful feedback, then save the grade. The pass state is calculated from the assignment threshold. A saved grade is permanent; verify the learner, revision, score and feedback before submitting. Revoked or expired staff scope removes grading access immediately.
+
+## Certificate eligibility
+
+Trainer delivery shows the derived lesson, quiz and assignment evidence used for certificate eligibility. Trainers can help learners complete missing evidence but cannot publish templates, issue certificates or revoke them. Escalate an eligible learner to an authorized Program Director; never treat the browser display as permission to create external certificates.

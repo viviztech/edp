@@ -12,8 +12,11 @@ export function learningPath(path: string[], method: string): string | null {
     ],
     POST: [
       `organizations/${id}`,
-      `organizations/${id}/(modules|lessons|materials|prerequisites|cohort-assignments|assignments|quizzes|quiz-questions|quiz-choices)`,
+      `organizations/${id}/(modules|lessons|materials|prerequisites|cohort-assignments|assignments|quizzes|quiz-questions|quiz-choices|certificate-templates)`,
       `organizations/${id}/${id}/(publish|completion-rule)`,
+      `organizations/${id}/certificate-templates/${id}/publish`,
+      `organizations/${id}/certificates/issue`,
+      `organizations/${id}/certificates/${id}/revoke`,
       `organizations/${id}/my-learning/${id}/start`,
       `organizations/${id}/my-learning/${id}/lessons/${id}/complete`,
       `organizations/${id}/my-learning/${id}/quizzes/${id}/attempts`,

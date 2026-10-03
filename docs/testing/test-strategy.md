@@ -88,3 +88,7 @@ PostgreSQL/API acceptance covers draft authoring, incomplete publication rejecti
 ## L02.2 assignment evidence
 
 PostgreSQL/API acceptance covers draft assignment authoring, learner availability and prerequisite scope, immutable revision creation, pending-review and submission-limit conflicts, trainer cohort scope, bounded manual scores, server-derived pass state, feedback visibility, audit evidence, and database rejection of submission/grade mutation and over-limit direct inserts. Migration validation downgrades to L02.1, upgrades to head and checks metadata drift. Generated OpenAPI/TypeScript contracts, exact BFF routes, bilingual admin/learner/trainer states, strict TypeScript, ESLint, all Vitest tests, the Next production build, and authenticated Chrome submission/grading/feedback form the local release gate.
+
+## L02.3 certificate evidence
+
+PostgreSQL/API acceptance proves incomplete-assessment denial, exact quiz/assignment/lesson eligibility counts, Trainer issue denial, authorized template publication, manual issuance, duplicate prevention, revocation, minimal anonymous verification, SVG QR output and database rejection of template/certificate rewrites. Migration validation downgrades to L02.2, upgrades to head and checks metadata drift. Fixed authenticated and public BFF allowlists, generated contracts, bilingual staff/learner/public states, strict lint/types, Vitest, production build and an anonymous Chrome verification journey form the local gate.
