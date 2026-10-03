@@ -270,10 +270,103 @@ class QuizAdminView(QuizView):
     questions: list[QuizQuestionAdminView]
 
 
+class AssignmentCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    course_id: UUID
+    lesson_id: UUID
+    position: int = Field(ge=1)
+    title_en: str = Field(min_length=1, max_length=200)
+    title_ta: str = Field(min_length=1, max_length=200)
+    instructions_en: str = Field(min_length=1, max_length=5000)
+    instructions_ta: str = Field(min_length=1, max_length=5000)
+    maximum_points: int = Field(ge=1, le=1000)
+    passing_points: int = Field(ge=0, le=1000)
+    max_submissions: int = Field(ge=1, le=10)
+
+    @field_validator("title_en", "title_ta", "instructions_en", "instructions_ta")
+    @classmethod
+    def strip_assignment_text(cls, value: str) -> str:
+        return value.strip()
+
+    @model_validator(mode="after")
+    def valid_points(self) -> "AssignmentCreate":
+        if self.passing_points > self.maximum_points:
+            raise ValueError("passing_points cannot exceed maximum_points")
+        return self
+
+
+class LearningAssignmentView(AssignmentCreate):
+    id: UUID
+    organization_id: UUID
+    created_at: datetime
+
+
+class AssignmentSubmissionCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    response_text: str = Field(min_length=1, max_length=10000)
+
+    @field_validator("response_text")
+    @classmethod
+    def strip_response(cls, value: str) -> str:
+        return value.strip()
+
+
+class AssignmentGradeView(BaseModel):
+    id: UUID
+    score_points: int
+    passed: bool
+    feedback: str
+    graded_at: datetime
+
+
+class AssignmentSubmissionView(BaseModel):
+    id: UUID
+    assignment_id: UUID
+    course_enrollment_id: UUID
+    revision: int
+    response_text: str
+    submitted_at: datetime
+    grade: AssignmentGradeView | None
+
+
+class LearnerAssignmentView(BaseModel):
+    id: UUID
+    position: int
+    title_en: str
+    title_ta: str
+    instructions_en: str
+    instructions_ta: str
+    maximum_points: int
+    passing_points: int
+    max_submissions: int
+    remaining_submissions: int
+    available: bool
+    submissions: list[AssignmentSubmissionView]
+
+
+class AssignmentGradeCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    score_points: int = Field(ge=0, le=1000)
+    feedback: str = Field(min_length=1, max_length=5000)
+
+    @field_validator("feedback")
+    @classmethod
+    def strip_feedback(cls, value: str) -> str:
+        return value.strip()
+
+
+class TrainerAssignmentSubmissionView(AssignmentSubmissionView):
+    title_en: str
+    title_ta: str
+    maximum_points: int
+    passing_points: int
+
+
 class AdminLessonView(LessonView):
     materials: list[MaterialAdminView]
     prerequisite_lesson_ids: list[UUID]
     quizzes: list[QuizAdminView]
+    assignments: list[LearningAssignmentView]
 
 
 class AdminModuleView(ModuleView):
@@ -419,6 +512,7 @@ class LearnerLessonView(BaseModel):
     completed_at: datetime | None
     materials: list[LearnerMaterialView]
     quizzes: list[LearnerQuizView]
+    assignments: list[LearnerAssignmentView]
 
 
 class LearnerModuleView(BaseModel):
@@ -488,6 +582,7 @@ class TrainerLearnerProgressView(BaseModel):
     course_enrollment: CourseEnrollmentView | None
     progress: CourseProgressView
     quiz_results: list[TrainerQuizResultView]
+    assignment_submissions: list[TrainerAssignmentSubmissionView]
 
 
 class TrainerCourseDeliveryView(BaseModel):

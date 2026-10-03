@@ -36,3 +36,7 @@ P01.2 Participant stores only organization, Person reference, lifecycle status a
 ## L02.1 quiz evidence
 
 Quiz attempts retain enrollment, quiz, submitted choices, awarded points, calculated percentage, pass state and submission time. Learners see their own summary and immediate grading result. Trainers see only attempt count, best percentage, pass state and last submission time for learners in assigned cohorts; answer selections and answer keys are excluded. Audit does not copy question, choice or grade values. Assessment retention and subject-access policy remain required before real participant use.
+
+## L02.2 assignment evidence
+
+Assignment submissions retain the learner's course-enrollment reference, assignment, immutable revision text and submission time. Grades retain grader identity, points, derived pass state, feedback and grading time. The owning learner and currently authorized cohort delivery staff can view this evidence; other learners and out-of-scope trainers cannot. Audit records identifiers and changed fields without response text, feedback or score values. File evidence is not accepted. Assessment retention, export, correction and subject-access policy remain required before real participant use.

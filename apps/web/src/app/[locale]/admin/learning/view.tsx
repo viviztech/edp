@@ -245,6 +245,37 @@ export default function LearningWorkspace({
         <Field label={text.reason} name="reason" />
         <button disabled={busy}>{text.saveRule}</button>
       </form>
+      {canAssess && <form onSubmit={(event) => submit(event, "/assignments", (data) => {
+        const key = String(data.lesson_key).split(":");
+        return {
+          course_id: key[0],
+          lesson_id: key[1],
+          position: Number(data.position),
+          title_en: data.title_en,
+          title_ta: data.title_ta,
+          instructions_en: data.instructions_en,
+          instructions_ta: data.instructions_ta,
+          maximum_points: Number(data.maximum_points),
+          passing_points: Number(data.passing_points),
+          max_submissions: Number(data.max_submissions),
+        };
+      })}>
+        <h2>{text.addAssignment}</h2>
+        <Select label={text.lesson} name="lesson_key" choose={text.choose}
+          options={draftLessons.map(({ course, module, lesson }) => [
+            course.id + ":" + lesson.id,
+            title(course) + " / " + title(module) + " / " + title(lesson),
+          ])} />
+        <Field label={text.position} name="position" type="number" />
+        <Field label={text.englishTitle} name="title_en" />
+        <Field label={text.tamilTitle} name="title_ta" />
+        <Area label={text.englishInstructions} name="instructions_en" />
+        <Area label={text.tamilInstructions} name="instructions_ta" />
+        <Field label={text.maximumPoints} name="maximum_points" type="number" />
+        <label>{text.passingPoints}<input name="passing_points" type="number" min="0" required /></label>
+        <Field label={text.maxSubmissions} name="max_submissions" type="number" />
+        <button disabled={busy}>{text.create}</button>
+      </form>}
       {canAssess && <form onSubmit={(event) => submit(event, "/quizzes", (data) => {
         const key = String(data.lesson_key).split(":");
         return {
@@ -381,6 +412,9 @@ export default function LearningWorkspace({
                     <small key={material.id}>{material.kind}: {locale === "ta" ? material.label_ta : material.label_en}</small>)}
                   {lesson.quizzes.map((quiz) => <small key={quiz.id}>
                     {text.quiz}: {title(quiz)} - {quiz.questions.length} {text.questions} - {quiz.passing_percent}%
+                  </small>)}
+                  {lesson.assignments.map((assignment) => <small key={assignment.id}>
+                    {text.assignment}: {title(assignment)} - {assignment.maximum_points} {text.points}
                   </small>)}
                 </li>)}</ol>
               </li>)}

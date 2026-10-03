@@ -1641,6 +1641,205 @@
         }
       }
     },
+    "/api/v1/courses/organizations/{org}/assignments": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Create Learning Assignment",
+        "operationId": "create_learning_assignment_api_v1_courses_organizations__org__assignments_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__modules__lms__schemas__AssignmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningAssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/assignments/{assignment_id}/submissions": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Submit Assignment",
+        "operationId": "submit_assignment_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__submissions_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assignment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentSubmissionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentSubmissionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/organizations/{org}/trainer-delivery/{course_id}/assignment-submissions/{submission_id}/grade": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Grade Assignment Submission",
+        "operationId": "grade_assignment_submission_api_v1_courses_organizations__org__trainer_delivery__course_id__assignment_submissions__submission_id__grade_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Submission Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentGradeCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentGradeView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/applications/organizations/{org}/form": {
       "get": {
         "tags": [
@@ -8123,7 +8322,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AssignmentCreate"
+                "$ref": "#/components/schemas/app__modules__selection__schemas__AssignmentCreate"
               }
             }
           }
@@ -9187,6 +9386,13 @@
             },
             "type": "array",
             "title": "Quizzes"
+          },
+          "assignments": {
+            "items": {
+              "$ref": "#/components/schemas/LearningAssignmentView"
+            },
+            "type": "array",
+            "title": "Assignments"
           }
         },
         "additionalProperties": false,
@@ -9204,7 +9410,8 @@
           "created_at",
           "materials",
           "prerequisite_lesson_ids",
-          "quizzes"
+          "quizzes",
+          "assignments"
         ],
         "title": "AdminLessonView"
       },
@@ -9536,32 +9743,132 @@
         ],
         "title": "AssetView"
       },
-      "AssignmentCreate": {
+      "AssignmentGradeCommand": {
         "properties": {
-          "selection_cycle_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Selection Cycle Id"
+          "score_points": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Score Points"
           },
-          "application_id": {
+          "feedback": {
             "type": "string",
-            "format": "uuid",
-            "title": "Application Id"
-          },
-          "reviewer_user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Reviewer User Id"
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Feedback"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "selection_cycle_id",
-          "application_id",
-          "reviewer_user_id"
+          "score_points",
+          "feedback"
         ],
-        "title": "AssignmentCreate"
+        "title": "AssignmentGradeCommand"
+      },
+      "AssignmentGradeView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "score_points": {
+            "type": "integer",
+            "title": "Score Points"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "feedback": {
+            "type": "string",
+            "title": "Feedback"
+          },
+          "graded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Graded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "score_points",
+          "passed",
+          "feedback",
+          "graded_at"
+        ],
+        "title": "AssignmentGradeView"
+      },
+      "AssignmentSubmissionCreate": {
+        "properties": {
+          "response_text": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Response Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "response_text"
+        ],
+        "title": "AssignmentSubmissionCreate"
+      },
+      "AssignmentSubmissionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "course_enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Enrollment Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "response_text": {
+            "type": "string",
+            "title": "Response Text"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Submitted At"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssignmentGradeView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "assignment_id",
+          "course_enrollment_id",
+          "revision",
+          "response_text",
+          "submitted_at",
+          "grade"
+        ],
+        "title": "AssignmentSubmissionView"
       },
       "AssignmentView": {
         "properties": {
@@ -13879,6 +14186,78 @@
         ],
         "title": "LeadView"
       },
+      "LearnerAssignmentView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "instructions_en": {
+            "type": "string",
+            "title": "Instructions En"
+          },
+          "instructions_ta": {
+            "type": "string",
+            "title": "Instructions Ta"
+          },
+          "maximum_points": {
+            "type": "integer",
+            "title": "Maximum Points"
+          },
+          "passing_points": {
+            "type": "integer",
+            "title": "Passing Points"
+          },
+          "max_submissions": {
+            "type": "integer",
+            "title": "Max Submissions"
+          },
+          "remaining_submissions": {
+            "type": "integer",
+            "title": "Remaining Submissions"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "submissions": {
+            "items": {
+              "$ref": "#/components/schemas/AssignmentSubmissionView"
+            },
+            "type": "array",
+            "title": "Submissions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "position",
+          "title_en",
+          "title_ta",
+          "instructions_en",
+          "instructions_ta",
+          "maximum_points",
+          "passing_points",
+          "max_submissions",
+          "remaining_submissions",
+          "available",
+          "submissions"
+        ],
+        "title": "LearnerAssignmentView"
+      },
       "LearnerCourseView": {
         "properties": {
           "id": {
@@ -14058,6 +14437,13 @@
             },
             "type": "array",
             "title": "Quizzes"
+          },
+          "assignments": {
+            "items": {
+              "$ref": "#/components/schemas/LearnerAssignmentView"
+            },
+            "type": "array",
+            "title": "Assignments"
           }
         },
         "type": "object",
@@ -14074,7 +14460,8 @@
           "completed",
           "completed_at",
           "materials",
-          "quizzes"
+          "quizzes",
+          "assignments"
         ],
         "title": "LearnerLessonView"
       },
@@ -14318,6 +14705,100 @@
           "questions"
         ],
         "title": "LearnerQuizView"
+      },
+      "LearningAssignmentView": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "instructions_en": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions En"
+          },
+          "instructions_ta": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions Ta"
+          },
+          "maximum_points": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Maximum Points"
+          },
+          "passing_points": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Passing Points"
+          },
+          "max_submissions": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Submissions"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "lesson_id",
+          "position",
+          "title_en",
+          "title_ta",
+          "instructions_en",
+          "instructions_ta",
+          "maximum_points",
+          "passing_points",
+          "max_submissions",
+          "id",
+          "organization_id",
+          "created_at"
+        ],
+        "title": "LearningAssignmentView"
       },
       "LearningCatalogView": {
         "properties": {
@@ -17959,6 +18440,79 @@
         ],
         "title": "Tokens"
       },
+      "TrainerAssignmentSubmissionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "course_enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Enrollment Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "response_text": {
+            "type": "string",
+            "title": "Response Text"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Submitted At"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssignmentGradeView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "title": "Title Ta"
+          },
+          "maximum_points": {
+            "type": "integer",
+            "title": "Maximum Points"
+          },
+          "passing_points": {
+            "type": "integer",
+            "title": "Passing Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "assignment_id",
+          "course_enrollment_id",
+          "revision",
+          "response_text",
+          "submitted_at",
+          "grade",
+          "title_en",
+          "title_ta",
+          "maximum_points",
+          "passing_points"
+        ],
+        "title": "TrainerAssignmentSubmissionView"
+      },
       "TrainerCourseDeliveryView": {
         "properties": {
           "course_id": {
@@ -18066,6 +18620,13 @@
             },
             "type": "array",
             "title": "Quiz Results"
+          },
+          "assignment_submissions": {
+            "items": {
+              "$ref": "#/components/schemas/TrainerAssignmentSubmissionView"
+            },
+            "type": "array",
+            "title": "Assignment Submissions"
           }
         },
         "type": "object",
@@ -18074,7 +18635,8 @@
           "display_name",
           "course_enrollment",
           "progress",
-          "quiz_results"
+          "quiz_results",
+          "assignment_submissions"
         ],
         "title": "TrainerLearnerProgressView"
       },
@@ -18400,6 +18962,82 @@
         ],
         "title": "SessionView"
       },
+      "app__modules__lms__schemas__AssignmentCreate": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "instructions_en": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions En"
+          },
+          "instructions_ta": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Instructions Ta"
+          },
+          "maximum_points": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Maximum Points"
+          },
+          "passing_points": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Passing Points"
+          },
+          "max_submissions": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Submissions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "course_id",
+          "lesson_id",
+          "position",
+          "title_en",
+          "title_ta",
+          "instructions_en",
+          "instructions_ta",
+          "maximum_points",
+          "passing_points",
+          "max_submissions"
+        ],
+        "title": "AssignmentCreate"
+      },
       "app__modules__programs__schemas__SessionView": {
         "properties": {
           "cohort_id": {
@@ -18501,6 +19139,33 @@
           "updated_at"
         ],
         "title": "SessionView"
+      },
+      "app__modules__selection__schemas__AssignmentCreate": {
+        "properties": {
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          },
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "reviewer_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Reviewer User Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "selection_cycle_id",
+          "application_id",
+          "reviewer_user_id"
+        ],
+        "title": "AssignmentCreate"
       }
     }
   }

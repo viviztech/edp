@@ -61,3 +61,11 @@ Staff use POST /prerequisites and POST /{course}/completion-rule while a course 
 Authorized assessment managers use POST /api/v1/courses/organizations/{org}/quizzes, /quiz-questions, and /quiz-choices while the course is draft. Correct-answer flags appear only in the staff catalog. Course publication returns quiz_structure_incomplete unless every quiz has a question and every question has at least two choices and exactly one correct answer.
 
 Participants submit POST /my-learning/{course}/quizzes/{quiz}/attempts with one question and choice pair per question. Identity, enrollment scope, prerequisites, attempt number, score, percentage and pass state are server-derived. GET /my-learning omits answer keys and returns attempt count, remaining attempts, best percentage and pass state. Trainer delivery returns only cohort-scoped result summaries.
+
+## L02.2 assignment and manual-grading endpoints
+
+Authorized assessment managers use `POST /api/v1/courses/organizations/{org}/assignments` while the course is draft. The request identifies the scoped course and lesson and supplies ordered bilingual instructions, maximum points, passing points and the submission limit. Published course protection freezes the definition.
+
+Participants use `POST /my-learning/{course}/assignments/{assignment}/submissions` with a bounded text response. The server derives the enrollment and revision. It returns `assignment_review_pending` when the latest revision has no grade and `assignment_submission_limit_reached` when the frozen limit is exhausted. `GET /my-learning` returns only the learner's revisions, grade, pass state and feedback.
+
+Authorized graders use `POST /trainer-delivery/{course}/assignment-submissions/{submission}/grade` with score points and bounded feedback. The server verifies exact cohort delivery scope, derives pass state, and permits one immutable grade. `GET /trainer-delivery` returns text submissions and grades only for authorized learners. File-upload fields and routes are intentionally absent until the shared secure-upload pipeline is approved.

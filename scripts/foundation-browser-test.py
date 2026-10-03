@@ -7,6 +7,11 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
+from cryptography.fernet import Fernet
+from playwright.sync_api import expect, sync_playwright
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
+
 from app.modules.applications.models import Application, ApplicationForm
 from app.modules.identity.models import (
     AuthDelivery,
@@ -20,6 +25,8 @@ from app.modules.identity.models import (
 from app.modules.identity.security import hasher
 from app.modules.identity.service import audit, seed_roles
 from app.modules.lms.models import (
+    AssignmentGrade,
+    AssignmentSubmission,
     CohortCourse,
     Course,
     CourseEnrollment,
@@ -47,10 +54,6 @@ from app.modules.selection.models import (
     SelectionCycle,
     SelectionDecision,
 )
-from cryptography.fernet import Fernet
-from playwright.sync_api import expect, sync_playwright
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
 
 engine = create_engine(os.environ["DATABASE_URL"])
 assert engine.url.database in {"edp_foundation_e2e", "edp_test"}, (
@@ -683,6 +686,27 @@ with sync_playwright() as playwright:
     material_form.get_by_role("button", name="Create", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
 
+    assignment_form = page.locator("form").filter(
+        has=page.get_by_role("heading", name="Add assignment", exact=True)
+    )
+    assignment_form.locator('select[name="lesson_key"]').select_option(
+        label="Enterprise foundations / Know the customer / Customer problem"
+    )
+    assignment_form.locator('input[name="position"]').fill("1")
+    assignment_form.locator('input[name="title_en"]').fill("Customer evidence")
+    assignment_form.locator('input[name="title_ta"]').fill("Synthetic Tamil assignment")
+    assignment_form.locator('textarea[name="instructions_en"]').fill(
+        "Summarize one customer interview."
+    )
+    assignment_form.locator('textarea[name="instructions_ta"]').fill(
+        "Synthetic Tamil assignment instructions."
+    )
+    assignment_form.locator('input[name="maximum_points"]').fill("20")
+    assignment_form.locator('input[name="passing_points"]').fill("12")
+    assignment_form.locator('input[name="max_submissions"]').fill("2")
+    assignment_form.get_by_role("button", name="Create", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+
     quiz_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Add quiz", exact=True)
     )
@@ -939,6 +963,48 @@ with sync_playwright() as playwright:
         page.get_by_role("button", name="Open material", exact=True).click()
     assert learner_download.value.suggested_filename == "customer-worksheet.pdf"
     assert Path(learner_download.value.path()).read_bytes().startswith(b"%PDF-1.4")
+    expect(page.get_by_text("Customer evidence", exact=True)).to_be_visible()
+    assignment_card = page.locator("form.learning-private").filter(
+        has=page.get_by_text("Customer evidence", exact=True)
+    )
+    assignment_card.locator('textarea[name="response_text"]').fill(
+        "Five interviews showed repeated payment delays."
+    )
+    assignment_card.get_by_role("button", name="Submit assignment", exact=True).click()
+    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.get_by_text("Awaiting trainer review.", exact=True)).to_be_visible()
+
+    grading_context = browser.new_context(viewport={"width": 1280, "height": 900})
+    grading_page = grading_context.new_page()
+    grading_page.goto(base + "/en/account")
+    grading_page.wait_for_load_state("domcontentloaded")
+    grading_page.get_by_label("Email", exact=True).fill(trainer_email)
+    grading_page.get_by_label("Password", exact=True).fill(trainer_password)
+    grading_page.locator("form").get_by_role(
+        "button", name="Sign in", exact=True
+    ).click()
+    expect(grading_page.get_by_text("Synthetic Trainer", exact=True)).to_be_visible()
+    grading_page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
+    expect(
+        grading_page.get_by_text(
+            "Five interviews showed repeated payment delays.", exact=True
+        )
+    ).to_be_visible()
+    grade_form = grading_page.locator("form").filter(
+        has=grading_page.get_by_role("button", name="Save grade", exact=True)
+    )
+    grade_form.locator('input[name="score_points"]').fill("15")
+    grade_form.locator('textarea[name="feedback"]').fill(
+        "Clear evidence; add interview dates next time."
+    )
+    grade_form.get_by_role("button", name="Save grade", exact=True).click()
+    expect(grading_page.get_by_role("status")).to_have_text("Change saved.")
+    grading_context.close()
+
+    page.reload()
+    expect(
+        page.get_by_text("Clear evidence; add interview dates next time.", exact=False)
+    ).to_be_visible()
     expect(page.get_by_text("Customer check", exact=True)).to_be_visible()
     page.get_by_label("Customers probably want it.", exact=True).check()
     page.get_by_role("button", name="Submit quiz", exact=True).click()
@@ -1052,6 +1118,21 @@ with sync_playwright() as playwright:
         assert course_enrollment.enrollment_id == enrollment.id
         assert course_enrollment.status == "completed"
         assert course_enrollment.completed_at is not None
+        assignment_submissions = list(
+            db.scalars(
+                select(AssignmentSubmission).where(
+                    AssignmentSubmission.course_enrollment_id == course_enrollment.id
+                )
+            )
+        )
+        assert len(assignment_submissions) == 1
+        assignment_grade = db.scalar(
+            select(AssignmentGrade).where(
+                AssignmentGrade.submission_id == assignment_submissions[0].id
+            )
+        )
+        assert assignment_grade and assignment_grade.score_points == 15
+        assert assignment_grade.passed is True
         quiz_attempts = list(
             db.scalars(
                 select(QuizAttempt).where(
@@ -1123,6 +1204,7 @@ print(
     "conflict/scoring/moderation/interview/decisions/finalization, enrollment/participant/"
     "session/timeline, center-scoped coordinator assignment/revocation, trainer-scoped "
     "delivery, learner/trainer private-material downloads, learning authoring/publication/"
-    "cohort access/start/quiz grading/completion, audit, responsive layouts and session recovery; "
+    "cohort access/start/quiz grading/assignment grading and feedback/completion, audit, "
+    "responsive layouts and session recovery; "
     "no JS errors"
 )

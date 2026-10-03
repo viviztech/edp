@@ -25,10 +25,13 @@ from app.modules.lms.material_access import (
     verify_access,
 )
 from app.modules.lms.models import (
+    AssignmentGrade,
+    AssignmentSubmission,
     CohortCourse,
     Course,
     CourseEnrollment,
     CourseModule,
+    LearningAssignment,
     Lesson,
     LessonMaterial,
     LessonPrerequisite,
@@ -43,6 +46,11 @@ from app.modules.lms.schemas import (
     AdminCourseView,
     AdminLessonView,
     AdminModuleView,
+    AssignmentCreate,
+    AssignmentGradeCommand,
+    AssignmentGradeView,
+    AssignmentSubmissionCreate,
+    AssignmentSubmissionView,
     CohortCourseCreate,
     CohortCourseView,
     CompletionRule,
@@ -54,6 +62,7 @@ from app.modules.lms.schemas import (
     CourseProgressView,
     CourseState,
     CourseView,
+    LearnerAssignmentView,
     LearnerCourseView,
     LearnerLessonView,
     LearnerMaterialView,
@@ -61,6 +70,7 @@ from app.modules.lms.schemas import (
     LearnerQuizChoiceView,
     LearnerQuizQuestionView,
     LearnerQuizView,
+    LearningAssignmentView,
     LearningCatalogView,
     LessonCompletionCommand,
     LessonCreate,
@@ -88,6 +98,7 @@ from app.modules.lms.schemas import (
     QuizQuestionCreate,
     QuizQuestionView,
     QuizView,
+    TrainerAssignmentSubmissionView,
     TrainerCourseDeliveryView,
     TrainerDeliveryView,
     TrainerLearnerProgressView,
@@ -211,6 +222,29 @@ def quiz_choice_admin_view(item: QuizChoice) -> QuizChoiceAdminView:
     return QuizChoiceAdminView.model_validate(item, from_attributes=True)
 
 
+def learning_assignment_view(item: LearningAssignment) -> LearningAssignmentView:
+    return LearningAssignmentView.model_validate(item, from_attributes=True)
+
+
+def assignment_grade_view(item: AssignmentGrade) -> AssignmentGradeView:
+    return AssignmentGradeView.model_validate(item, from_attributes=True)
+
+
+def assignment_submission_view(
+    item: AssignmentSubmission,
+    grade: AssignmentGrade | None,
+) -> AssignmentSubmissionView:
+    return AssignmentSubmissionView(
+        id=item.id,
+        assignment_id=item.assignment_id,
+        course_enrollment_id=item.course_enrollment_id,
+        revision=item.revision,
+        response_text=item.response_text,
+        submitted_at=item.submitted_at,
+        grade=assignment_grade_view(grade) if grade else None,
+    )
+
+
 def assignment_view(item: CohortCourse) -> CohortCourseView:
     return CohortCourseView(
         id=item.id,
@@ -277,6 +311,15 @@ def _admin_structure(db: Session, item: Course) -> AdminCourseView:
             .order_by(LessonMaterial.lesson_id, LessonMaterial.position, LessonMaterial.id)
         )
     )
+    learning_assignments = list(
+        db.scalars(
+            select(LearningAssignment)
+            .where(LearningAssignment.course_id == item.id)
+            .order_by(
+                LearningAssignment.lesson_id, LearningAssignment.position, LearningAssignment.id
+            )
+        )
+    )
     prerequisites = list(
         db.scalars(
             select(LessonPrerequisite)
@@ -305,6 +348,11 @@ def _admin_structure(db: Session, item: Course) -> AdminCourseView:
             .order_by(QuizChoice.question_id, QuizChoice.position, QuizChoice.id)
         )
     )
+    assignment_definition_map: dict[UUID, list[LearningAssignmentView]] = {}
+    for learning_assignment in learning_assignments:
+        assignment_definition_map.setdefault(learning_assignment.lesson_id, []).append(
+            learning_assignment_view(learning_assignment)
+        )
     prerequisite_map: dict[UUID, list[UUID]] = {}
     for prerequisite in prerequisites:
         prerequisite_map.setdefault(prerequisite.lesson_id, []).append(
@@ -340,6 +388,7 @@ def _admin_structure(db: Session, item: Course) -> AdminCourseView:
                 materials=material_map.get(lesson.id, []),
                 prerequisite_lesson_ids=prerequisite_map.get(lesson.id, []),
                 quizzes=quiz_map.get(lesson.id, []),
+                assignments=assignment_definition_map.get(lesson.id, []),
             )
         )
     return AdminCourseView(
@@ -921,6 +970,16 @@ def _learner_structure(
                             )
                             for quiz in lesson.quizzes
                         ],
+                        assignments=[
+                            _learner_assignment_view(
+                                db,
+                                learning_assignment,
+                                started,
+                                started is not None
+                                and set(lesson.prerequisite_lesson_ids).issubset(completed),
+                            )
+                            for learning_assignment in lesson.assignments
+                        ],
                     )
                     for lesson in module.lessons
                 ],
@@ -1352,6 +1411,7 @@ def trainer_delivery(
                     course_enrollment=course_enrollment_view(started) if started else None,
                     progress=_progress_view(course, total, completed, started is not None),
                     quiz_results=_trainer_quiz_results(db, course.id, started),
+                    assignment_submissions=_trainer_assignment_submissions(db, course.id, started),
                 )
             )
         courses.append(
@@ -1885,3 +1945,302 @@ def _trainer_quiz_results(
             )
         )
     return result
+
+
+def create_learning_assignment(
+    db: Session,
+    org: UUID,
+    actor: User,
+    data: AssignmentCreate,
+    request_id: str,
+) -> LearningAssignmentView:
+    require_permission(db, actor, org, "lms.assessment.manage")
+    course = _course(db, org, data.course_id, lock=True)
+    _require_draft(course)
+    lesson = db.scalar(
+        select(Lesson).where(
+            Lesson.id == data.lesson_id,
+            Lesson.course_id == course.id,
+            Lesson.organization_id == org,
+        )
+    )
+    if not lesson:
+        raise AuthError("not_found", 404)
+    item = LearningAssignment(organization_id=org, **data.model_dump())
+    db.add(item)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AuthError("assignment_position_exists", 409) from exc
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "lms.assignment.created",
+        request_id,
+        course.version,
+        "course_id,lesson_id,position,title_en,title_ta,instructions_en,"
+        "instructions_ta,maximum_points,passing_points,max_submissions",
+    )
+    _commit(db)
+    return learning_assignment_view(item)
+
+
+def _assignment_submissions(
+    db: Session,
+    assignment_id: UUID,
+    course_enrollment: CourseEnrollment | None,
+) -> list[tuple[AssignmentSubmission, AssignmentGrade | None]]:
+    if not course_enrollment:
+        return []
+    submissions = list(
+        db.scalars(
+            select(AssignmentSubmission)
+            .where(
+                AssignmentSubmission.assignment_id == assignment_id,
+                AssignmentSubmission.course_enrollment_id == course_enrollment.id,
+            )
+            .order_by(AssignmentSubmission.revision)
+        )
+    )
+    if not submissions:
+        return []
+    grades = {
+        grade.submission_id: grade
+        for grade in db.scalars(
+            select(AssignmentGrade).where(
+                AssignmentGrade.submission_id.in_([item.id for item in submissions])
+            )
+        )
+    }
+    return [(item, grades.get(item.id)) for item in submissions]
+
+
+def _learner_assignment_view(
+    db: Session,
+    assignment: LearningAssignmentView,
+    course_enrollment: CourseEnrollment | None,
+    available: bool,
+) -> LearnerAssignmentView:
+    rows = _assignment_submissions(db, assignment.id, course_enrollment)
+    return LearnerAssignmentView(
+        id=assignment.id,
+        position=assignment.position,
+        title_en=assignment.title_en,
+        title_ta=assignment.title_ta,
+        instructions_en=assignment.instructions_en,
+        instructions_ta=assignment.instructions_ta,
+        maximum_points=assignment.maximum_points,
+        passing_points=assignment.passing_points,
+        max_submissions=assignment.max_submissions,
+        remaining_submissions=max(0, assignment.max_submissions - len(rows)),
+        available=available,
+        submissions=[assignment_submission_view(item, grade) for item, grade in rows],
+    )
+
+
+def submit_assignment(
+    db: Session,
+    org: UUID,
+    course_id: UUID,
+    assignment_id: UUID,
+    actor: User,
+    data: AssignmentSubmissionCreate,
+    request_id: str,
+) -> AssignmentSubmissionView:
+    eligible = next(
+        (row for row in _learner_courses(db, org, actor) if row[2].id == course_id),
+        None,
+    )
+    if not eligible:
+        raise AuthError("course_access_denied", 403)
+    enrollment, _, course = eligible
+    course_enrollment = db.scalar(
+        select(CourseEnrollment)
+        .where(
+            CourseEnrollment.enrollment_id == enrollment.id,
+            CourseEnrollment.course_id == course.id,
+        )
+        .with_for_update()
+    )
+    if not course_enrollment:
+        raise AuthError("course_not_started", 409)
+    assignment = db.scalar(
+        select(LearningAssignment).where(
+            LearningAssignment.id == assignment_id,
+            LearningAssignment.course_id == course.id,
+            LearningAssignment.organization_id == org,
+        )
+    )
+    if not assignment:
+        raise AuthError("not_found", 404)
+    prerequisites = set(
+        db.scalars(
+            select(LessonPrerequisite.prerequisite_lesson_id).where(
+                LessonPrerequisite.lesson_id == assignment.lesson_id,
+                LessonPrerequisite.course_id == course.id,
+            )
+        )
+    )
+    completed = set(
+        db.scalars(
+            select(LessonProgress.lesson_id).where(
+                LessonProgress.course_enrollment_id == course_enrollment.id
+            )
+        )
+    )
+    if not prerequisites.issubset(completed):
+        raise AuthError("lesson_prerequisite_incomplete", 409)
+    prior = list(
+        db.scalars(
+            select(AssignmentSubmission)
+            .where(
+                AssignmentSubmission.assignment_id == assignment.id,
+                AssignmentSubmission.course_enrollment_id == course_enrollment.id,
+            )
+            .order_by(AssignmentSubmission.revision)
+        )
+    )
+    if len(prior) >= assignment.max_submissions:
+        raise AuthError("assignment_submission_limit_reached", 409)
+    if prior and not db.scalar(
+        select(AssignmentGrade.id).where(AssignmentGrade.submission_id == prior[-1].id)
+    ):
+        raise AuthError("assignment_review_pending", 409)
+    item = AssignmentSubmission(
+        organization_id=org,
+        course_id=course.id,
+        course_enrollment_id=course_enrollment.id,
+        assignment_id=assignment.id,
+        revision=len(prior) + 1,
+        response_text=data.response_text,
+    )
+    db.add(item)
+    db.flush()
+    _audit(
+        db,
+        actor,
+        org,
+        item.id,
+        "lms.assignment.submitted",
+        request_id,
+        item.revision,
+        "course_enrollment_id,assignment_id,revision,submitted_at",
+    )
+    _commit(db)
+    return assignment_submission_view(item, None)
+
+
+def _trainer_assignment_submissions(
+    db: Session,
+    course_id: UUID,
+    course_enrollment: CourseEnrollment | None,
+) -> list[TrainerAssignmentSubmissionView]:
+    if not course_enrollment:
+        return []
+    definitions = {
+        item.id: item
+        for item in db.scalars(
+            select(LearningAssignment).where(LearningAssignment.course_id == course_id)
+        )
+    }
+    if not definitions:
+        return []
+    submissions = list(
+        db.scalars(
+            select(AssignmentSubmission)
+            .where(
+                AssignmentSubmission.course_enrollment_id == course_enrollment.id,
+                AssignmentSubmission.assignment_id.in_(definitions),
+            )
+            .order_by(AssignmentSubmission.assignment_id, AssignmentSubmission.revision)
+        )
+    )
+    grades = (
+        {
+            grade.submission_id: grade
+            for grade in db.scalars(
+                select(AssignmentGrade).where(
+                    AssignmentGrade.submission_id.in_([item.id for item in submissions])
+                )
+            )
+        }
+        if submissions
+        else {}
+    )
+    return [
+        TrainerAssignmentSubmissionView(
+            **assignment_submission_view(item, grades.get(item.id)).model_dump(),
+            title_en=definitions[item.assignment_id].title_en,
+            title_ta=definitions[item.assignment_id].title_ta,
+            maximum_points=definitions[item.assignment_id].maximum_points,
+            passing_points=definitions[item.assignment_id].passing_points,
+        )
+        for item in submissions
+    ]
+
+
+def grade_assignment_submission(
+    db: Session,
+    org: UUID,
+    course_id: UUID,
+    submission_id: UUID,
+    actor: User,
+    data: AssignmentGradeCommand,
+    request_id: str,
+) -> AssignmentGradeView:
+    require_permission(db, actor, org, "lms.assessment.grade")
+    submission = db.scalar(
+        select(AssignmentSubmission)
+        .where(
+            AssignmentSubmission.id == submission_id,
+            AssignmentSubmission.course_id == course_id,
+            AssignmentSubmission.organization_id == org,
+        )
+        .with_for_update()
+    )
+    if not submission:
+        raise AuthError("not_found", 404)
+    course_enrollment = db.get(CourseEnrollment, submission.course_enrollment_id)
+    assignment = db.get(LearningAssignment, submission.assignment_id)
+    if not course_enrollment or not assignment:
+        raise AuthError("not_found", 404)
+    enrollment = db.get(Enrollment, course_enrollment.enrollment_id)
+    if not enrollment:
+        raise AuthError("not_found", 404)
+    allowed = any(
+        row_course.id == course_id and cohort.id == enrollment.cohort_id
+        for _, row_course, cohort in _trainer_course_rows(db, org, actor)
+    )
+    if not allowed:
+        raise AuthError("staff_scope_denied", 403)
+    if data.score_points > assignment.maximum_points:
+        raise AuthError("assignment_score_invalid", 422)
+    if db.scalar(select(AssignmentGrade.id).where(AssignmentGrade.submission_id == submission.id)):
+        raise AuthError("assignment_already_graded", 409)
+    grade = AssignmentGrade(
+        organization_id=org,
+        course_id=course_id,
+        assignment_id=assignment.id,
+        submission_id=submission.id,
+        grader_user_id=actor.id,
+        score_points=data.score_points,
+        passed=data.score_points >= assignment.passing_points,
+        feedback=data.feedback,
+    )
+    db.add(grade)
+    db.flush()
+    _audit(
+        db,
+        actor,
+        org,
+        grade.id,
+        "lms.assignment.graded",
+        request_id,
+        1,
+        "assignment_id,submission_id,grader_user_id,score_points,passed,graded_at",
+    )
+    _commit(db)
+    return assignment_grade_view(grade)

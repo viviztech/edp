@@ -289,3 +289,9 @@ L01.3 adds no domain tables. `ProgramStaffAssignment.user_role_id` now accepts a
 Course 1--many Quiz; Lesson 1--many Quiz; Quiz 1--many QuizQuestion; QuizQuestion 1--many QuizChoice; CourseEnrollment 1--many QuizAttempt; QuizAttempt 1--many QuizAttemptAnswer. Each answer references its question and selected choice.
 
 Migration b2a8d4e6f901 implements these five assessment tables. Composite foreign keys carry organization, course, quiz and question scope through every relationship. Unique keys enforce quiz/question/choice order, one attempt number per enrollment and quiz, and one answer per attempt and question. Check constraints bound pass marks, attempt limits, points, awarded points and percentages. Publication validates the complete answer-key structure, then database triggers freeze definitions. Attempt and answer rows reject update and delete.
+
+## L02.2 physical assignment extension
+
+Lesson 1--many LearningAssignment; LearningAssignment 1--many AssignmentSubmission; CourseEnrollment 1--many AssignmentSubmission; AssignmentSubmission 1--0..1 AssignmentGrade. The submission key `(course_enrollment_id, assignment_id, revision)` preserves every learner revision.
+
+Migration `c3b9e5f7a012` implements the three assignment tables. Composite foreign keys bind definition, submission and grade to one organization and course. Checks bound points, submission count, response length and feedback length. A database trigger freezes assignment definitions with the published course structure. Submission triggers enforce sequential revisions within the frozen limit and reject update/delete; grade triggers validate score and derived pass state and reject update/delete. One unique grade is allowed per submission.

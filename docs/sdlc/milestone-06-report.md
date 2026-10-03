@@ -1,6 +1,6 @@
 # Milestone 6 implementation report
 
-Status: L01.1-L01.3 and L02.1 implemented and locally accepted; Milestone 6 remains in progress.
+Status: L01.1-L01.3 and L02.1-L02.2 implemented and locally accepted; Milestone 6 remains in progress.
 
 ## Delivered behavior
 
@@ -33,7 +33,7 @@ The Next.js staff course studio and learner pathway provide English/Tamil loadin
 
 ## Remaining L01 scope
 
-Flutter learning screens remain deferred under ADR 0004. L02.1 quizzes and automatic grading are complete; assignments, manual grading, attendance and certificates remain later Phase 6 slices. Production object/video hosting and remote CI evidence remain release gates.
+Flutter learning screens remain deferred under ADR 0004. L02.1 quizzes/automatic grading and L02.2 assignments/manual grading are complete; assessment completion eligibility, attendance and certificates remain later Phase 6 slices. Production object/video hosting and remote CI evidence remain release gates.
 
 ## L01.2 implementation
 
@@ -49,4 +49,10 @@ Focused PostgreSQL acceptance proves unassigned denial, assigned cohort visibili
 
 Migration b2a8d4e6f901 adds organization-scoped quizzes, questions, choices, attempts and answer evidence with composite scope constraints, bounded values, immutable submissions and published-definition protection. Managers author bilingual single-choice quizzes; publication validates complete answer keys. Learners receive no correctness flags and submit through an enrollment-scoped command that derives score, percentage and pass state. Trainers see only bounded cohort result summaries.
 
-Local acceptance passed: the full backend suite reports 86 tests; focused Ruff and strict MyPy pass; migration downgrade/re-upgrade/drift is clean; OpenAPI and TypeScript contracts are current; ESLint, TypeScript, all 32 Vitest tests and the Next 16 production build pass. Authenticated Chrome creates and publishes a quiz, submits failed and passing attempts, confirms automatic grading and persisted evidence, and reports no JavaScript errors. The local Next build uses one page-data worker because the Windows host cannot commit memory for the default 15 workers. Remote CI remains pending. L02.2 assignments/manual grading, completion eligibility and certificates remain open.
+Local acceptance passed: the full backend suite reports 86 tests; focused Ruff and strict MyPy pass; migration downgrade/re-upgrade/drift is clean; OpenAPI and TypeScript contracts are current; ESLint, TypeScript, all 32 Vitest tests and the Next 16 production build pass. Authenticated Chrome creates and publishes a quiz, submits failed and passing attempts, confirms automatic grading and persisted evidence, and reports no JavaScript errors. The local Next build uses one page-data worker because the Windows host cannot commit memory for the default 15 workers. Remote CI remains pending. The assignment/manual-grading work that followed is recorded in L02.2 below; completion eligibility and certificates remain open.
+
+## L02.2 implementation
+
+Migration `c3b9e5f7a012` adds organization-scoped assignment definitions, immutable learner revisions and immutable manual grades. Managers author bilingual text assignments before publication. Learner commands derive enrollment, enforce prerequisites and submission limits, and require grading before a later revision. Trainers grade only learners covered by their active cohort assignment; the server validates score bounds and derives pass state. Learner and trainer views expose scoped response/feedback evidence, while audit payloads omit that content.
+
+Local acceptance passed for the focused PostgreSQL workflow, migration downgrade/re-upgrade/drift, focused Ruff and strict MyPy, generated OpenAPI and TypeScript contracts, ESLint, strict TypeScript, all 32 Vitest tests and the Next 16 production build. Authenticated Chrome creates an assignment, submits a learner response, records a trainer grade and confirms learner feedback visibility with no JavaScript errors. Text submission is complete; file uploads remain blocked on the shared secure-upload pipeline. Remote CI, assessment-based completion eligibility and certificates remain open.

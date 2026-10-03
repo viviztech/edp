@@ -6,12 +6,18 @@ from fastapi.responses import FileResponse
 from app.modules.identity.routes import DB, Principal
 from app.modules.lms import service
 from app.modules.lms.schemas import (
+    AssignmentCreate,
+    AssignmentGradeCommand,
+    AssignmentGradeView,
+    AssignmentSubmissionCreate,
+    AssignmentSubmissionView,
     CohortCourseCreate,
     CohortCourseView,
     CompletionRuleUpdate,
     CourseCreate,
     CourseEnrollmentView,
     CourseView,
+    LearningAssignmentView,
     LearningCatalogView,
     LessonCompletionCommand,
     LessonCreate,
@@ -295,6 +301,67 @@ def submit_quiz_attempt(
         org,
         course_id,
         quiz_id,
+        identity[0],
+        data,
+        request.state.request_id,
+    )
+
+
+@router.post("/assignments", response_model=LearningAssignmentView, status_code=201)
+def create_learning_assignment(
+    org: UUID,
+    data: AssignmentCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> LearningAssignmentView:
+    return service.create_learning_assignment(db, org, identity[0], data, request.state.request_id)
+
+
+@router.post(
+    "/my-learning/{course_id}/assignments/{assignment_id}/submissions",
+    response_model=AssignmentSubmissionView,
+    status_code=201,
+)
+def submit_assignment(
+    org: UUID,
+    course_id: UUID,
+    assignment_id: UUID,
+    data: AssignmentSubmissionCreate,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> AssignmentSubmissionView:
+    return service.submit_assignment(
+        db,
+        org,
+        course_id,
+        assignment_id,
+        identity[0],
+        data,
+        request.state.request_id,
+    )
+
+
+@router.post(
+    "/trainer-delivery/{course_id}/assignment-submissions/{submission_id}/grade",
+    response_model=AssignmentGradeView,
+    status_code=201,
+)
+def grade_assignment_submission(
+    org: UUID,
+    course_id: UUID,
+    submission_id: UUID,
+    data: AssignmentGradeCommand,
+    request: Request,
+    db: DB,
+    identity: Principal,
+) -> AssignmentGradeView:
+    return service.grade_assignment_submission(
+        db,
+        org,
+        course_id,
+        submission_id,
         identity[0],
         data,
         request.state.request_id,

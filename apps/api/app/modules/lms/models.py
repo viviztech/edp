@@ -403,3 +403,117 @@ class QuizAttemptAnswer(Record, Base):
         CheckConstraint("question_points BETWEEN 1 AND 100", name="quiz_answer_points"),
         CheckConstraint("points_awarded BETWEEN 0 AND question_points", name="quiz_answer_awarded"),
     )
+
+
+class LearningAssignment(Record, Base):
+    __tablename__ = "learning_assignments"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    lesson_id: Mapped[UUID] = mapped_column(index=True)
+    position: Mapped[int] = mapped_column(Integer)
+    title_en: Mapped[str] = mapped_column(String(200))
+    title_ta: Mapped[str] = mapped_column(String(200))
+    instructions_en: Mapped[str] = mapped_column(Text)
+    instructions_ta: Mapped[str] = mapped_column(Text)
+    maximum_points: Mapped[int] = mapped_column(Integer)
+    passing_points: Mapped[int] = mapped_column(Integer)
+    max_submissions: Mapped[int] = mapped_column(Integer)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["lesson_id", "course_id", "organization_id"],
+            ["lessons.id", "lessons.course_id", "lessons.organization_id"],
+            name="fk_learning_assignment_lesson_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("lesson_id", "position"),
+        UniqueConstraint("id", "course_id", "organization_id"),
+        CheckConstraint("position > 0", name="learning_assignment_position"),
+        CheckConstraint("maximum_points BETWEEN 1 AND 1000", name="learning_assignment_maximum"),
+        CheckConstraint(
+            "passing_points BETWEEN 0 AND maximum_points",
+            name="learning_assignment_passing",
+        ),
+        CheckConstraint(
+            "max_submissions BETWEEN 1 AND 10",
+            name="learning_assignment_submission_limit",
+        ),
+    )
+
+
+class AssignmentSubmission(Record, Base):
+    __tablename__ = "assignment_submissions"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    course_enrollment_id: Mapped[UUID] = mapped_column(index=True)
+    assignment_id: Mapped[UUID] = mapped_column(index=True)
+    revision: Mapped[int] = mapped_column(Integer)
+    response_text: Mapped[str] = mapped_column(Text)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["course_enrollment_id", "course_id", "organization_id"],
+            [
+                "course_enrollments.id",
+                "course_enrollments.course_id",
+                "course_enrollments.organization_id",
+            ],
+            name="fk_assignment_submission_enrollment_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["assignment_id", "course_id", "organization_id"],
+            [
+                "learning_assignments.id",
+                "learning_assignments.course_id",
+                "learning_assignments.organization_id",
+            ],
+            name="fk_assignment_submission_definition_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("course_enrollment_id", "assignment_id", "revision"),
+        UniqueConstraint("id", "assignment_id", "course_id", "organization_id"),
+        CheckConstraint("revision > 0", name="assignment_submission_revision"),
+        CheckConstraint(
+            "char_length(response_text) BETWEEN 1 AND 10000",
+            name="assignment_submission_text",
+        ),
+        Index(
+            "ix_assignment_submission_review",
+            "assignment_id",
+            "course_enrollment_id",
+            "revision",
+        ),
+    )
+
+
+class AssignmentGrade(Record, Base):
+    __tablename__ = "assignment_grades"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    course_id: Mapped[UUID] = mapped_column(index=True)
+    assignment_id: Mapped[UUID] = mapped_column(index=True)
+    submission_id: Mapped[UUID] = mapped_column(index=True)
+    grader_user_id: Mapped[UUID] = mapped_column(index=True)
+    score_points: Mapped[int] = mapped_column(Integer)
+    passed: Mapped[bool] = mapped_column(Boolean)
+    feedback: Mapped[str] = mapped_column(Text)
+    graded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["submission_id", "assignment_id", "course_id", "organization_id"],
+            [
+                "assignment_submissions.id",
+                "assignment_submissions.assignment_id",
+                "assignment_submissions.course_id",
+                "assignment_submissions.organization_id",
+            ],
+            name="fk_assignment_grade_submission_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(["grader_user_id"], ["users.id"], ondelete="RESTRICT"),
+        UniqueConstraint("submission_id"),
+        CheckConstraint("score_points BETWEEN 0 AND 1000", name="assignment_grade_score"),
+        CheckConstraint(
+            "char_length(feedback) BETWEEN 1 AND 5000",
+            name="assignment_grade_feedback",
+        ),
+    )

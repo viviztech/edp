@@ -582,6 +582,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/organizations/{org}/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Learning Assignment */
+        post: operations["create_learning_assignment_api_v1_courses_organizations__org__assignments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/assignments/{assignment_id}/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Assignment */
+        post: operations["submit_assignment_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__submissions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/trainer-delivery/{course_id}/assignment-submissions/{submission_id}/grade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grade Assignment Submission */
+        post: operations["grade_assignment_submission_api_v1_courses_organizations__org__trainer_delivery__course_id__assignment_submissions__submission_id__grade_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/applications/organizations/{org}/form": {
         parameters: {
             query?: never;
@@ -2524,6 +2575,8 @@ export interface components {
             prerequisite_lesson_ids: string[];
             /** Quizzes */
             quizzes: components["schemas"]["QuizAdminView"][];
+            /** Assignments */
+            assignments: components["schemas"]["LearningAssignmentView"][];
         };
         /** AdminModuleView */
         AdminModuleView: {
@@ -2665,23 +2718,64 @@ export interface components {
             /** Public Url */
             public_url: string | null;
         };
-        /** AssignmentCreate */
-        AssignmentCreate: {
+        /** AssignmentGradeCommand */
+        AssignmentGradeCommand: {
+            /** Score Points */
+            score_points: number;
+            /** Feedback */
+            feedback: string;
+        };
+        /** AssignmentGradeView */
+        AssignmentGradeView: {
             /**
-             * Selection Cycle Id
+             * Id
              * Format: uuid
              */
-            selection_cycle_id: string;
+            id: string;
+            /** Score Points */
+            score_points: number;
+            /** Passed */
+            passed: boolean;
+            /** Feedback */
+            feedback: string;
             /**
-             * Application Id
+             * Graded At
+             * Format: date-time
+             */
+            graded_at: string;
+        };
+        /** AssignmentSubmissionCreate */
+        AssignmentSubmissionCreate: {
+            /** Response Text */
+            response_text: string;
+        };
+        /** AssignmentSubmissionView */
+        AssignmentSubmissionView: {
+            /**
+             * Id
              * Format: uuid
              */
-            application_id: string;
+            id: string;
             /**
-             * Reviewer User Id
+             * Assignment Id
              * Format: uuid
              */
-            reviewer_user_id: string;
+            assignment_id: string;
+            /**
+             * Course Enrollment Id
+             * Format: uuid
+             */
+            course_enrollment_id: string;
+            /** Revision */
+            revision: number;
+            /** Response Text */
+            response_text: string;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+            grade: components["schemas"]["AssignmentGradeView"] | null;
         };
         /** AssignmentView */
         AssignmentView: {
@@ -4552,6 +4646,36 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** LearnerAssignmentView */
+        LearnerAssignmentView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Instructions En */
+            instructions_en: string;
+            /** Instructions Ta */
+            instructions_ta: string;
+            /** Maximum Points */
+            maximum_points: number;
+            /** Passing Points */
+            passing_points: number;
+            /** Max Submissions */
+            max_submissions: number;
+            /** Remaining Submissions */
+            remaining_submissions: number;
+            /** Available */
+            available: boolean;
+            /** Submissions */
+            submissions: components["schemas"]["AssignmentSubmissionView"][];
+        };
         /** LearnerCourseView */
         LearnerCourseView: {
             /**
@@ -4624,6 +4748,8 @@ export interface components {
             materials: components["schemas"]["LearnerMaterialView"][];
             /** Quizzes */
             quizzes: components["schemas"]["LearnerQuizView"][];
+            /** Assignments */
+            assignments: components["schemas"]["LearnerAssignmentView"][];
         };
         /** LearnerMaterialView */
         LearnerMaterialView: {
@@ -4730,6 +4856,50 @@ export interface components {
             available: boolean;
             /** Questions */
             questions: components["schemas"]["LearnerQuizQuestionView"][];
+        };
+        /** LearningAssignmentView */
+        LearningAssignmentView: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Instructions En */
+            instructions_en: string;
+            /** Instructions Ta */
+            instructions_ta: string;
+            /** Maximum Points */
+            maximum_points: number;
+            /** Passing Points */
+            passing_points: number;
+            /** Max Submissions */
+            max_submissions: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** LearningCatalogView */
         LearningCatalogView: {
@@ -6353,6 +6523,42 @@ export interface components {
             /** Expires In */
             expires_in: number;
         };
+        /** TrainerAssignmentSubmissionView */
+        TrainerAssignmentSubmissionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /**
+             * Course Enrollment Id
+             * Format: uuid
+             */
+            course_enrollment_id: string;
+            /** Revision */
+            revision: number;
+            /** Response Text */
+            response_text: string;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+            grade: components["schemas"]["AssignmentGradeView"] | null;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Maximum Points */
+            maximum_points: number;
+            /** Passing Points */
+            passing_points: number;
+        };
         /** TrainerCourseDeliveryView */
         TrainerCourseDeliveryView: {
             /**
@@ -6398,6 +6604,8 @@ export interface components {
             progress: components["schemas"]["CourseProgressView"];
             /** Quiz Results */
             quiz_results: components["schemas"]["TrainerQuizResultView"][];
+            /** Assignment Submissions */
+            assignment_submissions: components["schemas"]["TrainerAssignmentSubmissionView"][];
         };
         /** TrainerLessonView */
         TrainerLessonView: {
@@ -6533,6 +6741,35 @@ export interface components {
             /** Current */
             current: boolean;
         };
+        /** AssignmentCreate */
+        app__modules__lms__schemas__AssignmentCreate: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Position */
+            position: number;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /** Instructions En */
+            instructions_en: string;
+            /** Instructions Ta */
+            instructions_ta: string;
+            /** Maximum Points */
+            maximum_points: number;
+            /** Passing Points */
+            passing_points: number;
+            /** Max Submissions */
+            max_submissions: number;
+        };
         /** SessionView */
         app__modules__programs__schemas__SessionView: {
             /**
@@ -6588,6 +6825,24 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** AssignmentCreate */
+        app__modules__selection__schemas__AssignmentCreate: {
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /**
+             * Reviewer User Id
+             * Format: uuid
+             */
+            reviewer_user_id: string;
         };
     };
     responses: never;
@@ -7674,6 +7929,115 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["QuizAttemptView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_learning_assignment_api_v1_courses_organizations__org__assignments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__modules__lms__schemas__AssignmentCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearningAssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_assignment_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__submissions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentSubmissionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentSubmissionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    grade_assignment_submission_api_v1_courses_organizations__org__trainer_delivery__course_id__assignment_submissions__submission_id__grade_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentGradeCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentGradeView"];
                 };
             };
             /** @description Validation Error */
@@ -11362,7 +11726,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AssignmentCreate"];
+                "application/json": components["schemas"]["app__modules__selection__schemas__AssignmentCreate"];
             };
         };
         responses: {

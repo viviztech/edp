@@ -89,7 +89,11 @@ LMS_STAFF_PERMISSIONS = [
 ]
 LMS_LEARN_PERMISSION = "lms.learn"
 LMS_TRAINER_PERMISSIONS = ["lms.delivery.view"]
-LMS_ASSESSMENT_PERMISSIONS = ["lms.assessment.view", "lms.assessment.manage"]
+LMS_ASSESSMENT_PERMISSIONS = [
+    "lms.assessment.view",
+    "lms.assessment.manage",
+    "lms.assessment.grade",
+]
 SELECTION_PERMISSIONS = [
     "selection.cycle.view",
     "selection.cycle.manage",
@@ -497,6 +501,7 @@ def seed_roles(db: Session) -> None:
                 "system.access",
                 *LMS_TRAINER_PERMISSIONS,
                 "lms.assessment.view",
+                "lms.assessment.grade",
             ]
         elif name == "Selection Committee":
             codes = [

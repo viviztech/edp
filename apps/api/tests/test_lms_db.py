@@ -11,7 +11,14 @@ from test_identity import account, auth, signed_in  # noqa: F401
 from app.core.config import get_settings
 from app.modules.applications.models import Application, ApplicationForm
 from app.modules.identity.models import AuditLog, Organization, Role, User, UserRole, now
-from app.modules.lms.models import CourseEnrollment, CourseModule, LessonProgress, QuizAttempt
+from app.modules.lms.models import (
+    AssignmentGrade,
+    AssignmentSubmission,
+    CourseEnrollment,
+    CourseModule,
+    LessonProgress,
+    QuizAttempt,
+)
 from app.modules.programs.models import (
     ApplicationCycle,
     Cohort,
@@ -275,6 +282,24 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     assert material.status_code == 201
     assert material.json()["provider_key"].startswith("private/")
 
+    learning_assignment = client.post(
+        root + "/assignments",
+        headers=headers,
+        json={
+            "course_id": course["id"],
+            "lesson_id": lesson_data["id"],
+            "position": 1,
+            "title_en": "Customer evidence",
+            "title_ta": "Synthetic Tamil assignment",
+            "instructions_en": "Summarize one customer interview.",
+            "instructions_ta": "Synthetic Tamil assignment instructions.",
+            "maximum_points": 20,
+            "passing_points": 12,
+            "max_submissions": 2,
+        },
+    )
+    assert learning_assignment.status_code == 201
+
     quiz = client.post(
         root + "/quizzes",
         headers=headers,
@@ -423,6 +448,7 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     assert trainer_material["available"] is True
     assert "provider_key" not in trainer_material
     assert trainer_course["learners"][0]["quiz_results"][0]["attempt_count"] == 0
+    assert trainer_course["learners"][0]["assignment_submissions"] == []
     trainer_access = client.post(
         root + f"/trainer-delivery/{course['id']}/materials/{material.json()['id']}/access",
         headers=trainer_headers,
@@ -509,6 +535,56 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     )
     assert repeated_attempt.status_code == 409
     assert repeated_attempt.json()["error"]["code"] == "quiz_already_passed"
+    learner_assignment = started_learning["modules"][0]["lessons"][0]["assignments"][0]
+    assert learner_assignment["available"] is True
+    assert learner_assignment["remaining_submissions"] == 2
+    submission = client.post(
+        root
+        + f"/my-learning/{course['id']}/assignments/{learning_assignment.json()['id']}/submissions",
+        headers=headers,
+        json={"response_text": "Five interviews showed repeated payment delays."},
+    )
+    assert submission.status_code == 201
+    assert submission.json()["revision"] == 1
+    assert submission.json()["grade"] is None
+    pending_retry = client.post(
+        root
+        + f"/my-learning/{course['id']}/assignments/{learning_assignment.json()['id']}/submissions",
+        headers=headers,
+        json={"response_text": "A premature second revision."},
+    )
+    assert pending_retry.status_code == 409
+    assert pending_retry.json()["error"]["code"] == "assignment_review_pending"
+    graded = client.post(
+        root
+        + f"/trainer-delivery/{course['id']}/assignment-submissions/"
+        + f"{submission.json()['id']}/grade",
+        headers=trainer_headers,
+        json={"score_points": 15, "feedback": "Clear evidence; add interview dates next time."},
+    )
+    assert graded.status_code == 201
+    assert graded.json()["score_points"] == 15
+    assert graded.json()["passed"] is True
+    graded_learning = client.get(root + "/my-learning", headers=headers).json()["courses"][0]
+    graded_assignment = graded_learning["modules"][0]["lessons"][0]["assignments"][0]
+    assert graded_assignment["submissions"][0]["grade"]["feedback"].startswith("Clear evidence")
+    resubmission = client.post(
+        root
+        + f"/my-learning/{course['id']}/assignments/{learning_assignment.json()['id']}/submissions",
+        headers=headers,
+        json={"response_text": "Five dated interviews confirmed payment delays."},
+    )
+    assert resubmission.status_code == 201
+    assert resubmission.json()["revision"] == 2
+    exhausted = client.post(
+        root
+        + f"/my-learning/{course['id']}/assignments/{learning_assignment.json()['id']}/submissions",
+        headers=headers,
+        json={"response_text": "Third revision must be rejected."},
+    )
+    assert exhausted.status_code == 409
+    assert exhausted.json()["error"]["code"] == "assignment_submission_limit_reached"
+
     learner_access = client.post(
         root + f"/my-learning/{course['id']}/materials/{material.json()['id']}/access",
         headers=headers,
@@ -570,11 +646,23 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     assert summary["started_learners"] == 1
     assert summary["completed_learners"] == 1
     assert summary["average_percent"] == 100
+    second_grade = client.post(
+        root
+        + f"/trainer-delivery/{course['id']}/assignment-submissions/"
+        + f"{resubmission.json()['id']}/grade",
+        headers=trainer_headers,
+        json={"score_points": 18, "feedback": "The dated evidence meets the assignment standard."},
+    )
+    assert second_grade.status_code == 201
+    assert second_grade.json()["passed"] is True
     graded_delivery = client.get(root + "/trainer-delivery", headers=trainer_headers).json()
     graded_result = graded_delivery["courses"][0]["learners"][0]["quiz_results"][0]
     assert graded_result["attempt_count"] == 2
     assert graded_result["best_percent"] == 100
     assert graded_result["passed"] is True
+    assignment_results = graded_delivery["courses"][0]["learners"][0]["assignment_submissions"]
+    assert len(assignment_results) == 2
+    assert assignment_results[-1]["grade"]["score_points"] == 18
 
     with Session(engine) as db:
         trainer_assignment = db.get(ProgramStaffAssignment, trainer_assignment_id)
@@ -614,6 +702,35 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
         )
         assert attempt
         attempt.percent = 50
+        with pytest.raises(DBAPIError):
+            db.commit()
+        db.rollback()
+        assignment_submission = db.scalar(
+            select(AssignmentSubmission).where(AssignmentSubmission.id == submission.json()["id"])
+        )
+        assert assignment_submission
+        assignment_submission.response_text = "Forbidden rewrite"
+        with pytest.raises(DBAPIError):
+            db.commit()
+        db.rollback()
+        db.add(
+            AssignmentSubmission(
+                organization_id=assignment_submission.organization_id,
+                course_id=assignment_submission.course_id,
+                course_enrollment_id=assignment_submission.course_enrollment_id,
+                assignment_id=assignment_submission.assignment_id,
+                revision=3,
+                response_text="A direct third revision must be rejected by PostgreSQL.",
+            )
+        )
+        with pytest.raises(DBAPIError):
+            db.commit()
+        db.rollback()
+        assignment_grade = db.scalar(
+            select(AssignmentGrade).where(AssignmentGrade.id == graded.json()["id"])
+        )
+        assert assignment_grade
+        assignment_grade.feedback = "Forbidden feedback rewrite"
         with pytest.raises(DBAPIError):
             db.commit()
         db.rollback()

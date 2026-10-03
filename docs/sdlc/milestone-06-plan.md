@@ -1,6 +1,6 @@
 # Milestone 6 plan
 
-Status: L01.1-L01.3 and L02.1 implemented and locally accepted; remote CI and later Phase 6 slices remain open.
+Status: L01.1-L01.3 and L02.1-L02.2 implemented and locally accepted; remote CI and later Phase 6 slices remain open.
 
 ## L01.1 course catalog and enrollment access
 
@@ -62,3 +62,20 @@ Acceptance criteria:
 8. PostgreSQL, migrations, contracts, web checks, build and authenticated browser acceptance pass.
 
 Excluded: free-text/file assignments, manual grading, assessment-based completion, certificates, attendance and native Flutter screens under ADR 0004.
+
+## L02.2 assignments, manual grading and feedback
+
+Scope: draft-only bilingual text assignments, frozen points and submission limits, immutable learner revisions, review-before-resubmission, trainer-scoped manual grading, server-derived pass state, learner feedback visibility and audit evidence.
+
+Acceptance criteria:
+
+1. Only `lms.assessment.manage` can add assignment definitions, and only to a draft course and scoped lesson.
+2. Learners require their own active enrollment, a started assigned course and satisfied lesson prerequisites.
+3. The server assigns sequential revisions and rejects a retry while review is pending or after the frozen limit.
+4. Only `lms.assessment.grade` may grade; Trainers also require an active assignment covering the exact cohort.
+5. Scores cannot exceed the frozen maximum, pass state is server-derived, and one immutable grade is stored per submission.
+6. Response text and feedback are bounded, scoped and excluded from audit payloads.
+7. PostgreSQL independently rejects definition mutation, submission/grade mutation and invalid or over-limit revisions.
+8. Migrations, contracts, backend/web checks, production build and authenticated browser acceptance pass.
+
+Excluded: file uploads, grade amendment workflow, assessment-based completion eligibility, certificates, attendance and native Flutter screens under ADR 0004.

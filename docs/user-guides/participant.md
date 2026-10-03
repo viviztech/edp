@@ -24,3 +24,7 @@ Start an assigned course to enable its first eligible lessons. Locked lessons sh
 ## Take a quiz
 
 Start the assigned course and complete any prerequisite lesson shown for the quiz. Select one answer for every question and submit. The result and best percentage update immediately. A failed attempt can be retried while attempts remain. Passing the quiz or using the final attempt closes further submissions. Quiz status is separate from the current lesson-based course completion rule.
+
+## Submit an assignment
+
+Start the course and complete the assignment lesson's prerequisites. Enter the requested text response and submit it when ready. A submitted revision cannot be edited. Wait for trainer feedback before sending another revision; the page shows the score, pass state, feedback and remaining submissions. File attachments are not available in this release. Assignment results do not yet change the course completion percentage.

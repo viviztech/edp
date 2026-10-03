@@ -71,7 +71,7 @@ The open-questions register still requires decisions or confirmed owners for:
 
 The following are future implementation slices and are not defects or unfinished acceptance criteria in already completed slices:
 
-- L02.2 assignments/manual grading, assessment completion rules and certificates
+- L02.3 assessment completion eligibility and certificates; assignment file evidence remains blocked on the shared secure-upload pipeline
 - L03 attendance and QR check-in
 - M01 mentoring
 - K01 knowledge resources
@@ -94,12 +94,16 @@ Update this register whenever an item is completed, deferred by an approved deci
 
 ## L01.2 completion record
 
-L01.2 adds ordered prerequisites, draft-only completion rules, immutable lesson completion evidence, derived course progress, automatic enrollment completion, and count-only cohort summaries. L01.3 completes the remaining trainer and local/test private-media scope. L02.1 quiz assessment is complete. Assignments/manual grading, assessment completion rules, attendance, certificates, native Flutter after macOS migration, remote CI confirmation, and closure of legacy repository-wide Ruff/MyPy debt remain open.
+L01.2 adds ordered prerequisites, draft-only completion rules, immutable lesson completion evidence, derived course progress, automatic enrollment completion, and count-only cohort summaries. L01.3 completes the remaining trainer and local/test private-media scope. L02.1 quiz assessment and L02.2 text assignments/manual grading are complete. Assessment completion eligibility, secure assignment file evidence, attendance, certificates, native Flutter after macOS migration, remote CI confirmation, and closure of legacy repository-wide Ruff/MyPy debt remain open.
 
 ## L01.3 completion record
 
-L01.3 adds trainer-scoped published course delivery, cohort learner progress, short-lived private material capabilities, a confined local/test file adapter, BFF binary delivery and English/Tamil web states. Production private object/video hosting, storage retention and operational acceptance remain open release gates. Future Phase 6 work is L02.2 assignments/manual grading and eligibility, attendance/QR, certificates, native Flutter after macOS migration, remote CI confirmation and closure of separately recorded legacy Ruff/MyPy debt.
+L01.3 adds trainer-scoped published course delivery, cohort learner progress, short-lived private material capabilities, a confined local/test file adapter, BFF binary delivery and English/Tamil web states. Production private object/video hosting, storage retention and operational acceptance remain open release gates. Future Phase 6 work is L02.3 assessment completion eligibility/certificates, attendance/QR, secure file evidence, native Flutter after macOS migration, remote CI confirmation and closure of separately recorded legacy Ruff/MyPy debt.
 
 ## L02.1 completion record
 
-L02.1 adds draft-only bilingual single-choice assessment authoring, publication validation, immutable attempt evidence, server-derived grading, pass marks and bounded retries. Learner contracts omit answer keys; trainer summaries reuse active cohort delivery scope. The full API suite, migration round trip, drift check, generated contracts, web lint/type/test/build and authenticated Chrome journey pass locally. Remaining L02 scope is assignments/manual grading, assessment-based completion eligibility and certificates.
+L02.1 adds draft-only bilingual single-choice assessment authoring, publication validation, immutable attempt evidence, server-derived grading, pass marks and bounded retries. Learner contracts omit answer keys; trainer summaries reuse active cohort delivery scope. The full API suite, migration round trip, drift check, generated contracts, web lint/type/test/build and authenticated Chrome journey pass locally.
+
+## L02.2 completion record
+
+L02.2 adds draft-only bilingual text assignments, immutable sequential submissions, review-before-resubmission, bounded trainer grading, server-derived pass state and learner feedback. PostgreSQL repeats revision-limit and immutability controls. Focused API/database acceptance, migration round trip and drift, generated contracts, web lint/type/test/build and authenticated Chrome submission/grading pass locally. Remaining L02 scope is assessment-based completion eligibility and certificates; file evidence remains deferred until the shared secure-upload pipeline exists.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../../lib/api-contracts";
 import { learningMessages } from "../../../../lib/learning-messages";
 
@@ -42,6 +42,42 @@ export default function TrainerLearningWorkspace({
     })();
     return () => { active = false; };
   }, [load, text.error]);
+
+  async function gradeSubmission(
+    event: FormEvent<HTMLFormElement>,
+    courseId: string,
+    submissionId: string,
+  ) {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      const data = Object.fromEntries(new FormData(event.currentTarget));
+      const csrf = await fetch("/api/session/csrf", { cache: "no-store" });
+      if (!csrf.ok) throw new Error("csrf_failed");
+      const response = await fetch(
+        root + "/trainer-delivery/" + courseId
+          + "/assignment-submissions/" + submissionId + "/grade",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-csrf-token": (await csrf.json()).csrf_token,
+          },
+          body: JSON.stringify({
+            score_points: Number(data.score_points),
+            feedback: data.feedback,
+          }),
+        },
+      );
+      if (!response.ok) throw new Error("request_failed");
+      await load();
+      setMessage(text.saved);
+    } catch {
+      setMessage(text.error);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function openMaterial(courseId: string, materialId: string) {
     setBusy(true);
@@ -118,6 +154,27 @@ export default function TrainerLearningWorkspace({
                 <span>{result.attempt_count} {text.attempts} - {
                   result.best_percent === null ? text.notAttempted : `${text.bestScore}: ${result.best_percent}%`
                 } - {result.passed ? text.passed : text.notPassed}</span>
+              </li>)}</ul>
+              <ul>{learner.assignment_submissions.map((submission) => <li key={submission.id}>
+                <strong>{value(submission.title_en, submission.title_ta)} - {text.revision} {submission.revision}</strong>
+                <p>{submission.response_text}</p>
+                {submission.grade
+                  ? <p>{submission.grade.score_points}/{submission.maximum_points} - {
+                    submission.grade.passed ? text.passed : text.notPassed
+                  }<br />{text.feedback}: {submission.grade.feedback}</p>
+                  : <form onSubmit={(event) => gradeSubmission(
+                    event, course.course_id, submission.id,
+                  )}>
+                    <label>{text.score}<input
+                      name="score_points"
+                      type="number"
+                      min="0"
+                      max={submission.maximum_points}
+                      required
+                    /></label>
+                    <label>{text.feedback}<textarea name="feedback" required /></label>
+                    <button disabled={busy} type="submit">{text.saveGrade}</button>
+                  </form>}
               </li>)}</ul>
             </div>)}
           </section>

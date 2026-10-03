@@ -35,3 +35,7 @@ In Learning, create all modules and lessons in their final order. Add a prerequi
 ## Configure a quiz
 
 Before publishing a course, open Learning and add a quiz to a lesson. Set its bilingual title and instructions, pass mark, maximum attempts and order. Add each bilingual question with points, then add at least two choices and mark exactly one as correct. Review the answer key before publication because the published quiz cannot be edited. Publication is blocked when a quiz has no questions or a question has an incomplete answer key.
+
+## Configure an assignment
+
+Before publishing a course, add an assignment to its lesson. Enter the bilingual title and instructions, maximum and passing points, order, and the number of allowed submissions. Review these settings before publication because the definition is frozen with the course. This release accepts text responses only; do not request files or sensitive personal evidence in the instructions.

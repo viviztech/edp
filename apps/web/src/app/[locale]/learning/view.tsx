@@ -80,6 +80,19 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
     void mutate(`/my-learning/${courseId}/quizzes/${quizId}/attempts`, { answers });
   }
 
+  function submitAssignment(
+    event: FormEvent<HTMLFormElement>,
+    courseId: string,
+    assignmentId: string,
+  ) {
+    event.preventDefault();
+    const responseText = String(new FormData(event.currentTarget).get("response_text") ?? "");
+    void mutate(
+      "/my-learning/" + courseId + "/assignments/" + assignmentId + "/submissions",
+      { response_text: responseText },
+    );
+  }
+
   async function openMaterial(courseId: string, materialId: string) {
     setBusy(true);
     try {
@@ -185,6 +198,36 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
                     : quiz.available && quiz.remaining_attempts > 0
                       ? <button disabled={busy} type="submit">{text.submitQuiz}</button>
                       : <small>{text.quizUnavailable}</small>}
+                </form>)}
+                {lesson.assignments.map((assignment) => <form
+                  className="learning-private"
+                  key={assignment.id}
+                  onSubmit={(event) => submitAssignment(event, course.id, assignment.id)}
+                >
+                  <strong>{value(assignment.title_en, assignment.title_ta)}</strong>
+                  <p>{value(assignment.instructions_en, assignment.instructions_ta)}</p>
+                  <small>
+                    {text.passMark}: {assignment.passing_points}/{assignment.maximum_points} - {text.remainingSubmissions}: {assignment.remaining_submissions}
+                  </small>
+                  {assignment.submissions.map((submission) => <article key={submission.id}>
+                    <small>{text.revision} {submission.revision}</small>
+                    <p>{submission.response_text}</p>
+                    {submission.grade
+                      ? <p><strong>{submission.grade.score_points}/{assignment.maximum_points}</strong> - {
+                        submission.grade.passed ? text.passed : text.notPassed
+                      }<br />{text.feedback}: {submission.grade.feedback}</p>
+                      : <small>{text.awaitingReview}</small>}
+                  </article>)}
+                  {assignment.available && assignment.remaining_submissions > 0
+                    && (assignment.submissions.length === 0
+                      || assignment.submissions.at(-1)?.grade)
+                    ? <>
+                      <label>{text.assignmentResponse}<textarea name="response_text" required /></label>
+                      <button disabled={busy} type="submit">{text.submitAssignment}</button>
+                    </>
+                    : assignment.remaining_submissions === 0
+                      ? <small>{text.submissionLimitReached}</small>
+                      : <small>{text.assignmentUnavailable}</small>}
                 </form>)}
               </li>)}</ol>
             </li>)}
