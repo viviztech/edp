@@ -7111,6 +7111,937 @@
         }
       }
     },
+    "/api/v1/mentoring/organizations/{org}/workspace": {
+      "get": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Workspace",
+        "operationId": "workspace_api_v1_mentoring_organizations__org__workspace_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workspace"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/my-mentoring": {
+      "get": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "My Mentoring",
+        "operationId": "my_mentoring_api_v1_mentoring_organizations__org__my_mentoring_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyMentoring"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/profiles": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Create Profile",
+        "operationId": "create_profile_api_v1_mentoring_organizations__org__profiles_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/expertise": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Add Expertise",
+        "operationId": "add_expertise_api_v1_mentoring_organizations__org__expertise_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpertiseCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpertiseView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/availability": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Add Availability",
+        "operationId": "add_availability_api_v1_mentoring_organizations__org__availability_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/assignments": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Create Assignment",
+        "operationId": "create_assignment_api_v1_mentoring_organizations__org__assignments_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__modules__mentoring__schemas__AssignmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MentorAssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/assignments/{assignment_id}/end": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "End Assignment",
+        "operationId": "end_assignment_api_v1_mentoring_organizations__org__assignments__assignment_id__end_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "assignment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assignment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentEnd"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MentorAssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/sessions": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Create Session",
+        "operationId": "create_session_api_v1_mentoring_organizations__org__sessions_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__modules__mentoring__schemas__SessionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__mentoring__schemas__SessionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/sessions/{session_id}/state": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Transition Session",
+        "operationId": "transition_session_api_v1_mentoring_organizations__org__sessions__session_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__mentoring__schemas__SessionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/notes": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Create Note",
+        "operationId": "create_note_api_v1_mentoring_organizations__org__notes_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/goals": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Create Goal",
+        "operationId": "create_goal_api_v1_mentoring_organizations__org__goals_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/goals/{goal_id}/state": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Update Goal",
+        "operationId": "update_goal_api_v1_mentoring_organizations__org__goals__goal_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "goal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Goal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/action-items": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Create Action",
+        "operationId": "create_action_api_v1_mentoring_organizations__org__action_items_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/action-items/{action_id}/state": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Transition Action",
+        "operationId": "transition_action_api_v1_mentoring_organizations__org__action_items__action_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/follow-ups": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Create Follow Up",
+        "operationId": "create_follow_up_api_v1_mentoring_organizations__org__follow_ups_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowUpView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/follow-ups/{follow_id}/state": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Transition Follow Up",
+        "operationId": "transition_follow_up_api_v1_mentoring_organizations__org__follow_ups__follow_id__state_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "follow_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Follow Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowUpView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mentoring/organizations/{org}/feedback": {
+      "post": {
+        "tags": [
+          "mentoring"
+        ],
+        "summary": "Create Feedback",
+        "operationId": "create_feedback_api_v1_mentoring_organizations__org__feedback_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/notifications/organizations/{org}/preference": {
       "get": {
         "tags": [
@@ -8511,7 +9442,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SessionCreate"
+                "$ref": "#/components/schemas/app__modules__programs__schemas__SessionCreate"
               }
             }
           }
@@ -9772,6 +10703,113 @@
         ],
         "title": "AcknowledgementView"
       },
+      "ActionCreate": {
+        "properties": {
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 2,
+            "title": "Title"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "assignment_id",
+          "title"
+        ],
+        "title": "ActionCreate"
+      },
+      "ActionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "assignment_id",
+          "goal_id",
+          "title",
+          "due_at",
+          "state",
+          "version"
+        ],
+        "title": "ActionView"
+      },
       "ActivityComplete": {
         "properties": {
           "expected_version": {
@@ -10492,6 +11530,28 @@
         ],
         "title": "AssetView"
       },
+      "AssignmentEnd": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "reason"
+        ],
+        "title": "AssignmentEnd"
+      },
       "AssignmentGradeCommand": {
         "properties": {
           "score_points": {
@@ -10896,6 +11956,94 @@
         ],
         "title": "AuditView"
       },
+      "AvailabilityCreate": {
+        "properties": {
+          "mentor_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Mentor Profile Id"
+          },
+          "weekday": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Weekday"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "time",
+            "title": "Ends At"
+          },
+          "timezone": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Timezone",
+            "default": "Asia/Kolkata"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "mentor_profile_id",
+          "weekday",
+          "starts_at",
+          "ends_at"
+        ],
+        "title": "AvailabilityCreate"
+      },
+      "AvailabilityView": {
+        "properties": {
+          "mentor_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Mentor Profile Id"
+          },
+          "weekday": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Weekday"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "time",
+            "title": "Ends At"
+          },
+          "timezone": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Timezone",
+            "default": "Asia/Kolkata"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "mentor_profile_id",
+          "weekday",
+          "starts_at",
+          "ends_at",
+          "id"
+        ],
+        "title": "AvailabilityView"
+      },
       "CatalogView": {
         "properties": {
           "programs": {
@@ -10928,7 +12076,7 @@
           },
           "enrollment_candidates": {
             "items": {
-              "$ref": "#/components/schemas/EnrollmentCandidateView"
+              "$ref": "#/components/schemas/app__modules__programs__schemas__EnrollmentCandidateView"
             },
             "type": "array",
             "title": "Enrollment Candidates",
@@ -14021,59 +15169,6 @@
         ],
         "title": "EnquiryView"
       },
-      "EnrollmentCandidateView": {
-        "properties": {
-          "application_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Application Id"
-          },
-          "application_number": {
-            "type": "string",
-            "title": "Application Number"
-          },
-          "application_version": {
-            "type": "integer",
-            "title": "Application Version"
-          },
-          "person_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Person Id"
-          },
-          "display_name": {
-            "type": "string",
-            "title": "Display Name"
-          },
-          "program_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Program Id"
-          },
-          "cohort_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Cohort Id"
-          },
-          "selection_cycle_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Selection Cycle Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "application_id",
-          "application_number",
-          "application_version",
-          "person_id",
-          "display_name",
-          "program_id",
-          "cohort_id",
-          "selection_cycle_id"
-        ],
-        "title": "EnrollmentCandidateView"
-      },
       "EnrollmentConversionView": {
         "properties": {
           "participant": {
@@ -14353,6 +15448,86 @@
         ],
         "title": "EventView"
       },
+      "ExpertiseCreate": {
+        "properties": {
+          "mentor_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Mentor Profile Id"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name Ta"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "mentor_profile_id",
+          "code",
+          "name_en",
+          "name_ta"
+        ],
+        "title": "ExpertiseCreate"
+      },
+      "ExpertiseView": {
+        "properties": {
+          "mentor_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Mentor Profile Id"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "title": "Code"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "name_ta": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name Ta"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "mentor_profile_id",
+          "code",
+          "name_en",
+          "name_ta",
+          "id"
+        ],
+        "title": "ExpertiseView"
+      },
       "ExportJobView": {
         "properties": {
           "id": {
@@ -14486,6 +15661,86 @@
         ],
         "title": "FailureView"
       },
+      "FeedbackCreate": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Rating"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "session_id",
+          "rating"
+        ],
+        "title": "FeedbackCreate"
+      },
+      "FeedbackView": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Rating"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "session_id",
+          "rating",
+          "id",
+          "created_at"
+        ],
+        "title": "FeedbackView"
+      },
       "FieldView": {
         "properties": {
           "id": {
@@ -14542,6 +15797,105 @@
         ],
         "title": "FieldView"
       },
+      "FollowUpCreate": {
+        "properties": {
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "purpose": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 2,
+            "title": "Purpose"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Due At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "assignment_id",
+          "purpose",
+          "due_at"
+        ],
+        "title": "FollowUpCreate"
+      },
+      "FollowUpView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "purpose": {
+            "type": "string",
+            "title": "Purpose"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Due At"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "overdue": {
+            "type": "boolean",
+            "title": "Overdue"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "assignment_id",
+          "session_id",
+          "purpose",
+          "due_at",
+          "state",
+          "overdue",
+          "version"
+        ],
+        "title": "FollowUpView"
+      },
       "FormView": {
         "properties": {
           "id": {
@@ -14592,6 +15946,156 @@
           "acknowledgements"
         ],
         "title": "FormView"
+      },
+      "GoalCreate": {
+        "properties": {
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 2,
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "assignment_id",
+          "title"
+        ],
+        "title": "GoalCreate"
+      },
+      "GoalUpdate": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "progress_percent": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Progress Percent"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "active",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Target"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "progress_percent",
+          "target",
+          "reason"
+        ],
+        "title": "GoalUpdate"
+      },
+      "GoalView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "progress_percent": {
+            "type": "integer",
+            "title": "Progress Percent"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "assignment_id",
+          "title",
+          "description",
+          "target_date",
+          "progress_percent",
+          "state",
+          "version"
+        ],
+        "title": "GoalView"
       },
       "Grant": {
         "properties": {
@@ -16898,6 +18402,111 @@
         ],
         "title": "MaterialCreate"
       },
+      "MentorAssignmentView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "mentor_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Mentor Profile Id"
+          },
+          "mentor_name": {
+            "type": "string",
+            "title": "Mentor Name"
+          },
+          "enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Enrollment Id"
+          },
+          "participant_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Participant Id"
+          },
+          "participant_name": {
+            "type": "string",
+            "title": "Participant Name"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "ended"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "mentor_profile_id",
+          "mentor_name",
+          "enrollment_id",
+          "participant_id",
+          "participant_name",
+          "program_id",
+          "starts_on",
+          "ends_on",
+          "state",
+          "version"
+        ],
+        "title": "MentorAssignmentView"
+      },
+      "MentorCandidateView": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "has_profile": {
+            "type": "boolean",
+            "title": "Has Profile"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "display_name",
+          "has_profile"
+        ],
+        "title": "MentorCandidateView"
+      },
       "Message": {
         "properties": {
           "status": {
@@ -17060,6 +18669,70 @@
         ],
         "title": "MyLearningView"
       },
+      "MyMentoring": {
+        "properties": {
+          "assignments": {
+            "items": {
+              "$ref": "#/components/schemas/MentorAssignmentView"
+            },
+            "type": "array",
+            "title": "Assignments"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/app__modules__mentoring__schemas__SessionView"
+            },
+            "type": "array",
+            "title": "Sessions"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/NoteView"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/GoalView"
+            },
+            "type": "array",
+            "title": "Goals"
+          },
+          "action_items": {
+            "items": {
+              "$ref": "#/components/schemas/ActionView"
+            },
+            "type": "array",
+            "title": "Action Items"
+          },
+          "follow_ups": {
+            "items": {
+              "$ref": "#/components/schemas/FollowUpView"
+            },
+            "type": "array",
+            "title": "Follow Ups"
+          },
+          "feedback": {
+            "items": {
+              "$ref": "#/components/schemas/FeedbackView"
+            },
+            "type": "array",
+            "title": "Feedback"
+          }
+        },
+        "type": "object",
+        "required": [
+          "assignments",
+          "sessions",
+          "notes",
+          "goals",
+          "action_items",
+          "follow_ups",
+          "feedback"
+        ],
+        "title": "MyMentoring"
+      },
       "NamedCreate": {
         "properties": {
           "code": {
@@ -17163,6 +18836,98 @@
           "locale"
         ],
         "title": "NewTranslation"
+      },
+      "NoteCreate": {
+        "properties": {
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "mentor_private",
+              "shared_with_participant"
+            ],
+            "title": "Visibility"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "assignment_id",
+          "visibility",
+          "body"
+        ],
+        "title": "NoteCreate"
+      },
+      "NoteView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "visibility": {
+            "type": "string",
+            "title": "Visibility"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "assignment_id",
+          "session_id",
+          "visibility",
+          "body",
+          "created_at"
+        ],
+        "title": "NoteView"
       },
       "NotificationList": {
         "properties": {
@@ -17790,6 +19555,99 @@
           "grants"
         ],
         "title": "Profile"
+      },
+      "ProfileCreate": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "headline": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Headline"
+          },
+          "biography": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Biography"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "user_id",
+          "headline"
+        ],
+        "title": "ProfileCreate"
+      },
+      "ProfileView": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "headline": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Headline"
+          },
+          "biography": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Biography"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "title": "State"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "user_id",
+          "headline",
+          "id",
+          "display_name",
+          "state",
+          "version"
+        ],
+        "title": "ProfileView"
       },
       "ProgramView": {
         "properties": {
@@ -19568,69 +21426,6 @@
         ],
         "title": "SessionAttendanceView"
       },
-      "SessionCreate": {
-        "properties": {
-          "cohort_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Cohort Id"
-          },
-          "title_en": {
-            "type": "string",
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Title En"
-          },
-          "title_ta": {
-            "type": "string",
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Title Ta"
-          },
-          "starts_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Starts At"
-          },
-          "ends_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Ends At"
-          },
-          "mode": {
-            "type": "string",
-            "enum": [
-              "in_person",
-              "online",
-              "hybrid"
-            ],
-            "title": "Mode"
-          },
-          "location": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 500
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Location"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "cohort_id",
-          "title_en",
-          "title_ta",
-          "starts_at",
-          "ends_at",
-          "mode"
-        ],
-        "title": "SessionCreate"
-      },
       "SessionStateCommand": {
         "properties": {
           "expected_version": {
@@ -20901,6 +22696,119 @@
         ],
         "title": "WindowView"
       },
+      "Workspace": {
+        "properties": {
+          "mentor_candidates": {
+            "items": {
+              "$ref": "#/components/schemas/MentorCandidateView"
+            },
+            "type": "array",
+            "title": "Mentor Candidates"
+          },
+          "enrollment_candidates": {
+            "items": {
+              "$ref": "#/components/schemas/app__modules__mentoring__schemas__EnrollmentCandidateView"
+            },
+            "type": "array",
+            "title": "Enrollment Candidates"
+          },
+          "profiles": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileView"
+            },
+            "type": "array",
+            "title": "Profiles"
+          },
+          "expertise": {
+            "items": {
+              "$ref": "#/components/schemas/ExpertiseView"
+            },
+            "type": "array",
+            "title": "Expertise"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityView"
+            },
+            "type": "array",
+            "title": "Availability"
+          },
+          "assignments": {
+            "items": {
+              "$ref": "#/components/schemas/MentorAssignmentView"
+            },
+            "type": "array",
+            "title": "Assignments"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/app__modules__mentoring__schemas__SessionView"
+            },
+            "type": "array",
+            "title": "Sessions"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/NoteView"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/GoalView"
+            },
+            "type": "array",
+            "title": "Goals"
+          },
+          "action_items": {
+            "items": {
+              "$ref": "#/components/schemas/ActionView"
+            },
+            "type": "array",
+            "title": "Action Items"
+          },
+          "follow_ups": {
+            "items": {
+              "$ref": "#/components/schemas/FollowUpView"
+            },
+            "type": "array",
+            "title": "Follow Ups"
+          },
+          "feedback_count": {
+            "type": "integer",
+            "title": "Feedback Count"
+          },
+          "average_rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Rating"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mentor_candidates",
+          "enrollment_candidates",
+          "profiles",
+          "expertise",
+          "availability",
+          "assignments",
+          "sessions",
+          "notes",
+          "goals",
+          "action_items",
+          "follow_ups",
+          "feedback_count",
+          "average_rating"
+        ],
+        "title": "Workspace"
+      },
       "app__modules__identity__schemas__SessionView": {
         "properties": {
           "id": {
@@ -21017,6 +22925,323 @@
           "max_submissions"
         ],
         "title": "AssignmentCreate"
+      },
+      "app__modules__mentoring__schemas__AssignmentCreate": {
+        "properties": {
+          "mentor_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Mentor Profile Id"
+          },
+          "enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Enrollment Id"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "mentor_profile_id",
+          "enrollment_id",
+          "starts_on",
+          "reason"
+        ],
+        "title": "AssignmentCreate"
+      },
+      "app__modules__mentoring__schemas__EnrollmentCandidateView": {
+        "properties": {
+          "enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Enrollment Id"
+          },
+          "participant_name": {
+            "type": "string",
+            "title": "Participant Name"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "has_active_assignment": {
+            "type": "boolean",
+            "title": "Has Active Assignment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enrollment_id",
+          "participant_name",
+          "program_id",
+          "has_active_assignment"
+        ],
+        "title": "EnrollmentCandidateView"
+      },
+      "app__modules__mentoring__schemas__SessionCreate": {
+        "properties": {
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "in_person",
+              "online",
+              "phone"
+            ],
+            "title": "Mode"
+          },
+          "location_or_link": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Or Link"
+          },
+          "topic": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 2,
+            "title": "Topic"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "assignment_id",
+          "starts_at",
+          "ends_at",
+          "mode",
+          "topic"
+        ],
+        "title": "SessionCreate"
+      },
+      "app__modules__mentoring__schemas__SessionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "assignment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignment Id"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "location_or_link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Or Link"
+          },
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "assignment_id",
+          "starts_at",
+          "ends_at",
+          "mode",
+          "location_or_link",
+          "topic",
+          "status",
+          "version"
+        ],
+        "title": "SessionView"
+      },
+      "app__modules__programs__schemas__EnrollmentCandidateView": {
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Application Id"
+          },
+          "application_number": {
+            "type": "string",
+            "title": "Application Number"
+          },
+          "application_version": {
+            "type": "integer",
+            "title": "Application Version"
+          },
+          "person_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Person Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Program Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "selection_cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Cycle Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "application_id",
+          "application_number",
+          "application_version",
+          "person_id",
+          "display_name",
+          "program_id",
+          "cohort_id",
+          "selection_cycle_id"
+        ],
+        "title": "EnrollmentCandidateView"
+      },
+      "app__modules__programs__schemas__SessionCreate": {
+        "properties": {
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "title_ta": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title Ta"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "in_person",
+              "online",
+              "hybrid"
+            ],
+            "title": "Mode"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cohort_id",
+          "title_en",
+          "title_ta",
+          "starts_at",
+          "ends_at",
+          "mode"
+        ],
+        "title": "SessionCreate"
       },
       "app__modules__programs__schemas__SessionView": {
         "properties": {

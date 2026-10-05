@@ -31,6 +31,15 @@ from app.modules.lms.models import (
     LessonProgress,
     QuizAttempt,
 )
+from app.modules.mentoring.models import (
+    ActionItem,
+    FollowUp,
+    Goal,
+    MentorAssignment,
+    MentoringFeedback,
+    MentoringNote,
+    MentoringSession,
+)
 from app.modules.programs import service as program_service
 from app.modules.programs.models import (
     DomainOutbox,
@@ -1147,6 +1156,161 @@ with sync_playwright() as playwright:
     expect(page.get_by_role("heading", name="Timeline", exact=True)).to_be_visible()
 
     with Session(engine) as db:
+        mentor_role = db.scalar(select(Role).where(Role.name == "Mentor"))
+        mentor_user = db.scalar(select(User).where(User.email == email))
+        assert mentor_role and mentor_user
+        db.add(
+            UserRole(
+                user_id=mentor_user.id,
+                role_id=mentor_role.id,
+                organization_id=organization_id,
+            )
+        )
+        db.commit()
+
+    page.goto(base + "/en/admin/mentoring?organization=" + str(organization_id))
+    expect(page.get_by_role("heading", name="Mentoring workspace")).to_be_visible()
+    profile_panel = page.locator("section.program-panel").filter(
+        has=page.get_by_role("heading", name="Create mentor profile", exact=True)
+    )
+    profile_panel.locator('select[name="user_id"]').select_option(label="Synthetic E2E")
+    profile_panel.get_by_label("Headline").fill("Enterprise mentor")
+    profile_panel.get_by_label("Biography").fill("Supports participant validation.")
+    profile_panel.get_by_role("button", name="Save", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+
+    assignment_panel = page.locator("section.program-panel").filter(
+        has=page.get_by_role("heading", name="Assign mentor", exact=True)
+    )
+    assignment_panel.locator('select[name="profile"]').select_option(
+        label="Synthetic E2E"
+    )
+    assignment_panel.locator('select[name="enrollment"]').select_option(
+        label="Synthetic E2E"
+    )
+    assignment_panel.get_by_label("Starts").fill(datetime.now(UTC).date().isoformat())
+    assignment_panel.get_by_label("Reason").fill("Approved browser mentor match")
+    assignment_panel.get_by_role("button", name="Assign mentor", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+
+    session_start = datetime.now(UTC) + timedelta(days=2)
+    session_end = session_start + timedelta(hours=1)
+    schedule_panel = page.locator("section.program-panel").filter(
+        has=page.get_by_role("heading", name="Schedule session", exact=True)
+    )
+    schedule_panel.locator('select[name="assignment"]').select_option(
+        label="Synthetic E2E · Synthetic E2E"
+    )
+    schedule_panel.get_by_label("Topic").fill("Browser customer discovery review")
+    schedule_panel.get_by_label("Starts").fill(session_start.strftime("%Y-%m-%dT%H:%M"))
+    schedule_panel.get_by_label("Ends").fill(session_end.strftime("%Y-%m-%dT%H:%M"))
+    schedule_panel.get_by_label("Location or link").fill("https://meet.example/e2e")
+    schedule_panel.get_by_role("button", name="Schedule session", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+
+    notes_panel = page.locator("section.program-panel").filter(
+        has=page.get_by_role("heading", name="Notes", exact=True)
+    )
+    notes_panel.locator('select[name="assignment"]').select_option(
+        label="Synthetic E2E · Synthetic E2E"
+    )
+    notes_panel.locator('select[name="session"]').select_option(
+        label="Browser customer discovery review"
+    )
+    notes_panel.locator('select[name="visibility"]').select_option("mentor_private")
+    notes_panel.locator('textarea[name="body"]').fill(
+        "Browser private mentor observation"
+    )
+    notes_panel.get_by_role("button", name="Save", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+    notes_panel = page.locator("section.program-panel").filter(
+        has=page.get_by_role("heading", name="Notes", exact=True)
+    )
+    notes_panel.locator('select[name="assignment"]').select_option(
+        label="Synthetic E2E · Synthetic E2E"
+    )
+    notes_panel.locator('select[name="session"]').select_option(
+        label="Browser customer discovery review"
+    )
+    notes_panel.locator('select[name="visibility"]').select_option(
+        "shared_with_participant"
+    )
+    notes_panel.locator('textarea[name="body"]').fill(
+        "Interview five customers before follow-up."
+    )
+    notes_panel.get_by_role("button", name="Save", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+
+    goal_panel = (
+        page.locator("section.program-panel")
+        .filter(has=page.get_by_role("heading", name="Goals", exact=True))
+        .first
+    )
+    goal_panel.locator('select[name="assignment"]').select_option(
+        label="Synthetic E2E · Synthetic E2E"
+    )
+    goal_panel.get_by_label("Goal").fill("Validate customer demand")
+    goal_panel.get_by_role("button", name="Save", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+
+    action_panel = (
+        page.locator("section.program-panel")
+        .filter(has=page.get_by_role("heading", name="Action items", exact=True))
+        .first
+    )
+    action_panel.locator('select[name="assignment"]').select_option(
+        label="Synthetic E2E · Synthetic E2E"
+    )
+    action_panel.locator('select[name="goal"]').select_option(
+        label="Validate customer demand"
+    )
+    action_panel.get_by_label("Action").fill("Complete customer interviews")
+    action_panel.get_by_role("button", name="Save", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+
+    reminder_panel = (
+        page.locator("section.program-panel")
+        .filter(has=page.get_by_role("heading", name="Follow-up reminders", exact=True))
+        .first
+    )
+    reminder_panel.locator('select[name="assignment"]').select_option(
+        label="Synthetic E2E · Synthetic E2E"
+    )
+    reminder_panel.locator('select[name="session"]').select_option(
+        label="Browser customer discovery review"
+    )
+    reminder_panel.get_by_label("Purpose").fill("Review interview evidence")
+    reminder_panel.get_by_label("Due").fill(
+        (session_end + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M")
+    )
+    reminder_panel.get_by_role("button", name="Save", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+
+    session_list = page.locator("section.program-panel").filter(
+        has=page.get_by_role("heading", name="Sessions", exact=True)
+    )
+    session_list.get_by_role("button", name="Complete", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+
+    page.goto(base + "/en/mentoring?organization=" + str(organization_id))
+    expect(page.get_by_role("heading", name="My mentoring", exact=True)).to_be_visible()
+    expect(
+        page.get_by_text("Interview five customers before follow-up.")
+    ).to_be_visible()
+    expect(page.get_by_text("Browser private mentor observation")).to_have_count(0)
+    feedback_form = page.locator('form:has(select[name="rating"])')
+    feedback_form.locator('select[name="rating"]').select_option("5")
+    feedback_form.locator('textarea[name="comment"]').fill(
+        "Clear browser-tested guidance."
+    )
+    feedback_form.get_by_role("button", name="Save", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.screenshot(path=str(evidence / "mentoring-mobile.png"), full_page=True)
+    page.set_viewport_size({"width": 1280, "height": 900})
+
+    with Session(engine) as db:
         assignment = db.scalar(
             select(ReviewAssignment).where(
                 ReviewAssignment.organization_id == organization_id
@@ -1286,12 +1450,53 @@ with sync_playwright() as playwright:
                 AttendanceRecord.session_id == attendance_session_id,
             )
         )
+        mentor_assignment = db.scalar(
+            select(MentorAssignment).where(
+                MentorAssignment.organization_id == organization_id
+            )
+        )
+        mentoring_session = db.scalar(
+            select(MentoringSession).where(
+                MentoringSession.organization_id == organization_id
+            )
+        )
+        mentoring_notes = list(
+            db.scalars(
+                select(MentoringNote).where(
+                    MentoringNote.organization_id == organization_id
+                )
+            )
+        )
+        mentoring_goal = db.scalar(
+            select(Goal).where(Goal.organization_id == organization_id)
+        )
+        mentoring_action = db.scalar(
+            select(ActionItem).where(ActionItem.organization_id == organization_id)
+        )
+        mentoring_follow_up = db.scalar(
+            select(FollowUp).where(FollowUp.organization_id == organization_id)
+        )
+        mentoring_feedback = db.scalar(
+            select(MentoringFeedback).where(
+                MentoringFeedback.organization_id == organization_id
+            )
+        )
         assert certificate_template and certificate_template.state == "published"
         assert certificate and certificate.status == "valid"
         assert certificate.course_enrollment_id == course_enrollment.id
         assert attendance_policy and attendance_policy.threshold_percent == 80
         assert attendance_record and attendance_record.source == "qr"
         assert attendance_record.status == "present"
+        assert mentor_assignment and mentor_assignment.state == "active"
+        assert mentoring_session and mentoring_session.status == "completed"
+        assert {item.visibility for item in mentoring_notes} == {
+            "mentor_private",
+            "shared_with_participant",
+        }
+        assert mentoring_goal and mentoring_goal.state == "active"
+        assert mentoring_action and mentoring_action.state == "open"
+        assert mentoring_follow_up and mentoring_follow_up.state == "scheduled"
+        assert mentoring_feedback and mentoring_feedback.rating == 5
         assert interview and interview.status == "completed"
         assert float(interview.average_score or 0) == 84
         assert selection_cycle and selection_cycle.state == "closed"
@@ -1348,7 +1553,8 @@ print(
     "session/timeline, center-scoped coordinator assignment/revocation, trainer-scoped "
     "delivery, learner/trainer private-material downloads, learning authoring/publication/"
     "cohort access/start/quiz grading/assignment grading and feedback/completion/"
-    "certificate eligibility/issuance/public QR verification, attendance policy/QR check-in, audit, "
+    "certificate eligibility/issuance/public QR verification, attendance policy/QR check-in, "
+    "mentor assignment/session/private-shared notes/goals/actions/reminders/feedback, audit, "
     "responsive layouts and session recovery; "
     "no JS errors"
 )

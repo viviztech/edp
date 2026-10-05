@@ -1872,6 +1872,295 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/mentoring/organizations/{org}/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Workspace */
+        get: operations["workspace_api_v1_mentoring_organizations__org__workspace_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/my-mentoring": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Mentoring */
+        get: operations["my_mentoring_api_v1_mentoring_organizations__org__my_mentoring_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Profile */
+        post: operations["create_profile_api_v1_mentoring_organizations__org__profiles_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/expertise": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Expertise */
+        post: operations["add_expertise_api_v1_mentoring_organizations__org__expertise_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Availability */
+        post: operations["add_availability_api_v1_mentoring_organizations__org__availability_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Assignment */
+        post: operations["create_assignment_api_v1_mentoring_organizations__org__assignments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/assignments/{assignment_id}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** End Assignment */
+        post: operations["end_assignment_api_v1_mentoring_organizations__org__assignments__assignment_id__end_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Session */
+        post: operations["create_session_api_v1_mentoring_organizations__org__sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/sessions/{session_id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Session */
+        post: operations["transition_session_api_v1_mentoring_organizations__org__sessions__session_id__state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Note */
+        post: operations["create_note_api_v1_mentoring_organizations__org__notes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Goal */
+        post: operations["create_goal_api_v1_mentoring_organizations__org__goals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/goals/{goal_id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Goal */
+        post: operations["update_goal_api_v1_mentoring_organizations__org__goals__goal_id__state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/action-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Action */
+        post: operations["create_action_api_v1_mentoring_organizations__org__action_items_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/action-items/{action_id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Action */
+        post: operations["transition_action_api_v1_mentoring_organizations__org__action_items__action_id__state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/follow-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Follow Up */
+        post: operations["create_follow_up_api_v1_mentoring_organizations__org__follow_ups_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/follow-ups/{follow_id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Follow Up */
+        post: operations["transition_follow_up_api_v1_mentoring_organizations__org__follow_ups__follow_id__state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentoring/organizations/{org}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Feedback */
+        post: operations["create_feedback_api_v1_mentoring_organizations__org__feedback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications/organizations/{org}/preference": {
         parameters: {
             query?: never;
@@ -2663,6 +2952,43 @@ export interface components {
             /** Position */
             position: number;
         };
+        /** ActionCreate */
+        ActionCreate: {
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Goal Id */
+            goal_id?: string | null;
+            /** Title */
+            title: string;
+            /** Due At */
+            due_at?: string | null;
+        };
+        /** ActionView */
+        ActionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Goal Id */
+            goal_id: string | null;
+            /** Title */
+            title: string;
+            /** Due At */
+            due_at: string | null;
+            /** State */
+            state: string;
+            /** Version */
+            version: number;
+        };
         /** ActivityComplete */
         ActivityComplete: {
             /** Expected Version */
@@ -2956,6 +3282,13 @@ export interface components {
             /** Public Url */
             public_url: string | null;
         };
+        /** AssignmentEnd */
+        AssignmentEnd: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
         /** AssignmentGradeCommand */
         AssignmentGradeCommand: {
             /** Score Points */
@@ -3129,6 +3462,61 @@ export interface components {
             /** Request Id */
             request_id: string;
         };
+        /** AvailabilityCreate */
+        AvailabilityCreate: {
+            /**
+             * Mentor Profile Id
+             * Format: uuid
+             */
+            mentor_profile_id: string;
+            /** Weekday */
+            weekday: number;
+            /**
+             * Starts At
+             * Format: time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: time
+             */
+            ends_at: string;
+            /**
+             * Timezone
+             * @default Asia/Kolkata
+             */
+            timezone: string;
+        };
+        /** AvailabilityView */
+        AvailabilityView: {
+            /**
+             * Mentor Profile Id
+             * Format: uuid
+             */
+            mentor_profile_id: string;
+            /** Weekday */
+            weekday: number;
+            /**
+             * Starts At
+             * Format: time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: time
+             */
+            ends_at: string;
+            /**
+             * Timezone
+             * @default Asia/Kolkata
+             */
+            timezone: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
         /** CatalogView */
         CatalogView: {
             /** Programs */
@@ -3143,7 +3531,7 @@ export interface components {
              * Enrollment Candidates
              * @default []
              */
-            enrollment_candidates: components["schemas"]["EnrollmentCandidateView"][];
+            enrollment_candidates: components["schemas"]["app__modules__programs__schemas__EnrollmentCandidateView"][];
             /**
              * Participants
              * @default []
@@ -4465,40 +4853,6 @@ export interface components {
              */
             status: "new" | "reviewed" | "closed";
         };
-        /** EnrollmentCandidateView */
-        EnrollmentCandidateView: {
-            /**
-             * Application Id
-             * Format: uuid
-             */
-            application_id: string;
-            /** Application Number */
-            application_number: string;
-            /** Application Version */
-            application_version: number;
-            /**
-             * Person Id
-             * Format: uuid
-             */
-            person_id: string;
-            /** Display Name */
-            display_name: string;
-            /**
-             * Program Id
-             * Format: uuid
-             */
-            program_id: string;
-            /**
-             * Cohort Id
-             * Format: uuid
-             */
-            cohort_id: string;
-            /**
-             * Selection Cycle Id
-             * Format: uuid
-             */
-            selection_cycle_id: string;
-        };
         /** EnrollmentConversionView */
         EnrollmentConversionView: {
             participant: components["schemas"]["ParticipantView"];
@@ -4626,6 +4980,39 @@ export interface components {
             /** Processed At */
             processed_at: string | null;
         };
+        /** ExpertiseCreate */
+        ExpertiseCreate: {
+            /**
+             * Mentor Profile Id
+             * Format: uuid
+             */
+            mentor_profile_id: string;
+            /** Code */
+            code: string;
+            /** Name En */
+            name_en: string;
+            /** Name Ta */
+            name_ta: string;
+        };
+        /** ExpertiseView */
+        ExpertiseView: {
+            /**
+             * Mentor Profile Id
+             * Format: uuid
+             */
+            mentor_profile_id: string;
+            /** Code */
+            code: string;
+            /** Name En */
+            name_en: string;
+            /** Name Ta */
+            name_ta: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
         /** ExportJobView */
         ExportJobView: {
             /**
@@ -4686,6 +5073,40 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** FeedbackCreate */
+        FeedbackCreate: {
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+            /** Rating */
+            rating: number;
+            /** Comment */
+            comment?: string | null;
+        };
+        /** FeedbackView */
+        FeedbackView: {
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+            /** Rating */
+            rating: number;
+            /** Comment */
+            comment?: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /** FieldView */
         FieldView: {
             /**
@@ -4711,6 +5132,51 @@ export interface components {
             /** Position */
             position: number;
         };
+        /** FollowUpCreate */
+        FollowUpCreate: {
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Session Id */
+            session_id?: string | null;
+            /** Purpose */
+            purpose: string;
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+        };
+        /** FollowUpView */
+        FollowUpView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Session Id */
+            session_id: string | null;
+            /** Purpose */
+            purpose: string;
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+            /** State */
+            state: string;
+            /** Overdue */
+            overdue: boolean;
+            /** Version */
+            version: number;
+        };
         /** FormView */
         FormView: {
             /**
@@ -4733,6 +5199,59 @@ export interface components {
             fields: components["schemas"]["FieldView"][];
             /** Acknowledgements */
             acknowledgements: components["schemas"]["AcknowledgementView"][];
+        };
+        /** GoalCreate */
+        GoalCreate: {
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Title */
+            title: string;
+            /** Description */
+            description?: string | null;
+            /** Target Date */
+            target_date?: string | null;
+        };
+        /** GoalUpdate */
+        GoalUpdate: {
+            /** Expected Version */
+            expected_version: number;
+            /** Progress Percent */
+            progress_percent: number;
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "active" | "completed" | "cancelled";
+            /** Reason */
+            reason: string;
+        };
+        /** GoalView */
+        GoalView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Title */
+            title: string;
+            /** Description */
+            description: string | null;
+            /** Target Date */
+            target_date: string | null;
+            /** Progress Percent */
+            progress_percent: number;
+            /** State */
+            state: string;
+            /** Version */
+            version: number;
         };
         /** Grant */
         Grant: {
@@ -5743,6 +6262,64 @@ export interface components {
             /** Provider Key */
             provider_key: string;
         };
+        /** MentorAssignmentView */
+        MentorAssignmentView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Mentor Profile Id
+             * Format: uuid
+             */
+            mentor_profile_id: string;
+            /** Mentor Name */
+            mentor_name: string;
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /**
+             * Participant Id
+             * Format: uuid
+             */
+            participant_id: string;
+            /** Participant Name */
+            participant_name: string;
+            /**
+             * Program Id
+             * Format: uuid
+             */
+            program_id: string;
+            /**
+             * Starts On
+             * Format: date
+             */
+            starts_on: string;
+            /** Ends On */
+            ends_on: string | null;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "ended";
+            /** Version */
+            version: number;
+        };
+        /** MentorCandidateView */
+        MentorCandidateView: {
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+            /** Display Name */
+            display_name: string;
+            /** Has Profile */
+            has_profile: boolean;
+        };
         /** Message */
         Message: {
             /**
@@ -5816,6 +6393,23 @@ export interface components {
             /** Courses */
             courses: components["schemas"]["LearnerCourseView"][];
         };
+        /** MyMentoring */
+        MyMentoring: {
+            /** Assignments */
+            assignments: components["schemas"]["MentorAssignmentView"][];
+            /** Sessions */
+            sessions: components["schemas"]["app__modules__mentoring__schemas__SessionView"][];
+            /** Notes */
+            notes: components["schemas"]["NoteView"][];
+            /** Goals */
+            goals: components["schemas"]["GoalView"][];
+            /** Action Items */
+            action_items: components["schemas"]["ActionView"][];
+            /** Follow Ups */
+            follow_ups: components["schemas"]["FollowUpView"][];
+            /** Feedback */
+            feedback: components["schemas"]["FeedbackView"][];
+        };
         /** NamedCreate */
         NamedCreate: {
             /** Code */
@@ -5855,6 +6449,47 @@ export interface components {
              * @enum {string}
              */
             locale: "en" | "ta";
+        };
+        /** NoteCreate */
+        NoteCreate: {
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Visibility
+             * @enum {string}
+             */
+            visibility: "mentor_private" | "shared_with_participant";
+            /** Body */
+            body: string;
+        };
+        /** NoteView */
+        NoteView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Session Id */
+            session_id: string | null;
+            /** Visibility */
+            visibility: string;
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** NotificationList */
         NotificationList: {
@@ -6107,6 +6742,44 @@ export interface components {
             locale: string;
             /** Grants */
             grants: components["schemas"]["Grant"][];
+        };
+        /** ProfileCreate */
+        ProfileCreate: {
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+            /** Headline */
+            headline: string;
+            /** Biography */
+            biography?: string | null;
+        };
+        /** ProfileView */
+        ProfileView: {
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+            /** Headline */
+            headline: string;
+            /** Biography */
+            biography?: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "inactive";
+            /** Version */
+            version: number;
         };
         /** ProgramView */
         ProgramView: {
@@ -6910,35 +7583,6 @@ export interface components {
             /** Participants */
             participants: components["schemas"]["ParticipantAttendanceView"][];
         };
-        /** SessionCreate */
-        SessionCreate: {
-            /**
-             * Cohort Id
-             * Format: uuid
-             */
-            cohort_id: string;
-            /** Title En */
-            title_en: string;
-            /** Title Ta */
-            title_ta: string;
-            /**
-             * Starts At
-             * Format: date-time
-             */
-            starts_at: string;
-            /**
-             * Ends At
-             * Format: date-time
-             */
-            ends_at: string;
-            /**
-             * Mode
-             * @enum {string}
-             */
-            mode: "in_person" | "online" | "hybrid";
-            /** Location */
-            location?: string | null;
-        };
         /** SessionStateCommand */
         SessionStateCommand: {
             /** Expected Version */
@@ -7490,6 +8134,35 @@ export interface components {
             /** Closed At */
             closed_at: string | null;
         };
+        /** Workspace */
+        Workspace: {
+            /** Mentor Candidates */
+            mentor_candidates: components["schemas"]["MentorCandidateView"][];
+            /** Enrollment Candidates */
+            enrollment_candidates: components["schemas"]["app__modules__mentoring__schemas__EnrollmentCandidateView"][];
+            /** Profiles */
+            profiles: components["schemas"]["ProfileView"][];
+            /** Expertise */
+            expertise: components["schemas"]["ExpertiseView"][];
+            /** Availability */
+            availability: components["schemas"]["AvailabilityView"][];
+            /** Assignments */
+            assignments: components["schemas"]["MentorAssignmentView"][];
+            /** Sessions */
+            sessions: components["schemas"]["app__modules__mentoring__schemas__SessionView"][];
+            /** Notes */
+            notes: components["schemas"]["NoteView"][];
+            /** Goals */
+            goals: components["schemas"]["GoalView"][];
+            /** Action Items */
+            action_items: components["schemas"]["ActionView"][];
+            /** Follow Ups */
+            follow_ups: components["schemas"]["FollowUpView"][];
+            /** Feedback Count */
+            feedback_count: number;
+            /** Average Rating */
+            average_rating: number | null;
+        };
         /** SessionView */
         app__modules__identity__schemas__SessionView: {
             /**
@@ -7542,6 +8215,171 @@ export interface components {
             passing_points: number;
             /** Max Submissions */
             max_submissions: number;
+        };
+        /** AssignmentCreate */
+        app__modules__mentoring__schemas__AssignmentCreate: {
+            /**
+             * Mentor Profile Id
+             * Format: uuid
+             */
+            mentor_profile_id: string;
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /**
+             * Starts On
+             * Format: date
+             */
+            starts_on: string;
+            /** Ends On */
+            ends_on?: string | null;
+            /** Reason */
+            reason: string;
+        };
+        /** EnrollmentCandidateView */
+        app__modules__mentoring__schemas__EnrollmentCandidateView: {
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /** Participant Name */
+            participant_name: string;
+            /**
+             * Program Id
+             * Format: uuid
+             */
+            program_id: string;
+            /** Has Active Assignment */
+            has_active_assignment: boolean;
+        };
+        /** SessionCreate */
+        app__modules__mentoring__schemas__SessionCreate: {
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "in_person" | "online" | "phone";
+            /** Location Or Link */
+            location_or_link?: string | null;
+            /** Topic */
+            topic: string;
+        };
+        /** SessionView */
+        app__modules__mentoring__schemas__SessionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Mode */
+            mode: string;
+            /** Location Or Link */
+            location_or_link: string | null;
+            /** Topic */
+            topic: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "scheduled" | "completed" | "cancelled";
+            /** Version */
+            version: number;
+        };
+        /** EnrollmentCandidateView */
+        app__modules__programs__schemas__EnrollmentCandidateView: {
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /** Application Number */
+            application_number: string;
+            /** Application Version */
+            application_version: number;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Program Id
+             * Format: uuid
+             */
+            program_id: string;
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /**
+             * Selection Cycle Id
+             * Format: uuid
+             */
+            selection_cycle_id: string;
+        };
+        /** SessionCreate */
+        app__modules__programs__schemas__SessionCreate: {
+            /**
+             * Cohort Id
+             * Format: uuid
+             */
+            cohort_id: string;
+            /** Title En */
+            title_en: string;
+            /** Title Ta */
+            title_ta: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "in_person" | "online" | "hybrid";
+            /** Location */
+            location?: string | null;
         };
         /** SessionView */
         app__modules__programs__schemas__SessionView: {
@@ -11812,6 +12650,598 @@ export interface operations {
             };
         };
     };
+    workspace_api_v1_mentoring_organizations__org__workspace_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Workspace"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_mentoring_api_v1_mentoring_organizations__org__my_mentoring_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyMentoring"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_profile_api_v1_mentoring_organizations__org__profiles_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_expertise_api_v1_mentoring_organizations__org__expertise_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpertiseCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpertiseView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_availability_api_v1_mentoring_organizations__org__availability_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvailabilityCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailabilityView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_assignment_api_v1_mentoring_organizations__org__assignments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__modules__mentoring__schemas__AssignmentCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorAssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    end_assignment_api_v1_mentoring_organizations__org__assignments__assignment_id__end_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentEnd"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorAssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_session_api_v1_mentoring_organizations__org__sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__modules__mentoring__schemas__SessionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__mentoring__schemas__SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_session_api_v1_mentoring_organizations__org__sessions__session_id__state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StateCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__mentoring__schemas__SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_note_api_v1_mentoring_organizations__org__notes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_goal_api_v1_mentoring_organizations__org__goals_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_goal_api_v1_mentoring_organizations__org__goals__goal_id__state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_action_api_v1_mentoring_organizations__org__action_items_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_action_api_v1_mentoring_organizations__org__action_items__action_id__state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                action_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StateCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_follow_up_api_v1_mentoring_organizations__org__follow_ups_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FollowUpCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUpView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_follow_up_api_v1_mentoring_organizations__org__follow_ups__follow_id__state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                follow_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StateCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUpView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_feedback_api_v1_mentoring_organizations__org__feedback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     preference_api_v1_notifications_organizations__org__preference_get: {
         parameters: {
             query?: {
@@ -12632,7 +14062,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SessionCreate"];
+                "application/json": components["schemas"]["app__modules__programs__schemas__SessionCreate"];
             };
         };
         responses: {

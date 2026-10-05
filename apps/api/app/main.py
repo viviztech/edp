@@ -26,6 +26,7 @@ from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
 from app.modules.lms.routes import public_router as certificates_router
 from app.modules.lms.routes import router as lms_router
+from app.modules.mentoring.routes import router as mentoring_router
 from app.modules.meta.routes import router as meta_router
 from app.modules.notifications.routes import router as notifications_router
 from app.modules.programs.routes import router as programs_router
@@ -91,6 +92,7 @@ def create_app() -> FastAPI:
     app.include_router(cms_router)
     app.include_router(crm_router)
     app.include_router(meta_router)
+    app.include_router(mentoring_router)
     app.include_router(notifications_router)
     app.include_router(programs_router)
     app.include_router(selection_router)
@@ -135,6 +137,7 @@ def create_app() -> FastAPI:
                         or request.url.path.startswith("/api/v1/courses/")
                         or request.url.path.startswith("/api/v1/selection/")
                         or request.url.path.startswith("/api/v1/attendance/")
+                        or request.url.path.startswith("/api/v1/mentoring/")
                     )
                     and request.method in {"POST", "PATCH", "PUT"}
                 )

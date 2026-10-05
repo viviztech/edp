@@ -72,7 +72,7 @@ The open-questions register still requires decisions or confirmed owners for:
 The following are future implementation slices and are not defects or unfinished acceptance criteria in already completed slices:
 
 - L02 follow-up: secure assignment file evidence, approved certificate signatories/PDF presentation and any attendance gate; L02.3 core eligibility/issuance/verification is complete locally
-- M01 mentoring
+- M01 mentoring is complete locally; provider reminder delivery and native mobile remain deferred
 - K01 knowledge resources
 - S01 schemes and opportunities
 - I01 impact reporting
@@ -113,4 +113,8 @@ L02.3 adds derived lesson/quiz/assignment eligibility, versioned bilingual templ
 
 ## L03 completion record
 
-L03 adds versioned cohort policy, scoped manual attendance, digest-only time-limited QR windows, participant check-in, duplicate prevention, immutable corrections, derived percentages and low-attendance status, and English/Tamil staff/participant web flows. No location, biometric, or device-fingerprint data is collected. Final threshold approval, outbound alert delivery, any certificate attendance gate, native Flutter, remote CI, and production operational acceptance remain open. The next scheduled module is M01 mentoring.
+L03 adds versioned cohort policy, scoped manual attendance, digest-only time-limited QR windows, participant check-in, duplicate prevention, immutable corrections, derived percentages and low-attendance status, and English/Tamil staff/participant web flows. No location, biometric, or device-fingerprint data is collected. Final threshold approval, outbound alert delivery, any certificate attendance gate, native Flutter, remote CI, and production operational acceptance remain open.
+
+## M01 completion record
+
+M01 adds eligible mentor profiles, expertise and availability, one active enrollment-scoped assignment, conflict-checked sessions, author-only private notes, participant-shared notes, versioned goals/actions, durable follow-up reminders, immutable participant feedback and count/average monitoring. PostgreSQL repeats scope and immutability controls. English/Tamil staff and participant web flows use a closed BFF allowlist. Native mentor mobile access, production reminder dispatch, retention approval, remote CI and production operational acceptance remain open. The next scheduled module is K01 knowledge resources.

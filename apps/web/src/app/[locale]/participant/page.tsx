@@ -14,5 +14,5 @@ export default async function ParticipantPage({ params, searchParams }: { params
   const requested = (await searchParams).organization;
   const grant = profile.grants.filter((item) => item.permissions.includes("participant.self")).find((item) => !requested || item.organization_id === requested);
   if (!grant) return <main><h1>Participant schedule</h1><p>No active participant enrollment.</p><Link href={`/${locale}/account`}>Account</Link></main>;
-  return <main className="program-main"><nav><Link href={`/${locale}/attendance?organization=${grant.organization_id}`}>{locale === "ta" ? "\u0b8e\u0ba9\u0ba4\u0bc1 \u0bb5\u0bb0\u0bc1\u0b95\u0bc8" : "My attendance"}</Link></nav><ParticipantTimelineView org={grant.organization_id} locale={locale} /></main>;
+  return <main className="program-main"><nav><Link href={`/${locale}/attendance?organization=${grant.organization_id}`}>{locale === "ta" ? "\u0b8e\u0ba9\u0ba4\u0bc1 \u0bb5\u0bb0\u0bc1\u0b95\u0bc8" : "My attendance"}</Link> · <Link href={`/${locale}/mentoring?organization=${grant.organization_id}`}>{locale === "ta" ? "\u0b8e\u0ba9\u0ba4\u0bc1 \u0bb5\u0bb4\u0bbf\u0b95\u0bbe\u0b9f\u0bcd\u0b9f\u0bc1\u0ba4\u0bb2\u0bcd" : "My mentoring"}</Link></nav><ParticipantTimelineView org={grant.organization_id} locale={locale} /></main>;
 }

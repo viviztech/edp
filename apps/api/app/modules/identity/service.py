@@ -96,6 +96,7 @@ LMS_ASSESSMENT_PERMISSIONS = [
 ]
 CERTIFICATE_PERMISSIONS = ["certificate.manage", "certificate.issue"]
 ATTENDANCE_PERMISSIONS = ["attendance.view", "attendance.manage"]
+MENTORING_PERMISSIONS = ["mentoring.view", "mentoring.manage", "mentoring.admin"]
 SELECTION_PERMISSIONS = [
     "selection.cycle.view",
     "selection.cycle.manage",
@@ -136,6 +137,7 @@ PERMISSIONS = [
     *LMS_ASSESSMENT_PERMISSIONS,
     *CERTIFICATE_PERMISSIONS,
     *ATTENDANCE_PERMISSIONS,
+    *MENTORING_PERMISSIONS,
     *SELECTION_PERMISSIONS,
 ]
 
@@ -483,6 +485,7 @@ def seed_roles(db: Session) -> None:
                 *LMS_ASSESSMENT_PERMISSIONS,
                 *CERTIFICATE_PERMISSIONS,
                 *ATTENDANCE_PERMISSIONS,
+                *MENTORING_PERMISSIONS,
                 *SELECTION_PERMISSIONS,
             ]
         elif name == "Program Manager":
@@ -497,6 +500,7 @@ def seed_roles(db: Session) -> None:
                 *LMS_ASSESSMENT_PERMISSIONS,
                 "certificate.manage",
                 *ATTENDANCE_PERMISSIONS,
+                *MENTORING_PERMISSIONS,
                 "selection.cycle.view",
                 "selection.cycle.manage",
                 "selection.rubric.manage",
@@ -512,6 +516,8 @@ def seed_roles(db: Session) -> None:
                 "lms.assessment.grade",
                 *ATTENDANCE_PERMISSIONS,
             ]
+        elif name == "Mentor":
+            codes = ["system.access", "mentoring.view", "mentoring.manage"]
         elif name == "Selection Committee":
             codes = [
                 "system.access",
@@ -536,6 +542,7 @@ def seed_roles(db: Session) -> None:
                 "system.access",
                 PARTICIPANT_SELF_PERMISSION,
                 LMS_LEARN_PERMISSION,
+                "mentoring.view",
             ]
         else:
             codes = ["system.access"]
