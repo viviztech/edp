@@ -20,6 +20,8 @@ from app.core.database import create_engine
 from app.core.logging import configure_logging
 from app.modules.applications.routes import router as applications_router
 from app.modules.attendance.routes import router as attendance_router
+from app.modules.business_plans.routes import router as business_plans_router
+from app.modules.businesses.routes import router as businesses_router
 from app.modules.cms.routes import router as cms_router
 from app.modules.crm.routes import router as crm_router
 from app.modules.identity.routes import router as identity_router
@@ -86,6 +88,8 @@ def create_app() -> FastAPI:
     )
     app.include_router(identity_router)
     app.include_router(attendance_router)
+    app.include_router(business_plans_router)
+    app.include_router(businesses_router)
     app.include_router(lms_router)
     app.include_router(certificates_router)
     app.include_router(applications_router)
@@ -138,6 +142,8 @@ def create_app() -> FastAPI:
                         or request.url.path.startswith("/api/v1/selection/")
                         or request.url.path.startswith("/api/v1/attendance/")
                         or request.url.path.startswith("/api/v1/mentoring/")
+                        or request.url.path.startswith("/api/v1/business-plans/")
+                        or request.url.path.startswith("/api/v1/businesses/")
                     )
                     and request.method in {"POST", "PATCH", "PUT"}
                 )

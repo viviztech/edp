@@ -3,6 +3,14 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
   experimental: { cpus: 1 },
   async redirects() {
     return [{ source: "/", destination: "/en", permanent: false }];

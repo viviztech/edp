@@ -38,3 +38,7 @@ The course shows separate lesson, quiz and assignment requirements. You become c
 Open **My attendance** from the participant portal. Scan the QR shown by the trainer with a compatible app and paste its `edp-attendance:` value, or enter the provided check-in code. Check-in works only during the session window and only for your active enrollment. Repeating a successful check-in is rejected.
 
 The page shows Present, Late, Absent, Excused, or Unmarked for each session and calculates your percentage. Present and Late count as attended; Excused sessions are removed from the counted total. A warning appears when the result is below the cohort threshold. Ask authorized staff to correct an error; the original record remains in the audit history. No location is collected.
+
+## Draft and submit a business plan
+
+Open **My business plan** from the participant portal for an active enrollment. Work through the 20 sections; each change saves after a short pause and creates a revision. Check the saved status before leaving. All sections must contain text before **Submit for mentor review** becomes available. Submission preserves a numbered snapshot. Your assigned mentor may approve it or request changes with comments. After a changes request, revise and submit again; earlier snapshots remain visible. Financial entries are planning assumptions, not guaranteed outcomes. PDF export is not yet available.

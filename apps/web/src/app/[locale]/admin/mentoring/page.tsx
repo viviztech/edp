@@ -30,7 +30,8 @@ export default async function MentoringAdminPage({ params, searchParams }: {
       permissions={grant.permissions} active="mentoring" />
     <header className="program-heading"><div><p className="eyebrow">{text.eyebrow}</p>
       <h1>{text.title}</h1><p>{text.intro}</p></div>
-      <Link href={`/${locale}/admin?organization=${grant.organization_id}`}>Admin</Link>
+      <div><Link href={`/${locale}/admin/business-plans?organization=${grant.organization_id}`}>
+        {locale === "ta" ? "வணிகத் திட்ட மதிப்பாய்வுகள்" : "Business plan reviews"}</Link> · <Link href={`/${locale}/admin?organization=${grant.organization_id}`}>Admin</Link></div>
     </header>
     <MentoringWorkspace org={grant.organization_id} locale={locale}
       canAdmin={grant.permissions.includes("mentoring.admin")} />

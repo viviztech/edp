@@ -12,7 +12,7 @@ import { notificationMessages } from "../lib/notification-messages";
 import { programMessages } from "../lib/program-messages";
 import { selectionMessages } from "../lib/selection-messages";
 
-type ModuleKey = "pages" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning" | "attendance" | "mentoring";
+type ModuleKey = "pages" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning" | "attendance" | "mentoring" | "businesses";
 type Locale = "en" | "ta";
 
 const descriptions: Record<Locale, Record<ModuleKey, string>> = {
@@ -27,6 +27,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     learning: "Build courses and place them in cohort pathways.",
     attendance: "Open check-in windows and maintain session registers.",
     mentoring: "Match mentors, schedule sessions and track agreed outcomes.",
+    businesses: "Review business progress and follow-up reports.",
   },
   ta: {
     pages: "\u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0baa\u0bcd \u0baa\u0b95\u0bcd\u0b95\u0b99\u0bcd\u0b95\u0bb3\u0bc8 \u0b89\u0bb0\u0bc1\u0bb5\u0bbe\u0b95\u0bcd\u0b95\u0bbf \u0bb5\u0bc6\u0bb3\u0bbf\u0baf\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
@@ -39,6 +40,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     learning: "\u0baa\u0bbe\u0b9f\u0ba8\u0bc6\u0bb1\u0bbf\u0b95\u0bb3\u0bc8 \u0b89\u0bb0\u0bc1\u0bb5\u0bbe\u0b95\u0bcd\u0b95\u0bbf \u0b95\u0bc1\u0bb4\u0bc1 \u0baa\u0bbe\u0ba4\u0bc8\u0b95\u0bb3\u0bbf\u0bb2\u0bcd \u0bb5\u0bc8\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
     attendance: "\u0b85\u0bae\u0bb0\u0bcd\u0bb5\u0bc1 \u0bb5\u0bb0\u0bc1\u0b95\u0bc8\u0baf\u0bc8 \u0ba4\u0bbf\u0bb1\u0ba8\u0bcd\u0ba4\u0bc1 \u0baa\u0ba4\u0bbf\u0bb5\u0bc7\u0b9f\u0bc1\u0b95\u0bb3\u0bc8 \u0ba8\u0bbf\u0bb0\u0bcd\u0bb5\u0b95\u0bbf\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
     mentoring: "\u0bb5\u0bb4\u0bbf\u0b95\u0bbe\u0b9f\u0bcd\u0b9f\u0bbf\u0b95\u0bb3\u0bc8 \u0b92\u0ba4\u0bc1\u0b95\u0bcd\u0b95\u0bbf \u0b85\u0bae\u0bb0\u0bcd\u0bb5\u0bc1\u0b95\u0bb3\u0bc8\u0ba4\u0bcd \u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0bae\u0bbf\u0b9f\u0bb5\u0bc1\u0bae\u0bcd.",
+    businesses: "தொழில் முன்னேற்றம் மற்றும் பின்தொடர்வு அறிக்கைகளைப் பார்க்கவும்.",
   },
 };
 
@@ -53,6 +55,7 @@ const modules = [
   { key: "learning", route: "learning", permission: "lms.course.view", Icon: BookOpen },
   { key: "attendance", route: "attendance", permission: "attendance.view", Icon: ScanLine },
   { key: "mentoring", route: "mentoring", permission: "mentoring.view", Icon: Handshake },
+  { key: "businesses", route: "businesses", permission: "business.track.view", Icon: Building2 },
 ] as const;
 
 export function StaffModuleNav({ locale, organization, permissions, variant = "tabs", active }: {
@@ -73,6 +76,7 @@ export function StaffModuleNav({ locale, organization, permissions, variant = "t
     learning: learningMessages[locale].workspace,
     attendance: attendanceMessages[locale].workspace,
     mentoring: mentoringMessages[locale].workspace,
+    businesses: locale === "ta" ? "தொழில் பின்தொடர்வு" : "Business tracking",
   };
   const available = modules.filter((module) =>
     permissions.includes(module.permission)

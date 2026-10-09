@@ -51,3 +51,7 @@ The Certificate eligibility section recalculates lesson completion and passed qu
 Open **Attendance** after program sessions and delivery staff assignments exist. Save the cohort policy before opening check-in. Confirm the threshold, late boundary, opening offset, and closing offset with the program owner and record the approval reason.
 
 For a scheduled session, open its QR window and immediately show the generated QR to enrolled participants; the raw token is displayed only during that browser session. Close the window as soon as check-in finishes. Mark any remaining participant as Present, Absent, Late, or Excused. An existing mark must be changed through **Correct** with the exact reason; corrections retain the prior value and actor. Never enter medical details in the reason. The platform does not collect participant location.
+
+## Review assigned business plans
+
+Open **Business plan reviews** from Mentoring. Only an active mentor assignment grants access to a participant's submitted snapshot. Read the submitted version, add section comments where useful, enter a review reason, and choose **Request changes** or **Approve**. A review is recorded once for that submission and cannot be edited. A participant can submit a new version after a changes request. Draft changes made after a review are not part of an earlier submitted snapshot.

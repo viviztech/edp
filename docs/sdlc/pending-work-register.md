@@ -77,6 +77,10 @@ The following are future implementation slices and are not defects or unfinished
 - S01 schemes and opportunities
 - I01 impact reporting
 
+## B01.1 continuation — 2026-10-08
+
+B01 implementation has started after M01. The participant draft and submission API, immutable revision/snapshot/review design, assigned mentor review API, bilingual participant and mentor web flows, CSRF BFF, generated contracts, and focused static/web checks are present. On 2026-10-08 the isolated PostgreSQL `edp_test` workflow test passed, along with migration downgrade/re-upgrade and zero drift. Across the full API run and a targeted retry using a project-local temp directory, 89 tests passed. Authenticated browser acceptance and remote CI remain open. Do not mark B01 complete until the Milestone 7 plan's acceptance gates pass.
+
 ## Recommended continuation rule
 
 Before the next Phase 6 slice, commit and push the current changes and obtain remote CI results. Repository-wide CMS Ruff/MyPy debt is verified and remains tracked for remediation; it must not be attributed to later focused modules. Native macOS validation, live-provider work, staging, and production gates may remain explicitly deferred while local feature development continues.
