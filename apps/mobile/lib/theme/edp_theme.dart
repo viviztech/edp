@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 /// Mirrors packages/design-tokens/tokens.json for the Material 3 app shell.
 abstract final class EdpColors {
-  static const ink = Color(0xFF193B45);
-  static const background = Color(0xFFF6FAFB);
-  static const accent = Color(0xFF086B68);
-  static const line = Color(0xFFB9CED1);
-  static const highlight = Color(0xFFC76B2B);
+  static const ink = Color(0xFF012154);
+  static const background = Color(0xFFF6F8FC);
+  static const accent = Color(0xFF195DA4);
+  static const line = Color(0xFFC8D5E7);
+  static const highlight = Color(0xFF195DA4);
   static const paper = Colors.white;
 }
 

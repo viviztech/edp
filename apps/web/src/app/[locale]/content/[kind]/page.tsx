@@ -1,11 +1,48 @@
 import Link from "next/link";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { notFound } from "next/navigation";
-import { publicEditorial, type EditorialKind } from "../../../../lib/public-editorial";
 import type { Metadata } from "next";
+import { publicEditorial, type EditorialKind } from "../../../../lib/public-editorial";
 import { absoluteUrl } from "../../../../lib/site-url";
 import { isLocale, messages } from "../../../../lib/messages";
-import { editorialLabels, editorialEmpty } from "../../../../lib/editorial-copy";
-const kinds:EditorialKind[]=["news","event","faq","testimonial"];
-export const dynamic="force-dynamic";
-export async function generateMetadata({params}:{params:Promise<{locale:string;kind:string}>}):Promise<Metadata>{const p=await params;return {title:p.kind,alternates:{canonical:absoluteUrl(`/${p.locale}/content/${p.kind}`),languages:{en:absoluteUrl(`/en/content/${p.kind}`),ta:absoluteUrl(`/ta/content/${p.kind}`)}}};}
-export default async function EditorialList({params}:{params:Promise<{locale:string;kind:string}>}){const p=await params;if(!isLocale(p.locale)||!kinds.includes(p.kind as EditorialKind))notFound();const data=await publicEditorial(p.kind as EditorialKind,p.locale);return <main className="content-shell editorial-index"><p className="eyebrow">{messages[p.locale].title}</p><h1>{editorialLabels[p.locale][p.kind as EditorialKind]}</h1><div className="editorial-list">{data?.items.map(i=><Link className="information-card" key={i.id} href={`/${p.locale}/content/${p.kind}/${i.slug}`}><h2>{i.title}</h2>{i.starts_at&&<p className="content-date">{new Intl.DateTimeFormat(p.locale).format(new Date(i.starts_at))}</p>}<p>{i.body}</p></Link>)}</div>{!data?.items.length&&<p>{editorialEmpty[p.locale]}</p>}</main>}
+import { editorialLabels, editorialEmpty, editorialIntroductions } from "../../../../lib/editorial-copy";
+
+const kinds: EditorialKind[] = ["news", "event", "faq", "testimonial"];
+type Props = { params: Promise<{ locale: string; kind: string }> };
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, kind } = await params;
+  if (!isLocale(locale) || !kinds.includes(kind as EditorialKind)) return {};
+  return {
+    title: editorialLabels[locale][kind as EditorialKind],
+    description: editorialIntroductions[locale][kind as EditorialKind],
+    alternates: {
+      canonical: absoluteUrl("/" + locale + "/content/" + kind),
+      languages: { en: absoluteUrl("/en/content/" + kind), ta: absoluteUrl("/ta/content/" + kind) },
+    },
+  };
+}
+
+export default async function EditorialList({ params }: Props) {
+  const { locale, kind } = await params;
+  if (!isLocale(locale) || !kinds.includes(kind as EditorialKind)) notFound();
+  const selected = kind as EditorialKind;
+  let data: Awaited<ReturnType<typeof publicEditorial>> = null;
+  try { data = await publicEditorial(selected, locale); } catch {}
+  return <main id="main" className="editorial-public">
+    <div className="editorial-public-shell">
+      <p className="public-eyebrow">{messages[locale].title}</p>
+      <h1>{editorialLabels[locale][selected]}</h1>
+      <p className="editorial-public-intro">{editorialIntroductions[locale][selected]}</p>
+      {data?.items.length ? <div className="editorial-public-grid">{data.items.map((item) =>
+        <Link key={item.id} href={"/" + locale + "/content/" + kind + "/" + item.slug}>
+          <span>{item.starts_at && new Intl.DateTimeFormat(locale).format(new Date(item.starts_at))}</span>
+          <h2>{item.title}</h2>
+          <p>{item.body}</p>
+          <ArrowUpRight size={20} aria-hidden="true" />
+        </Link>)}</div> : <div className="editorial-public-empty">{editorialEmpty[locale]}</div>}
+      <Link className="editorial-public-back" href={"/" + locale + "/pages"}><ArrowLeft size={18} aria-hidden="true" />{locale === "en" ? "All pages" : "அனைத்து பக்கங்களும்"}</Link>
+    </div>
+  </main>;
+}

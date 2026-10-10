@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 560" role="img" aria-hidden="true">
-  <rect width="600" height="560" fill="#E8F1F1"/>
-  <path d="M0 80h600M0 160h600M0 240h600M0 320h600M0 400h600M0 480h600M80 0v560M160 0v560M240 0v560M320 0v560M400 0v560M480 0v560M560 0v560" fill="none" stroke="#C7D9DA" stroke-width="1"/>
-  <path d="M80 480h80v-80h80v-80h80v-80h80v-80h80V80h80" fill="none" stroke="#086B68" stroke-width="36" stroke-linecap="square" stroke-linejoin="miter"/>
-  <path d="M80 480h80v-80h80v-80h80v-80h80v-80h80V80h80" fill="none" stroke="#F6FAFB" stroke-width="2" stroke-dasharray="4 10"/>
-  <circle cx="80" cy="480" r="21" fill="#193B45"/>
-  <circle cx="560" cy="80" r="26" fill="#C76B2B"/>
-  <circle cx="560" cy="80" r="8" fill="#F6FAFB"/>
-  <path d="M44 80h56M72 52v56M488 476h72" stroke="#193B45" stroke-width="2"/>
+  <rect width="600" height="560" fill="#EAF1FA"/>
+  <path d="M0 80h600M0 160h600M0 240h600M0 320h600M0 400h600M0 480h600M80 0v560M160 0v560M240 0v560M320 0v560M400 0v560M480 0v560M560 0v560" fill="none" stroke="#C8D5E7" stroke-width="1"/>
+  <path d="M80 480h80v-80h80v-80h80v-80h80v-80h80V80h80" fill="none" stroke="#195DA4" stroke-width="36" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M80 480h80v-80h80v-80h80v-80h80v-80h80V80h80" fill="none" stroke="#F6F8FC" stroke-width="2" stroke-dasharray="4 10"/>
+  <circle cx="80" cy="480" r="21" fill="#012154"/>
+  <circle cx="560" cy="80" r="26" fill="#195DA4"/>
+  <circle cx="560" cy="80" r="8" fill="#F6F8FC"/>
+  <path d="M44 80h56M72 52v56M488 476h72" stroke="#012154" stroke-width="2"/>
 </svg>

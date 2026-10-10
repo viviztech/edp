@@ -1,10 +1,21 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { authMessages } from "../../lib/auth-messages";
+import { PublicNavigation } from "../../components/public-navigation";
 import { isLocale, messages } from "../../lib/messages";
 import "../styles.css";
-import { cmsMessages } from "../../lib/cms-messages";
-import { publicNavigation } from "../../lib/public-navigation";
+import { publicNavLabels, starterPageList } from "../../lib/public-site-content";
+import { siteUrl } from "../../lib/site-url";
+
+export const metadata: Metadata = {
+  metadataBase: siteUrl(),
+  icons: {
+    icon: "/cse-logo.png",
+    apple: "/cse-logo.png",
+  },
+};
 
 export default async function LocaleLayout({ children, params }: {
   children: React.ReactNode; params: Promise<{ locale: string }>;
@@ -12,19 +23,22 @@ export default async function LocaleLayout({ children, params }: {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const text = messages[locale];
-  const navigation = await publicNavigation(locale);
+  const labels = publicNavLabels[locale];
+  const pages = starterPageList(locale);
+  const program = pages.filter((page) => page.group === "program");
+  const support = pages.filter((page) => page.group === "support");
   return <html lang={locale}><body>
     <a className="skip" href="#main">{text.skip}</a>
-    <header className="site-header"><div className="site-header-inner"><Link className="identity" href={`/${locale}`}><span className="identity-mark" aria-hidden="true" /><span>{text.organization}</span></Link>
-      <nav className="site-nav" aria-label={text.navigation}>
-        <Link href={`/${locale}`}>{text.home}</Link>
-        {navigation.map((page) => <Link key={page.id} href={`/${locale}/pages/${page.slug}`}>{page.title}</Link>)}
-        <Link href={`/${locale}/pages`}>{cmsMessages[locale].pages}</Link>
-        <Link className="site-account" href={`/${locale}/account`}>{authMessages[locale].title}</Link>
-        <Link className="site-language" href={`/${locale === "en" ? "ta" : "en"}`} lang={locale === "en" ? "ta" : "en"}>{text.language}</Link>
-      </nav>
+    <header className="site-header"><div className="site-header-inner"><Link className="identity" href={`/${locale}`} aria-label={text.organization}><Image className="identity-logo" src="/cse-logo.png" width={88} height={88} alt="" priority /></Link>
+      <PublicNavigation
+        locale={locale}
+        navigationLabel={text.navigation}
+        labels={{ ...labels, account: authMessages[locale].title, language: text.language }}
+        program={program.map((page) => ({ title: page.title, href: `/${locale}/pages/${page.slug}` }))}
+        support={support.map((page) => ({ title: page.title, href: `/${locale}/pages/${page.slug}` }))}
+      />
     </div></header>
     {children}
-    <footer className="site-footer"><div><strong>{text.organization}</strong><span>{text.title}</span></div></footer>
+    <footer className="site-footer"><div><div className="site-footer-brand"><Image src="/cse-logo.png" width={68} height={68} alt="" /><strong>{text.organization}</strong></div><span>{text.title}</span></div></footer>
   </body></html>;
 }

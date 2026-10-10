@@ -79,7 +79,16 @@ class PublicHome extends ConsumerWidget {
     final text = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('EDP')),
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/images/cse-logo.png', width: 42, height: 42),
+            const SizedBox(width: 10),
+            const Text('EDP'),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
