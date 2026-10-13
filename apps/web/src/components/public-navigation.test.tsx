@@ -8,9 +8,17 @@ const props = {
   locale: "en" as const,
   navigationLabel: "Public navigation",
   labels: {
-    home: "Home", program: "The program", support: "Explore", updates: "Updates",
-    contact: "Contact", apply: "Apply", account: "Account", language: "Tamil",
-    news: "News", events: "Events", faq: "FAQ",
+    home: "Home",
+    program: "The program",
+    support: "Explore",
+    updates: "Updates",
+    contact: "Contact",
+    apply: "Apply",
+    account: "Account",
+    language: "Tamil",
+    news: "News",
+    events: "Events",
+    faq: "FAQ",
   },
   program: [{ title: "About", href: "/en/pages/about" }],
   support: [{ title: "Resources", href: "/en/pages/resources" }],
@@ -25,7 +33,9 @@ describe("public navigation dropdowns", () => {
 
     fireEvent.mouseEnter(group);
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    expect(screen.getByRole("link", { name: "About" }).getAttribute("href")).toBe("/en/pages/about");
+    expect(
+      screen.getByRole("link", { name: "About" }).getAttribute("href"),
+    ).toBe("/en/pages/about");
 
     fireEvent.mouseLeave(group);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
@@ -48,5 +58,27 @@ describe("public navigation dropdowns", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
     fireEvent.keyDown(group, { key: "Escape" });
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("closes the mobile navigation after following a link", () => {
+    render(<PublicNavigation {...props} />);
+    const toggle = screen.getByRole("button", { name: "Menu" });
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute("aria-expanded")).toBe("true");
+    const home = screen.getByRole("link", { name: "Home" });
+    home.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(home);
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("returns keyboard focus to the mobile trigger when dismissed", () => {
+    render(<PublicNavigation {...props} />);
+    const toggle = screen.getByRole("button", { name: "Menu" });
+    fireEvent.click(toggle);
+    const programTrigger = screen.getByRole("button", { name: "The program" });
+    programTrigger.focus();
+    fireEvent.keyDown(programTrigger, { key: "Escape" });
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(toggle);
   });
 });
