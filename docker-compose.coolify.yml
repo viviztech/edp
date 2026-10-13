@@ -2,11 +2,13 @@ x-api: &api
   build:
     context: .
     dockerfile: infra/docker/api.Dockerfile
+  entrypoint: ["sh", "-c", "export DATABASE_URL=\"postgresql+psycopg://edp:$${POSTGRES_PASSWORD}@postgres:5432/edp\" REDIS_URL=\"redis://:$${REDIS_PASSWORD}@redis:6379/0\"; exec \"$$@\"", "--"]
+  command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
   environment: &api-env
     APP_ENV: staging
     BFF_KEY: ${BFF_KEY:?}
-    DATABASE_URL: postgresql+psycopg://edp:${POSTGRES_PASSWORD:?}@postgres:5432/edp
-    REDIS_URL: redis://:${REDIS_PASSWORD:?}@redis:6379/0
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    REDIS_PASSWORD: ${REDIS_PASSWORD:?}
     CORS_ORIGINS: '["${WEB_ORIGIN:?}"]'
     LMS_MATERIAL_ROOT: /private-materials
     LMS_MATERIAL_SIGNING_KEY: ${LMS_MATERIAL_SIGNING_KEY:?}

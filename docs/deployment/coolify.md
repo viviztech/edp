@@ -8,6 +8,8 @@ Generate independent random URL-safe secrets for `POSTGRES_PASSWORD`, `REDIS_PAS
 
 The migration service runs Alembic to head and seeds identity roles/permissions. It is excluded from overall health because it exits after success. API, Celery worker, and the single scheduler wait for migration completion. PostgreSQL, Redis, and private materials use persistent resource-scoped volumes. No database, Redis, or API port is published to the host.
 
+The API image's shared Compose entrypoint constructs connection URLs inside the container from the injected URL-safe password variables, then executes the service command. This preserves identical database/cache credentials when Coolify's literal-variable handling adds YAML quotes. Set `WEB_ORIGIN` as a regular variable with literal mode disabled; embedding a literal-mode origin inside the CORS JSON would retain extra quotes.
+
 Only web traffic is routed by the Coolify proxy. The API remains reachable internally at `http://api:8000`; `/ready` checks PostgreSQL and Redis. Check both `/en` and `/ta`, `/cse-logo.png`, and a browser session request after deployment. Inspect container health and migration logs.
 
 This is a staging deployment of the current code, not evidence that the production product acceptance gates have passed. Email delivery and integrations remain subject to their existing provider and policy requirements. There is no default administrator account. Provision one through the trusted `app.modules.identity.cli bootstrap-admin` operator command when the administrator identity is supplied.
