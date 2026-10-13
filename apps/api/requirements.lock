@@ -42,6 +42,8 @@ click-plugins==1.1.1.2
     # via celery
 click-repl==0.4.0
     # via celery
+colorama==0.4.6
+    # via qrcode
 cryptography==50.0.1
     # via edp-api (apps/api/pyproject.toml)
 dnspython==2.8.0
@@ -99,6 +101,8 @@ python-dotenv==1.2.3
     #   uvicorn
 pyyaml==6.0.3
     # via uvicorn
+qrcode==8.2
+    # via edp-api (apps/api/pyproject.toml)
 redis==6.4.0
     # via edp-api (apps/api/pyproject.toml)
 six==1.17.0

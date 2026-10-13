@@ -50,7 +50,9 @@ click-plugins==1.1.1.2
 click-repl==0.4.0
     # via celery
 colorama==0.4.6
-    # via pytest
+    # via
+    #   pytest
+    #   qrcode
 cryptography==50.0.1
     # via edp-api (apps/api/pyproject.toml)
 cyclonedx-python-lib==11.12.0
@@ -117,6 +119,8 @@ packaging==26.3
     #   pytest
 pathspec==1.1.1
     # via mypy
+pillow==12.3.0
+    # via types-qrcode
 pip==26.2.1
     # via pip-api
 pip-api==0.0.35
@@ -171,6 +175,8 @@ python-dotenv==1.2.3
     #   uvicorn
 pyyaml==6.0.3
     # via uvicorn
+qrcode==8.2
+    # via edp-api (apps/api/pyproject.toml)
 redis==6.4.0
     # via edp-api (apps/api/pyproject.toml)
 requests==2.34.2
@@ -197,6 +203,8 @@ tomli==2.4.1
     # via pip-audit
 tomli-w==1.2.0
     # via pip-audit
+types-qrcode==8.2.0.20260518
+    # via edp-api (apps/api/pyproject.toml)
 typing-extensions==4.16.0
     # via
     #   alembic
