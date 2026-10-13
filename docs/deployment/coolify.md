@@ -4,7 +4,7 @@ Use the Docker Compose build pack with `/docker-compose.coolify.yml`, repository
 
 Set `WEB_ORIGIN` to the public HTTPS origin (no trailing slash). Configure the `web` service domain in Coolify with port `3000`. Set `COOKIE_SECURE=true` through the Compose definition.
 
-Generate independent random URL-safe secrets for `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `BFF_KEY`, and `LMS_MATERIAL_SIGNING_KEY`; enter them as runtime variables in Coolify. Do not commit values or reuse local credentials. Set `PUBLIC_ORGANIZATION_ID` when an organization is provisioned through the trusted administrator procedure.
+Generate independent random URL-safe secrets for `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `BFF_KEY`, and `LMS_MATERIAL_SIGNING_KEY`; enter them in Coolify. Enable both build and runtime availability for all Compose variables: Coolify runs `docker compose build` with a separate build-time environment file, and Compose interpolates the entire definition even when building images. Enable Docker Build Secrets and disable automatic Dockerfile ARG injection so credentials are not embedded in images. Do not commit values or reuse local credentials. Set `PUBLIC_ORGANIZATION_ID` when an organization is provisioned through the trusted administrator procedure.
 
 The migration service runs Alembic to head and seeds identity roles/permissions. It is excluded from overall health because it exits after success. API, Celery worker, and the single scheduler wait for migration completion. PostgreSQL, Redis, and private materials use persistent resource-scoped volumes. No database, Redis, or API port is published to the host.
 
