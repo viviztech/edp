@@ -32,4 +32,15 @@ The owner has supplied an administrator email and proposed Gmail as sender. No G
 
 ## Publication
 
-Target: existing `csje-edp` Coolify staging stack on `deploy/coolify`, at https://edp.200.234.34.140.sslip.io/. Record the final commit, deployment and live acceptance below after rollout.
+Published on the existing `csje-edp` Coolify staging stack on `deploy/coolify`, at https://edp.200.234.34.140.sslip.io/. Demo entry: https://edp.200.234.34.140.sslip.io/en/demo (Tamil: `/ta/demo`).
+
+- Code commit: `c4c036955634de5846ad165a0d9e22890f8e162b`, pushed to GitHub.
+- Coolify deployment: `jt0af9m8lkgrt5odneqsiv7g`, finished on 13 October 2026 at 11:47 UTC; reported application state `running:healthy`.
+- Remote Docker/Next.js build succeeded. The migration service completed and the API, PostgreSQL and Redis health checks passed.
+- Live Chrome repeated the complete demo journey at 1440, 390 and 320 pixels in English and 390 pixels in Tamil. Draft saving, receipt, learning, mentoring and restart passed with zero JavaScript errors and zero API requests from the demo/planner.
+- Both live planner downloads passed and matched the locally verified UTF-8 worksheet content. Live screenshots are `output/playwright/launch-live-*`.
+- Live landing checks passed at 1440 and 390 pixels in English and 390 pixels in Tamil; FAQ passed at 390 pixels. Images loaded and no horizontal overflow was detected.
+- Eleven live route checks returned 200. Canonical, sitemap and robots URLs used the HTTPS deployment origin, and demo routes emitted `noindex`. HSTS and CSP headers were verified on all checked routes.
+- The real registration probe returned `503 self_service_closed`; an unprotected login mutation returned `403 csrf_failed`. Both are intentional boundaries, with no account or session created by the probes.
+
+The demo runs without provider credentials or administrative provisioning. The proposed real administrator email was not published as a public contact or used to create a fictitious real-service setup. Read `docs/user-guides/public-demo.md` for the presentation sequence; the real-service prerequisites above remain separate acceptance work.
