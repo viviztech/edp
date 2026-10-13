@@ -34,4 +34,13 @@ Final generation prompt:
 
 ## Publication
 
-Target: existing Coolify staging application `csje-edp`, on `deploy/coolify`, at https://edp.200.234.34.140.sslip.io/. Deployment verification is recorded after rollout.
+Published to the existing Coolify staging application `csje-edp`, on `deploy/coolify`, at https://edp.200.234.34.140.sslip.io/.
+
+- Deployed commit: `bf6ac5ee1350f176db9d73b7c145b5f36be58b99`.
+- Deployment: `n75m3uepm1ywfahmlg3qkewh`, finished on 13 October 2026; application status `running:healthy`.
+- Live Chrome verification passed for English at 1440 and 390 pixels, Tamil at 390 pixels, and the FAQ page at 390 pixels: HTTP 200, loaded images, no horizontal overflow and no JavaScript errors.
+- Live screenshots: `output/playwright/live-redesign-en-1440.png`, `live-redesign-en-390.png`, `live-redesign-ta-390.png`, and `live-redesign-en-content-faq-390.png`.
+- HTTPS route checks passed for the root redirect, both locales, the account page and public assets. The deployed CSRF endpoint returned 200 with a valid response and a Secure cookie; the unauthenticated session endpoint returned the expected 401.
+- The live account page completed its initial session check and displayed the sign-in form. Its only console error was the expected 401 resource response for an unauthenticated session.
+
+Database migrations completed successfully and the API, database and Redis passed their deployment health checks. Deployment configuration and existing application secrets were preserved.
