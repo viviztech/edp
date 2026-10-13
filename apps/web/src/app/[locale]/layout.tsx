@@ -12,8 +12,13 @@ import {
   starterPageList,
 } from "../../lib/public-site-content";
 import { siteUrl } from "../../lib/site-url";
+import { publicLaunch, launchCopy } from "../../lib/public-launch";
+import { publicEditorial } from "../../lib/public-editorial";
 import "../styles.css";
 import "../public.css";
+import "../launch.css";
+
+export const dynamic = "force-dynamic";
 
 const displayFont = localFont({
   src: "../../assets/fonts/sora.woff2",
@@ -53,6 +58,19 @@ export default async function LocaleLayout({
   const text = messages[locale];
   const labels = publicNavLabels[locale];
   const pages = starterPageList(locale);
+  const launch = publicLaunch();
+  const hasContact = launch.email || launch.phone || launch.whatsapp;
+  const publishedUpdates: { title: string; href: string }[] = [];
+  for (const kind of ["news", "event"] as const) {
+    try {
+      const data = await publicEditorial(kind, locale);
+      if (data?.items.length)
+        publishedUpdates.push({
+          title: kind === "news" ? labels.news : labels.events,
+          href: `/${locale}/content/${kind}`,
+        });
+    } catch {}
+  }
   return (
     <html
       lang={locale}
@@ -91,9 +109,26 @@ export default async function LocaleLayout({
               navigationLabel={text.navigation}
               labels={{
                 ...labels,
-                account: authMessages[locale].title,
+                account: launch.selfService
+                  ? authMessages[locale].title
+                  : launch.demo
+                    ? launchCopy[locale].demo
+                    : hasContact
+                      ? launchCopy[locale].action
+                      : launchCopy[locale].planner,
                 language: text.language,
               }}
+              selfServiceEnabled={launch.selfService}
+              primaryHref={
+                launch.selfService
+                  ? `/${locale}/account`
+                  : launch.demo
+                    ? `/${locale}/demo`
+                    : hasContact
+                      ? `/${locale}/pages/contact`
+                      : `/${locale}/tools/idea-planner`
+              }
+              publishedUpdates={publishedUpdates}
               program={pages
                 .filter((page) => page.group === "program")
                 .map((page) => ({

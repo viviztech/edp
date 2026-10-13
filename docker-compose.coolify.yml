@@ -100,6 +100,8 @@ services:
       BFF_KEY: ${BFF_KEY:?}
       COOKIE_SECURE: "true"
       PUBLIC_ORGANIZATION_ID: ${PUBLIC_ORGANIZATION_ID:-}
+      PUBLIC_DEMO_ENABLED: ${PUBLIC_DEMO_ENABLED:-true}
+      PUBLIC_SELF_SERVICE_ENABLED: ${PUBLIC_SELF_SERVICE_ENABLED:-false}
     expose: ["3000"]
     depends_on:
       api: {condition: service_healthy}

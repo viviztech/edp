@@ -22,9 +22,18 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, kind } = await params;
   if (!isLocale(locale) || !kinds.includes(kind as EditorialKind)) return {};
+  let published = false;
+  try {
+    published = !!(await publicEditorial(kind as EditorialKind, locale))?.items
+      .length;
+  } catch {}
   return {
     title: editorialLabels[locale][kind as EditorialKind],
     description: editorialIntroductions[locale][kind as EditorialKind],
+    robots:
+      kind === "faq" || published
+        ? { index: true, follow: true }
+        : { index: false, follow: true },
     alternates: {
       canonical: absoluteUrl("/" + locale + "/content/" + kind),
       languages: {
@@ -83,7 +92,18 @@ export default async function EditorialList({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="editorial-public-empty">{editorialEmpty[locale]}</div>
+          <div className="editorial-public-empty">
+            <p>{editorialEmpty[locale]}</p>
+            <Link
+              className="public-text-link"
+              href={`/${locale}/tools/idea-planner`}
+            >
+              {locale === "en"
+                ? "Build your idea plan"
+                : "யோசனைத் திட்டத்தை உருவாக்குங்கள்"}
+              <ArrowUpRight size={18} aria-hidden="true" />
+            </Link>
+          </div>
         )}
         <Link className="editorial-public-back" href={"/" + locale + "/pages"}>
           <ArrowLeft size={18} aria-hidden="true" />

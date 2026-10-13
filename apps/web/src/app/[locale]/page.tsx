@@ -19,6 +19,8 @@ import {
 import { JourneyExplorer } from "../../components/journey-explorer";
 import { landingCopy } from "../../lib/landing-copy";
 import { isLocale, messages } from "../../lib/messages";
+import { absoluteUrl } from "../../lib/site-url";
+import { launchCopy, publicLaunch } from "../../lib/public-launch";
 
 const valueIcons = [BookOpen, MessageCircle, Users, Sprout];
 const exploreIcons = [Compass, Users, BookOpen];
@@ -33,9 +35,21 @@ export async function generateMetadata({
   return {
     title: messages[locale].title,
     description: messages[locale].description,
+    alternates: {
+      canonical: absoluteUrl(`/${locale}`),
+      languages: {
+        en: absoluteUrl("/en"),
+        ta: absoluteUrl("/ta"),
+        "x-default": absoluteUrl("/en"),
+      },
+    },
     openGraph: {
       title: messages[locale].title,
       description: messages[locale].description,
+      url: absoluteUrl(`/${locale}`),
+      siteName: "CSJE EDP",
+      locale: locale === "en" ? "en_IN" : "ta_IN",
+      type: "website",
       images: [
         {
           url: "/images/entrepreneurs-hero.png",
@@ -56,6 +70,7 @@ export default async function Home({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const copy = landingCopy[locale];
+  const launch = publicLaunch();
   return (
     <main id="main" className="landing-main">
       <section
@@ -81,9 +96,9 @@ export default async function Home({
           <div className="public-actions">
             <Link
               className="public-button public-button-primary"
-              href={`/${locale}/pages/about`}
+              href={launch.demo ? `/${locale}/demo` : `/${locale}/pages/about`}
             >
-              {copy.primary}
+              {launch.demo ? launchCopy[locale].demo : copy.primary}
               <ArrowUpRight size={19} aria-hidden="true" />
             </Link>
             <a className="public-hero-secondary" href="#journey">
@@ -343,13 +358,15 @@ export default async function Home({
           <div className="public-actions">
             <Link
               className="public-button public-button-light"
-              href={`/${locale}/pages/about`}
+              href={`/${locale}/tools/idea-planner`}
             >
-              {copy.closingPrimary}
+              {launchCopy[locale].resourceAction}
               <ArrowUpRight size={19} aria-hidden="true" />
             </Link>
-            <Link className="closing-account" href={`/${locale}/account`}>
-              {copy.closingSecondary}
+            <Link className="closing-account" href={`/${locale}/pages/apply`}>
+              {locale === "en"
+                ? "Explore participation"
+                : "பங்கேற்பை அறியுங்கள்"}
               <ArrowRight size={18} aria-hidden="true" />
             </Link>
           </div>

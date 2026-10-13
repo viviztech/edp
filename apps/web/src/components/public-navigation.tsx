@@ -25,6 +25,9 @@ type Props = {
   };
   program: Item[];
   support: Item[];
+  selfServiceEnabled?: boolean;
+  publishedUpdates?: Item[];
+  primaryHref?: string;
 };
 
 export function PublicNavigation({
@@ -33,6 +36,9 @@ export function PublicNavigation({
   labels,
   program,
   support,
+  selfServiceEnabled = true,
+  publishedUpdates,
+  primaryHref,
 }: Props) {
   const [openMenu, setOpenMenu] = useState<MenuId | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -44,7 +50,7 @@ export function PublicNavigation({
     "/" + otherLocale,
   );
   const lastPointerType = useRef<string | null>(null);
-  const updates: Item[] = [
+  const updates: Item[] = publishedUpdates ?? [
     { title: labels.news, href: "/" + locale + "/content/news" },
     { title: labels.events, href: "/" + locale + "/content/event" },
     { title: labels.faq, href: "/" + locale + "/content/faq" },
@@ -170,7 +176,16 @@ export function PublicNavigation({
           </Link>
           {menu("program", labels.program, program)}
           {menu("support", labels.support, support)}
-          {menu("updates", labels.updates, updates)}
+          {updates.length ? (
+            menu("updates", labels.updates, updates)
+          ) : (
+            <Link
+              href={"/" + locale + "/content/faq"}
+              onClick={closeNavigation}
+            >
+              {labels.faq}
+            </Link>
+          )}
           <Link
             href={"/" + locale + "/pages/contact"}
             onClick={closeNavigation}
@@ -188,16 +203,23 @@ export function PublicNavigation({
           >
             {locale === "en" ? "தமிழ்" : "EN"}
           </Link>
-          <Link
-            className="site-apply"
-            href={"/" + locale + "/pages/apply"}
-            onClick={closeNavigation}
-          >
-            {labels.apply}
-          </Link>
+          {selfServiceEnabled && (
+            <Link
+              className="site-apply"
+              href={"/" + locale + "/pages/apply"}
+              onClick={closeNavigation}
+            >
+              {labels.apply}
+            </Link>
+          )}
           <Link
             className="site-account"
-            href={"/" + locale + "/account"}
+            href={
+              primaryHref ??
+              "/" +
+                locale +
+                (selfServiceEnabled ? "/account" : "/pages/contact")
+            }
             onClick={closeNavigation}
           >
             {labels.account}

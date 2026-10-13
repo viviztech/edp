@@ -3,11 +3,13 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { messages, type Locale } from "../lib/messages";
 import { publicNavLabels, starterPageList } from "../lib/public-site-content";
+import { launchCopy, publicLaunch } from "../lib/public-launch";
 
 export function PublicFooter({ locale }: { locale: Locale }) {
   const text = messages[locale];
   const labels = publicNavLabels[locale];
   const pages = starterPageList(locale);
+  const launch = publicLaunch();
   const copy =
     locale === "en"
       ? {
@@ -56,6 +58,9 @@ export function PublicFooter({ locale }: { locale: Locale }) {
         </div>
         <div className="footer-links">
           <h2>{labels.support}</h2>
+          <Link href={`/${locale}/tools/idea-planner`}>
+            {launchCopy[locale].planner}
+          </Link>
           {pages
             .filter((page) => page.group === "support")
             .slice(0, 4)
@@ -69,7 +74,15 @@ export function PublicFooter({ locale }: { locale: Locale }) {
           <h2>{copy.connect}</h2>
           <Link href={`/${locale}/pages/contact`}>{labels.contact}</Link>
           <Link href={`/${locale}/content/faq`}>{labels.faq}</Link>
-          <Link href={`/${locale}/account`}>{copy.account}</Link>
+          <Link href={`/${locale}/pages/privacy`}>
+            {launchCopy[locale].privacy}
+          </Link>
+          {launch.demo && (
+            <Link href={`/${locale}/demo`}>{launchCopy[locale].demo}</Link>
+          )}
+          <Link href={`/${locale}/account`}>
+            {launch.selfService ? copy.account : launchCopy[locale].signIn}
+          </Link>
           <Link
             href={`/${locale === "en" ? "ta" : "en"}`}
             lang={locale === "en" ? "ta" : "en"}

@@ -75,11 +75,11 @@ export const landingCopy = {
         short: "Take the next step",
         tag: "When you're ready to move forward",
         heading: "Your story.\nYour next chapter.",
-        body: "When applications open, your account is the place to share your idea and follow your application. Published information will explain the requirements and dates.",
+        body: "Explore the application journey and prepare your idea. The interactive demo lets you create a sample profile, save a draft and see how submission works.",
         items: [
           "Read the application information",
           "Check the published requirements",
-          "Explore your account",
+          "Try the sample application journey",
         ],
         action: "Explore application information",
         path: "/pages/apply",
@@ -149,9 +149,9 @@ export const landingCopy = {
           "The program connects practical learning, mentoring, business planning, and post-training support. Individual services become available according to the program stage and participation requirements.",
       },
       {
-        question: "When will applications open?",
+        question: "How can I try the application journey?",
         answer:
-          "Application dates and final program details have not been published yet. The application information page will be updated when these details are available.",
+          "Use the interactive demo to create a sample profile, save a draft and submit a fictional application. The demo does not create a real account, send email or confirm admission. Actual intake details come from the program team.",
       },
       {
         question: "Can I explore the website in Tamil?",
@@ -242,7 +242,7 @@ export const landingCopy = {
         short: "அடுத்த படியை எடுங்கள்",
         tag: "முன்னேறத் தயாராகும்போது",
         heading: "உங்கள் கதை.\nஒரு புதிய அத்தியாயம்.",
-        body: "விண்ணப்பங்கள் திறக்கும்போது, உங்கள் கணக்கில் யோசனையைப் பகிர்ந்து விண்ணப்பத்தின் நிலையைப் பார்க்கலாம். தேவைகளும் தேதிகளும் வெளியிடப்பட்ட தகவலில் இடம்பெறும்.",
+        body: "விண்ணப்பப் பயணத்தை அறிந்து உங்கள் யோசனையைத் தயாரியுங்கள். செயல்விளக்கத்தில் மாதிரிக் கணக்கு, வரைவு மற்றும் சமர்ப்பித்தலை முயலலாம்.",
         items: [
           "விண்ணப்பத் தகவலைப் படியுங்கள்",
           "வெளியிடப்பட்ட தேவைகளைச் சரிபாருங்கள்",
@@ -316,9 +316,9 @@ export const landingCopy = {
           "நடைமுறைக் கற்றல், வழிகாட்டுதல், தொழில் திட்டமிடல், பயிற்சிக்குப் பிந்தைய ஆதரவு ஆகியவற்றை இத்திட்டம் இணைக்கிறது. திட்டத்தின் கட்டம் மற்றும் பங்கேற்பு விதிகளுக்கு ஏற்ப சேவைகள் கிடைக்கும்.",
       },
       {
-        question: "விண்ணப்பங்கள் எப்போது திறக்கும்?",
+        question: "விண்ணப்பப் பயணத்தை எப்படி முயல்வது?",
         answer:
-          "விண்ணப்பத் தேதிகளும் இறுதித் திட்ட விவரங்களும் இன்னும் வெளியிடப்படவில்லை. அவை கிடைக்கும்போது விண்ணப்பத் தகவல் பக்கம் புதுப்பிக்கப்படும்.",
+          "செயல்விளக்கத்தில் மாதிரிக் கணக்கு உருவாக்கி, வரைவைச் சேமித்து, கற்பனை விண்ணப்பத்தைச் சமர்ப்பிக்கலாம். உண்மையான கணக்கோ மின்னஞ்சலோ சேர்க்கை உறுதியோ உருவாகாது. உண்மையான சேர்க்கை விவரங்களைத் திட்டக் குழுவிடம் அறியுங்கள்.",
       },
       {
         question: "இணையதளத்தைத் தமிழில் பார்க்கலாமா?",

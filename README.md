@@ -6,6 +6,8 @@ This is the **design baseline and minimum development bootstrap**, not a complet
 
 Latest: [foundation authentication report](docs/sdlc/foundation-auth-report.md).
 
+Public launch: the redesigned English/Tamil website now includes an interactive, explicitly labeled demonstration of sample profile creation, applications, learning and mentoring, plus a private idea worksheet. See the [public launch report](docs/sdlc/public-launch-report.md) and [presenter guide](docs/user-guides/public-demo.md). The demonstration does not create real accounts or applications; production email and approved intake policy remain prerequisites for enabling real self-service.
+
 Start with [Milestone 1 report](docs/sdlc/milestone-01-report.md), [local setup](docs/deployment/local.md) and [Milestone 1 plan](docs/sdlc/milestone-01-plan.md).
 
 | Design | Delivery |

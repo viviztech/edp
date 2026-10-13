@@ -25,6 +25,25 @@ const props = {
 };
 
 describe("public navigation dropdowns", () => {
+  it("replaces unavailable signup and empty updates with the launch demo", () => {
+    render(
+      <PublicNavigation
+        {...props}
+        labels={{ ...props.labels, account: "Try the demo" }}
+        selfServiceEnabled={false}
+        publishedUpdates={[]}
+        primaryHref="/en/demo"
+      />,
+    );
+    expect(
+      screen.queryByRole("link", { name: "Apply" }),
+    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Updates" })).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "Try the demo" }).getAttribute("href"),
+    ).toBe("/en/demo");
+    expect(screen.getByRole("link", { name: "Tamil" })).toBeTruthy();
+  });
   it("opens on hover and closes when the pointer leaves the menu", () => {
     render(<PublicNavigation {...props} />);
     const trigger = screen.getByRole("button", { name: "The program" });
