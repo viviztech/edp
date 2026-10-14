@@ -62,7 +62,7 @@ function ReviewCard({ item, org, locale, onSaved }: {
     {item.review ? <section><h3>{labels.feedback}: {item.review.decision}</h3>
       <p>{item.review.reason}</p><ul>{Object.entries(item.review.comments).map(([code, body]) =>
         <li key={code}><strong>{sectionLabel(code, locale)}</strong>: {body}</li>)}</ul></section>
-      : <form onSubmit={(event) => void submit(event)}>
+      : <form className="business-plan-review-form" onSubmit={(event) => void submit(event)}>
         <label>{labels.decision}<select name="decision" defaultValue="changes_requested">
           <option value="changes_requested">{labels.request}</option>
           <option value="approved">{labels.approve}</option>

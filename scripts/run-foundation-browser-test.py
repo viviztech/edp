@@ -35,12 +35,20 @@ env.update(
     HOSTNAME="127.0.0.1",
     PORT="3100",
     PUBLIC_ORGANIZATION_ID=str(uuid4()),
+    # This runner refuses non-test databases and owns localhost-only servers.
+    # Account registration/reset must be open for this synthetic acceptance journey.
+    PUBLIC_SELF_SERVICE_ENABLED="true",
     LMS_MATERIAL_ROOT=str(material_root),
     LMS_MATERIAL_SIGNING_KEY=secrets.token_urlsafe(32),
 )
 shutil.copytree(
     root / "apps/web/.next/static",
     root / "apps/web/.next/standalone/.next/static",
+    dirs_exist_ok=True,
+)
+shutil.copytree(
+    root / "apps/web/public",
+    root / "apps/web/.next/standalone/public",
     dirs_exist_ok=True,
 )
 cache = root / ".tool-cache"
@@ -59,14 +67,11 @@ try:
             "api",
             [
                 sys.executable,
-                "-m",
-                "uvicorn",
-                "app.main:app",
+                "scripts/run-native-api.py",
                 "--host",
                 "127.0.0.1",
                 "--port",
                 "8100",
-                "--no-access-log",
             ],
             "http://127.0.0.1:8100/health",
         ),

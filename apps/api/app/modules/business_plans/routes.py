@@ -31,18 +31,24 @@ def create(
 
 @router.post("/enrollments/{enrollment_id}/sections", response_model=PlanView)
 def save(
-    org: UUID, enrollment_id: UUID, data: SaveSection,
-    request: Request, db: DB, identity: Principal,
+    org: UUID,
+    enrollment_id: UUID,
+    data: SaveSection,
+    request: Request,
+    db: DB,
+    identity: Principal,
 ) -> PlanView:
-    return service.save_section(
-        db, org, identity[0], enrollment_id, data, request.state.request_id
-    )
+    return service.save_section(db, org, identity[0], enrollment_id, data, request.state.request_id)
 
 
 @router.post("/enrollments/{enrollment_id}/submit", response_model=PlanView)
 def submit(
-    org: UUID, enrollment_id: UUID, data: SubmitPlan,
-    request: Request, db: DB, identity: Principal,
+    org: UUID,
+    enrollment_id: UUID,
+    data: SubmitPlan,
+    request: Request,
+    db: DB,
+    identity: Principal,
 ) -> PlanView:
     return service.submit_plan(db, org, identity[0], enrollment_id, data, request.state.request_id)
 
@@ -54,8 +60,12 @@ def assigned(org: UUID, db: DB, identity: Principal) -> MentorPlans:
 
 @router.post("/submissions/{submission_id}/review", response_model=ReviewView)
 def review(
-    org: UUID, submission_id: UUID, data: ReviewPlan,
-    request: Request, db: DB, identity: Principal,
+    org: UUID,
+    submission_id: UUID,
+    data: ReviewPlan,
+    request: Request,
+    db: DB,
+    identity: Principal,
 ) -> ReviewView:
     return service.review_submission(
         db, org, identity[0], submission_id, data, request.state.request_id

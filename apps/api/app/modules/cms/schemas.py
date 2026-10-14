@@ -72,6 +72,7 @@ class History(BaseModel):
 
 EditorialKind = Literal["news", "event", "faq", "testimonial"]
 
+
 class EditorialDraft(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     kind: EditorialKind
@@ -83,6 +84,7 @@ class EditorialDraft(BaseModel):
     ends_at: datetime | None = None
     sort_order: int = Field(default=0, ge=0, le=100000)
 
+
 class EditorialEdit(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     title: str = Field(min_length=1, max_length=200)
@@ -92,9 +94,11 @@ class EditorialEdit(BaseModel):
     sort_order: int = Field(default=0, ge=0, le=100000)
     expected_version: int = Field(ge=1)
 
+
 class EditorialCommand(BaseModel):
     expected_version: int = Field(ge=1)
     reason: str = Field(default="", max_length=500)
+
 
 class EditorialView(EditorialDraft):
     id: UUID
@@ -102,12 +106,15 @@ class EditorialView(EditorialDraft):
     version: int
     published_at: datetime | None
 
+
 class EditorialList(BaseModel):
     items: list[EditorialView]
     next_cursor: UUID | None
 
+
 class PublicEditorial(EditorialView):
     pass
+
 
 class PublicEditorialList(BaseModel):
     items: list[PublicEditorial]
@@ -121,6 +128,7 @@ class AssetCreate(BaseModel):
     byte_size: int = Field(ge=1, le=10485760)
     title: str = Field(min_length=1, max_length=200)
 
+
 class AssetView(BaseModel):
     id: UUID
     filename: str
@@ -130,6 +138,7 @@ class AssetView(BaseModel):
     scan_status: Literal["pending", "clean", "infected", "rejected"]
     visibility: Literal["private", "public"]
     public_url: str | None
+
 
 class AssetList(BaseModel):
     items: list[AssetView]
@@ -150,9 +159,11 @@ class EnquiryCreate(BaseModel):
     message: str = Field(min_length=1, max_length=5000)
     consent_version: str = Field(min_length=1, max_length=40)
 
+
 class EnquiryReceipt(BaseModel):
     accepted: Literal[True]
     reference: UUID
+
 
 class EnquiryView(BaseModel):
     id: UUID

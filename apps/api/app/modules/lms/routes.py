@@ -387,9 +387,7 @@ def create_certificate_template(
     db: DB,
     identity: Principal,
 ) -> CertificateTemplateView:
-    return service.create_certificate_template(
-        db, org, identity[0], data, request.state.request_id
-    )
+    return service.create_certificate_template(db, org, identity[0], data, request.state.request_id)
 
 
 @router.post(

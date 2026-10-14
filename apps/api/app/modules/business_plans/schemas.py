@@ -5,10 +5,26 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 SectionCode = Literal[
-    "executive_summary", "problem", "solution", "product_service", "customer_segments",
-    "market", "competition", "value_proposition", "business_model", "pricing",
-    "sales_marketing", "operations", "team", "investment", "revenue_assumptions",
-    "expense_assumptions", "break_even_inputs", "funding_requirement", "risks", "milestones",
+    "executive_summary",
+    "problem",
+    "solution",
+    "product_service",
+    "customer_segments",
+    "market",
+    "competition",
+    "value_proposition",
+    "business_model",
+    "pricing",
+    "sales_marketing",
+    "operations",
+    "team",
+    "investment",
+    "revenue_assumptions",
+    "expense_assumptions",
+    "break_even_inputs",
+    "funding_requirement",
+    "risks",
+    "milestones",
 ]
 
 

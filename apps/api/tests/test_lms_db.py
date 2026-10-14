@@ -744,24 +744,19 @@ def test_lms_author_publish_assign_and_enrollment_scoped_access(request, tmp_pat
     )
     assert duplicate_certificate.status_code == 409
     assert duplicate_certificate.json()["error"]["code"] == "certificate_already_issued"
-    verification = client.get(
-        f"/api/v1/certificates/verify/{certificate['verification_code']}"
-    )
+    verification = client.get(f"/api/v1/certificates/verify/{certificate['verification_code']}")
     assert verification.status_code == 200
     assert verification.json()["status"] == "valid"
     assert "recipient_name" not in verification.json()
     assert "statement_en" not in verification.json()
     assert "organization_id" not in verification.json()
-    qr = client.get(
-        f"/api/v1/certificates/verify/{certificate['verification_code']}/qr"
-    )
+    qr = client.get(f"/api/v1/certificates/verify/{certificate['verification_code']}/qr")
     assert qr.status_code == 200
     assert qr.headers["content-type"].startswith("image/svg+xml")
     assert b"<svg" in qr.content
     learner_certificate = client.get(root + "/my-learning", headers=headers).json()["courses"][0]
     assert (
-        learner_certificate["certificate"]["verification_code"]
-        == certificate["verification_code"]
+        learner_certificate["certificate"]["verification_code"] == certificate["verification_code"]
     )
     revoked_certificate = client.post(
         root + f"/certificates/{certificate['id']}/revoke",

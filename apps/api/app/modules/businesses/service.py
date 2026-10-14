@@ -112,7 +112,7 @@ def profile_view(db: Session, row: BusinessProfile) -> ProfileView:
                 id=item.id,
                 offset_days=item.offset_days,
                 due_on=item.due_on,
-            status=cast(Literal["pending", "completed"], item.status),
+                status=cast(Literal["pending", "completed"], item.status),
                 outcome=OutcomeView(
                     id=outcomes[item.id].id,
                     created_at=outcomes[item.id].created_at,

@@ -212,6 +212,25 @@ html[lang="ta"] .editorial-list h2 { font-family: Arial, sans-serif; }
 .program-actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .65rem; }
 .program-actions button { border: 1px solid var(--border); border-radius: .45rem; background: var(--background); padding: .4rem .65rem; color: inherit; }
 .program-form button:disabled, .program-actions button:disabled { opacity: .55; }
+
+/* Keep every business-plan label above its full-width editing control. */
+.business-plan-editor .program-grid > label,
+.business-plan-review-form label { display: grid; gap: .45rem; min-width: 0; overflow-wrap: anywhere; }
+.business-plan-editor textarea,
+.business-plan-review-form textarea,
+.business-plan-review-form select {
+  display: block; width: 100%; min-width: 0; max-width: 100%;
+  border: 1px solid var(--border); border-radius: .55rem; padding: .7rem;
+  background: var(--background); color: inherit; font: inherit; font-weight: 400;
+}
+.business-plan-editor textarea,
+.business-plan-review-form textarea { min-height: 9rem; resize: vertical; }
+.business-plan-editor textarea:disabled { opacity: 1; background: var(--muted); }
+.business-plan-review-form { display: grid; gap: 1rem; margin-top: 1rem; }
+.business-plan-review-form details > label { margin-top: .85rem; }
+.business-plan-editor > button,
+.business-plan-review-form > button { min-height: 2.75rem; max-width: 100%; justify-self: start; }
+
 @media (max-width: 900px) { .program-grid { grid-template-columns: 1fr; } .program-wide { grid-column: auto; } .program-form-wide { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .program-main { padding: 1rem; } .program-heading { display: block; } .program-form, .program-form-wide { grid-template-columns: 1fr; } }
 

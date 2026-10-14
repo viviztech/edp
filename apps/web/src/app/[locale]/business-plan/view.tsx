@@ -114,7 +114,7 @@ function Editor({ entry, org, locale }: { entry: Entry; org: string; locale: Loc
     finally { setBusy(false); }
   }
 
-  return <section className="program-panel">
+  return <section className="program-panel business-plan-editor">
     <h2>{text.title}</h2><p>{text.caution}</p>
     <p role="status">{message}</p>
     {!plan ? <button type="button" disabled={busy} onClick={() => void createPlan()}>{text.create}</button> : <>

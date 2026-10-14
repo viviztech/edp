@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy import (
@@ -132,7 +133,7 @@ class ReviewAssignment(Record, Base):
     conflict_status: Mapped[str] = mapped_column(String(16), default="pending")
     conflict_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
     internal_comment: Mapped[str | None] = mapped_column(String(4000), nullable=True)
-    weighted_score: Mapped[float | None] = mapped_column(Numeric(7, 4), nullable=True)
+    weighted_score: Mapped[Decimal | None] = mapped_column(Numeric(7, 4), nullable=True)
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     moderation_status: Mapped[str] = mapped_column(String(16), default="included")
     moderation_reason: Mapped[str | None] = mapped_column(String(1000), nullable=True)
@@ -203,7 +204,7 @@ class ApplicationScore(Record, Base):
     assignment_id: Mapped[UUID] = mapped_column(index=True)
     rubric_id: Mapped[UUID] = mapped_column(index=True)
     criterion_id: Mapped[UUID] = mapped_column(index=True)
-    score: Mapped[float] = mapped_column(Numeric(6, 2))
+    score: Mapped[Decimal] = mapped_column(Numeric(6, 2))
     __table_args__ = (
         ForeignKeyConstraint(
             ["assignment_id", "rubric_id"],
@@ -232,7 +233,7 @@ class Interview(Record, Base):
     mode: Mapped[str] = mapped_column(String(16))
     location: Mapped[str | None] = mapped_column(String(500), nullable=True)
     status: Mapped[str] = mapped_column(String(16), default="scheduled")
-    average_score: Mapped[float | None] = mapped_column(Numeric(7, 4), nullable=True)
+    average_score: Mapped[Decimal | None] = mapped_column(Numeric(7, 4), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     version: Mapped[int] = mapped_column(Integer, default=1)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
@@ -271,7 +272,7 @@ class InterviewPanelMember(Record, Base):
         ForeignKey("interviews.id", ondelete="RESTRICT"), index=True
     )
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
-    score: Mapped[float | None] = mapped_column(Numeric(6, 2), nullable=True)
+    score: Mapped[Decimal | None] = mapped_column(Numeric(6, 2), nullable=True)
     comment: Mapped[str | None] = mapped_column(String(4000), nullable=True)
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     version: Mapped[int] = mapped_column(Integer, default=1)
@@ -301,8 +302,8 @@ class SelectionDecision(Record, Base):
     to_state: Mapped[str] = mapped_column(String(24))
     reason: Mapped[str] = mapped_column(String(1000))
     is_override: Mapped[bool] = mapped_column(Boolean, default=False)
-    aggregate_score_snapshot: Mapped[float | None] = mapped_column(Numeric(7, 2), nullable=True)
-    interview_score_snapshot: Mapped[float | None] = mapped_column(Numeric(7, 2), nullable=True)
+    aggregate_score_snapshot: Mapped[Decimal | None] = mapped_column(Numeric(7, 2), nullable=True)
+    interview_score_snapshot: Mapped[Decimal | None] = mapped_column(Numeric(7, 2), nullable=True)
     application_version: Mapped[int] = mapped_column(Integer)
     __table_args__ = (
         ForeignKeyConstraint(

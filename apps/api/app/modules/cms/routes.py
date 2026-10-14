@@ -1,20 +1,42 @@
+from secrets import compare_digest
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Query, Request, Response
 from sqlalchemy import select
 
-from app.modules.cms import repository, service
-from app.modules.cms.models import Page, Revision, Translation
+from app.core.config import get_settings
+from app.modules.cms import editorial_service, repository, service
+from app.modules.cms.asset_service import create as create_asset
+from app.modules.cms.asset_service import publish as publish_asset
+from app.modules.cms.asset_service import scan_result as asset_scan_result
+from app.modules.cms.asset_service import view as asset_view
+from app.modules.cms.enquiry_service import create as create_enquiry
+from app.modules.cms.enquiry_service import list_staff as list_enquiries
+from app.modules.cms.models import Asset, EditorialEntry, Page, Revision, Translation
 from app.modules.cms.schemas import (
+    AssetCreate,
+    AssetList,
+    AssetScanResult,
+    AssetView,
     Command,
     CreatePage,
     Edit,
+    EditorialCommand,
+    EditorialDraft,
+    EditorialEdit,
+    EditorialKind,
+    EditorialList,
+    EditorialView,
+    EnquiryCreate,
+    EnquiryReceipt,
+    EnquiryView,
     History,
     Locale,
     NewTranslation,
     PageList,
     PageView,
+    PublicEditorialList,
     PublicList,
     PublicPage,
 )
@@ -223,70 +245,169 @@ def public_page(
         return Response(status_code=304, headers=headers)
     response.headers.update(headers)
     return data
-from app.modules.cms import editorial_service
-from app.modules.cms.models import EditorialEntry
-from app.modules.cms.schemas import EditorialDraft, EditorialEdit, EditorialCommand, EditorialKind, EditorialList, EditorialView, PublicEditorialList
+
+
 EDITORIAL_STAFF = "/cms/organizations/{org}/editorial"
 EDITORIAL_PUBLIC = "/public/organizations/{org}/editorial"
+
+
 @router.post(EDITORIAL_STAFF, response_model=EditorialView, status_code=201)
-def editorial_create(org: UUID, data: EditorialDraft, request: Request, db: DB, identity: Principal):
+def editorial_create(
+    org: UUID, data: EditorialDraft, request: Request, db: DB, identity: Principal
+) -> EditorialView:
     return editorial_service.create(db, org, identity[0], data, request.state.request_id)
+
+
 @router.get(EDITORIAL_STAFF, response_model=EditorialList)
-def editorial_list(org: UUID, db: DB, identity: Principal, kind: EditorialKind|None=None, locale: Locale|None=None, cursor: UUID|None=None, limit: Limit=25):
+def editorial_list(
+    org: UUID,
+    db: DB,
+    identity: Principal,
+    kind: EditorialKind | None = None,
+    locale: Locale | None = None,
+    cursor: UUID | None = None,
+    limit: Limit = 25,
+) -> EditorialList:
     require_permission(db, identity[0], org, "cms.editorial.view")
-    q=select(EditorialEntry).where(EditorialEntry.organization_id==org)
-    if kind: q=q.where(EditorialEntry.kind==kind)
-    if locale: q=q.where(EditorialEntry.locale==locale)
-    if cursor: q=q.where(EditorialEntry.id>cursor)
-    rows=list(db.scalars(q.order_by(EditorialEntry.id).limit(limit+1)))
-    return EditorialList(items=[editorial_service.view(e) for e in rows[:limit]], next_cursor=rows[limit-1].id if len(rows)>limit else None)
-@router.get(EDITORIAL_STAFF+"/{entry_id}", response_model=EditorialView)
-def editorial_detail(org: UUID, entry_id: UUID, db: DB, identity: Principal):
-    require_permission(db, identity[0], org, "cms.editorial.view"); return editorial_service.view(editorial_service.get(db,org,entry_id))
-@router.patch(EDITORIAL_STAFF+"/{entry_id}", response_model=EditorialView)
-def editorial_edit(org: UUID, entry_id: UUID, data: EditorialEdit, request: Request, db: DB, identity: Principal):
-    return editorial_service.mutate(db,org,entry_id,identity[0],data,"update",request.state.request_id)
-@router.post(EDITORIAL_STAFF+"/{entry_id}/publish", response_model=EditorialView)
-def editorial_publish(org: UUID, entry_id: UUID, data: EditorialCommand, request: Request, db: DB, identity: Principal):
-    return editorial_service.mutate(db,org,entry_id,identity[0],data,"publish",request.state.request_id)
-@router.post(EDITORIAL_STAFF+"/{entry_id}/archive", response_model=EditorialView)
-def editorial_archive(org: UUID, entry_id: UUID, data: EditorialCommand, request: Request, db: DB, identity: Principal):
-    return editorial_service.mutate(db,org,entry_id,identity[0],data,"archive",request.state.request_id)
-@router.post(EDITORIAL_STAFF+"/{entry_id}/restore", response_model=EditorialView)
-def editorial_restore(org: UUID, entry_id: UUID, data: EditorialCommand, request: Request, db: DB, identity: Principal):
-    return editorial_service.mutate(db,org,entry_id,identity[0],data,"restore",request.state.request_id)
+    q = select(EditorialEntry).where(EditorialEntry.organization_id == org)
+    if kind:
+        q = q.where(EditorialEntry.kind == kind)
+    if locale:
+        q = q.where(EditorialEntry.locale == locale)
+    if cursor:
+        q = q.where(EditorialEntry.id > cursor)
+    rows = list(db.scalars(q.order_by(EditorialEntry.id).limit(limit + 1)))
+    return EditorialList(
+        items=[editorial_service.view(e) for e in rows[:limit]],
+        next_cursor=rows[limit - 1].id if len(rows) > limit else None,
+    )
+
+
+@router.get(EDITORIAL_STAFF + "/{entry_id}", response_model=EditorialView)
+def editorial_detail(org: UUID, entry_id: UUID, db: DB, identity: Principal) -> EditorialView:
+    require_permission(db, identity[0], org, "cms.editorial.view")
+    return editorial_service.view(editorial_service.get(db, org, entry_id))
+
+
+@router.patch(EDITORIAL_STAFF + "/{entry_id}", response_model=EditorialView)
+def editorial_edit(
+    org: UUID, entry_id: UUID, data: EditorialEdit, request: Request, db: DB, identity: Principal
+) -> EditorialView:
+    return editorial_service.mutate(
+        db, org, entry_id, identity[0], data, "update", request.state.request_id
+    )
+
+
+@router.post(EDITORIAL_STAFF + "/{entry_id}/publish", response_model=EditorialView)
+def editorial_publish(
+    org: UUID, entry_id: UUID, data: EditorialCommand, request: Request, db: DB, identity: Principal
+) -> EditorialView:
+    return editorial_service.mutate(
+        db, org, entry_id, identity[0], data, "publish", request.state.request_id
+    )
+
+
+@router.post(EDITORIAL_STAFF + "/{entry_id}/archive", response_model=EditorialView)
+def editorial_archive(
+    org: UUID, entry_id: UUID, data: EditorialCommand, request: Request, db: DB, identity: Principal
+) -> EditorialView:
+    return editorial_service.mutate(
+        db, org, entry_id, identity[0], data, "archive", request.state.request_id
+    )
+
+
+@router.post(EDITORIAL_STAFF + "/{entry_id}/restore", response_model=EditorialView)
+def editorial_restore(
+    org: UUID, entry_id: UUID, data: EditorialCommand, request: Request, db: DB, identity: Principal
+) -> EditorialView:
+    return editorial_service.mutate(
+        db, org, entry_id, identity[0], data, "restore", request.state.request_id
+    )
+
+
 @router.get(EDITORIAL_PUBLIC, response_model=PublicEditorialList)
-def editorial_public_list(org: UUID, db: DB, kind: EditorialKind, locale: Locale="en", cursor: UUID|None=None, limit: Limit=25):
-    rows=editorial_service.public(db,org,kind,locale,cursor,limit)
-    return PublicEditorialList(items=[editorial_service.view(e) for e in rows[:limit]], next_cursor=rows[limit-1].id if len(rows)>limit else None)
-@router.get(EDITORIAL_PUBLIC+"/{kind}/{slug}", response_model=EditorialView)
-def editorial_public_detail(org: UUID, kind: EditorialKind, slug: str, db: DB, locale: Locale="en"):
-    e=db.scalar(select(EditorialEntry).where(EditorialEntry.organization_id==org,EditorialEntry.kind==kind,EditorialEntry.slug==slug,EditorialEntry.locale==locale,EditorialEntry.state=="published"))
-    if not e: raise AuthError("not_found",404)
+def editorial_public_list(
+    org: UUID,
+    db: DB,
+    kind: EditorialKind,
+    locale: Locale = "en",
+    cursor: UUID | None = None,
+    limit: Limit = 25,
+) -> PublicEditorialList:
+    rows = editorial_service.public(db, org, kind, locale, cursor, limit)
+    return PublicEditorialList(
+        items=[editorial_service.view(e) for e in rows[:limit]],
+        next_cursor=rows[limit - 1].id if len(rows) > limit else None,
+    )
+
+
+@router.get(EDITORIAL_PUBLIC + "/{kind}/{slug}", response_model=EditorialView)
+def editorial_public_detail(
+    org: UUID, kind: EditorialKind, slug: str, db: DB, locale: Locale = "en"
+) -> EditorialView:
+    e = db.scalar(
+        select(EditorialEntry).where(
+            EditorialEntry.organization_id == org,
+            EditorialEntry.kind == kind,
+            EditorialEntry.slug == slug,
+            EditorialEntry.locale == locale,
+            EditorialEntry.state == "published",
+        )
+    )
+    if not e:
+        raise AuthError("not_found", 404)
     return editorial_service.view(e)
-from app.modules.cms.asset_service import create as create_asset, publish as publish_asset, view as asset_view
-from app.modules.cms.models import Asset
-from app.modules.cms.schemas import AssetCreate, AssetList, AssetView
-ASSET_STAFF="/cms/organizations/{org}/assets"
-ASSET_PUBLIC="/public/organizations/{org}/assets"
-@router.post(ASSET_STAFF,response_model=AssetView,status_code=201)
-def asset_create(org:UUID,data:AssetCreate,request:Request,db:DB,identity:Principal): return create_asset(db,org,identity[0],data,request.state.request_id)
-@router.get(ASSET_STAFF,response_model=AssetList)
-def asset_list(org:UUID,db:DB,identity:Principal,cursor:UUID|None=None,limit:Limit=25):
- require_permission(db,identity[0],org,"cms.asset.view"); q=select(Asset).where(Asset.organization_id==org); q=q.where(Asset.id>cursor) if cursor else q; rows=list(db.scalars(q.order_by(Asset.id).limit(limit+1))); return AssetList(items=[asset_view(a) for a in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
-@router.post(ASSET_STAFF+"/{asset_id}/publish",response_model=AssetView)
-def asset_publish(org:UUID,asset_id:UUID,request:Request,db:DB,identity:Principal): return publish_asset(db,org,asset_id,identity[0],request.state.request_id)
-@router.get(ASSET_PUBLIC,response_model=AssetList)
-def asset_public(org:UUID,db:DB,cursor:UUID|None=None,limit:Limit=25):
- q=select(Asset).where(Asset.organization_id==org,Asset.visibility=="public",Asset.scan_status=="clean"); q=q.where(Asset.id>cursor) if cursor else q; rows=list(db.scalars(q.order_by(Asset.id).limit(limit+1))); return AssetList(items=[asset_view(a) for a in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
 
 
-from app.core.config import get_settings
-from app.modules.cms.asset_service import scan_result as asset_scan_result
-from app.modules.cms.schemas import AssetScanResult
-from secrets import compare_digest
+ASSET_STAFF = "/cms/organizations/{org}/assets"
+ASSET_PUBLIC = "/public/organizations/{org}/assets"
+
+
+@router.post(ASSET_STAFF, response_model=AssetView, status_code=201)
+def asset_create(
+    org: UUID, data: AssetCreate, request: Request, db: DB, identity: Principal
+) -> AssetView:
+    return create_asset(db, org, identity[0], data, request.state.request_id)
+
+
+@router.get(ASSET_STAFF, response_model=AssetList)
+def asset_list(
+    org: UUID, db: DB, identity: Principal, cursor: UUID | None = None, limit: Limit = 25
+) -> AssetList:
+    require_permission(db, identity[0], org, "cms.asset.view")
+    q = select(Asset).where(Asset.organization_id == org)
+    q = q.where(Asset.id > cursor) if cursor else q
+    rows = list(db.scalars(q.order_by(Asset.id).limit(limit + 1)))
+    return AssetList(
+        items=[asset_view(a) for a in rows[:limit]],
+        next_cursor=rows[limit - 1].id if len(rows) > limit else None,
+    )
+
+
+@router.post(ASSET_STAFF + "/{asset_id}/publish", response_model=AssetView)
+def asset_publish(
+    org: UUID, asset_id: UUID, request: Request, db: DB, identity: Principal
+) -> AssetView:
+    return publish_asset(db, org, asset_id, identity[0], request.state.request_id)
+
+
+@router.get(ASSET_PUBLIC, response_model=AssetList)
+def asset_public(org: UUID, db: DB, cursor: UUID | None = None, limit: Limit = 25) -> AssetList:
+    q = select(Asset).where(
+        Asset.organization_id == org, Asset.visibility == "public", Asset.scan_status == "clean"
+    )
+    q = q.where(Asset.id > cursor) if cursor else q
+    rows = list(db.scalars(q.order_by(Asset.id).limit(limit + 1)))
+    return AssetList(
+        items=[asset_view(a) for a in rows[:limit]],
+        next_cursor=rows[limit - 1].id if len(rows) > limit else None,
+    )
+
+
 @router.post("/internal/cms/organizations/{org}/assets/{asset_id}/scan", response_model=AssetView)
-def asset_scan(org: UUID, asset_id: UUID, data: AssetScanResult, request: Request, db: DB):
+def asset_scan(
+    org: UUID, asset_id: UUID, data: AssetScanResult, request: Request, db: DB
+) -> AssetView:
     configured = get_settings().asset_scanner_key
     supplied = request.headers.get("X-Asset-Scanner-Key", "")
     if not configured or not compare_digest(supplied, configured.get_secret_value()):
@@ -294,11 +415,13 @@ def asset_scan(org: UUID, asset_id: UUID, data: AssetScanResult, request: Reques
     return asset_scan_result(db, org, asset_id, data.clean, data.reason, request.state.request_id)
 
 
-from app.modules.cms.enquiry_service import create as create_enquiry, list_staff as list_enquiries
-from app.modules.cms.schemas import EnquiryCreate, EnquiryReceipt, EnquiryView
-@router.post("/public/organizations/{org}/enquiries", response_model=EnquiryReceipt, status_code=202)
-def enquiry_create(org: UUID, data: EnquiryCreate, request: Request, db: DB):
+@router.post(
+    "/public/organizations/{org}/enquiries", response_model=EnquiryReceipt, status_code=202
+)
+def enquiry_create(org: UUID, data: EnquiryCreate, request: Request, db: DB) -> EnquiryReceipt:
     return create_enquiry(db, org, data, request.state.request_id)
+
+
 @router.get("/cms/organizations/{org}/enquiries", response_model=list[EnquiryView])
-def enquiry_list(org: UUID, db: DB, identity: Principal, limit: Limit=25):
+def enquiry_list(org: UUID, db: DB, identity: Principal, limit: Limit = 25) -> list[EnquiryView]:
     return list_enquiries(db, org, identity[0], limit)

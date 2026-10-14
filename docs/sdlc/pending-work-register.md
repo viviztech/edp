@@ -121,4 +121,10 @@ L03 adds versioned cohort policy, scoped manual attendance, digest-only time-lim
 
 ## M01 completion record
 
-M01 adds eligible mentor profiles, expertise and availability, one active enrollment-scoped assignment, conflict-checked sessions, author-only private notes, participant-shared notes, versioned goals/actions, durable follow-up reminders, immutable participant feedback and count/average monitoring. PostgreSQL repeats scope and immutability controls. English/Tamil staff and participant web flows use a closed BFF allowlist. Native mentor mobile access, production reminder dispatch, retention approval, remote CI and production operational acceptance remain open. The next scheduled module is K01 knowledge resources.
+M01 adds eligible mentor profiles, expertise and availability, one active enrollment-scoped assignment, conflict-checked sessions, author-only private notes, participant-shared notes, versioned goals/actions, durable follow-up reminders, immutable participant feedback and count/average monitoring. PostgreSQL repeats scope and immutability controls. English/Tamil staff and participant web flows use a closed BFF allowlist. Native mentor mobile access, production reminder dispatch, retention approval, remote CI and production operational acceptance remain open. B01/B02 continuation is tracked in the Milestone 7 plans and report.
+
+## B01.3 acceptance continuation — 14 October 2026
+
+B01 local API/web/browser acceptance passed: 90 API tests, 56 web tests, the full authenticated Chrome journey, migration round trip/drift, generated contracts, backend/web lint and types, and the production web build. Participant and mentor form layout was corrected and verified at 390 pixels in English/Tamil. The historical repository-wide Ruff/MyPy debt above is resolved for the current source (151 formatted files, 87 type-checked source files). See `milestone-07-report.md` for commands, evidence and scope.
+
+B01 remains open for the CI audit gate: nine high npm findings share the unpatched `braces` dependency chain (GHSA-vfj7-8cjw-p6xm). Compatible published dependency fixes were applied, including Next.js 16.3.8; no audit suppression or breaking downgrade was applied. B02 implementation/acceptance, native/device evidence, client policy approval, PDF export and production operational gates remain pending separately.
