@@ -15586,6 +15586,392 @@
         }
       }
     },
+    "/api/v1/files/organizations/{org}/policies": {
+      "get": {
+        "tags": [
+          "file-policies"
+        ],
+        "summary": "Policies",
+        "operationId": "policies_api_v1_files_organizations__org__policies_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "application_document",
+                    "cms_asset",
+                    "assignment_submission",
+                    "lms_material",
+                    "helpdesk_attachment"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Purpose"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilePolicyList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "file-policies"
+        ],
+        "summary": "Create Policy",
+        "operationId": "create_policy_api_v1_files_organizations__org__policies_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilePolicyCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilePolicyView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/files/organizations/{org}/policies/{policy_id}": {
+      "get": {
+        "tags": [
+          "file-policies"
+        ],
+        "summary": "Policy",
+        "operationId": "policy_api_v1_files_organizations__org__policies__policy_id__get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilePolicyView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "file-policies"
+        ],
+        "summary": "Edit Policy",
+        "operationId": "edit_policy_api_v1_files_organizations__org__policies__policy_id__patch",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilePolicyUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilePolicyView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/files/organizations/{org}/policies/{policy_id}/publish": {
+      "post": {
+        "tags": [
+          "file-policies"
+        ],
+        "summary": "Publish Policy",
+        "operationId": "publish_policy_api_v1_files_organizations__org__policies__policy_id__publish_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilePolicyCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilePolicyView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/files/organizations/{org}/policies/{policy_id}/retire": {
+      "post": {
+        "tags": [
+          "file-policies"
+        ],
+        "summary": "Retire Policy",
+        "operationId": "retire_policy_api_v1_files_organizations__org__policies__policy_id__retire_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilePolicyCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilePolicyView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -21388,6 +21774,435 @@
           "position"
         ],
         "title": "FieldView"
+      },
+      "FilePolicyCommand": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "reason"
+        ],
+        "title": "FilePolicyCommand"
+      },
+      "FilePolicyCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "notice_en": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Notice En"
+          },
+          "notice_ta": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Notice Ta"
+          },
+          "allowed_mime_types": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "application/pdf",
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+                "text/plain"
+              ]
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Allowed Mime Types"
+          },
+          "max_file_bytes": {
+            "type": "integer",
+            "maximum": 104857600.0,
+            "minimum": 1.0,
+            "title": "Max File Bytes"
+          },
+          "max_files": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Max Files"
+          },
+          "retention_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Retention Days"
+          },
+          "rejected_retention_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Rejected Retention Days"
+          },
+          "allow_frozen_disposal": {
+            "type": "boolean",
+            "title": "Allow Frozen Disposal"
+          },
+          "client_request_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Request Id"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "application_document",
+              "cms_asset",
+              "assignment_submission",
+              "lms_material",
+              "helpdesk_attachment"
+            ],
+            "title": "Purpose"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason"
+          },
+          "copy_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Copy From"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "notice_en",
+          "notice_ta",
+          "allowed_mime_types",
+          "max_file_bytes",
+          "max_files",
+          "retention_days",
+          "rejected_retention_days",
+          "allow_frozen_disposal",
+          "client_request_id",
+          "purpose",
+          "reason"
+        ],
+        "title": "FilePolicyCreate"
+      },
+      "FilePolicyList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FilePolicyView"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "FilePolicyList"
+      },
+      "FilePolicyUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "notice_en": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Notice En"
+          },
+          "notice_ta": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Notice Ta"
+          },
+          "allowed_mime_types": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "application/pdf",
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+                "text/plain"
+              ]
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Allowed Mime Types"
+          },
+          "max_file_bytes": {
+            "type": "integer",
+            "maximum": 104857600.0,
+            "minimum": 1.0,
+            "title": "Max File Bytes"
+          },
+          "max_files": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Max Files"
+          },
+          "retention_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Retention Days"
+          },
+          "rejected_retention_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Rejected Retention Days"
+          },
+          "allow_frozen_disposal": {
+            "type": "boolean",
+            "title": "Allow Frozen Disposal"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "notice_en",
+          "notice_ta",
+          "allowed_mime_types",
+          "max_file_bytes",
+          "max_files",
+          "retention_days",
+          "rejected_retention_days",
+          "allow_frozen_disposal",
+          "expected_version",
+          "reason"
+        ],
+        "title": "FilePolicyUpdate"
+      },
+      "FilePolicyView": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "notice_en": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Notice En"
+          },
+          "notice_ta": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Notice Ta"
+          },
+          "allowed_mime_types": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "application/pdf",
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+                "text/plain"
+              ]
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Allowed Mime Types"
+          },
+          "max_file_bytes": {
+            "type": "integer",
+            "maximum": 104857600.0,
+            "minimum": 1.0,
+            "title": "Max File Bytes"
+          },
+          "max_files": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Max Files"
+          },
+          "retention_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Retention Days"
+          },
+          "rejected_retention_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Rejected Retention Days"
+          },
+          "allow_frozen_disposal": {
+            "type": "boolean",
+            "title": "Allow Frozen Disposal"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "client_request_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Request Id"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "application_document",
+              "cms_asset",
+              "assignment_submission",
+              "lms_material",
+              "helpdesk_attachment"
+            ],
+            "title": "Purpose"
+          },
+          "edition": {
+            "type": "integer",
+            "title": "Edition"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "retired"
+            ],
+            "title": "State"
+          },
+          "copy_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Copy From"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "notice_en",
+          "notice_ta",
+          "allowed_mime_types",
+          "max_file_bytes",
+          "max_files",
+          "retention_days",
+          "rejected_retention_days",
+          "allow_frozen_disposal",
+          "id",
+          "organization_id",
+          "client_request_id",
+          "purpose",
+          "edition",
+          "version",
+          "state",
+          "copy_from",
+          "published_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "FilePolicyView"
       },
       "FollowUpCreate": {
         "properties": {

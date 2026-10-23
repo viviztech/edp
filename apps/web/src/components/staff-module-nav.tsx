@@ -12,7 +12,7 @@ import { notificationMessages } from "../lib/notification-messages";
 import { programMessages } from "../lib/program-messages";
 import { selectionMessages } from "../lib/selection-messages";
 
-type ModuleKey = "pages" | "content" | "media" | "enquiries" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning" | "attendance" | "mentoring" | "businesses" | "knowledge" | "helpdesk" | "reports";
+type ModuleKey = "pages" | "content" | "media" | "enquiries" | "filePolicies" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning" | "attendance" | "mentoring" | "businesses" | "knowledge" | "helpdesk" | "reports";
 type Locale = "en" | "ta";
 
 const descriptions: Record<Locale, Record<ModuleKey, string>> = {
@@ -21,6 +21,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     content: "Draft and publish bilingual news, events, answers and stories.",
     media: "Review registered media metadata and recorded scan states.",
     enquiries: "Review public enquiries and manage the next response.",
+    filePolicies: "Configure explicit formats, limits, notices and retention by purpose.",
     crm: "Review leads and plan the next action.",
     notifications: "See assignments, due follow-ups and delivery failures.",
     meta: "Monitor lead forms and delivery.",
@@ -36,6 +37,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     reports: "Review defined measures, preserve snapshots and export authorized evidence.",
   },
   ta: {
+    filePolicies: "நோக்கத்தின்படி கோப்பு வடிவங்கள், வரம்புகள், அறிவிப்புகள் மற்றும் காலங்களை அமைக்கவும்.",
     content: "இருமொழிச் செய்திகள், நிகழ்வுகள், பதில்கள் மற்றும் அனுபவங்களை வெளியிடுக.",
     media: "ஊடக விவரங்களையும் பதிவு செய்யப்பட்ட பரிசோதனை நிலைகளையும் பார்க்கவும்.",
     enquiries: "பொது விசாரணைகளைப் பார்த்து அடுத்த பதிலை நிர்வகிக்கவும்.",
@@ -61,6 +63,7 @@ const modules = [
   { key: "content", route: "content", permission: "cms.editorial.view", Icon: FilePenLine },
   { key: "media", route: "media", permission: "cms.asset.view", Icon: BookOpen },
   { key: "enquiries", route: "enquiries", permission: "enquiry.view", Icon: ClipboardList },
+  { key: "filePolicies", route: "file-policies", permission: "files.policy.view", Icon: ClipboardList },
   { key: "crm", route: "crm", permission: "crm.lead.view", Icon: UsersRound },
   { key: "notifications", route: "notifications", permission: "crm.lead.view", Icon: Bell },
   { key: "meta", route: "meta", permission: "meta.integration.view", Icon: Network },
@@ -84,6 +87,7 @@ export function StaffModuleNav({ locale, organization, permissions, variant = "t
   active?: ModuleKey;
 }) {
   const labels: Record<ModuleKey, string> = {
+    filePolicies: locale === "ta" ? "கோப்புக் கொள்கைகள்" : "File policies",
     pages: cmsMessages[locale].workspace,
     content: locale === "ta" ? "உள்ளடக்கப் பகுதி" : "Content studio",
     media: locale === "ta" ? "ஊடக விவரங்கள்" : "Media metadata",

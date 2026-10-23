@@ -3872,6 +3872,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/files/organizations/{org}/policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Policies */
+        get: operations["policies_api_v1_files_organizations__org__policies_get"];
+        put?: never;
+        /** Create Policy */
+        post: operations["create_policy_api_v1_files_organizations__org__policies_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/organizations/{org}/policies/{policy_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Policy */
+        get: operations["policy_api_v1_files_organizations__org__policies__policy_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit Policy */
+        patch: operations["edit_policy_api_v1_files_organizations__org__policies__policy_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/files/organizations/{org}/policies/{policy_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Policy */
+        post: operations["publish_policy_api_v1_files_organizations__org__policies__policy_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/organizations/{org}/policies/{policy_id}/retire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retire Policy */
+        post: operations["retire_policy_api_v1_files_organizations__org__policies__policy_id__retire_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -6348,6 +6418,144 @@ export interface components {
             required: boolean;
             /** Position */
             position: number;
+        };
+        /** FilePolicyCommand */
+        FilePolicyCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** FilePolicyCreate */
+        FilePolicyCreate: {
+            /** Name */
+            name: string;
+            /** Notice En */
+            notice_en: string;
+            /** Notice Ta */
+            notice_ta: string;
+            /** Allowed Mime Types */
+            allowed_mime_types: ("application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain")[];
+            /** Max File Bytes */
+            max_file_bytes: number;
+            /** Max Files */
+            max_files: number;
+            /** Retention Days */
+            retention_days: number;
+            /** Rejected Retention Days */
+            rejected_retention_days: number;
+            /** Allow Frozen Disposal */
+            allow_frozen_disposal: boolean;
+            /**
+             * Client Request Id
+             * Format: uuid
+             */
+            client_request_id: string;
+            /**
+             * Purpose
+             * @enum {string}
+             */
+            purpose: "application_document" | "cms_asset" | "assignment_submission" | "lms_material" | "helpdesk_attachment";
+            /** Reason */
+            reason: string;
+            /** Copy From */
+            copy_from?: string | null;
+        };
+        /** FilePolicyList */
+        FilePolicyList: {
+            /** Items */
+            items: components["schemas"]["FilePolicyView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** FilePolicyUpdate */
+        FilePolicyUpdate: {
+            /** Name */
+            name: string;
+            /** Notice En */
+            notice_en: string;
+            /** Notice Ta */
+            notice_ta: string;
+            /** Allowed Mime Types */
+            allowed_mime_types: ("application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain")[];
+            /** Max File Bytes */
+            max_file_bytes: number;
+            /** Max Files */
+            max_files: number;
+            /** Retention Days */
+            retention_days: number;
+            /** Rejected Retention Days */
+            rejected_retention_days: number;
+            /** Allow Frozen Disposal */
+            allow_frozen_disposal: boolean;
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** FilePolicyView */
+        FilePolicyView: {
+            /** Name */
+            name: string;
+            /** Notice En */
+            notice_en: string;
+            /** Notice Ta */
+            notice_ta: string;
+            /** Allowed Mime Types */
+            allowed_mime_types: ("application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain")[];
+            /** Max File Bytes */
+            max_file_bytes: number;
+            /** Max Files */
+            max_files: number;
+            /** Retention Days */
+            retention_days: number;
+            /** Rejected Retention Days */
+            rejected_retention_days: number;
+            /** Allow Frozen Disposal */
+            allow_frozen_disposal: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Client Request Id
+             * Format: uuid
+             */
+            client_request_id: string;
+            /**
+             * Purpose
+             * @enum {string}
+             */
+            purpose: "application_document" | "cms_asset" | "assignment_submission" | "lms_material" | "helpdesk_attachment";
+            /** Edition */
+            edition: number;
+            /** Version */
+            version: number;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "published" | "retired";
+            /** Copy From */
+            copy_from: string | null;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** FollowUpCreate */
         FollowUpCreate: {
@@ -20020,6 +20228,216 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImpactRecordView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    policies_api_v1_files_organizations__org__policies_get: {
+        parameters: {
+            query?: {
+                purpose?: ("application_document" | "cms_asset" | "assignment_submission" | "lms_material" | "helpdesk_attachment") | null;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilePolicyList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_policy_api_v1_files_organizations__org__policies_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FilePolicyCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilePolicyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    policy_api_v1_files_organizations__org__policies__policy_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilePolicyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_policy_api_v1_files_organizations__org__policies__policy_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FilePolicyUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilePolicyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_policy_api_v1_files_organizations__org__policies__policy_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FilePolicyCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilePolicyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retire_policy_api_v1_files_organizations__org__policies__policy_id__retire_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FilePolicyCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilePolicyView"];
                 };
             };
             /** @description Validation Error */

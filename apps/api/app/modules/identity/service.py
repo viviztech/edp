@@ -59,6 +59,7 @@ CMS_PERMISSIONS += [
 ]
 CMS_PERMISSIONS += ["cms.asset." + action for action in ("view", "create", "publish")]
 ENQUIRY_PERMISSIONS = ["enquiry.view", "enquiry.manage"]
+FILE_POLICY_PERMISSIONS = ["files.policy.view", "files.policy.manage"]
 NOTIFICATION_OPERATIONS_PERMISSIONS = [
     "notification.operations.view",
     "notification.operations.replay",
@@ -128,6 +129,7 @@ PERMISSIONS = [
     "audit.view",
     *CMS_PERMISSIONS,
     *ENQUIRY_PERMISSIONS,
+    *FILE_POLICY_PERMISSIONS,
     *CRM_PERMISSIONS,
     *META_PERMISSIONS,
     *NOTIFICATION_OPERATIONS_PERMISSIONS,
@@ -488,6 +490,7 @@ def seed_roles(db: Session) -> None:
         elif name == "Program Director":
             codes = [
                 "system.access",
+                *FILE_POLICY_PERMISSIONS,
                 *ENQUIRY_PERMISSIONS,
                 *NOTIFICATION_OPERATIONS_PERMISSIONS,
                 *APPLICATION_PERMISSIONS,

@@ -1,0 +1,11 @@
+.file-policy-main{max-width:1220px;margin:0 auto;padding:2rem 1rem;overflow-wrap:anywhere}
+.file-policy-grid{display:grid;grid-template-columns:minmax(14rem,1fr) minmax(0,2fr);gap:1.5rem;margin-top:1.5rem}
+.file-policy-grid aside,.file-policy-grid>section{min-width:0;padding:1rem;border:1px solid #d5dfed;border-radius:.5rem}
+.file-policy-grid fieldset{min-width:0;border:0;padding:0;margin:0;display:grid;gap:1rem}
+.file-policy-grid label{display:grid;gap:.4rem}.file-policy-grid select,.file-policy-grid input:not([type=checkbox]),.file-policy-grid textarea{box-sizing:border-box;width:100%;max-width:100%;min-width:0;padding:.6rem;border:1px solid #a5b5c9;border-radius:.35rem;background:#fff;color:#172c49;font:inherit}
+.file-policy-grid ul{list-style:none;padding:0;display:grid;gap:.5rem}.file-policy-grid li button{width:100%;background:#fff;border:1px solid #c8d6e7;border-radius:.4rem;text-align:left}
+.file-policy-grid small{display:block;margin-top:.3rem;line-height:1.6}.file-policy-grid button{min-height:2.75rem;padding:.5rem .8rem;white-space:normal;overflow-wrap:anywhere}.file-policy-grid li button[aria-pressed=true]{background:#e5effa;border-color:#3269a8}
+.file-policy-form{display:grid;gap:1rem;margin:1rem 0}.file-policy-grid .file-policy-check{display:flex;align-items:center;gap:.6rem}.file-policy-check input{flex-shrink:0}
+.file-policy-conflict{padding:1rem;border:2px solid #a87519;border-radius:.4rem}.file-policy-conflict article p{white-space:pre-wrap;overflow-wrap:anywhere}.file-policy-reference{overflow-wrap:anywhere}
+.file-policy-conflict dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.5rem}.file-policy-conflict dt{font-weight:600}.file-policy-conflict dd{margin:0;overflow-wrap:anywhere}
+@media(max-width:760px){.file-policy-grid{grid-template-columns:1fr}.file-policy-main{padding:1.5rem .75rem}}

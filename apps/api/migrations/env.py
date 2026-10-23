@@ -9,6 +9,7 @@ from app.modules.business_plans import models as business_plan_models  # noqa: F
 from app.modules.businesses import models as business_models  # noqa: F401
 from app.modules.cms import models as cms_models  # noqa: F401
 from app.modules.crm import models as crm_models  # noqa: F401
+from app.modules.files import models as file_models  # noqa: F401
 from app.modules.helpdesk import models as helpdesk_models  # noqa: F401
 from app.modules.identity import models as identity_models  # noqa: F401
 from app.modules.knowledge import models as knowledge_models  # noqa: F401

@@ -10,6 +10,12 @@ import { programMessages } from "../lib/program-messages";
 afterEach(cleanup);
 
 describe("staff module navigation", () => {
+  it("links policy administration only with scoped file-policy view rights", () => {
+    const view = render(<StaffModuleNav locale="ta" organization="org-files" permissions={["files.policy.view"]} active="filePolicies" />);
+    const link = screen.getByRole("link", { name: "கோப்புக் கொள்கைகள்" });
+    expect(link.getAttribute("href")).toBe("/ta/admin/file-policies?organization=org-files"); expect(link.getAttribute("aria-current")).toBe("page");
+    view.rerender(<StaffModuleNav locale="en" organization="org-files" permissions={["files.policy.manage"]} />); expect(screen.queryByRole("navigation")).toBeNull();
+  });
   it("exposes editorial and media only for their respective scoped view rights", () => {
     const view = render(<StaffModuleNav locale="en" organization="org-content" permissions={["cms.editorial.view"]} active="content" />);
     expect(screen.getByRole("link", { name: "Content studio" }).getAttribute("href")).toBe("/en/admin/content?organization=org-content");

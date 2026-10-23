@@ -12,10 +12,11 @@ dependencies = [
   "psycopg[binary]>=3.2,<4", "alembic>=1.15,<2", "redis>=5,<7",
   "argon2-cffi>=25,<26", "cryptography>=50,<51", "email-validator>=2,<3",
   "celery>=5.4,<6", "httpx>=0.28,<1", "structlog>=25,<26", "qrcode>=8.2,<9",
+  "boto3>=1.43,<2", "pillow>=13,<14",
 ]
 
 [project.optional-dependencies]
-dev = ["playwright>=1.56,<2", "pytest>=8,<10", "pytest-asyncio>=0.25,<2", "ruff>=0.11,<1", "mypy>=1.15,<2", "pip-audit>=2.8,<3", "types-qrcode>=8.2,<9"]
+dev = ["playwright>=1.56,<2", "pytest>=8,<10", "pytest-asyncio>=0.25,<2", "ruff>=0.11,<1", "mypy>=1.15,<2", "pip-audit>=2.8,<3", "types-qrcode>=8.2,<9", "boto3-stubs[s3]>=1.43,<2"]
 
 [tool.setuptools.packages.find]
 include = ["app*"]

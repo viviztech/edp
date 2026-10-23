@@ -8,6 +8,8 @@ Latest local completion: [Process 2 web journeys](docs/sdlc/web-journey-completi
 
 Latest: [Phase 10 reporting and impact](docs/sdlc/milestone-10-report.md), [Phase 9 post-training and helpdesk acceptance](docs/sdlc/milestone-09-report.md), [K01 knowledge and funding acceptance](docs/sdlc/milestone-08-report.md), [B01 acceptance](docs/sdlc/b01-acceptance-report.md), [dependency repair](docs/sdlc/dependency-repair-report.md).
 
+Current work: [Process 3 secure files](docs/sdlc/secure-files-plan.md). The [configurable foundation checkpoint](docs/sdlc/secure-file-foundation-report.md) adds policy administration and private storage/scanner lifecycle; application documents, CMS verified bytes, learning and helpdesk integration remain in progress. Collection and maintenance remain disabled; policy publication does not approve real collection.
+
 Start with [Milestone 1 report](docs/sdlc/milestone-01-report.md), [local setup](docs/deployment/local.md) and [Milestone 1 plan](docs/sdlc/milestone-01-plan.md).
 
 | Design | Delivery |

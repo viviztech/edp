@@ -12,6 +12,8 @@ Earlier foundation/learning/mentoring slices, B01, K01 and Phase 9 B02/S01 are a
 
 ## Immediate closure work
 
+Process 3 is now active under the [secure-files plan](secure-files-plan.md). The owner selected configurable policies; the [foundation checkpoint](secure-file-foundation-report.md) is locally verified. A01.3 application documents is the next implementation slice, followed by CMS/learning/helpdesk bindings. Real collection and maintenance remain disabled, and no document list or retention policy has been approved.
+
 These tasks should be completed before or alongside the next feature implementation:
 
 | Priority | Task | Recorded status |

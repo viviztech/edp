@@ -2,7 +2,8 @@ FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY apps/api/requirements.lock ./requirements.lock
-RUN pip install --no-cache-dir -r requirements.lock && useradd --create-home edp
+RUN pip install --no-cache-dir -r requirements.lock && useradd --create-home edp \
+    && install -d -m 700 -o edp -g edp /var/lib/edp/files-tmp
 COPY apps/api/ ./
 USER edp
 EXPOSE 8000

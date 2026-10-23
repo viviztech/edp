@@ -20,8 +20,17 @@ celery_app.conf.update(
     result_expires=300,
     task_soft_time_limit=25,
     task_time_limit=30,
-    imports=("app.workers.crm_exports", "app.workers.meta_leads", "app.workers.notifications"),
+    imports=(
+        "app.workers.crm_exports",
+        "app.workers.meta_leads",
+        "app.workers.notifications",
+        "app.workers.files",
+    ),
     beat_schedule={
+        "recover-private-files": {
+            "task": "edp.files.queue_due",
+            "schedule": 60.0,
+        },
         "recover-meta-events": {
             "task": "edp.meta.recover_events",
             "schedule": 60.0,

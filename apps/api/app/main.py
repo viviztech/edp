@@ -24,6 +24,7 @@ from app.modules.business_plans.routes import router as business_plans_router
 from app.modules.businesses.routes import router as businesses_router
 from app.modules.cms.routes import router as cms_router
 from app.modules.crm.routes import router as crm_router
+from app.modules.files.policy_routes import router as file_policy_router
 from app.modules.helpdesk.routes import router as helpdesk_router
 from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
@@ -110,6 +111,7 @@ def create_app() -> FastAPI:
     app.include_router(helpdesk_router)
     app.include_router(reports_router)
     app.include_router(impact_router)
+    app.include_router(file_policy_router)
 
     @app.exception_handler(AuthError)
     async def auth_error(request: Request, exc: AuthError) -> JSONResponse:
@@ -158,6 +160,7 @@ def create_app() -> FastAPI:
                         or request.url.path.startswith("/api/v1/helpdesk/")
                         or request.url.path.startswith("/api/v1/reports/")
                         or request.url.path.startswith("/api/v1/impact/")
+                        or request.url.path.startswith("/api/v1/files/")
                     )
                     and request.method in {"POST", "PATCH", "PUT"}
                 )
@@ -184,6 +187,8 @@ def create_app() -> FastAPI:
                     32768
                     if request.url.path.startswith("/api/v1/public/organizations/")
                     and request.url.path.endswith("/enquiries")
+                    else 65536
+                    if request.url.path.startswith("/api/v1/files/")
                     else 262144
                 )
                 body = bytearray()

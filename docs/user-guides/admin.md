@@ -14,6 +14,16 @@ If a change conflicts or its response is interrupted, use the detail **Refresh**
 
 The public form is disabled by default. Before collecting real enquiries, the owner must approve both language versions of the notice and consent wording, retention and response arrangements. An operator configures the approved notice URLs and consent texts with `CONTACT_PRIVACY_NOTICE_URL_EN/TA`, `CONTACT_CONSENT_TEXT_EN/TA`, the current `CONTACT_PRIVACY_VERSION`, and `CONTACT_ENQUIRIES_ENABLED`. Both languages are required before enabling. See [enquiry configuration and boundaries](../architecture/enquiry-web-journey.md). Local automated acceptance uses synthetic policy wording only.
 
+## Configure future file rules
+
+Authorized directors open **File policies** in the intended organization. Choose the purpose and create a draft with explicit formats, file size/count, both participant notices, retention/rejected-retention periods and the frozen-evidence disposal choice. Every change needs a reason. New drafts supply none of these policy decisions automatically. Use only approved rules for real use; local acceptance uses synthetic values.
+
+Save and review the draft, then enter a new reason to publish it. Publishing retires the prior active edition for that purpose; existing evidence remains pinned to its original edition. Published or retired rules cannot be edited. **Copy displayed rules to a new edition** prepares an editable draft for review and a new reason. Retirement stops an edition being active; it does not delete evidence. A purpose may have only one draft at a time.
+
+If creation is uncertain, use **Retry the same draft request** to recover the same edition; its input stays frozen until confirmed. Other interrupted or stale writes require **Load current saved edition**, comparison of all saved fields and an explicit choice to keep your entered rules with the current version. Nothing is retried or published automatically. A saved write followed by a list error stays saved; refresh the list instead of repeating the write.
+
+This workspace configures policy only. It does not provide uploads, enable collection, override legal holds or certify legal approval. Required documents, approved notices/retention and deployment controls remain separate owner decisions. See [policy administration](../architecture/file-policy-administration.md).
+
 ## News, events, FAQs and testimonials
 
 Open **Content studio** in the intended organization. Select the content type and language, then create a separate locale draft using the same permanent slug as its counterpart. Save and review the draft before publishing. Creation, editing, publication and archiving each require their own permission. Published entries must be archived with a reason and restored to draft before editing; archiving removes the entry from public discovery immediately. Republish the reviewed draft when ready.
