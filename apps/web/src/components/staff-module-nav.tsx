@@ -12,12 +12,15 @@ import { notificationMessages } from "../lib/notification-messages";
 import { programMessages } from "../lib/program-messages";
 import { selectionMessages } from "../lib/selection-messages";
 
-type ModuleKey = "pages" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning" | "attendance" | "mentoring" | "businesses" | "knowledge" | "helpdesk" | "reports";
+type ModuleKey = "pages" | "content" | "media" | "enquiries" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning" | "attendance" | "mentoring" | "businesses" | "knowledge" | "helpdesk" | "reports";
 type Locale = "en" | "ta";
 
 const descriptions: Record<Locale, Record<ModuleKey, string>> = {
   en: {
     pages: "Create and publish program pages.",
+    content: "Draft and publish bilingual news, events, answers and stories.",
+    media: "Review registered media metadata and recorded scan states.",
+    enquiries: "Review public enquiries and manage the next response.",
     crm: "Review leads and plan the next action.",
     notifications: "See assignments, due follow-ups and delivery failures.",
     meta: "Monitor lead forms and delivery.",
@@ -33,6 +36,9 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     reports: "Review defined measures, preserve snapshots and export authorized evidence.",
   },
   ta: {
+    content: "இருமொழிச் செய்திகள், நிகழ்வுகள், பதில்கள் மற்றும் அனுபவங்களை வெளியிடுக.",
+    media: "ஊடக விவரங்களையும் பதிவு செய்யப்பட்ட பரிசோதனை நிலைகளையும் பார்க்கவும்.",
+    enquiries: "பொது விசாரணைகளைப் பார்த்து அடுத்த பதிலை நிர்வகிக்கவும்.",
     reports: "வரையறுக்கப்பட்ட அளவீடுகளைப் பார்த்து, அறிக்கைச் சான்றுகளைச் சேமிக்கவும்.",
     helpdesk: "ஒதுக்கப்பட்ட உதவிக் கோரிக்கைகளுக்குப் பதிலளித்து தீர்வைக் கண்காணிக்கவும்.",
     pages: "\u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0baa\u0bcd \u0baa\u0b95\u0bcd\u0b95\u0b99\u0bcd\u0b95\u0bb3\u0bc8 \u0b89\u0bb0\u0bc1\u0bb5\u0bbe\u0b95\u0bcd\u0b95\u0bbf \u0bb5\u0bc6\u0bb3\u0bbf\u0baf\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
@@ -41,7 +47,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     meta: "\u0bb5\u0bbe\u0baf\u0bcd\u0baa\u0bcd\u0baa\u0bc1 \u0baa\u0b9f\u0bbf\u0bb5\u0b99\u0bcd\u0b95\u0bb3\u0bc8\u0baf\u0bc1\u0bae\u0bcd \u0bb5\u0bb0\u0bb5\u0bc8\u0baf\u0bc1\u0bae\u0bcd \u0b95\u0ba3\u0bcd\u0b95\u0bbe\u0ba3\u0bbf\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
     applicationDefinitions: "\u0b87\u0bb0\u0bc1\u0bae\u0bca\u0bb4\u0bbf \u0bb5\u0bbf\u0ba3\u0bcd\u0ba3\u0baa\u0bcd\u0baa\u0baa\u0bcd \u0baa\u0b9f\u0bbf\u0bb5\u0b95\u0bcd \u0b95\u0bca\u0bb3\u0bcd\u0b95\u0bc8\u0baf\u0bc8\u0baa\u0bcd \u0baa\u0ba4\u0bbf\u0baa\u0bcd\u0baa\u0bc1\u0b95\u0bb3\u0bbe\u0b95 \u0bae\u0bc7\u0bb2\u0bbe\u0ba3\u0bcd\u0bae\u0bc8 \u0b9a\u0bc6\u0baf\u0bcd\u0baf\u0bb5\u0bc1\u0bae\u0bcd.",
     programs: "\u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0b99\u0bcd\u0b95\u0bb3\u0bcd, \u0bae\u0bc8\u0baf\u0b99\u0bcd\u0b95\u0bb3\u0bcd, \u0b95\u0bc1\u0bb4\u0bc1\u0b95\u0bcd\u0b95\u0bb3\u0bcd \u0bae\u0bb1\u0bcd\u0bb1\u0bc1\u0bae\u0bcd \u0bb5\u0bbf\u0ba3\u0bcd\u0ba3\u0baa\u0bcd\u0baa\u0b95\u0bcd \u0b95\u0bbe\u0bb2\u0b99\u0bcd\u0b95\u0bb3\u0bc8\u0ba4\u0bcd \u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0bae\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
-    selection: "à®®à®¤à®¿à®ªà¯à®ªà¯€à®Ÿà¯à®Ÿà¯à®ªà¯ à®ªà®Ÿà¯à®Ÿà®¿à®¯à®²à¯ˆ à®…à®®à¯ˆà®¤à¯à®¤à¯ à®µà®¿à®£à¯à®£à®ªà¯à®ªà®™à¯à®•à®³à¯ˆ à®’à®¤à¯à®•à¯à®•à®µà¯à®®à¯.",
+    selection: "மதிப்பீட்டுப் பட்டியலை அமைத்து விண்ணப்பங்களை ஒதுக்கவும்.",
     learning: "\u0baa\u0bbe\u0b9f\u0ba8\u0bc6\u0bb1\u0bbf\u0b95\u0bb3\u0bc8 \u0b89\u0bb0\u0bc1\u0bb5\u0bbe\u0b95\u0bcd\u0b95\u0bbf \u0b95\u0bc1\u0bb4\u0bc1 \u0baa\u0bbe\u0ba4\u0bc8\u0b95\u0bb3\u0bbf\u0bb2\u0bcd \u0bb5\u0bc8\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
     attendance: "\u0b85\u0bae\u0bb0\u0bcd\u0bb5\u0bc1 \u0bb5\u0bb0\u0bc1\u0b95\u0bc8\u0baf\u0bc8 \u0ba4\u0bbf\u0bb1\u0ba8\u0bcd\u0ba4\u0bc1 \u0baa\u0ba4\u0bbf\u0bb5\u0bc7\u0b9f\u0bc1\u0b95\u0bb3\u0bc8 \u0ba8\u0bbf\u0bb0\u0bcd\u0bb5\u0b95\u0bbf\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
     mentoring: "\u0bb5\u0bb4\u0bbf\u0b95\u0bbe\u0b9f\u0bcd\u0b9f\u0bbf\u0b95\u0bb3\u0bc8 \u0b92\u0ba4\u0bc1\u0b95\u0bcd\u0b95\u0bbf \u0b85\u0bae\u0bb0\u0bcd\u0bb5\u0bc1\u0b95\u0bb3\u0bc8\u0ba4\u0bcd \u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0bae\u0bbf\u0b9f\u0bb5\u0bc1\u0bae\u0bcd.",
@@ -52,6 +58,9 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
 
 const modules = [
   { key: "pages", route: "pages", permission: "cms.page.view", Icon: FilePenLine },
+  { key: "content", route: "content", permission: "cms.editorial.view", Icon: FilePenLine },
+  { key: "media", route: "media", permission: "cms.asset.view", Icon: BookOpen },
+  { key: "enquiries", route: "enquiries", permission: "enquiry.view", Icon: ClipboardList },
   { key: "crm", route: "crm", permission: "crm.lead.view", Icon: UsersRound },
   { key: "notifications", route: "notifications", permission: "crm.lead.view", Icon: Bell },
   { key: "meta", route: "meta", permission: "meta.integration.view", Icon: Network },
@@ -76,6 +85,9 @@ export function StaffModuleNav({ locale, organization, permissions, variant = "t
 }) {
   const labels: Record<ModuleKey, string> = {
     pages: cmsMessages[locale].workspace,
+    content: locale === "ta" ? "உள்ளடக்கப் பகுதி" : "Content studio",
+    media: locale === "ta" ? "ஊடக விவரங்கள்" : "Media metadata",
+    enquiries: locale === "ta" ? "விசாரணைப் பெட்டி" : "Enquiry inbox",
     crm: crmMessages[locale].workspace,
     notifications: notificationMessages[locale].workspace,
     meta: metaMessages[locale].workspace,

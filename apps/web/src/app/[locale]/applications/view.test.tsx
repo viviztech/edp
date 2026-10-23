@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import ApplicationWorkspace from "./view";
+import Link from "next/link";
 
 const form = {
   id: "22222222-2222-4222-8222-222222222222",
@@ -74,5 +75,127 @@ describe("application final submission", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit application" }));
     expect(await screen.findByText("Accept the required declarations and consent before submitting.")).toBeTruthy();
     expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith("/submit"))).toBe(false);
+  });
+
+  it("reconciles history and receipt when a successful submission response was lost", async () => {
+    let committed = false;
+    const submitted = { ...draft, state: "submitted", version: 3, completion_percent: 100, application_number: "EDP-2026-00000001", submitted_at: "2026-09-23T01:00:00Z", accepted_acknowledgements: [], status_history: [], answers: [{ field_id: form.fields[0].id, value: "A repair service" }] };
+    vi.stubGlobal("fetch", vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.startsWith("/api/applications/mine")) return response({ items: [{ id: draft.id, organization_id: form.organization_id, organization_name: "Saved program", cycle_id: cycle.id, cycle_name_en: cycle.name_en, state: committed ? "submitted" : "draft", updated_at: draft.updated_at }], next_cursor: null });
+      if (url.endsWith("/cycles")) return response({ items: [cycle] });
+      if (url.endsWith(`/cycles/${cycle.id}/application`)) return response(committed ? submitted : draft);
+      if (url === "/api/session/csrf") return response({ csrf_token: "test-csrf" });
+      if (init?.method === "PATCH") return response({ ...draft, version: 2, answers: submitted.answers });
+      if (url.endsWith("/submit")) { committed = true; return response({}, 503); }
+      return response({}, 500);
+    }));
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(<ApplicationWorkspace locale="en" org={form.organization_id} />);
+    fireEvent.change(await screen.findByLabelText("Business idea *"), { target: { value: "A repair service" } });
+    fireEvent.click(screen.getByLabelText(/I declare this is accurate/));
+    fireEvent.click(screen.getByLabelText(/I consent to processing/));
+    fireEvent.click(screen.getByRole("button", { name: "Submit application" }));
+    await screen.findByText(/The request could not be completed/);
+    expect(screen.getByText("Current status: Draft")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Reload application" }));
+    expect(await screen.findByText("Current status: Submitted")).toBeTruthy();
+    expect(await screen.findByText(/Application number: EDP-2026-00000001/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Submit application" })).toBeNull();
+  });
+});
+
+describe("saved intake recovery", () => {
+  function mockWorkspace(options: { discoveryFails?: boolean; open?: boolean; missing?: boolean; state?: "draft" | "under_review" } = {}) {
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith("/api/applications/mine")) return response({ items: [], next_cursor: null });
+      if (url.endsWith("/cycles")) return options.discoveryFails ? response({}, 503) : response({ items: options.open ? [cycle] : [] });
+      if (url.endsWith(`/cycles/${cycle.id}/application`)) {
+        if (options.missing) return response({ error: { code: "not_found" } }, 404);
+        return response(options.state === "under_review" ? {
+          ...draft, state: "under_review", application_number: "EDP-2026-00000001", submitted_at: "2026-09-23T01:00:00Z",
+          accepted_acknowledgements: [], status_history: [],
+        } : draft);
+      }
+      return response({}, 500);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  }
+
+  it("opens a saved closed intake as read-only without substituting an open intake", async () => {
+    mockWorkspace();
+    render(<ApplicationWorkspace locale="en" org={form.organization_id} initialCycle={cycle.id} />);
+    const field = await screen.findByLabelText("Business idea *");
+    expect((field as HTMLInputElement).disabled).toBe(true);
+    expect(screen.getByText(/This intake is closed/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Save draft" })).toBeNull();
+  });
+
+  it("keeps applications under review immutable even while their intake is open", async () => {
+    mockWorkspace({ open: true, state: "under_review" });
+    render(<ApplicationWorkspace locale="en" org={form.organization_id} initialCycle={cycle.id} />);
+    expect((await screen.findByLabelText("Business idea *") as HTMLInputElement).disabled).toBe(true);
+    expect(screen.getByText(/EDP-2026-00000001/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Submit application" })).toBeNull();
+  });
+
+  it("distinguishes failed discovery from a closed intake while preserving the saved view", async () => {
+    mockWorkspace({ discoveryFails: true });
+    render(<ApplicationWorkspace locale="en" org={form.organization_id} initialCycle={cycle.id} />);
+    expect(await screen.findByLabelText("Business idea *")).toBeTruthy();
+    expect(screen.getByText(/The request could not be completed/)).toBeTruthy();
+    expect(screen.queryByText(/This intake is closed/)).toBeNull();
+    expect(screen.queryByText(/No application cycle is open/)).toBeNull();
+  });
+
+  it("does not open another intake when the explicit saved intake is unavailable", async () => {
+    const fetchMock = mockWorkspace({ open: true, missing: true });
+    const missing = "88888888-8888-4888-8888-888888888888";
+    render(<ApplicationWorkspace locale="en" org={form.organization_id} initialCycle={missing} />);
+    expect(await screen.findByText(/The selected application is unavailable/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Start application" })).toBeNull();
+    expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith(`/cycles/${cycle.id}/application`))).toBe(false);
+  });
+
+  it("preserves unsaved answers when the applicant cancels reloading", async () => {
+    mockWorkspace({ open: true });
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(<ApplicationWorkspace locale="en" org={form.organization_id} />);
+    const field = await screen.findByLabelText("Business idea *");
+    fireEvent.change(field, { target: { value: "Unsaved repair service" } });
+    fireEvent.click(screen.getByRole("button", { name: "Reload application" }));
+    expect(window.confirm).toHaveBeenCalled();
+    expect((field as HTMLInputElement).value).toBe("Unsaved repair service");
+  });
+
+  it("reloads the currently selected intake after an uncertain write", async () => {
+    const secondCycle = { ...cycle, id: "88888888-8888-4888-8888-888888888888", code: "2026-B", name_en: "Second intake" };
+    const requests: string[] = [];
+    vi.stubGlobal("fetch", vi.fn((input: RequestInfo | URL) => {
+      const url = String(input); requests.push(url);
+      if (url.startsWith("/api/applications/mine")) return response({ items: [], next_cursor: null });
+      if (url.endsWith("/cycles")) return response({ items: [cycle, secondCycle] });
+      return response({ ...draft, cycle_id: url.includes(secondCycle.id) ? secondCycle.id : cycle.id });
+    }));
+    render(<ApplicationWorkspace locale="en" org={form.organization_id} />);
+    await screen.findByLabelText("Business idea *");
+    fireEvent.click(screen.getByRole("button", { name: /Second intake/ }));
+    await waitFor(() => expect(screen.getByRole("button", { name: /Second intake/ }).getAttribute("disabled")).toBeNull());
+    fireEvent.click(screen.getByRole("button", { name: "Reload application" }));
+    await waitFor(() => expect(requests.filter((url) => url.endsWith(`/cycles/${secondCycle.id}/application`))).toHaveLength(2));
+    expect(requests.filter((url) => url.endsWith(`/cycles/${cycle.id}/application`))).toHaveLength(1);
+  });
+
+  it("protects dirty answers from global client navigation", async () => {
+    mockWorkspace({ open: true });
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(<><Link href="/en/account">Global account</Link><ApplicationWorkspace locale="en" org={form.organization_id} /></>);
+    fireEvent.change(await screen.findByLabelText("Business idea *"), { target: { value: "Unsaved repair service" } });
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    fireEvent(screen.getByRole("link", { name: "Global account" }), click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(window.confirm).toHaveBeenCalledOnce();
   });
 });

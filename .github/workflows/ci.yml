@@ -115,3 +115,4 @@ jobs:
       - run: python scripts/run-knowledge-browser-test.py
       - run: python scripts/run-helpdesk-browser-test.py
       - run: python scripts/run-reports-browser-test.py
+      - run: python scripts/run-web-journey-browser-test.py

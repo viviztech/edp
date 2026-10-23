@@ -173,12 +173,16 @@ class Enquiry(Record, Base):
     consent_version: Mapped[str] = mapped_column(String(40))
     dedupe_hash: Mapped[str] = mapped_column(String(64))
     status: Mapped[str] = mapped_column(String(16), default="new")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
     __table_args__ = (
         UniqueConstraint("organization_id", "dedupe_hash"),
         ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="RESTRICT"),
         CheckConstraint("status IN ('new','reviewed','closed')", name="enquiry_status"),
+        CheckConstraint("version > 0", name="enquiry_version"),
         CheckConstraint(
             "length(trim(name)) BETWEEN 1 AND 120 AND length(message) BETWEEN 1 AND 5000",
             name="enquiry_content",
         ),
+        Index("ix_contact_enquiries_queue", "organization_id", "status", "id"),
     )

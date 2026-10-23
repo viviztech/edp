@@ -43,6 +43,12 @@ Set AUTH_TEST_DATABASE_URL to a dedicated migrated edp_auth_test/edp_test databa
 
 Backend test discovery: `pytest -q` from apps/api and `pytest -q apps/api/tests` from the repository root both use the explicit API-root pythonpath in pyproject.toml. Integration tests still require the dedicated migrated AUTH_TEST_DATABASE_URL. Remote CI evidence and remaining gates are recorded in the foundation continuation report.
 
+## Web journey continuation
+
+`scripts/run-web-journey-browser-test.py` owns loopback API/web servers on 8104/3104 and accepts only `edp_foundation_e2e` or `edp_web_journey_e2e`. It creates temporary keys and explicitly supplies synthetic bilingual enquiry consent settings for its child servers; it does not enable collection in any other environment. Build `apps/web` and migrate the isolated database before running it. It runs applicant, enquiry and editorial Chrome scripts sequentially, preserves diagnostic output in ignored `.tool-cache` logs and stops on failure. CI runs it after the existing four browser regressions.
+
+The applicant journey covers actual registration/local verification/sign-in without grants, explicit intake preservation, submission, closed-intake history, later-state immutability, owner/organization/CSRF negatives, pagination and English/Tamil keyboard/responsive layouts. Enquiry coverage uses synthetic consent only and separate public/staff actors for receipts, private queue/status transitions and access/CSRF/origin negatives. Editorial coverage exercises create/publish/archive/restore, preserved stale edits, public pagination, scoped permissions and metadata-only media. Component/database tests separately cover uncertain requests and refresh races. The [Process 2 report](../sdlc/web-journey-completion-report.md) records executed results; remote CI and production-policy acceptance remain separate gates.
+
 ## C03 Meta ingestion evidence
 
 Focused tests cover exact raw-body HMAC verification and tamper rejection, encrypted provider secrets, mapping allowlists and required name mapping, reduction of provider responses to configured CRM fields, and denial when an integration is outside the requested organization. PostgreSQL acceptance must additionally prove concurrent duplicate delivery creates one inbox row and one lead, constraints survive upgrade/downgrade/upgrade, queue outage remains replayable, and worker retries do not process a claimed event twice.

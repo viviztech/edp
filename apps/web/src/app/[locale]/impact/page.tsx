@@ -1,3 +1,4 @@
+import { ParticipantModuleNav } from "../../../components/participant-module-nav";
 import { notFound, redirect } from "next/navigation";
 import type { components } from "../../../lib/api-contracts";
 import { isLocale } from "../../../lib/messages";
@@ -14,11 +15,11 @@ export default async function ImpactPage({ params, searchParams }: {
   let response: Response;
   try { response = await serverApi("/auth/me"); } catch { response = new Response(null, { status: 503 }); }
   if (response.status === 401) redirect(`/${locale}/account`);
-  if (!response.ok) return <main id="main"><h1>{t.title}</h1><p>{t.error}</p></main>;
+  if (!response.ok) return <main id="main" tabIndex={-1}><h1>{t.title}</h1><p>{t.error}</p></main>;
   const profile = await response.json() as components["schemas"]["Profile"];
   const requested = (await searchParams).organization;
   const grant = profile.grants.filter((entry) => entry.permissions.includes("participant.self"))
     .find((entry) => !requested || entry.organization_id === requested);
-  if (!grant) return <main id="main"><h1>{t.title}</h1><p>{t.access}</p></main>;
-  return <main id="main" className="program-main impact-main"><ImpactWorkspace key={`${grant.organization_id}-${locale}`} org={grant.organization_id} locale={locale} /></main>;
+  if (!grant) return <main id="main" tabIndex={-1}><h1>{t.title}</h1><p>{t.access}</p></main>;
+  return <main id="main" tabIndex={-1} className="program-main impact-main"><ParticipantModuleNav locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="impact" /><ImpactWorkspace key={`${grant.organization_id}-${locale}`} org={grant.organization_id} locale={locale} /></main>;
 }

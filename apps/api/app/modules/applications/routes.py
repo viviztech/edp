@@ -1,9 +1,12 @@
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Query, Request
 
 from app.modules.applications import service
 from app.modules.applications.schemas import (
+    ApplicationHistoryList,
+    ApplicationHistoryQuery,
     CycleOpportunityList,
     DefinitionCommand,
     DefinitionCreate,
@@ -18,20 +21,30 @@ from app.modules.applications.schemas import (
 )
 from app.modules.identity.routes import DB, Principal
 
-router = APIRouter(prefix="/api/v1/applications/organizations/{org}", tags=["applications"])
+router = APIRouter(prefix="/api/v1/applications", tags=["applications"])
+organization_router = APIRouter(prefix="/organizations/{org}")
 
 
-@router.get("/form", response_model=FormView)
+@router.get("/mine", response_model=ApplicationHistoryList)
+def history(
+    db: DB,
+    identity: Principal,
+    filters: Annotated[ApplicationHistoryQuery, Query()],
+) -> ApplicationHistoryList:
+    return service.history(db, identity[0], filters.cursor, filters.limit)
+
+
+@organization_router.get("/form", response_model=FormView)
 def form(org: UUID, db: DB, identity: Principal) -> FormView:
     return service.get_form(db, org)
 
 
-@router.get("/definitions", response_model=DefinitionList)
+@organization_router.get("/definitions", response_model=DefinitionList)
 def definitions(org: UUID, db: DB, identity: Principal) -> DefinitionList:
     return service.list_definitions(db, org, identity[0])
 
 
-@router.post("/definitions", response_model=DefinitionView, status_code=201)
+@organization_router.post("/definitions", response_model=DefinitionView, status_code=201)
 def create_definition(
     org: UUID,
     data: DefinitionCreate,
@@ -42,7 +55,7 @@ def create_definition(
     return service.create_definition(db, org, identity[0], data, request.state.request_id)
 
 
-@router.get("/definitions/{definition_id}", response_model=DefinitionView)
+@organization_router.get("/definitions/{definition_id}", response_model=DefinitionView)
 def definition(
     org: UUID,
     definition_id: UUID,
@@ -52,7 +65,7 @@ def definition(
     return service.get_definition(db, org, definition_id, identity[0])
 
 
-@router.patch("/definitions/{definition_id}", response_model=DefinitionView)
+@organization_router.patch("/definitions/{definition_id}", response_model=DefinitionView)
 def update_definition(
     org: UUID,
     definition_id: UUID,
@@ -66,7 +79,9 @@ def update_definition(
     )
 
 
-@router.post("/definitions/{definition_id}/copy", response_model=DefinitionView, status_code=201)
+@organization_router.post(
+    "/definitions/{definition_id}/copy", response_model=DefinitionView, status_code=201
+)
 def copy_definition(
     org: UUID,
     definition_id: UUID,
@@ -80,7 +95,7 @@ def copy_definition(
     )
 
 
-@router.post("/definitions/{definition_id}/publish", response_model=DefinitionView)
+@organization_router.post("/definitions/{definition_id}/publish", response_model=DefinitionView)
 def publish_definition(
     org: UUID,
     definition_id: UUID,
@@ -94,17 +109,17 @@ def publish_definition(
     )
 
 
-@router.post("/draft", response_model=DraftView, status_code=201)
+@organization_router.post("/draft", response_model=DraftView, status_code=201)
 def create_draft(org: UUID, request: Request, db: DB, identity: Principal) -> DraftView:
     return service.create_draft(db, org, identity[0], request.state.request_id)
 
 
-@router.get("/draft", response_model=DraftView)
+@organization_router.get("/draft", response_model=DraftView)
 def draft(org: UUID, db: DB, identity: Principal) -> DraftView:
     return service.mine(db, org, identity[0])
 
 
-@router.patch("/draft/{application_id}", response_model=DraftView)
+@organization_router.patch("/draft/{application_id}", response_model=DraftView)
 def save(
     org: UUID,
     application_id: UUID,
@@ -116,12 +131,12 @@ def save(
     return service.save(db, org, application_id, identity[0], data, request.state.request_id)
 
 
-@router.get("/cycles", response_model=CycleOpportunityList)
+@organization_router.get("/cycles", response_model=CycleOpportunityList)
 def cycles(org: UUID, db: DB, identity: Principal) -> CycleOpportunityList:
     return service.available_cycles(db, org)
 
 
-@router.post("/cycles/{cycle_id}/draft", response_model=DraftView, status_code=201)
+@organization_router.post("/cycles/{cycle_id}/draft", response_model=DraftView, status_code=201)
 def create_cycle_draft(
     org: UUID,
     cycle_id: UUID,
@@ -132,7 +147,7 @@ def create_cycle_draft(
     return service.create_cycle_draft(db, org, cycle_id, identity[0], request.state.request_id)
 
 
-@router.get(
+@organization_router.get(
     "/cycles/{cycle_id}/application",
     response_model=DraftView | SubmittedView,
 )
@@ -145,7 +160,7 @@ def cycle_application(
     return service.cycle_application(db, org, cycle_id, identity[0])
 
 
-@router.post("/draft/{application_id}/submit", response_model=SubmittedView)
+@organization_router.post("/draft/{application_id}/submit", response_model=SubmittedView)
 def submit(
     org: UUID,
     application_id: UUID,
@@ -162,3 +177,6 @@ def submit(
         data,
         request.state.request_id,
     )
+
+
+router.include_router(organization_router)

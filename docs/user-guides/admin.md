@@ -2,9 +2,25 @@
 
 An operator provisions an account and exact organization role using the documented CLI; no shared default credentials. Sign in through /en/account or /ta/account. Your organizations lists only current authorized workspaces. Open a workspace to view its name; Audit history is available only with audit.view. Unauthorized or revoked grants are rejected by the backend even if a link is retained.
 
-Account lists current devices and supports per-device, current-device and all-device sign-out. Password reset invalidates every session. In development, verification/reset messages are available through trusted operator CLI, not real email. Publishing/CRM/selection workflows are not yet released. Use synthetic data only until production gates pass.
+Account lists current devices and supports per-device, current-device and all-device sign-out. Password reset invalidates every session. In development, verification/reset messages are available through trusted operator CLI, not real email. The workflows below support local acceptance; production release gates remain open. Use synthetic data only until those gates pass.
 
 CMS: open Publishing workspace from the staff page. Choose an organization and page, or create a page with a permanent lowercase address. Select content language, enter title/plain-text body and optional search metadata, then Save draft. Preview shows the saved draft. Publish saved draft updates only that language. Editing does not change published content. Archive requires a reason; restore keeps content as an unpublished draft. Publication history is read-only. A conflict means another edit occurred: select the page again to load current values before reconciling.
+
+## Public enquiries
+
+Open **Enquiry inbox** in the intended organization. The list can show New, Reviewed, Closed or all statuses; use **Load more** for later records. Select an enquiry to read its contact details, question and recorded consent version. Authorized managers can mark New as Reviewed, then close a reviewed enquiry. Received contact details and questions cannot be edited. There is no internal-note or outbound-response control in this workspace.
+
+If a change conflicts or its response is interrupted, use the detail **Refresh** action and check the saved status before continuing. The controls stay paused until current details are loaded. Do not repeat a status command automatically. Access is limited to the organization's enquiry permissions; retain contact data only according to the approved operational policy.
+
+The public form is disabled by default. Before collecting real enquiries, the owner must approve both language versions of the notice and consent wording, retention and response arrangements. An operator configures the approved notice URLs and consent texts with `CONTACT_PRIVACY_NOTICE_URL_EN/TA`, `CONTACT_CONSENT_TEXT_EN/TA`, the current `CONTACT_PRIVACY_VERSION`, and `CONTACT_ENQUIRIES_ENABLED`. Both languages are required before enabling. See [enquiry configuration and boundaries](../architecture/enquiry-web-journey.md). Local automated acceptance uses synthetic policy wording only.
+
+## News, events, FAQs and testimonials
+
+Open **Content studio** in the intended organization. Select the content type and language, then create a separate locale draft using the same permanent slug as its counterpart. Save and review the draft before publishing. Creation, editing, publication and archiving each require their own permission. Published entries must be archived with a reason and restored to draft before editing; archiving removes the entry from public discovery immediately. Republish the reviewed draft when ready.
+
+Unsaved changes block switching to another entry. On a version conflict, keep the entered draft, load the latest saved values, compare them, then explicitly choose the latest version while retaining the intended changes before saving. Never replay a stale publication command without checking the current state.
+
+**Media records** shows only recorded filename/type/size, scan state and visibility for staff with media-view permission. It does not offer secure uploads, downloads or publication. Those operations await the shared secure-file development process; metadata is not proof that file bytes have been stored or scanned.
 
 CRM assignment notices: staff with crm.lead.view can open /{locale}/admin/notifications, choose their organization, and view their own in-app notices. A new notice appears after the background worker handles an assignment to them, provided their grant, active account, ownership and preference still allow it. Mark a notice read to acknowledge it. Turn assignment notices off or on using the preference control; changes affect pending and future notices, while already delivered notices remain. The CRM link opens the scoped lead queue for follow-up. A conflict means the item or preference changed; reload before trying again.
 

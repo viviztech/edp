@@ -10,6 +10,30 @@ import { programMessages } from "../lib/program-messages";
 afterEach(cleanup);
 
 describe("staff module navigation", () => {
+  it("exposes editorial and media only for their respective scoped view rights", () => {
+    const view = render(<StaffModuleNav locale="en" organization="org-content" permissions={["cms.editorial.view"]} active="content" />);
+    expect(screen.getByRole("link", { name: "Content studio" }).getAttribute("href")).toBe("/en/admin/content?organization=org-content");
+    expect(screen.queryByRole("link", { name: "Media metadata" })).toBeNull();
+    view.rerender(<StaffModuleNav locale="ta" organization="org-media" permissions={["cms.asset.view"]} active="media" />);
+    expect(screen.getByRole("link", { name: "ஊடக விவரங்கள்" }).getAttribute("href")).toBe("/ta/admin/media?organization=org-media");
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    view.rerender(<StaffModuleNav locale="en" organization="org-content" permissions={["cms.editorial.create", "cms.asset.publish"]} />);
+    expect(screen.queryByRole("navigation")).toBeNull();
+  });
+  it("links the bilingual enquiry inbox only with scoped enquiry access", () => {
+    const view = render(<StaffModuleNav locale="ta" organization="org-enquiry" permissions={["enquiry.view"]} active="enquiries" />);
+    const link = screen.getByRole("link", { name: "விசாரணைப் பெட்டி" });
+    expect(link.getAttribute("href")).toBe("/ta/admin/enquiries?organization=org-enquiry");
+    expect(link.getAttribute("aria-current")).toBe("page");
+    view.rerender(<StaffModuleNav locale="en" organization="org-enquiry" permissions={["system.access"]} />);
+    expect(screen.queryByRole("link", { name: "Enquiry inbox" })).toBeNull();
+  });
+
+  it("renders readable Tamil selection guidance", () => {
+    render(<StaffModuleNav locale="ta" organization="org-selection" permissions={["selection.cycle.view"]} variant="tiles" />);
+    expect(screen.getByText("மதிப்பீட்டுப் பட்டியலை அமைத்து விண்ணப்பங்களை ஒதுக்கவும்.")).toBeTruthy();
+    expect(screen.getByRole("navigation").textContent).not.toMatch(/\?{3,}|à®|Ã/);
+  });
   it.each(["report.view", "impact.manage"])("links reporting only for scoped %s access", (permission) => {
     render(<StaffModuleNav locale="en" organization="org-report" permissions={[permission]} active="reports" />);
     const link = screen.getByRole("link", { name: "Reports and impact" });

@@ -48,6 +48,10 @@ button:not([data-slot]) { border: 1px solid var(--accent); padding: .7rem 1rem; 
 .account-form input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .account-form small { font-weight: 400; }
 .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.5rem 0; }
+.participant-modules { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+.participant-modules a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: .5rem .75rem; border: 1px solid var(--line); background: white; text-decoration: none; }
+.participant-modules a:hover { border-color: var(--accent); text-decoration: underline; }
+.participant-modules a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: white; font-weight: 700; }
 button[aria-pressed="true"] { background: var(--accent); color: white; }
 button:disabled { opacity: .55; cursor: default; }
 h2 { font-size: 1.5rem; margin-top: 2rem; }

@@ -1,12 +1,12 @@
 from secrets import compare_digest
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Query, Request, Response
 from sqlalchemy import select
 
 from app.core.config import get_settings
-from app.modules.cms import editorial_service, repository, service
+from app.modules.cms import editorial_service, enquiry_service, repository, service
 from app.modules.cms.asset_service import create as create_asset
 from app.modules.cms.asset_service import publish as publish_asset
 from app.modules.cms.asset_service import scan_result as asset_scan_result
@@ -29,13 +29,17 @@ from app.modules.cms.schemas import (
     EditorialList,
     EditorialView,
     EnquiryCreate,
+    EnquiryList,
+    EnquiryPolicy,
     EnquiryReceipt,
+    EnquiryStatus,
     EnquiryView,
     History,
     Locale,
     NewTranslation,
     PageList,
     PageView,
+    PublicEditorial,
     PublicEditorialList,
     PublicList,
     PublicPage,
@@ -265,6 +269,9 @@ def editorial_list(
     identity: Principal,
     kind: EditorialKind | None = None,
     locale: Locale | None = None,
+    slug: Annotated[
+        str | None, Query(min_length=1, max_length=120, pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$")
+    ] = None,
     cursor: UUID | None = None,
     limit: Limit = 25,
 ) -> EditorialList:
@@ -274,6 +281,8 @@ def editorial_list(
         q = q.where(EditorialEntry.kind == kind)
     if locale:
         q = q.where(EditorialEntry.locale == locale)
+    if slug:
+        q = q.where(EditorialEntry.slug == slug)
     if cursor:
         q = q.where(EditorialEntry.id > cursor)
     rows = list(db.scalars(q.order_by(EditorialEntry.id).limit(limit + 1)))
@@ -336,7 +345,7 @@ def editorial_public_list(
 ) -> PublicEditorialList:
     rows = editorial_service.public(db, org, kind, locale, cursor, limit)
     return PublicEditorialList(
-        items=[editorial_service.view(e) for e in rows[:limit]],
+        items=[PublicEditorial(**editorial_service.view(e).model_dump()) for e in rows[:limit]],
         next_cursor=rows[limit - 1].id if len(rows) > limit else None,
     )
 
@@ -419,9 +428,46 @@ def asset_scan(
     "/public/organizations/{org}/enquiries", response_model=EnquiryReceipt, status_code=202
 )
 def enquiry_create(org: UUID, data: EnquiryCreate, request: Request, db: DB) -> EnquiryReceipt:
-    return create_enquiry(db, org, data, request.state.request_id)
+    source = request.client.host if request.client else "unknown"
+    return create_enquiry(db, org, data, request.state.request_id, source)
+
+
+@router.get("/public/organizations/{org}/enquiry-policy", response_model=EnquiryPolicy)
+def enquiry_policy(org: UUID, db: DB, response: Response, locale: Locale = "en") -> EnquiryPolicy:
+    from app.modules.identity.models import Organization
+
+    response.headers["Cache-Control"] = "no-store"
+    if not db.get(Organization, org):
+        return EnquiryPolicy(enabled=False)
+    return enquiry_service.policy(locale)
 
 
 @router.get("/cms/organizations/{org}/enquiries", response_model=list[EnquiryView])
 def enquiry_list(org: UUID, db: DB, identity: Principal, limit: Limit = 25) -> list[EnquiryView]:
     return list_enquiries(db, org, identity[0], limit)
+
+
+@router.get("/cms/organizations/{org}/enquiries/queue", response_model=EnquiryList)
+def enquiry_queue(
+    org: UUID,
+    db: DB,
+    identity: Principal,
+    cursor: UUID | None = None,
+    status: Literal["new", "reviewed", "closed"] | None = None,
+    limit: Limit = 25,
+) -> EnquiryList:
+    return enquiry_service.queue(db, org, identity[0], limit, cursor, status)
+
+
+@router.get("/cms/organizations/{org}/enquiries/{enquiry_id}", response_model=EnquiryView)
+def enquiry_detail(org: UUID, enquiry_id: UUID, db: DB, identity: Principal) -> EnquiryView:
+    return enquiry_service.detail(db, org, enquiry_id, identity[0])
+
+
+@router.post("/cms/organizations/{org}/enquiries/{enquiry_id}/status", response_model=EnquiryView)
+def enquiry_status(
+    org: UUID, enquiry_id: UUID, data: EnquiryStatus, request: Request, db: DB, identity: Principal
+) -> EnquiryView:
+    return enquiry_service.change_status(
+        db, org, enquiry_id, identity[0], data, request.state.request_id
+    )

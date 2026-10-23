@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { applicationPath } from "../../../../lib/application-security";
+import { applicationPath, applicationQuery } from "../../../../lib/application-security";
 import { validMutation } from "../../../../lib/bff-security";
 import { cookieName, csrfName, settings } from "../../../../lib/server-api";
 
@@ -11,8 +11,11 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
   try {
     const config = settings();
     const jar = await cookies();
-    const path = applicationPath((await context.params).path, request.method);
+    const segments = (await context.params).path;
+    const path = applicationPath(segments, request.method);
     if (!path) return fail("not_found", 404);
+    const query = applicationQuery(segments, request.method, request.nextUrl.searchParams);
+    if (query === null || request.nextUrl.search.length > 1024) return fail("invalid_request", 400);
     let body: string | undefined;
     if (request.method !== "GET") {
       if (!validMutation(request.headers.get("origin"), config.origin, jar.get(csrfName)?.value, request.headers.get("x-csrf-token"))) {
@@ -30,10 +33,11 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
         if (size > 262144) { await reader.cancel(); return fail("body_too_large", 413); }
         chunks.push(value);
       }
-      body = Buffer.concat(chunks).toString("utf8");
+      try { body = new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks)); }
+      catch { return fail("invalid_request", 400); }
       try { JSON.parse(body); } catch { return fail("invalid_request", 400); }
     }
-    const upstream = await fetch(config.api + "/api/v1" + path, {
+    const upstream = await fetch(config.api + "/api/v1" + path + query, {
       method: request.method, body, cache: "no-store", signal: AbortSignal.timeout(15000),
       headers: {
         "Content-Type": "application/json", "X-BFF-Key": config.key,

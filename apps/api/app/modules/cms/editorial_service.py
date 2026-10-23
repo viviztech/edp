@@ -1,7 +1,7 @@
 from typing import cast
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -113,6 +113,8 @@ def mutate(
     if e.version != data.expected_version:
         raise AuthError("version_conflict", 409)
     if action == "update":
+        if e.state == "published":
+            raise AuthError("published_entry_read_only", 409)
         if e.state == "archived":
             raise AuthError("invalid_transition", 409)
         for k in ("title", "body", "starts_at", "ends_at", "sort_order"):
@@ -165,7 +167,29 @@ def public(
         EditorialEntry.state == "published",
     )
     if cursor:
-        q = q.where(EditorialEntry.id > cursor)
+        previous = db.scalar(q.where(EditorialEntry.id == cursor))
+        if previous is None:
+            raise AuthError("invalid_cursor", 400)
+        after_order = or_(
+            EditorialEntry.sort_order > previous.sort_order,
+            and_(
+                EditorialEntry.sort_order == previous.sort_order,
+                EditorialEntry.id > previous.id,
+            ),
+        )
+        if kind == "event":
+            if previous.starts_at is None:
+                q = q.where(and_(EditorialEntry.starts_at.is_(None), after_order))
+            else:
+                q = q.where(
+                    or_(
+                        EditorialEntry.starts_at > previous.starts_at,
+                        EditorialEntry.starts_at.is_(None),
+                        and_(EditorialEntry.starts_at == previous.starts_at, after_order),
+                    )
+                )
+        else:
+            q = q.where(after_order)
     order = (
         (
             EditorialEntry.starts_at.asc().nulls_last(),

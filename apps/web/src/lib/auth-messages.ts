@@ -10,7 +10,9 @@ export const authMessages = {
     sessions: "Active devices", noSessions: "No active devices.", revoke: "Sign out device", current: "This device",
     staff: "Staff workspace", denied: "You do not have access to this workspace.", organizations: "Your organizations",
     audit: "Audit history", noAudit: "No audit events to show.", passwordHelp: "Use 12–128 characters.", back: "Back to account",
-    noOrganizations: "No staff access is assigned to your account.", application: "Application draft", refresh: "Refresh", next: "Next"
+    noOrganizations: "Your program access will appear here after enrollment.", application: "Continue application", myApplications: "My applications",
+    applicationEntry: "Sign in or create an account to continue your application. Your selected intake will be kept while you verify your email and sign in.",
+    participant: "Participant portal", learning: "My learning", refresh: "Refresh", next: "Next"
   },
   ta: {
     title: "உங்கள் கணக்கு", email: "மின்னஞ்சல்", password: "கடவுச்சொல்", name: "பெயர்", token: "சரிபார்ப்பு அல்லது மீட்டமைப்புக் குறியீடு",
@@ -23,7 +25,9 @@ export const authMessages = {
     sessions: "செயலில் உள்ள சாதனங்கள்", noSessions: "செயலில் சாதனங்கள் இல்லை.", revoke: "சாதனத்திலிருந்து வெளியேறுக", current: "இந்தச் சாதனம்",
     staff: "பணியாளர் பணியிடம்", denied: "இந்தப் பணியிடத்திற்கான அணுகல் உங்களிடம் இல்லை.", organizations: "உங்கள் நிறுவனங்கள்",
     audit: "தணிக்கை வரலாறு", noAudit: "தணிக்கை நிகழ்வுகள் இல்லை.", passwordHelp: "12–128 எழுத்துகளைப் பயன்படுத்துக.", back: "கணக்கிற்குத் திரும்புக",
-    application: "\u0bb5\u0bbf\u0ba3\u0bcd\u0ba3\u0baa\u0bcd\u0baa \u0bb5\u0bb0\u0bc8\u0bb5\u0bc1", noOrganizations: "உங்கள் கணக்கிற்குப் பணியாளர் அணுகல் வழங்கப்படவில்லை.", refresh: "புதுப்பிக்க", next: "அடுத்து"
+    application: "விண்ணப்பத்தைத் தொடர்க", myApplications: "எனது விண்ணப்பங்கள்", noOrganizations: "சேர்க்கைக்குப் பிறகு உங்கள் திட்ட அணுகல் இங்கே தோன்றும்.",
+    applicationEntry: "விண்ணப்பத்தைத் தொடர உள்நுழைக அல்லது கணக்கை உருவாக்குக. மின்னஞ்சலைச் சரிபார்த்து உள்நுழையும் வரை தேர்ந்தெடுத்த சேர்க்கைக் காலம் பாதுகாக்கப்படும்.",
+    participant: "பங்கேற்பாளர் தளம்", learning: "எனது கற்றல்", refresh: "புதுப்பிக்க", next: "அடுத்து"
   }
 } as const;
 export type AuthMessages = { [K in keyof typeof authMessages.en]: string };

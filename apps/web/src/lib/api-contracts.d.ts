@@ -1075,6 +1075,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/applications/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** History */
+        get: operations["history_api_v1_applications_mine_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/applications/organizations/{org}/form": {
         parameters: {
             query?: never;
@@ -1660,6 +1677,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/organizations/{org}/enquiry-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Enquiry Policy */
+        get: operations["enquiry_policy_api_v1_public_organizations__org__enquiry_policy_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cms/organizations/{org}/enquiries": {
         parameters: {
             query?: never;
@@ -1671,6 +1705,57 @@ export interface paths {
         get: operations["enquiry_list_api_v1_cms_organizations__org__enquiries_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/enquiries/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Enquiry Queue */
+        get: operations["enquiry_queue_api_v1_cms_organizations__org__enquiries_queue_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/enquiries/{enquiry_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Enquiry Detail */
+        get: operations["enquiry_detail_api_v1_cms_organizations__org__enquiries__enquiry_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/enquiries/{enquiry_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enquiry Status */
+        post: operations["enquiry_status_api_v1_cms_organizations__org__enquiries__enquiry_id__status_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4151,6 +4236,52 @@ export interface components {
             /** Aggregate Score */
             aggregate_score: string | null;
         };
+        /** ApplicationHistoryItem */
+        ApplicationHistoryItem: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /** Organization Name */
+            organization_name: string;
+            /** Cycle Id */
+            cycle_id: string | null;
+            /** Cycle Code */
+            cycle_code: string | null;
+            /** Cycle Name En */
+            cycle_name_en: string | null;
+            /** Cycle Name Ta */
+            cycle_name_ta: string | null;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "draft" | "submitted" | "under_review" | "shortlisted" | "interview_scheduled" | "selected" | "waitlisted" | "rejected" | "enrolled";
+            /** Version */
+            version: number;
+            /** Application Number */
+            application_number: string | null;
+            /** Submitted At */
+            submitted_at: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ApplicationHistoryList */
+        ApplicationHistoryList: {
+            /** Items */
+            items: components["schemas"]["ApplicationHistoryItem"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
         /** AssetCreate */
         AssetCreate: {
             /** Filename */
@@ -5840,6 +5971,33 @@ export interface components {
             /** Consent Version */
             consent_version: string;
         };
+        /** EnquiryList */
+        EnquiryList: {
+            /** Items */
+            items: components["schemas"]["EnquiryView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** EnquiryPolicy */
+        EnquiryPolicy: {
+            /** Enabled */
+            enabled: boolean;
+            /**
+             * Consent Version
+             * @default
+             */
+            consent_version: string;
+            /**
+             * Privacy Notice Url
+             * @default
+             */
+            privacy_notice_url: string;
+            /**
+             * Consent Text
+             * @default
+             */
+            consent_text: string;
+        };
         /** EnquiryReceipt */
         EnquiryReceipt: {
             /**
@@ -5852,6 +6010,16 @@ export interface components {
              * Format: uuid
              */
             reference: string;
+        };
+        /** EnquiryStatus */
+        EnquiryStatus: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "reviewed" | "closed";
         };
         /** EnquiryView */
         EnquiryView: {
@@ -5875,6 +6043,18 @@ export interface components {
              * @enum {string}
              */
             status: "new" | "reviewed" | "closed";
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** EnrollmentConversionView */
         EnrollmentConversionView: {
@@ -13286,6 +13466,38 @@ export interface operations {
             };
         };
     };
+    history_api_v1_applications_mine_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationHistoryList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     form_api_v1_applications_organizations__org__form_get: {
         parameters: {
             query?: never;
@@ -14187,6 +14399,7 @@ export interface operations {
             query?: {
                 kind?: ("news" | "event" | "faq" | "testimonial") | null;
                 locale?: ("en" | "ta") | null;
+                slug?: string | null;
                 cursor?: string | null;
                 limit?: number;
             };
@@ -14706,6 +14919,39 @@ export interface operations {
             };
         };
     };
+    enquiry_policy_api_v1_public_organizations__org__enquiry_policy_get: {
+        parameters: {
+            query?: {
+                locale?: "en" | "ta";
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnquiryPolicy"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     enquiry_list_api_v1_cms_organizations__org__enquiries_get: {
         parameters: {
             query?: {
@@ -14726,6 +14972,109 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnquiryView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enquiry_queue_api_v1_cms_organizations__org__enquiries_queue_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                status?: ("new" | "reviewed" | "closed") | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnquiryList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enquiry_detail_api_v1_cms_organizations__org__enquiries__enquiry_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                enquiry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnquiryView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enquiry_status_api_v1_cms_organizations__org__enquiries__enquiry_id__status_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                enquiry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnquiryStatus"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnquiryView"];
                 };
             };
             /** @description Validation Error */

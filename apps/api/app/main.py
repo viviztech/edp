@@ -173,6 +173,11 @@ def create_app() -> FastAPI:
                     request.url.path.startswith("/api/v1/integrations/meta/webhook/")
                     and request.method == "POST"
                 )
+                or (
+                    request.url.path.startswith("/api/v1/public/organizations/")
+                    and request.url.path.endswith("/enquiries")
+                    and request.method == "POST"
+                )
             )
             if bounded_body:
                 body = bytearray()

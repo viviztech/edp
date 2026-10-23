@@ -6,6 +6,8 @@ import { publicPage } from "../../../../lib/public-pages";
 import { isLocale, messages, type Locale } from "../../../../lib/messages";
 import { starterPage, starterPageList } from "../../../../lib/public-site-content";
 import { absoluteUrl } from "../../../../lib/site-url";
+import { PublicEnquiryForm } from "../../../../components/public-enquiry-form";
+import { publicEnquiryPolicy } from "../../../../lib/public-enquiries";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 export const dynamic = "force-dynamic";
@@ -43,11 +45,12 @@ export default async function Page({ params }: Props) {
   if (!page && !fallback) notFound();
   const group = starterPageList(locale).find((item) => item.slug === slug)?.group;
   const related = starterPageList(locale).filter((item) => item.group === group && item.slug !== slug).slice(0, 4);
+  const enquiryPolicy = slug === "contact" ? await publicEnquiryPolicy(locale) : null;
   const labels = locale === "en"
     ? { all: "All pages", related: "In this section", note: "Good to know", next: "Next step" }
     : { all: "அனைத்து பக்கங்களும்", related: "இந்தப் பகுதியில்", note: "அறிந்துகொள்ளுங்கள்", next: "அடுத்த படி" };
 
-  return <main id="main" className="public-detail">
+  return <main id="main" tabIndex={-1} className="public-detail">
     <div className="public-detail-shell">
       <nav className="public-breadcrumb" aria-label={locale === "en" ? "Breadcrumb" : "பக்க வழி"}>
         <Link href={"/" + locale}>{messages[locale].home}</Link><span aria-hidden="true">/</span>
@@ -65,9 +68,10 @@ export default async function Page({ params }: Props) {
                 <span className="public-topic-number">{String(index + 1).padStart(2, "0")}</span>
                 <div><h2>{section.heading}</h2><p>{section.body}</p></div>
               </section>)}</div>
-            {fallback?.note && <div className="public-note"><strong>{labels.note}</strong><p>{fallback.note}</p></div>}
+            {fallback?.note && !(slug === "contact" && enquiryPolicy) && <div className="public-note"><strong>{labels.note}</strong><p>{fallback.note}</p></div>}
             {fallback?.next && <div className="public-next"><span>{labels.next}</span><Link href={"/" + locale + fallback.next.path}>{fallback.next.label}<ArrowRight size={19} aria-hidden="true" /></Link></div>}
           </>}
+          {slug === "contact" && <PublicEnquiryForm locale={locale} policy={enquiryPolicy} />}
         </article>
         <aside className="public-side">
           <div className="public-side-card">

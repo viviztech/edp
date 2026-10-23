@@ -7,6 +7,43 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 FieldType = Literal["text", "textarea", "number", "date", "boolean"]
 DefinitionState = Literal["draft", "published", "retired"]
 AcknowledgementKind = Literal["declaration", "consent"]
+ApplicationState = Literal[
+    "draft",
+    "submitted",
+    "under_review",
+    "shortlisted",
+    "interview_scheduled",
+    "selected",
+    "waitlisted",
+    "rejected",
+    "enrolled",
+]
+
+
+class ApplicationHistoryQuery(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    cursor: UUID | None = None
+    limit: int = Field(default=25, ge=1, le=100)
+
+
+class ApplicationHistoryItem(BaseModel):
+    id: UUID
+    organization_id: UUID
+    organization_name: str
+    cycle_id: UUID | None
+    cycle_code: str | None
+    cycle_name_en: str | None
+    cycle_name_ta: str | None
+    state: ApplicationState
+    version: int
+    application_number: str | None
+    submitted_at: datetime | None
+    updated_at: datetime
+
+
+class ApplicationHistoryList(BaseModel):
+    items: list[ApplicationHistoryItem]
+    next_cursor: UUID | None
 
 
 class FieldView(BaseModel):

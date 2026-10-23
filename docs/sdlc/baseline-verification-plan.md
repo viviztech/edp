@@ -18,3 +18,7 @@ Process 1 is complete only when its required checks and reviewed-revision CI are
 ## Next process
 
 Process 2 completes the web journeys: ordinary applicant entry with preserved intake context, application history after intake closes, participant/learning navigation, public enquiries and staff CMS operations, with English/Tamil and accessibility acceptance. Its own plan and acceptance criteria are required before implementation.
+
+## Local continuation - 2026-10-23
+
+The owner instructed **Keep the commit local** when asked to publish baseline `c9877ab`. Do not push this or later work without a new explicit instruction. Local functional verification is complete as recorded in the report. Remote CI is deferred under this delivery constraint; the unpatched npm finding and all formal security/release gates remain open rather than passed. Continue the already authorized development sequence locally using the [Process 2 plan](web-journey-completion-plan.md). This continuation does not declare the full green-baseline or production-release criteria satisfied.

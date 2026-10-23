@@ -284,7 +284,10 @@ with sync_playwright() as playwright:
         organization_id = organization.id
     page.reload()
     page.wait_for_load_state("domcontentloaded")
-    page.get_by_role("link", name="Synthetic E2E Organization", exact=True).click()
+    organization_card = page.get_by_role("listitem").filter(
+        has=page.get_by_text("Synthetic E2E Organization", exact=True)
+    )
+    organization_card.get_by_role("link", name="Staff workspace", exact=True).click()
     expect(page.get_by_role("heading", name="Staff workspace")).to_be_visible()
     expect(page.get_by_text("system.role_granted", exact=False)).to_be_visible()
     assert page.request.get(base + "/api/session/staff/" + str(uuid4())).status == 403
@@ -550,8 +553,8 @@ with sync_playwright() as playwright:
     ).check()
     page.once("dialog", lambda dialog: dialog.accept())
     page.get_by_role("button", name="Submit application", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Application submitted")
-    expect(page.get_by_text("Application number:", exact=False)).to_contain_text("EDP-")
+    expect(page.locator(".application-message")).to_have_text("Application submitted")
+    expect(page.locator(".application-receipt")).to_contain_text("EDP-")
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     page.screenshot(

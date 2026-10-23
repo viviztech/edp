@@ -3,12 +3,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { components } from "../../../lib/api-contracts";
 import type { AuthMessages } from "../../../lib/auth-messages";
+import { hasStaffWorkspaceAccess } from "../../../lib/account-access";
+import { applicationHref, type IntakeContext } from "../../../lib/intake-context";
+import type { Locale } from "../../../lib/messages";
 
 type Mode = "login" | "register" | "request-verification" | "verify" | "request-reset" | "reset";
 type Profile = components["schemas"]["Profile"];
 type Session = components["schemas"]["app__modules__identity__schemas__SessionView"];
 
-export default function Account({ text, locale }: { text: AuthMessages; locale: string }) {
+export default function Account({ text, locale, intake = {} }: { text: AuthMessages; locale: Locale; intake?: IntakeContext }) {
   const [mode, setMode] = useState<Mode>("login");
   const [profile, setProfile] = useState<Profile | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -79,12 +82,21 @@ export default function Account({ text, locale }: { text: AuthMessages; locale: 
     {message && <p role="status">{message}</p>}
     {loading ? <p role="status">{text.loading}</p> : profile ? <>
       <p>{profile.display_name}</p>
+      <p className="actions"><Link href={applicationHref(locale, intake)}>{text.application}</Link></p>
       <div className="actions"><button disabled={busy} onClick={() => action("logout")}>{text.logout}</button><button disabled={busy} onClick={() => action("logout-all")}>{text.logoutAll}</button></div>
       <h2>{text.sessions}</h2>
       {sessions.length === 0 ? <p>{text.noSessions}</p> : <ul>{sessions.map(device => <li key={device.id}>{device.device_name} {device.current ? "(" + text.current + ")" : ""} <button disabled={busy} onClick={() => action("revoke/" + device.id)}>{text.revoke}</button></li>)}</ul>}
       <h2>{text.organizations}</h2>
-      {profile.grants.filter(grant => grant.permissions.includes("system.access")).length === 0 ? <p>{text.noOrganizations}</p> : <ul>{profile.grants.filter(grant => grant.permissions.includes("system.access")).map(grant => <li key={grant.organization_id}><Link href={"/" + locale + "/admin?organization=" + grant.organization_id}>{grant.organization_name}</Link>{" ? "}<Link href={"/" + locale + "/applications?organization=" + grant.organization_id}>{text.application}</Link></li>)}</ul>}
+      {profile.grants.length === 0 ? <p>{text.noOrganizations}</p> : <ul>{profile.grants.map(grant => <li key={grant.organization_id}>
+        <strong>{grant.organization_name}</strong><div className="actions">
+          {grant.permissions.includes("participant.self") && <Link href={`/${locale}/participant?organization=${grant.organization_id}`}>{text.participant}</Link>}
+          {grant.permissions.includes("lms.learn") && <Link href={`/${locale}/learning?organization=${grant.organization_id}`}>{text.learning}</Link>}
+          {hasStaffWorkspaceAccess(grant.permissions) && <Link href={`/${locale}/admin?organization=${grant.organization_id}`}>{text.staff}</Link>}
+          <Link href={applicationHref(locale, { organization: grant.organization_id })}>{text.myApplications}</Link>
+        </div>
+      </li>)}</ul>}
     </> : <>
+      <p>{text.applicationEntry}</p>
       <nav className="actions" aria-label={text.title}>{modes.map(([key, label]) => <button type="button" key={key} disabled={busy} aria-pressed={mode === key} onClick={() => { setMode(key); setMessage(""); }}>{label}</button>)}</nav>
       <form key={mode} onSubmit={submit} className="account-form">
         {mode === "register" && <label>{text.name}<input name="display_name" autoComplete="name" required maxLength={120} /></label>}

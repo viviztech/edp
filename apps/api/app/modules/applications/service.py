@@ -3,7 +3,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Literal, cast
 from uuid import UUID
 
-from sqlalchemy import delete, func, select, text
+from sqlalchemy import delete, func, select, text, tuple_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -22,6 +22,9 @@ from app.modules.applications.schemas import (
     AcknowledgementKind,
     AcknowledgementView,
     AnswerView,
+    ApplicationHistoryItem,
+    ApplicationHistoryList,
+    ApplicationState,
     CycleOpportunityList,
     CycleOpportunityView,
     DefinitionCommand,
@@ -568,6 +571,58 @@ def mine(db: Session, org: UUID, actor: User) -> DraftView:
     return _view(db, application, form, _fields(db, form.id))
 
 
+def history(db: Session, actor: User, cursor: UUID | None, limit: int) -> ApplicationHistoryList:
+    # Ownership is sufficient: an applicant need not have an organization role.
+    # Order by immutable creation keys so saving a draft cannot move it between pages.
+    query = (
+        select(Application, Organization.name, ApplicationCycle)
+        .join(Organization, Organization.id == Application.organization_id)
+        .outerjoin(
+            ApplicationCycle,
+            (ApplicationCycle.id == Application.cycle_id)
+            & (ApplicationCycle.organization_id == Application.organization_id),
+        )
+        .where(Application.person_id == actor.person_id)
+    )
+    if cursor is not None:
+        anchor = db.scalar(
+            select(Application).where(
+                Application.id == cursor,
+                Application.person_id == actor.person_id,
+            )
+        )
+        if anchor is None:
+            raise AuthError("invalid_cursor", 422)
+        query = query.where(
+            tuple_(Application.created_at, Application.id) < (anchor.created_at, anchor.id)
+        )
+    rows = list(
+        db.execute(
+            query.order_by(Application.created_at.desc(), Application.id.desc()).limit(limit + 1)
+        )
+    )
+    return ApplicationHistoryList(
+        items=[
+            ApplicationHistoryItem(
+                id=application.id,
+                organization_id=application.organization_id,
+                organization_name=organization_name,
+                cycle_id=application.cycle_id,
+                cycle_code=cycle.code if cycle else None,
+                cycle_name_en=cycle.name_en if cycle else None,
+                cycle_name_ta=cycle.name_ta if cycle else None,
+                state=cast(ApplicationState, application.state),
+                version=application.version,
+                application_number=application.application_number,
+                submitted_at=application.submitted_at,
+                updated_at=application.updated_at,
+            )
+            for application, organization_name, cycle in rows[:limit]
+        ],
+        next_cursor=rows[limit - 1][0].id if len(rows) > limit else None,
+    )
+
+
 def save(
     db: Session,
     org: UUID,
@@ -686,7 +741,7 @@ def _create_cycle_draft(
         form = db.get(ApplicationForm, existing.form_id)
         if not form:
             raise AuthError("application_integrity_error", 503)
-        if existing.state == "submitted":
+        if existing.state != "draft":
             raise AuthError("application_already_submitted", 409)
         return _view(db, existing, form, _fields(db, form.id))
     form = db.get(ApplicationForm, cycle.form_id)

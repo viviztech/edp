@@ -173,3 +173,24 @@ class EnquiryView(BaseModel):
     message: str
     consent_version: str
     status: Literal["new", "reviewed", "closed"]
+    version: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class EnquiryList(BaseModel):
+    items: list[EnquiryView]
+    next_cursor: UUID | None
+
+
+class EnquiryStatus(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_version: int = Field(ge=1)
+    status: Literal["reviewed", "closed"]
+
+
+class EnquiryPolicy(BaseModel):
+    enabled: bool
+    consent_version: str = ""
+    privacy_notice_url: str = ""
+    consent_text: str = ""

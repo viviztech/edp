@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     meta_event_retention_days: int | None = Field(default=None, ge=1, le=3650)
     notification_retention_days: int | None = Field(default=None, ge=1, le=3650)
     contact_privacy_version: str = Field(default="v1", min_length=1, max_length=40)
+    contact_enquiries_enabled: bool = False
+    contact_privacy_notice_url_en: str = Field(default="", max_length=2048)
+    contact_privacy_notice_url_ta: str = Field(default="", max_length=2048)
+    contact_consent_text_en: str = Field(default="", max_length=2000)
+    contact_consent_text_ta: str = Field(default="", max_length=2000)
     access_token_seconds: int = Field(default=600, ge=60, le=1800)
     session_seconds: int = Field(default=1209600, ge=3600, le=2592000)
     cors_origins: list[str] = Field(default_factory=list)

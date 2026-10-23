@@ -4,14 +4,20 @@ Choose Your account, then Create account. Supply name, email and a 12?128 charac
 
 Forgot password requests a reset message without revealing whether an email is registered. Reset password consumes its code and signs out all existing sessions. Account shows active devices; sign out one device or all devices. An expired/revoked session requires sign-in again. After a network failure, reconnect before assuming remote device revocation succeeded.
 
-Program applications and the participant schedule are available after an approved enrollment; learning content remains pending. Do not submit real personal data or documents during foundation testing.
+Program applications are available before enrollment. Participant services become available according to your current organization permissions and enrollment. Account links preserve the selected organization and language. Use synthetic information during local acceptance; secure supporting-document uploads are not available yet.
 
 Public information: use Pages on web or the mobile home screen to browse published information in the selected language. Missing translations are unavailable; drafts and archived content are never shown. No sign-in is needed.
 
 
-## Application draft
+## Apply and track an application
 
-After signing in, choose an organization and open Application draft. A published form is required. Saving creates a new version and the completion indicator counts required fields. This development slice cannot submit an application or upload documents; do not enter real applicant data until the program fields, consent and retention policies are approved.
+Choose **Apply** from the public website, or open applications from your account. Registration, verification and sign-in preserve a valid chosen organization/intake. An ordinary applicant does not need a staff role. Choose an open intake, start its application and save your draft. Complete the required fields, review the declarations/consents and submit explicitly when ready. Submission records an application number and freezes the submitted answers.
+
+**Saved and submitted applications** lists your own records independently of currently open intakes. Use its continuation controls to see later records, continue an available draft or view a submitted receipt and status history. Intake closure does not remove your earlier application; a closed draft is read-only. Scores, reviewer comments and internal decision reasons are never shown. If a chosen intake is unavailable, the page does not silently substitute a different application. Refresh and check the selected record after an interrupted or stale request before continuing.
+
+## Send a public enquiry
+
+Open **Contact and support** in English or Tamil. When the approved enquiry channel is enabled, enter your name, email, optional phone and question, read the linked privacy notice and explicitly check its consent box. No account or document upload is required. A confirmed submission shows an opaque reference. If confirmation fails, the entered details stay available for an explicit retry. If the notice changed, reload and review the current notice before sending. An unavailable form means the channel has not been opened or cannot currently be reached; use only contact information actually published by the team.
 
 ## Participant schedule
 
