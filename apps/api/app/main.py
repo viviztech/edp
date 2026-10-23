@@ -180,10 +180,16 @@ def create_app() -> FastAPI:
                 )
             )
             if bounded_body:
+                body_limit = (
+                    32768
+                    if request.url.path.startswith("/api/v1/public/organizations/")
+                    and request.url.path.endswith("/enquiries")
+                    else 262144
+                )
                 body = bytearray()
                 async for chunk in request.stream():
                     body.extend(chunk)
-                    if len(body) > 262144:
+                    if len(body) > body_limit:
                         return JSONResponse(
                             status_code=413,
                             content={

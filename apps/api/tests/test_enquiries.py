@@ -1,3 +1,4 @@
+import json
 import os
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
@@ -100,6 +101,44 @@ def test_public_receipt_deduplication_validation_and_limits(enquiries):
         client.post(public + "/enquiries", json=payload(4) | {"message": "x" * 5001}).status_code
         == 422
     )
+
+
+@pytest.mark.parametrize("transport", ["declared_length", "misleading_length", "chunked"])
+def test_public_enquiry_exact_utf8_stream_byte_boundary(enquiries, transport):
+    client, engine, public, _ = enquiries
+    encoded = json.dumps(
+        payload() | {"message": "செயற்கை விசாரணை"},
+        ensure_ascii=False,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    assert len(encoded) > len(encoded.decode("utf-8"))
+    accepted_body = encoded + b" " * (32768 - len(encoded))
+    oversized_body = accepted_body + b" "
+    assert len(accepted_body) == 32768 and len(oversized_body) == 32769
+    assert json.loads(accepted_body) == json.loads(oversized_body)
+
+    def send(body):
+        headers = {"Content-Type": "application/json"}
+        if transport == "misleading_length":
+            # The application must count received bytes, not a claimed size.
+            headers["Content-Length"] = "1"
+        if transport == "chunked":
+            headers["Transfer-Encoding"] = "chunked"
+            content = (body[offset : offset + 1024] for offset in range(0, len(body), 1024))
+            return client.post(public + "/enquiries", content=content, headers=headers)
+        return client.post(public + "/enquiries", content=body, headers=headers)
+
+    accepted = send(accepted_body)
+    assert accepted.status_code == 202, accepted.text
+    assert set(accepted.json()) == {"accepted", "reference"}
+    rejected = send(oversized_body)
+    assert rejected.status_code == 413, rejected.text
+    assert rejected.json()["error"]["code"] == "body_too_large"
+    if transport == "chunked":
+        assert "content-length" not in accepted.request.headers
+        assert "content-length" not in rejected.request.headers
+    with Session(engine) as db:
+        assert len(list(db.scalars(select(Enquiry)))) == 1
 
 
 def test_public_rate_limit_cannot_be_bypassed_with_forwarded_headers(enquiries):

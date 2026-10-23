@@ -32,3 +32,7 @@ The browser runner uses owned loopback servers, temporary keys, synthetic policy
 Public enquiry collection remains disabled by default until approved bilingual consent and privacy links are supplied. Secure documents, verified media bytes, real delivery providers, native workflows, staging, operational recovery, UAT and production approval remain outside this local web slice. Nine high npm findings from unpatched transitive `braces` remain tracked under the baseline. Remote CI remains unverified under the owner's local-only instruction; its gate has not been waived or marked passed.
 
 Process 2's in-scope local acceptance is complete. Notify the owner before continuing to Process 3 shared secure files. The release boundaries above remain open.
+
+## Enquiry boundary follow-up
+
+Preparing Process 3 exposed an error in the earlier direct-API boundary claim: commit `23a5a46` enforced 32 KiB in the public BFF, while the API middleware still used its general 256 KiB cap. The API now independently enforces 32 KiB for public enquiries. Ten enquiry API/database tests pass (33.44 s), including otherwise-valid Tamil JSON at exactly 32,768 bytes and rejection at 32,769 bytes with normal, misleading and absent/chunked Content-Length. Only the accepted record persists. Existing domain JSON limits remain unchanged. Ruff lint/format pass; this correction does not claim a new full-suite or browser run.
