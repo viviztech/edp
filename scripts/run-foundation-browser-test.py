@@ -43,6 +43,11 @@ shutil.copytree(
     root / "apps/web/.next/standalone/.next/static",
     dirs_exist_ok=True,
 )
+shutil.copytree(
+    root / "apps/web/public",
+    root / "apps/web/.next/standalone/public",
+    dirs_exist_ok=True,
+)
 cache = root / ".tool-cache"
 cache.mkdir(exist_ok=True)
 for port in (8100, 3100):

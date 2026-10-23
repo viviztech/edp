@@ -1,13 +1,14 @@
 # Pending Work Register
 
 **Recorded:** 2026-09-25  
+**Updated:** 2026-10-23
 **Purpose:** Preserve the outstanding work associated with completed implementation slices before the project proceeds to the next scheduled module.
 
 ## Current position
 
-The completed vertical slices are functionally accepted in the local development environment. They are not yet formally released, and the milestone Definition of Done remains open where remote CI, native-device validation, external providers, staging, production operations, or client approval are required.
+Earlier foundation/learning/mentoring slices, B01, K01 and Phase 9 B02/S01 are accepted for their documented local web/API scope. Phase 10 reporting and impact local web/API acceptance, including final Tamil responsive review, passed on 2026-10-23. These slices are not formally released, and the milestone Definition of Done remains open where remote CI, native-device validation, external providers, staging, production operations, or client approval are required.
 
-P01.3 center/cohort staff bindings has passed the available local API, migration, static-analysis, web, build, and authenticated browser checks. No known functional defect remains in that slice at the time of this record.
+[Process 1 baseline verification](baseline-verification-plan.md) remains in progress against the current revision. Its [report](baseline-verification-report.md) records fresh Phase 10, API/database, migration, contract and web evidence. Nine high dependency findings from unpatched transitive `braces` and missing exact-revision remote CI keep Process 1 open. Earlier dated entries below preserve their historical evidence; this current-position section and the latest checkpoint supersede their descriptions of future work or resolved legacy static-analysis debt.
 
 ## Immediate closure work
 
@@ -15,9 +16,11 @@ These tasks should be completed before or alongside the next feature implementat
 
 | Priority | Task | Recorded status |
 | --- | --- | --- |
-| P0 | Commit and push the latest P01.3 implementation, documentation, generated contracts, and completed-flow PDF artifacts to `main` | Changes were still local when this register was created |
-| P0 | Run GitHub Actions against the pushed commit | Remote CI had not tested the latest changes |
-| P0 | Resolve repository-wide Ruff and strict MyPy checks | Verified 2026-09-26: the focused P01.3 modules pass, while the repository-wide Ruff gate reports 166 pre-existing findings concentrated in legacy CMS code and early migrations; MyPy remains gated behind Ruff in the CI-equivalent command |
+| P0 | Commit and push the P01.3 implementation and flow documentation | Completed in `ae7cff4` as recorded on 2026-09-26; current-baseline review and source-control work are tracked separately below |
+| P0 | Close Phase 10 final responsive acceptance | Completed 2026-10-23: fresh reporting/impact Chrome assertions, Tamil responsive controls and single-line numeric cells pass with no JavaScript errors; focused screenshots visually inspected. See the [Phase 10 report](milestone-10-report.md) |
+| P0 | Review the current changes, prepare the intended revision and obtain green GitHub Actions for that revision | In progress under [Process 1](baseline-verification-plan.md); current-baseline CI is unverified because Git authentication was unavailable without interaction and the GitHub plugin was not connected |
+| P0 | Resolve dependency security findings without weakening scans | Compatible Vitest and `ip-address` updates applied; nine high findings from unpatched transitive `braces` remain. See the current [baseline report](baseline-verification-report.md) and historical [dependency repair report](dependency-repair-report.md) |
+| P0 | Resolve repository-wide Ruff and strict MyPy checks | Resolved locally 2026-10-21: repository-wide Ruff, formatting and strict MyPy pass; see the [dependency repair report](dependency-repair-report.md). Remote CI remains unverified. |
 | P1 | Reconcile superseded milestone-report wording | Completed 2026-09-26: the P01.2 checkpoint now explicitly points to the superseding P01.3 implementation |
 
 ## Deferred implementation and acceptance work
@@ -25,7 +28,7 @@ These tasks should be completed before or alongside the next feature implementat
 | Area | Pending work | Classification |
 | --- | --- | --- |
 | Applications | A01.3 supporting-document upload, private storage, malware scanning, retention, and access control | Planned implementation |
-| Flutter | Secure storage, deep links, remote revocation, and real-device acceptance | Deferred to the macOS development stage under ADR 0004 |
+| Flutter | Applicant/student/alumni domain workflows, deep links, and Android/iOS secure-storage/session/device acceptance; secure refresh storage, rotation and session-revocation controls are implemented | Domain implementation remains open; native runtime verification is deferred under ADR 0004 |
 | Background processing | Full Redis, Celery worker, and Celery Beat container/runtime acceptance | Environment acceptance |
 | Notifications | Production email, SMS, FCM, and WhatsApp adapters, credentials, and delivery-status validation | Provider integration |
 | Meta | Live credentials, page/app ownership, production webhook validation, and retention approval | Provider and operational acceptance |
@@ -67,15 +70,15 @@ The open-questions register still requires decisions or confirmed owners for:
 - business-tool priorities; and
 - UAT, security, and production-release approvers.
 
-## Future scheduled scope
+## Remaining implementation and acceptance scope
 
-The following are future implementation slices and are not defects or unfinished acceptance criteria in already completed slices:
+The following distinguish deferred channel/integration implementation from acceptance still needed for the documented local slices:
 
 - L02 follow-up: secure assignment file evidence, approved certificate signatories/PDF presentation and any attendance gate; L02.3 core eligibility/issuance/verification is complete locally
 - M01 mentoring is complete locally; provider reminder delivery and native mobile remain deferred
-- K01 knowledge resources
-- S01 schemes and opportunities
-- I01 impact reporting
+- K01 native client and approved live resource ownership/content; web/API local acceptance is recorded below
+- S01 native client, broader secure attachments, approved support policy and external notification delivery; local web/API acceptance is recorded below
+- I01 policy/native/release gates and exact-revision CI; reporting/impact local web/API acceptance, including final responsive review, is complete as documented in the [Phase 10 report](milestone-10-report.md)
 
 ## B01.1 continuation — 2026-10-08
 
@@ -83,7 +86,9 @@ B01 implementation has started after M01. The participant draft and submission A
 
 ## Recommended continuation rule
 
-Before the next Phase 6 slice, commit and push the current changes and obtain remote CI results. Repository-wide CMS Ruff/MyPy debt is verified and remains tracked for remediation; it must not be attributed to later focused modules. Native macOS validation, live-provider work, staging, and production gates may remain explicitly deferred while local feature development continues.
+Before accepting the next feature slice, obtain remote CI results for the intended commit. Repository-wide CMS Ruff/MyPy debt was resolved locally on 2026-10-21; the unpatched transitive npm advisory remains explicitly tracked in the [dependency repair report](dependency-repair-report.md). Native macOS validation, live-provider work, staging, and production gates may remain explicitly deferred while local feature development continues.
+
+The approved remaining-development sequence is [baseline verification](baseline-verification-plan.md), complete web journeys, shared secure files, communications/jobs, Flutter domain workflows, staging/operations and launch acceptance, followed by approved P1 business tools. A required check or security gate that remains failing or unverified keeps the current process open. Report its completion evidence before starting the next process.
 
 Update this register whenever an item is completed, deferred by an approved decision, or superseded. Link the supporting commit, CI run, ADR, test evidence, or release record in the corresponding row.
 
@@ -122,3 +127,41 @@ L03 adds versioned cohort policy, scoped manual attendance, digest-only time-lim
 ## M01 completion record
 
 M01 adds eligible mentor profiles, expertise and availability, one active enrollment-scoped assignment, conflict-checked sessions, author-only private notes, participant-shared notes, versioned goals/actions, durable follow-up reminders, immutable participant feedback and count/average monitoring. PostgreSQL repeats scope and immutability controls. English/Tamil staff and participant web flows use a closed BFF allowlist. Native mentor mobile access, production reminder dispatch, retention approval, remote CI and production operational acceptance remain open. The next scheduled module is K01 knowledge resources.
+
+## Dependency repair and B02 editing - 2026-10-21
+
+Python/Node/Flutter dependencies and locks are aligned; an isolated UTC PostgreSQL cluster supports local acceptance. B02 updates after reload now send only writable contract fields. All 92 backend tests, 46 web tests, eight Flutter tests, both web builds, migration checks and the authenticated Chrome journey pass locally. The full details, an unpatched upstream npm advisory, unavailable Docker/Redis runtime gates and deferred native/remote/release work are recorded in the [repair report](dependency-repair-report.md). This closes the focused editing defect without declaring the broader Milestone 7 scope released.
+
+## B01 autosave recovery - 2026-10-21
+
+The focused recovery slice is locally verified: independent-section merging, explicit conflicting-text choices, lost-response and late-commit handling, preserved in-flight edits, failure pauses and navigation warnings. The existing B01 API workflow, web lint/types, 77 tests, production build and authenticated two-tab browser acceptance pass. See the [recovery report](b01-autosave-recovery-report.md).
+
+The full B01 journey was pending at this checkpoint and is closed by the continuation below. Remote CI, final approval policy, PDF/native work and previously recorded release gates remain open.
+
+## B01 local acceptance closure - 2026-10-21
+
+B01 web/API development and local acceptance are complete. Separate participant and assigned-mentor actors exercise submission, requested changes, preserved feedback, revision/resubmission, approval and locked immutable evidence. Mentor stale/interrupted-review recovery, bilingual decisions, valid proxy text sizes and normalized reason validation are verified. All 93 backend tests, 104 web tests, static checks, production build, migration round trip/drift, generated contracts and the full authenticated Chrome journey pass. See the [acceptance report](b01-acceptance-report.md).
+
+The next scheduled development phase is K01 knowledge resources. Broader B02 acceptance/decisions, remote CI, native/PDF scope, the recorded upstream dependency advisory and operational release gates remain open; no formal milestone or production release is implied.
+
+## K01 local knowledge and funding acceptance - 2026-10-21
+
+K01 web/API development and local acceptance are complete. Schemes, funding programs and opportunities have versioned publication, safe official sources, verification/availability information, bilingual discovery and scoped participant resources. Saved items, opportunity interest and owner funding cases preserve original evidence; only approval can precede disbursement. Staff funding access is read-only and organization-scoped.
+
+All 97 backend tests, final four K01 database tests, 132 web tests, static checks, migration round trip/drift, compatible generated contracts, production build, dedicated K01 Chrome acceptance and the existing foundation/B01/B02 browser regression pass. See the [Milestone 8 report](milestone-08-report.md).
+
+The next scheduled development phase is S01 helpdesk. K01 native screens/device acceptance, live content/translation ownership and policy approval, remote CI, broader B02 decisions and the previously recorded dependency/infrastructure/production release gates remain open. Local acceptance does not waive the formal Definition of Done or declare production readiness.
+
+## Phase 9 local post-training and helpdesk acceptance - 2026-10-21
+
+Phase 9 B02/S01 web/API development and local acceptance are complete. Private business profiles, fixed periodic follow-ups and immutable self-reported outcomes now have full separate-actor/policy-freeze/withdrawal coverage and safe save recovery. Helpdesk adds scoped claim/assignment queues, shared replies and private notes, bounded private text files, controlled lifecycle/reopen, immutable history and recipient-only in-app notices/preferences. Current assignment and eligible owner status are rechecked for content and downloads.
+
+All 103 API/PostgreSQL tests, 159 web tests, backend/web lint and typing, compatible generated contracts, migration round trip/drift and the final production build pass. Dedicated Phase 9 Chrome acceptance and the existing foundation/B01/B02 regression pass without JavaScript errors. Tamil responsive evidence was inspected; temporary servers were stopped. See the [Phase 9 report](milestone-09-report.md).
+
+The next scheduled domain phase is I01 reporting and impact. Native domain screens/device acceptance, public business publishing, final support/outcome/retention/translation policy, broader private-file ingestion, external communications, remote CI and previously recorded dependency/infrastructure/production gates remain open. Earlier entries describe their historical checkpoints and are superseded by this acceptance record for B02/S01 local scope.
+
+## Process 1 baseline reconciliation - 2026-10-23
+
+Phase 10 reporting/impact local web/API acceptance is complete on 2026-10-23. Fresh Chrome assertions and the final Tamil responsive review passed; focused filter, metric and participant-control screenshots were visually inspected without clipping. Fresh API/PostgreSQL regression (112 tests), web regression (180 tests across 37 files), static checks, production build, disposable migration round trips/drift and compatible contracts also passed. The [Phase 10 report](milestone-10-report.md) preserves the 2026-10-21 checkpoint and adds the fresh closure evidence. README, backlog, this register and mobile status distinguish implemented local scope from remaining domain/native/provider/operations work.
+
+The [baseline plan](baseline-verification-plan.md) and current [report](baseline-verification-report.md) govern verification, dependency remediation, CI corrections and the reviewed revision. Process 1 remains open because nine high findings from unpatched `braces` and missing exact-revision CI leave required gates unsatisfied. Native-device validation, provider activation, staging, UAT and production release remain open; local acceptance does not close them. Phase 11/P1 tools follow the outstanding P0 journey and release work in the approved continuation sequence.

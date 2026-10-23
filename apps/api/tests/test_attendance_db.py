@@ -49,9 +49,12 @@ def test_attendance_policy_qr_manual_correction_and_projection(request) -> None:
         qr_session_id = qr_session.id
         manual_session_id = manual_session.id
 
-    assert client.get(
-        f"/api/v1/attendance/organizations/{other_id}/staff-workspace", headers=headers
-    ).status_code == 403
+    assert (
+        client.get(
+            f"/api/v1/attendance/organizations/{other_id}/staff-workspace", headers=headers
+        ).status_code
+        == 403
+    )
 
     policy = client.put(
         root + "/policy",
@@ -91,11 +94,14 @@ def test_attendance_policy_qr_manual_correction_and_projection(request) -> None:
     window = opened.json()
     assert len(window["check_in_token"]) >= 32
     assert window["qr_svg_data_url"].startswith("data:image/svg+xml;base64,")
-    assert client.post(
-        root + "/windows",
-        headers=headers,
-        json={"session_id": str(qr_session_id), "reason": "Reject duplicate window"},
-    ).status_code == 409
+    assert (
+        client.post(
+            root + "/windows",
+            headers=headers,
+            json={"session_id": str(qr_session_id), "reason": "Reject duplicate window"},
+        ).status_code
+        == 409
+    )
 
     checked = client.post(
         root + "/check-in",
@@ -105,14 +111,18 @@ def test_attendance_policy_qr_manual_correction_and_projection(request) -> None:
     assert checked.status_code == 201
     assert checked.json()["status"] == "present"
     assert checked.json()["source"] == "qr"
-    assert client.post(
-        root + "/check-in",
-        headers=headers,
-        json={"token": window["check_in_token"]},
-    ).status_code == 409
-    assert client.post(
-        root + "/check-in", headers=headers, json={"token": "x" * 43}
-    ).status_code == 404
+    assert (
+        client.post(
+            root + "/check-in",
+            headers=headers,
+            json={"token": window["check_in_token"]},
+        ).status_code
+        == 409
+    )
+    assert (
+        client.post(root + "/check-in", headers=headers, json={"token": "x" * 43}).status_code
+        == 404
+    )
 
     marked = client.post(
         root + f"/sessions/{manual_session_id}/records",
@@ -125,15 +135,18 @@ def test_attendance_policy_qr_manual_correction_and_projection(request) -> None:
     )
     assert marked.status_code == 201
     record = marked.json()
-    assert client.post(
-        root + f"/sessions/{manual_session_id}/records",
-        headers=headers,
-        json={
-            "enrollment_id": str(enrollment_id),
-            "status": "present",
-            "reason": "Reject duplicate marking",
-        },
-    ).status_code == 409
+    assert (
+        client.post(
+            root + f"/sessions/{manual_session_id}/records",
+            headers=headers,
+            json={
+                "enrollment_id": str(enrollment_id),
+                "status": "present",
+                "reason": "Reject duplicate marking",
+            },
+        ).status_code
+        == 409
+    )
 
     corrected = client.post(
         root + f"/records/{record['id']}/correct",
@@ -147,15 +160,18 @@ def test_attendance_policy_qr_manual_correction_and_projection(request) -> None:
     assert corrected.status_code == 200
     assert corrected.json()["version"] == 2
     assert corrected.json()["status"] == "excused"
-    assert client.post(
-        root + f"/records/{record['id']}/correct",
-        headers=headers,
-        json={
-            "expected_version": 1,
-            "status": "present",
-            "reason": "Reject stale correction",
-        },
-    ).status_code == 409
+    assert (
+        client.post(
+            root + f"/records/{record['id']}/correct",
+            headers=headers,
+            json={
+                "expected_version": 1,
+                "status": "present",
+                "reason": "Reject stale correction",
+            },
+        ).status_code
+        == 409
+    )
 
     workspace = client.get(root + "/staff-workspace", headers=headers)
     assert workspace.status_code == 200

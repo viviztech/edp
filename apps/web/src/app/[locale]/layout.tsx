@@ -35,7 +35,7 @@ export default async function LocaleLayout({ children, params }: {
         navigationLabel={text.navigation}
         labels={{ ...labels, account: authMessages[locale].title, language: text.language }}
         program={program.map((page) => ({ title: page.title, href: `/${locale}/pages/${page.slug}` }))}
-        support={support.map((page) => ({ title: page.title, href: `/${locale}/pages/${page.slug}` }))}
+        support={support.map((page) => ({ title: page.title, href: page.slug === "resources" ? `/${locale}/resources` : `/${locale}/pages/${page.slug}` }))}
       />
     </div></header>
     {children}

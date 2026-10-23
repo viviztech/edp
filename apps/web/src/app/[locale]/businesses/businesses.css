@@ -1,0 +1,17 @@
+.business-main .program-panel { margin-block: 1rem; overflow-wrap: anywhere; }
+.business-main fieldset { border: 0; margin: 1rem 0; padding: 0; min-width: 0; }
+.business-main label { display: grid; gap: .4rem; margin-block: .65rem; font-weight: 600; }
+.business-main input:not([type=checkbox]), .business-main select, .business-main textarea {
+  width: 100%; min-width: 0; min-height: 44px; padding: .6rem .75rem; border: 1px solid #64748b;
+  border-radius: .4rem; background: #fff; color: #172033; font: inherit;
+}
+.business-main textarea { min-height: 90px; resize: vertical; }
+.business-main label:has(input[type=checkbox]) { display: flex; align-items: center; gap: .7rem; min-height: 44px; }
+.business-main input[type=checkbox] { width: 20px; height: 20px; }
+.business-main button { min-height: 44px; padding: .6rem 1rem; margin-block: .4rem; border: 1px solid #334155;
+  border-radius: .4rem; background: #fff; color: #172033; font: inherit; cursor: pointer; }
+.business-main button:hover:not(:disabled) { background: #eff6ff; }
+.business-main button:disabled, .business-main fieldset:disabled { opacity: .65; }
+.business-main :is(button,input,select,textarea,summary):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.business-main summary { cursor: pointer; min-height: 44px; padding-block: .6rem; }
+.business-main [role=status] { min-height: 1.5rem; }

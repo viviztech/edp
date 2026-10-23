@@ -10,6 +10,13 @@ import { programMessages } from "../lib/program-messages";
 afterEach(cleanup);
 
 describe("staff module navigation", () => {
+  it.each(["report.view", "impact.manage"])("links reporting only for scoped %s access", (permission) => {
+    render(<StaffModuleNav locale="en" organization="org-report" permissions={[permission]} active="reports" />);
+    const link = screen.getByRole("link", { name: "Reports and impact" });
+    expect(link.getAttribute("href")).toBe("/en/admin/reports?organization=org-report");
+    expect(link.getAttribute("aria-current")).toBe("page");
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
   it("links only to modules granted for the selected organization", () => {
     render(<StaffModuleNav locale="en" organization="org-1" permissions={["cms.page.view", "crm.lead.view"]} variant="tiles" />);
     expect(screen.getByText(cmsMessages.en.workspace).closest("a")?.getAttribute("href")).toBe("/en/admin/pages?organization=org-1");
@@ -39,5 +46,21 @@ describe("staff module navigation", () => {
     const link = screen.getByText(programMessages.en.workspace).closest("a");
     expect(link?.getAttribute("href")).toBe("/en/admin/programs?organization=org-4");
     expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+  it.each(["knowledge.manage", "funding.manage"])("links knowledge for scoped %s access", (permission) => {
+    render(<StaffModuleNav locale="en" organization="org-5" permissions={[permission]} active="knowledge" />);
+    const link = screen.getByRole("link", { name: "Resources and funding" });
+    expect(link.getAttribute("href")).toBe("/en/admin/knowledge?organization=org-5");
+    expect(link.getAttribute("aria-current")).toBe("page");
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+  it("links the helpdesk only with scoped ticket access", () => {
+    const view = render(<StaffModuleNav locale="en" organization="org-6" permissions={["ticket.view"]} active="helpdesk" />);
+    const link = screen.getByRole("link", { name: "Helpdesk" });
+    expect(link.getAttribute("href")).toBe("/en/admin/helpdesk?organization=org-6");
+    expect(link.getAttribute("aria-current")).toBe("page");
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    view.rerender(<StaffModuleNav locale="en" organization="org-6" permissions={["system.access"]} />);
+    expect(screen.queryByRole("link", { name: "Helpdesk" })).toBeNull();
   });
 });

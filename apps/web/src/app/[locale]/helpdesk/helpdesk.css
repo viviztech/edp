@@ -1,0 +1,28 @@
+.helpdesk-main { max-width: 1120px; margin: 0 auto; padding: 24px; color: #173128; }
+.helpdesk-main h1 { font-size: clamp(1.8rem, 4vw, 2.7rem); margin: 16px 0; }
+.helpdesk-main h2 { font-size: 1.5rem; margin: 0 0 16px; overflow-wrap: anywhere; }
+.helpdesk-main h3 { font-size: 1.2rem; margin: 24px 0 12px; }
+.helpdesk-main .helpdesk-panel { border: 1px solid #b9cfc5; border-radius: 14px; padding: 24px; margin: 24px 0; background: #fff; min-width: 0; }
+.helpdesk-main form { display: grid; gap: 16px; margin: 20px 0; }
+.helpdesk-main fieldset { display: grid; gap: 16px; border: 0; padding: 0; min-width: 0; }
+.helpdesk-main label { display: grid; gap: 7px; font-weight: 650; }
+.helpdesk-main input, .helpdesk-main select, .helpdesk-main textarea { color: #173128; background: #fff; border: 1px solid #748c81; border-radius: 7px; padding: 10px 12px; min-height: 44px; width: 100%; max-width: 100%; font: inherit; }
+.helpdesk-main textarea { min-height: 108px; resize: vertical; }
+.helpdesk-main button { border: 1px solid #1d6549; background: #1d6549; color: #fff; border-radius: 7px; min-height: 44px; padding: 10px 18px; font: inherit; font-weight: 650; width: fit-content; max-width: 100%; cursor: pointer; white-space: normal; text-align: start; overflow-wrap: anywhere; }
+.helpdesk-main button + button { margin: 8px; }
+.helpdesk-main button[aria-pressed=true] { background: #123e2d; outline: 3px solid #c3decb; }
+.helpdesk-main button:disabled, .helpdesk-main input:disabled, .helpdesk-main select:disabled, .helpdesk-main textarea:disabled { opacity: .58; cursor: default; }
+.helpdesk-main :focus-visible { outline: 3px solid #c98518; outline-offset: 3px; }
+.helpdesk-main p { margin: 10px 0; line-height: 1.65; overflow-wrap: anywhere; }
+.helpdesk-main li { padding: 12px 0; border-bottom: 1px solid #dce5df; }
+.helpdesk-main ul { list-style: none; padding: 0; }
+.helpdesk-main ol { padding-left: 24px; }
+.helpdesk-main .helpdesk-prose { white-space: pre-wrap; }
+.helpdesk-main .helpdesk-message, .helpdesk-main .helpdesk-note { padding: 16px; border: 1px solid #d0ded6; border-radius: 8px; margin: 12px 0; }
+.helpdesk-main .helpdesk-note { background: #fff8e8; border-color: #d6ba78; }
+.helpdesk-main .helpdesk-check { display: flex; align-items: center; gap: 12px; }
+.helpdesk-main .helpdesk-check input { width: 22px; height: 22px; min-height: 22px; }
+.helpdesk-main .helpdesk-hint, .helpdesk-main time { font-size: .9rem; color: #476153; }
+.helpdesk-main a { color: #155637; text-decoration: underline; overflow-wrap: anywhere; }
+.helpdesk-main [role=alert]:not(:empty) { padding: 12px; border-left: 4px solid #a23924; background: #fff3ee; }
+@media (max-width: 600px) { .helpdesk-main { padding: 16px; } .helpdesk-main .helpdesk-panel { padding: 16px; } .helpdesk-main button { width: 100%; } .helpdesk-main button + button { margin: 8px 0; } }

@@ -12,7 +12,7 @@ import { notificationMessages } from "../lib/notification-messages";
 import { programMessages } from "../lib/program-messages";
 import { selectionMessages } from "../lib/selection-messages";
 
-type ModuleKey = "pages" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning" | "attendance" | "mentoring" | "businesses";
+type ModuleKey = "pages" | "crm" | "notifications" | "meta" | "applicationDefinitions" | "programs" | "selection" | "learning" | "attendance" | "mentoring" | "businesses" | "knowledge" | "helpdesk" | "reports";
 type Locale = "en" | "ta";
 
 const descriptions: Record<Locale, Record<ModuleKey, string>> = {
@@ -28,8 +28,13 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     attendance: "Open check-in windows and maintain session registers.",
     mentoring: "Match mentors, schedule sessions and track agreed outcomes.",
     businesses: "Review business progress and follow-up reports.",
+    knowledge: "Publish support resources and review participant funding progress.",
+    helpdesk: "Respond to assigned support tickets and track their resolution.",
+    reports: "Review defined measures, preserve snapshots and export authorized evidence.",
   },
   ta: {
+    reports: "வரையறுக்கப்பட்ட அளவீடுகளைப் பார்த்து, அறிக்கைச் சான்றுகளைச் சேமிக்கவும்.",
+    helpdesk: "ஒதுக்கப்பட்ட உதவிக் கோரிக்கைகளுக்குப் பதிலளித்து தீர்வைக் கண்காணிக்கவும்.",
     pages: "\u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0baa\u0bcd \u0baa\u0b95\u0bcd\u0b95\u0b99\u0bcd\u0b95\u0bb3\u0bc8 \u0b89\u0bb0\u0bc1\u0bb5\u0bbe\u0b95\u0bcd\u0b95\u0bbf \u0bb5\u0bc6\u0bb3\u0bbf\u0baf\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
     crm: "\u0bb5\u0bbe\u0baf\u0bcd\u0baa\u0bcd\u0baa\u0bc1\u0b95\u0bb3\u0bc8\u0baa\u0bcd \u0baa\u0bbe\u0bb0\u0bcd\u0ba4\u0bcd\u0ba4\u0bc1 \u0b85\u0b9f\u0bc1\u0ba4\u0bcd\u0ba4 \u0ba8\u0b9f\u0bb5\u0b9f\u0bbf\u0b95\u0bcd\u0b95\u0bc8\u0baf\u0bc8\u0ba4\u0bcd \u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0bae\u0bbf\u0b9f\u0bc1\u0b99\u0bcd\u0b95\u0bb3\u0bcd.",
     notifications: "\u0b92\u0ba4\u0bc1\u0b95\u0bcd\u0b95\u0bc0\u0b9f\u0bc1\u0b95\u0bb3\u0bc8\u0baf\u0bc1\u0bae\u0bcd \u0ba8\u0bbf\u0bb2\u0bc1\u0bb5\u0bc8\u0ba4\u0bcd \u0ba4\u0bca\u0b9f\u0bb0\u0bcd\u0b9a\u0bcd\u0b9a\u0bbf\u0baa\u0bcd \u0baa\u0ba3\u0bbf\u0b95\u0bb3\u0bc8\u0baf\u0bc1\u0bae\u0bcd \u0baa\u0bbe\u0bb0\u0bcd\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
@@ -41,6 +46,7 @@ const descriptions: Record<Locale, Record<ModuleKey, string>> = {
     attendance: "\u0b85\u0bae\u0bb0\u0bcd\u0bb5\u0bc1 \u0bb5\u0bb0\u0bc1\u0b95\u0bc8\u0baf\u0bc8 \u0ba4\u0bbf\u0bb1\u0ba8\u0bcd\u0ba4\u0bc1 \u0baa\u0ba4\u0bbf\u0bb5\u0bc7\u0b9f\u0bc1\u0b95\u0bb3\u0bc8 \u0ba8\u0bbf\u0bb0\u0bcd\u0bb5\u0b95\u0bbf\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd.",
     mentoring: "\u0bb5\u0bb4\u0bbf\u0b95\u0bbe\u0b9f\u0bcd\u0b9f\u0bbf\u0b95\u0bb3\u0bc8 \u0b92\u0ba4\u0bc1\u0b95\u0bcd\u0b95\u0bbf \u0b85\u0bae\u0bb0\u0bcd\u0bb5\u0bc1\u0b95\u0bb3\u0bc8\u0ba4\u0bcd \u0ba4\u0bbf\u0b9f\u0bcd\u0b9f\u0bae\u0bbf\u0b9f\u0bb5\u0bc1\u0bae\u0bcd.",
     businesses: "தொழில் முன்னேற்றம் மற்றும் பின்தொடர்வு அறிக்கைகளைப் பார்க்கவும்.",
+    knowledge: "ஆதரவு வளங்களை வெளியிட்டு நிதி முன்னேற்றத்தைப் பார்க்கவும்.",
   },
 };
 
@@ -56,6 +62,9 @@ const modules = [
   { key: "attendance", route: "attendance", permission: "attendance.view", Icon: ScanLine },
   { key: "mentoring", route: "mentoring", permission: "mentoring.view", Icon: Handshake },
   { key: "businesses", route: "businesses", permission: "business.track.view", Icon: Building2 },
+  { key: "knowledge", route: "knowledge", permission: "knowledge.manage", Icon: BookOpen },
+  { key: "helpdesk", route: "helpdesk", permission: "ticket.view", Icon: Handshake },
+  { key: "reports", route: "reports", permission: "report.view", Icon: ListChecks },
 ] as const;
 
 export function StaffModuleNav({ locale, organization, permissions, variant = "tabs", active }: {
@@ -77,11 +86,16 @@ export function StaffModuleNav({ locale, organization, permissions, variant = "t
     attendance: attendanceMessages[locale].workspace,
     mentoring: mentoringMessages[locale].workspace,
     businesses: locale === "ta" ? "தொழில் பின்தொடர்வு" : "Business tracking",
+    knowledge: locale === "ta" ? "வளங்கள் மற்றும் நிதி" : "Resources and funding",
+    helpdesk: locale === "ta" ? "உதவி மையம்" : "Helpdesk",
+    reports: locale === "ta" ? "அறிக்கைகள் மற்றும் தாக்கம்" : "Reports and impact",
   };
   const available = modules.filter((module) =>
     permissions.includes(module.permission)
     || (module.key === "learning" && permissions.includes("lms.delivery.view"))
     || (module.key === "notifications" && permissions.includes("notification.operations.view"))
+    || (module.key === "knowledge" && permissions.includes("funding.manage"))
+    || (module.key === "reports" && permissions.includes("impact.manage"))
   );
   if (available.length === 0) return null;
   return <nav className={"staff-modules staff-modules-" + variant} aria-label={authMessages[locale].staff}>

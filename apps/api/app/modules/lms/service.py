@@ -2594,9 +2594,7 @@ def revoke_certificate(
 
 
 def verify_certificate(db: Session, verification_code: str) -> PublicCertificateView:
-    item = db.scalar(
-        select(Certificate).where(Certificate.verification_code == verification_code)
-    )
+    item = db.scalar(select(Certificate).where(Certificate.verification_code == verification_code))
     if not item:
         raise AuthError("certificate_not_found", 404)
     return PublicCertificateView(

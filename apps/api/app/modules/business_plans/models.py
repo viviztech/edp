@@ -72,9 +72,7 @@ class BusinessPlanSubmission(Record, Base):
     plan_id: Mapped[UUID] = mapped_column(index=True)
     number: Mapped[int] = mapped_column(Integer)
     snapshot: Mapped[dict[str, str]] = mapped_column(JSONB)
-    submitted_by_user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="RESTRICT")
-    )
+    submitted_by_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
 
     __table_args__ = (
         ForeignKeyConstraint(

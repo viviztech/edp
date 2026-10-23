@@ -9,7 +9,15 @@ from uuid import UUID, uuid4
 
 from app.modules.applications.models import Application, ApplicationForm
 from app.modules.attendance.models import AttendancePolicy, AttendanceRecord
+from app.modules.business_plans.models import (
+    BusinessPlan,
+    BusinessPlanReview,
+    BusinessPlanRevision,
+    BusinessPlanSubmission,
+)
+from app.modules.businesses.models import BusinessProfile, BusinessProfileRevision
 from app.modules.identity.models import (
+    AuditLog,
     AuthDelivery,
     Organization,
     Person,
@@ -39,6 +47,7 @@ from app.modules.mentoring.models import (
     MentoringFeedback,
     MentoringNote,
     MentoringSession,
+    MentorProfile,
 )
 from app.modules.programs import service as program_service
 from app.modules.programs.models import (
@@ -78,6 +87,10 @@ coordinator_email = "coordinator-" + uuid4().hex[:12] + "@example.com"
 coordinator_password = secrets.token_urlsafe(24)
 trainer_email = "trainer-" + uuid4().hex[:12] + "@example.com"
 trainer_password = secrets.token_urlsafe(24)
+plan_mentor_email = "plan-mentor-" + uuid4().hex[:12] + "@example.com"
+plan_mentor_password = secrets.token_urlsafe(24)
+unrelated_email = "unrelated-" + uuid4().hex[:12] + "@example.com"
+unrelated_password = secrets.token_urlsafe(24)
 
 
 def latest_token(purpose):
@@ -102,7 +115,8 @@ with sync_playwright() as playwright:
     browser = playwright.chromium.launch(
         channel=os.getenv("PLAYWRIGHT_CHANNEL"), headless=True
     )
-    page = browser.new_page(viewport={"width": 1280, "height": 900})
+    participant_context = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = participant_context.new_page()
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     pending = set()
@@ -220,6 +234,45 @@ with sync_playwright() as playwright:
                 organization_id=organization.id,
             )
         )
+        for display_name, actor_email, actor_password, role_names in (
+            (
+                "Synthetic Plan Mentor",
+                plan_mentor_email,
+                plan_mentor_password,
+                ("Mentor",),
+            ),
+            (
+                "Synthetic Unrelated Actor",
+                unrelated_email,
+                unrelated_password,
+                ("Mentor", "Participant"),
+            ),
+        ):
+            actor_person = Person(display_name=display_name)
+            db.add(actor_person)
+            db.flush()
+            actor = User(
+                person_id=actor_person.id,
+                email=actor_email,
+                password_hash=hasher.hash(actor_password),
+                status="active",
+            )
+            db.add(actor)
+            db.flush()
+            for role_name in role_names:
+                actor_role = db.scalar(select(Role).where(Role.name == role_name))
+                assert actor_role
+                db.add(
+                    UserRole(
+                        user_id=actor.id,
+                        role_id=actor_role.id,
+                        organization_id=organization.id,
+                    )
+                )
+            if actor_email == plan_mentor_email:
+                plan_mentor_user_id = actor.id
+            else:
+                unrelated_user_id = actor.id
         audit(
             db,
             "system.role_granted",
@@ -259,14 +312,29 @@ with sync_playwright() as playwright:
     expect(page.locator(".cms-state")).to_contain_text("Published")
     public = browser.new_page()
     public.goto(base + "/en/pages/eligibility")
+    assert public.request.get(base + "/cse-logo.png").status == 200
     expect(public.get_by_role("heading", name="Who can apply")).to_be_visible()
-    expect(public.locator(".cms-body")).to_contain_text("<script>alert(1)</script>")
+    published_article = public.get_by_role("article").filter(
+        has=public.get_by_role("heading", name="Who can apply", exact=True)
+    )
+    expect(
+        published_article.get_by_text(
+            "Synthetic eligibility <script>alert(1)</script>", exact=True
+        )
+    ).to_be_visible()
+    expect(published_article.locator("script")).to_have_count(0)
     page.screenshot(path=str(evidence / "cms-debug.png"), full_page=True)
     page.get_by_label("Content", exact=True).fill("Unpublished change")
     page.get_by_role("button", name="Save draft", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Saved")
     public.reload()
-    expect(public.locator(".cms-body")).not_to_contain_text("Unpublished change")
+    expect(published_article).not_to_contain_text("Unpublished change")
+    expect(
+        published_article.get_by_text(
+            "Synthetic eligibility <script>alert(1)</script>", exact=True
+        )
+    ).to_be_visible()
+    expect(published_article.locator("script")).to_have_count(0)
     page.get_by_label("Content language").select_option("ta")
     page.get_by_label("Title", exact=True).fill("Tamil synthetic title")
     page.get_by_label("Content", exact=True).fill("Tamil synthetic content")
@@ -1310,6 +1378,554 @@ with sync_playwright() as playwright:
     page.screenshot(path=str(evidence / "mentoring-mobile.png"), full_page=True)
     page.set_viewport_size({"width": 1280, "height": 900})
 
+    plan_url = base + "/en/business-plan?organization=" + str(organization_id)
+    page.goto(plan_url)
+    expect(
+        page.get_by_role("heading", name="My business plan", exact=True, level=1)
+    ).to_be_visible()
+    plan_panel = page.locator("section.program-panel")
+    with page.expect_response(
+        lambda response: response.request.method == "POST"
+        and "/api/business-plans/" in response.url
+    ) as create_plan_response:
+        plan_panel.get_by_role("button", name="Start a plan", exact=True).click()
+    assert create_plan_response.value.status == 201
+    plan_api = create_plan_response.value.url
+    plan_id = UUID(create_plan_response.value.json()["id"])
+    plan_section_api = plan_api + "/sections"
+    plan_summary = plan_panel.get_by_role(
+        "textbox", name="Executive summary", exact=True
+    )
+    with page.expect_response(
+        lambda response: response.url == plan_section_api
+    ) as first_plan_save:
+        plan_summary.fill("Browser baseline business plan")
+    assert first_plan_save.value.status == 200
+    assert first_plan_save.value.json()["version"] == 2
+    expect(plan_panel.get_by_role("status")).to_have_text("Saved")
+
+    # A second authenticated tab deliberately retains the acknowledged v2 snapshot.
+    other_plan_page = participant_context.new_page()
+    other_plan_page.on("pageerror", lambda error: errors.append(str(error)))
+    other_plan_page.goto(plan_url)
+    other_plan_panel = other_plan_page.locator("section.program-panel")
+    other_summary = other_plan_panel.get_by_role(
+        "textbox", name="Executive summary", exact=True
+    )
+    expect(other_summary).to_have_value("Browser baseline business plan")
+    with page.expect_response(
+        lambda response: response.url == plan_section_api
+    ) as remote_plan_save:
+        plan_summary.fill("Browser remotely saved business plan")
+    assert remote_plan_save.value.status == 200
+    assert remote_plan_save.value.json()["version"] == 3
+    expect(plan_panel.get_by_role("status")).to_have_text("Saved")
+    with other_plan_page.expect_response(
+        lambda response: response.url == plan_section_api
+    ) as stale_plan_save:
+        other_summary.fill("Browser preserved local business plan")
+    assert stale_plan_save.value.status == 409
+    assert stale_plan_save.value.request.post_data_json["expected_version"] == 2
+    expect(
+        other_plan_panel.get_by_role("heading", name="Review conflicting edits")
+    ).to_be_visible()
+    expect(other_summary).to_have_value("Browser preserved local business plan")
+    expect(other_plan_panel.get_by_text("Saved version", exact=True)).to_be_visible()
+    expect(other_plan_panel.get_by_text("Your edits", exact=True)).to_be_visible()
+    expect(other_plan_panel.locator("pre")).to_have_text(
+        ["Browser remotely saved business plan", "Browser preserved local business plan"]
+    )
+    expect(
+        other_plan_panel.get_by_role("button", name="Submit for mentor review")
+    ).to_be_disabled()
+    with other_plan_page.expect_response(
+        lambda response: response.url == plan_section_api
+    ) as recovered_plan_save:
+        other_plan_panel.get_by_role("button", name="Keep my edits", exact=True).click()
+    assert recovered_plan_save.value.status == 200
+    assert recovered_plan_save.value.request.post_data_json == {
+        "expected_version": 3,
+        "section_code": "executive_summary",
+        "body": "Browser preserved local business plan",
+    }
+    assert recovered_plan_save.value.json()["version"] == 4
+    expect(other_plan_panel.get_by_role("status")).to_have_text("Saved")
+    other_plan_page.reload()
+    expect(other_summary).to_have_value("Browser preserved local business plan")
+
+    # Independent edits still conflict globally, then reconcile without replacing
+    # either section or requiring an overwrite decision from the participant.
+    page.reload()
+    expect(plan_summary).to_have_value("Browser preserved local business plan")
+    with page.expect_response(
+        lambda response: response.url == plan_section_api
+    ) as problem_plan_save:
+        plan_panel.get_by_role("textbox", name="Problem", exact=True).fill(
+            "Browser remotely saved customer problem"
+        )
+    assert problem_plan_save.value.status == 200
+    assert problem_plan_save.value.json()["version"] == 5
+    expect(plan_panel.get_by_role("status")).to_have_text("Saved")
+    with (
+        other_plan_page.expect_response(
+            lambda response: response.url == plan_section_api and response.status == 409
+        ) as independent_conflict,
+        other_plan_page.expect_response(
+            lambda response: response.url == plan_section_api and response.status == 200
+        ) as independent_recovery,
+    ):
+        other_plan_panel.get_by_role("textbox", name="Solution", exact=True).fill(
+            "Browser independently saved repair solution"
+        )
+    assert independent_conflict.value.request.post_data_json["expected_version"] == 4
+    assert independent_recovery.value.request.post_data_json["expected_version"] == 5
+    assert independent_recovery.value.json()["version"] == 6
+    expect(other_plan_panel.get_by_role("status")).to_have_text("Saved")
+    expect(
+        other_plan_panel.get_by_role("textbox", name="Problem", exact=True)
+    ).to_have_value("Browser remotely saved customer problem")
+    other_plan_page.reload()
+    expect(other_summary).to_have_value("Browser preserved local business plan")
+    expect(
+        other_plan_panel.get_by_role("textbox", name="Solution", exact=True)
+    ).to_have_value("Browser independently saved repair solution")
+
+    # Leave a real overlapping conflict paused so navigation warnings cannot race
+    # the autosave debounce. Canceling warnings must keep the unsaved text intact.
+    with other_plan_page.expect_response(
+        lambda response: response.url == plan_section_api
+    ) as navigation_plan_save:
+        other_summary.fill("Browser saved navigation comparison")
+    assert navigation_plan_save.value.status == 200
+    assert navigation_plan_save.value.json()["version"] == 7
+    expect(other_plan_panel.get_by_role("status")).to_have_text("Saved")
+    with page.expect_response(
+        lambda response: response.url == plan_section_api
+    ) as navigation_plan_conflict:
+        plan_summary.fill("Browser unsaved navigation draft")
+    assert navigation_plan_conflict.value.status == 409
+    expect(
+        plan_panel.get_by_role("heading", name="Review conflicting edits")
+    ).to_be_visible()
+    page.once("dialog", lambda dialog: dialog.dismiss())
+    with page.expect_event("dialog") as link_warning:
+        page.get_by_role("link", name="Your account", exact=True).click()
+    assert link_warning.value.type == "confirm"
+    expect(page).to_have_url(plan_url)
+    expect(plan_summary).to_have_value("Browser unsaved navigation draft")
+    page.once("dialog", lambda dialog: dialog.dismiss())
+    with page.expect_event("dialog") as reload_warning:
+        page.evaluate("window.location.reload()")
+    assert reload_warning.value.type == "beforeunload"
+    expect(plan_summary).to_have_value("Browser unsaved navigation draft")
+    page.once("dialog", lambda dialog: dialog.dismiss())
+    with page.expect_event("dialog") as discard_warning:
+        plan_panel.get_by_role("button", name="Load saved version", exact=True).click()
+    assert discard_warning.value.type == "confirm"
+    expect(plan_summary).to_have_value("Browser unsaved navigation draft")
+    page.once("dialog", lambda dialog: dialog.accept())
+    plan_panel.get_by_role("button", name="Load saved version", exact=True).click()
+    expect(plan_summary).to_have_value("Browser saved navigation comparison")
+    expect(
+        plan_panel.get_by_role("heading", name="Review conflicting edits")
+    ).to_have_count(0)
+    page.reload()
+    expect(plan_summary).to_have_value("Browser saved navigation comparison")
+    expect(plan_panel.get_by_role("textbox", name="Problem", exact=True)).to_have_value(
+        "Browser remotely saved customer problem"
+    )
+    expect(plan_panel.get_by_role("textbox", name="Solution", exact=True)).to_have_value(
+        "Browser independently saved repair solution"
+    )
+    assert page.evaluate("Object.keys(localStorage)") == []
+    assert page.evaluate("Object.keys(sessionStorage)") == []
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.screenshot(path=str(evidence / "business-plan-mobile.png"), full_page=True)
+    page.set_viewport_size({"width": 1280, "height": 900})
+    other_plan_page.close()
+
+    # Hand off the M01 assignment through the staff interface. The B01 reviewer
+    # has a separate browser session and only Mentor permissions, with no plan
+    # ownership or Super Admin grant to mask authorization failures.
+    page.goto(base + "/en/admin/mentoring?organization=" + str(organization_id))
+    page.get_by_role("button", name="End assignment", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+    profile_panel.locator('select[name="user_id"]').select_option(
+        label="Synthetic Plan Mentor"
+    )
+    profile_panel.get_by_label("Headline").fill("Independent business-plan mentor")
+    profile_panel.get_by_label("Biography").fill("Reviews synthetic plan evidence.")
+    profile_panel.get_by_role("button", name="Save", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+    assignment_panel.locator('select[name="profile"]').select_option(
+        label="Synthetic Plan Mentor"
+    )
+    assignment_panel.locator('select[name="enrollment"]').select_option(
+        label="Synthetic E2E"
+    )
+    assignment_panel.get_by_label("Starts").fill(datetime.now(UTC).date().isoformat())
+    assignment_panel.get_by_label("Reason").fill("Independent B01 review handoff")
+    assignment_panel.get_by_role("button", name="Assign mentor", exact=True).click()
+    expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
+
+    plan_mentor_context = browser.new_context(viewport={"width": 1280, "height": 900})
+    plan_mentor_page = plan_mentor_context.new_page()
+    plan_mentor_page.on("pageerror", lambda error: errors.append(str(error)))
+    plan_mentor_page.goto(base + "/en/account")
+    plan_mentor_page.get_by_label("Email", exact=True).fill(plan_mentor_email)
+    plan_mentor_page.get_by_label("Password", exact=True).fill(plan_mentor_password)
+    plan_mentor_page.locator("form").get_by_role(
+        "button", name="Sign in", exact=True
+    ).click()
+    expect(
+        plan_mentor_page.get_by_text("Synthetic Plan Mentor", exact=True)
+    ).to_be_visible()
+    plan_review_url = base + "/en/admin/business-plans?organization=" + str(organization_id)
+    plan_root = base + "/api/business-plans/organizations/" + str(organization_id)
+    plan_mentor_page.goto(plan_review_url)
+    expect(
+        plan_mentor_page.get_by_text("No submitted plans are assigned to you.", exact=True)
+    ).to_be_visible()
+    assert plan_mentor_page.request.get(plan_root + "/mine").status == 403
+    mentor_csrf = plan_mentor_page.request.get(base + "/api/session/csrf").json()[
+        "csrf_token"
+    ]
+    mentor_headers = {"Origin": base, "X-CSRF-Token": mentor_csrf}
+    assert plan_mentor_page.request.post(
+        plan_section_api,
+        data={"expected_version": 7, "section_code": "problem", "body": "Unauthorized"},
+        headers=mentor_headers,
+    ).status == 403
+
+    unrelated_context = browser.new_context(viewport={"width": 1280, "height": 900})
+    unrelated_page = unrelated_context.new_page()
+    unrelated_page.on("pageerror", lambda error: errors.append(str(error)))
+    unrelated_page.goto(base + "/en/account")
+    unrelated_page.get_by_label("Email", exact=True).fill(unrelated_email)
+    unrelated_page.get_by_label("Password", exact=True).fill(unrelated_password)
+    unrelated_page.locator("form").get_by_role(
+        "button", name="Sign in", exact=True
+    ).click()
+    expect(
+        unrelated_page.get_by_text("Synthetic Unrelated Actor", exact=True)
+    ).to_be_visible()
+    unrelated_page.goto(plan_url)
+    expect(
+        unrelated_page.get_by_text("No active enrollment is available.", exact=True)
+    ).to_be_visible()
+    assert unrelated_page.request.get(plan_root + "/mine").json() == {"entries": []}
+    unrelated_csrf = unrelated_page.request.get(base + "/api/session/csrf").json()[
+        "csrf_token"
+    ]
+    unrelated_headers = {"Origin": base, "X-CSRF-Token": unrelated_csrf}
+    assert unrelated_page.request.post(plan_api, data={}, headers=unrelated_headers).status == 404
+    assert unrelated_page.request.post(
+        plan_section_api,
+        data={"expected_version": 7, "section_code": "problem", "body": "Unauthorized"},
+        headers=unrelated_headers,
+    ).status == 404
+    assert unrelated_page.request.get(
+        base + "/api/business-plans/organizations/" + str(uuid4()) + "/mine"
+    ).status == 403
+    unrelated_page.goto(plan_review_url)
+    expect(
+        unrelated_page.get_by_text("No submitted plans are assigned to you.", exact=True)
+    ).to_be_visible()
+
+    page.goto(plan_url)
+    section_labels = {
+        "executive_summary": "Executive summary",
+        "problem": "Problem",
+        "solution": "Solution",
+        "product_service": "Product or service",
+        "customer_segments": "Customer segments",
+        "market": "Market",
+        "competition": "Competition",
+        "value_proposition": "Value proposition",
+        "business_model": "Business model",
+        "pricing": "Pricing",
+        "sales_marketing": "Sales and marketing",
+        "operations": "Operations",
+        "team": "Team",
+        "investment": "Investment",
+        "revenue_assumptions": "Revenue assumptions",
+        "expense_assumptions": "Expense assumptions",
+        "break_even_inputs": "Break-even inputs",
+        "funding_requirement": "Funding requirement",
+        "risks": "Risks",
+        "milestones": "Milestones",
+    }
+    submitted_plan_snapshot = {
+        code: f"Browser complete planning evidence for {code}." for code in section_labels
+    }
+    plan_version = 7
+    for code, section_label in section_labels.items():
+        with page.expect_response(
+            lambda response: response.url == plan_section_api
+        ) as complete_section_save:
+            plan_panel.get_by_role("textbox", name=section_label, exact=True).fill(
+                submitted_plan_snapshot[code]
+            )
+        assert complete_section_save.value.status == 200
+        assert (
+            complete_section_save.value.request.post_data_json["expected_version"] == plan_version
+        )
+        plan_version += 1
+        assert complete_section_save.value.json()["version"] == plan_version
+        expect(plan_panel.get_by_role("status")).to_have_text("Saved")
+    expect(plan_panel.get_by_text("20 / 20 sections completed", exact=True)).to_be_visible()
+    expect(
+        plan_panel.get_by_text(
+            "Financial figures are your planning assumptions, not guaranteed outcomes.",
+            exact=True,
+        )
+    ).to_be_visible()
+    with page.expect_response(
+        lambda response: response.url == plan_api + "/submit"
+    ) as first_submission_response:
+        plan_panel.get_by_role("button", name="Submit for mentor review", exact=True).click()
+    assert first_submission_response.value.status == 200
+    first_submission_plan = first_submission_response.value.json()
+    plan_version += 1
+    assert first_submission_plan["version"] == plan_version
+    first_submission = first_submission_plan["submissions"][0]
+    assert first_submission["number"] == 1
+    assert first_submission["snapshot"] == submitted_plan_snapshot
+    first_review_api = plan_root + "/submissions/" + first_submission["id"] + "/review"
+    page.reload()
+    expect(plan_panel.get_by_text("Submitted for review", exact=True)).to_be_visible()
+    for code, section_label in section_labels.items():
+        expect(plan_panel.get_by_role("textbox", name=section_label, exact=True)).to_have_value(
+            submitted_plan_snapshot[code]
+        )
+        expect(plan_panel.get_by_role("textbox", name=section_label, exact=True)).to_have_attribute(
+            "readonly", ""
+        )
+    assert page.request.post(
+        plan_section_api,
+        data={"expected_version": plan_version, "section_code": "problem", "body": "Locked"},
+        headers={"Origin": base, "X-CSRF-Token": csrf},
+    ).status == 409
+    forbidden_review = {
+        "expected_version": plan_version,
+        "decision": "approved",
+        "reason": "Unassigned reviewer attempt",
+        "comments": {},
+    }
+    assert unrelated_page.request.get(plan_root + "/assigned").json() == {"submissions": []}
+    assert unrelated_page.request.post(
+        first_review_api, data=forbidden_review, headers=unrelated_headers
+    ).status == 404
+    # Even the former assigned mentor, who also has Super Admin and owns the
+    # plan, cannot review it after the assignment has ended.
+    assert page.request.get(plan_root + "/assigned").json() == {"submissions": []}
+    assert page.request.post(
+        first_review_api,
+        data=forbidden_review,
+        headers={"Origin": base, "X-CSRF-Token": csrf},
+    ).status == 404
+
+    plan_mentor_page.reload()
+    first_review_card = plan_mentor_page.locator("section.program-panel").filter(
+        has=plan_mentor_page.get_by_role("heading", name="Submitted version 1", exact=True)
+    )
+    expect(first_review_card).to_be_visible()
+    for body in submitted_plan_snapshot.values():
+        expect(first_review_card.get_by_text(body, exact=True)).to_be_visible()
+    expect(plan_mentor_page.get_by_text("Browser private mentor observation")).to_have_count(0)
+    first_review_reason = "Clarify the customer evidence before approval."
+    first_review_comment = "Add the findings from five customer interviews."
+    expect(
+        first_review_card.get_by_role("button", name="Record review", exact=True)
+    ).to_be_visible()
+    first_review_card.locator('select[name="decision"]').select_option("changes_requested")
+    first_review_card.get_by_label("Review reason", exact=True).fill(first_review_reason)
+    first_review_card.get_by_text("Comments for this section", exact=True).click()
+    first_review_card.get_by_role("textbox", name="Executive summary", exact=True).fill(
+        first_review_comment
+    )
+    with plan_mentor_page.expect_response(
+        lambda response: response.url == first_review_api
+    ) as changes_requested_response:
+        first_review_card.get_by_role("button", name="Record review", exact=True).click()
+    assert changes_requested_response.value.status == 200
+    assert changes_requested_response.value.json()["decision"] == "changes_requested"
+    plan_version += 1
+    expect(first_review_card.get_by_text(first_review_reason, exact=True)).to_be_visible()
+    expect(first_review_card.get_by_text(first_review_comment, exact=False)).to_be_visible()
+    plan_mentor_page.reload()
+    expect(first_review_card.get_by_text(first_review_reason, exact=True)).to_be_visible()
+    assert plan_mentor_page.request.post(
+        first_review_api,
+        data={**forbidden_review, "expected_version": plan_version},
+        headers=mentor_headers,
+    ).status == 409
+
+    page.reload()
+    expect(plan_panel.get_by_text("Changes requested", exact=True)).to_be_visible()
+    first_participant_snapshot = plan_panel.locator("details").filter(
+        has=page.locator("summary").filter(has_text="Submitted version 1")
+    )
+    first_participant_snapshot.locator("summary").click()
+    expect(first_participant_snapshot.get_by_text(first_review_reason, exact=True)).to_be_visible()
+    expect(
+        first_participant_snapshot.get_by_text(first_review_comment, exact=False)
+    ).to_be_visible()
+    expect(page.get_by_text("Browser private mentor observation")).to_have_count(0)
+    revised_summary = "Browser revised plan incorporates five customer interview findings."
+    expect(plan_summary).not_to_have_attribute("readonly", "")
+    with page.expect_response(
+        lambda response: response.url == plan_section_api
+    ) as revised_section_response:
+        plan_summary.fill(revised_summary)
+    assert revised_section_response.value.status == 200
+    assert revised_section_response.value.request.post_data_json["expected_version"] == plan_version
+    plan_version += 1
+    assert revised_section_response.value.json()["version"] == plan_version
+    expect(plan_panel.get_by_role("status")).to_have_text("Saved")
+    expect(
+        first_participant_snapshot.get_by_text(
+            submitted_plan_snapshot["executive_summary"], exact=True
+        )
+    ).to_be_visible()
+    with page.expect_response(
+        lambda response: response.url == plan_api + "/submit"
+    ) as second_submission_response:
+        plan_panel.get_by_role("button", name="Submit for mentor review", exact=True).click()
+    assert second_submission_response.value.status == 200
+    plan_version += 1
+    second_submission_plan = second_submission_response.value.json()
+    assert second_submission_plan["version"] == plan_version
+    second_submission = second_submission_plan["submissions"][0]
+    revised_plan_snapshot = {**submitted_plan_snapshot, "executive_summary": revised_summary}
+    assert second_submission["number"] == 2
+    assert second_submission["snapshot"] == revised_plan_snapshot
+    assert second_submission_plan["submissions"][1]["snapshot"] == submitted_plan_snapshot
+
+    plan_mentor_page.reload()
+    second_review_card = plan_mentor_page.locator("section.program-panel").filter(
+        has=plan_mentor_page.get_by_role("heading", name="Submitted version 2", exact=True)
+    )
+    expect(second_review_card.get_by_text(revised_summary, exact=True)).to_be_visible()
+    expect(
+        first_review_card.get_by_text(submitted_plan_snapshot["executive_summary"], exact=True)
+    ).to_be_visible()
+    expect(first_review_card.get_by_text(first_review_reason, exact=True)).to_be_visible()
+    second_review_reason = "Customer evidence is clear and the revised plan is approved."
+    expect(
+        second_review_card.get_by_role("button", name="Record review", exact=True)
+    ).to_be_visible()
+    second_review_card.locator('select[name="decision"]').select_option("approved")
+    second_review_card.get_by_label("Review reason", exact=True).fill(second_review_reason)
+    second_review_api = plan_root + "/submissions/" + second_submission["id"] + "/review"
+    with plan_mentor_page.expect_response(
+        lambda response: response.url == second_review_api
+    ) as approval_response:
+        second_review_card.get_by_role("button", name="Record review", exact=True).click()
+    assert approval_response.value.status == 200
+    assert approval_response.value.json()["decision"] == "approved"
+    plan_version += 1
+    expect(second_review_card.get_by_text(second_review_reason, exact=True)).to_be_visible()
+    plan_mentor_page.reload()
+    expect(second_review_card.get_by_text(second_review_reason, exact=True)).to_be_visible()
+    expect(first_review_card.get_by_text(first_review_reason, exact=True)).to_be_visible()
+    assert plan_mentor_page.evaluate("Object.keys(localStorage)") == []
+    assert plan_mentor_page.evaluate("Object.keys(sessionStorage)") == []
+    plan_mentor_page.set_viewport_size({"width": 390, "height": 844})
+    assert plan_mentor_page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    plan_mentor_page.screenshot(
+        path=str(evidence / "business-plan-review-mobile.png"), full_page=True
+    )
+
+    page.reload()
+    expect(plan_panel.get_by_text("Approved", exact=True)).to_be_visible()
+    expect(plan_summary).to_have_value(revised_summary)
+    expect(plan_summary).to_have_attribute("readonly", "")
+    expect(
+        plan_panel.get_by_role("button", name="Submit for mentor review", exact=True)
+    ).to_have_count(0)
+    participant_submissions = plan_panel.locator("details").filter(
+        has=page.locator("summary").filter(has_text="Submitted version")
+    )
+    expect(participant_submissions).to_have_count(2)
+    for snapshot_details in participant_submissions.all():
+        snapshot_details.locator("summary").click()
+    expect(first_participant_snapshot.get_by_text(first_review_reason, exact=True)).to_be_visible()
+    expect(
+        first_participant_snapshot.get_by_text(
+            submitted_plan_snapshot["executive_summary"], exact=True
+        )
+    ).to_be_visible()
+    expect(plan_panel.get_by_text(second_review_reason, exact=True)).to_be_visible()
+    assert page.request.post(
+        plan_section_api,
+        data={"expected_version": plan_version, "section_code": "problem", "body": "Locked"},
+        headers={"Origin": base, "X-CSRF-Token": csrf},
+    ).status == 409
+    assert page.request.post(
+        plan_api + "/submit",
+        data={"expected_version": plan_version},
+        headers={"Origin": base, "X-CSRF-Token": csrf},
+    ).status == 409
+    assert plan_mentor_page.request.post(
+        second_review_api,
+        data={**forbidden_review, "expected_version": plan_version},
+        headers=mentor_headers,
+    ).status == 409
+    plan_mentor_context.close()
+    unrelated_context.close()
+
+    page.goto(base + "/en/businesses?organization=" + str(organization_id))
+    expect(
+        page.get_by_role("heading", name="My business", exact=True, level=1)
+    ).to_be_visible()
+    business_panel = page.locator("section.program-panel")
+    business_panel.get_by_label("Business name", exact=True).fill(
+        "Browser repair workshop"
+    )
+    business_panel.get_by_label("Sector", exact=True).fill("Repair services")
+    business_panel.get_by_role("textbox", name="Products and services", exact=True).fill(
+        "Synthetic bicycle repair services"
+    )
+    business_panel.get_by_role("button", name="Save business", exact=True).click()
+    expect(business_panel.get_by_role("status")).to_have_text("Saved.")
+    business_panel.get_by_text("Profile versions", exact=True).click()
+    expect(
+        business_panel.locator("details").last.get_by_role("listitem")
+    ).to_have_count(1)
+
+    page.reload()
+    expect(business_panel.get_by_label("Business name", exact=True)).to_have_value(
+        "Browser repair workshop"
+    )
+    business_panel.get_by_label("Business name", exact=True).fill(
+        "Browser expanded repair workshop"
+    )
+    business_panel.get_by_role("textbox", name="Support needed", exact=True).fill(
+        "Synthetic equipment advice"
+    )
+    business_panel.get_by_role("button", name="Save business", exact=True).click()
+    expect(business_panel.get_by_role("status")).to_have_text("Saved.")
+
+    page.reload()
+    expect(business_panel.get_by_label("Business name", exact=True)).to_have_value(
+        "Browser expanded repair workshop"
+    )
+    expect(
+        business_panel.get_by_role("textbox", name="Support needed", exact=True)
+    ).to_have_value(
+        "Synthetic equipment advice"
+    )
+    business_panel.get_by_text("Profile versions", exact=True).click()
+    expect(
+        business_panel.locator("details").last.get_by_role("listitem")
+    ).to_have_count(2)
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.screenshot(path=str(evidence / "business-tracking-mobile.png"), full_page=True)
+    page.set_viewport_size({"width": 1280, "height": 900})
+
     with Session(engine) as db:
         assignment = db.scalar(
             select(ReviewAssignment).where(
@@ -1451,8 +2067,11 @@ with sync_playwright() as playwright:
             )
         )
         mentor_assignment = db.scalar(
-            select(MentorAssignment).where(
-                MentorAssignment.organization_id == organization_id
+            select(MentorAssignment)
+            .join(MentorProfile, MentorProfile.id == MentorAssignment.mentor_profile_id)
+            .where(
+                MentorAssignment.organization_id == organization_id,
+                MentorProfile.user_id == plan_mentor_user_id,
             )
         )
         mentoring_session = db.scalar(
@@ -1489,6 +2108,9 @@ with sync_playwright() as playwright:
         assert attendance_record.status == "present"
         assert mentor_assignment and mentor_assignment.state == "active"
         assert mentoring_session and mentoring_session.status == "completed"
+        original_mentor_assignment = db.get(MentorAssignment, mentoring_session.assignment_id)
+        assert original_mentor_assignment and original_mentor_assignment.state == "ended"
+        assert original_mentor_assignment.ended_at is not None
         assert {item.visibility for item in mentoring_notes} == {
             "mentor_private",
             "shared_with_participant",
@@ -1497,6 +2119,117 @@ with sync_playwright() as playwright:
         assert mentoring_action and mentoring_action.state == "open"
         assert mentoring_follow_up and mentoring_follow_up.state == "scheduled"
         assert mentoring_feedback and mentoring_feedback.rating == 5
+        business_plan = db.get(BusinessPlan, plan_id)
+        assert business_plan and business_plan.organization_id == organization_id
+        assert business_plan.enrollment_id == enrollment.id
+        assert business_plan.status == "approved" and business_plan.version == plan_version == 32
+        plan_revisions = list(
+            db.scalars(
+                select(BusinessPlanRevision)
+                .where(BusinessPlanRevision.plan_id == plan_id)
+                .order_by(BusinessPlanRevision.version)
+            )
+        )
+        assert [
+            (revision.version, revision.section_code, revision.body)
+            for revision in plan_revisions[:6]
+        ] == [
+            (2, "executive_summary", "Browser baseline business plan"),
+            (3, "executive_summary", "Browser remotely saved business plan"),
+            (4, "executive_summary", "Browser preserved local business plan"),
+            (5, "problem", "Browser remotely saved customer problem"),
+            (6, "solution", "Browser independently saved repair solution"),
+            (7, "executive_summary", "Browser saved navigation comparison"),
+        ]
+        assert [
+            (revision.version, revision.section_code, revision.body)
+            for revision in plan_revisions[6:26]
+        ] == [
+            (number, code, submitted_plan_snapshot[code])
+            for number, code in enumerate(section_labels, start=8)
+        ]
+        assert len(plan_revisions) == 27
+        assert plan_revisions[-1].version == 30
+        assert plan_revisions[-1].section_code == "executive_summary"
+        assert plan_revisions[-1].body == revised_summary
+        plan_submissions = list(
+            db.scalars(
+                select(BusinessPlanSubmission)
+                .where(BusinessPlanSubmission.plan_id == plan_id)
+                .order_by(BusinessPlanSubmission.number)
+            )
+        )
+        assert [item.number for item in plan_submissions] == [1, 2]
+        assert [str(item.id) for item in plan_submissions] == [
+            first_submission["id"], second_submission["id"]
+        ]
+        assert [item.snapshot for item in plan_submissions] == [
+            submitted_plan_snapshot, revised_plan_snapshot
+        ]
+        plan_reviews = list(
+            db.scalars(
+                select(BusinessPlanReview)
+                .join(
+                    BusinessPlanSubmission,
+                    BusinessPlanSubmission.id == BusinessPlanReview.submission_id,
+                )
+                .where(BusinessPlanSubmission.plan_id == plan_id)
+                .order_by(BusinessPlanSubmission.number)
+            )
+        )
+        assert [item.decision for item in plan_reviews] == ["changes_requested", "approved"]
+        assert [item.reason for item in plan_reviews] == [first_review_reason, second_review_reason]
+        assert [item.comments for item in plan_reviews] == [
+            {"executive_summary": first_review_comment}, {}
+        ]
+        assert {item.reviewer_user_id for item in plan_reviews} == {plan_mentor_user_id}
+        plan_owner = db.scalar(select(User).where(User.email == email))
+        assert plan_owner
+        assert {item.submitted_by_user_id for item in plan_submissions} == {plan_owner.id}
+        assert {item.author_user_id for item in plan_revisions} == {plan_owner.id}
+        plan_audit = list(
+            db.scalars(
+                select(AuditLog)
+                .where(AuditLog.organization_id == organization_id, AuditLog.resource_id == plan_id)
+                .order_by(AuditLog.resource_version)
+            )
+        )
+        assert [item.resource_version for item in plan_audit] == list(range(1, 33))
+        assert [item.action for item in plan_audit] == (
+            ["business_plan.created"]
+            + ["business_plan.section_saved"] * 26
+            + ["business_plan.submitted", "business_plan.reviewed", "business_plan.section_saved",
+               "business_plan.submitted", "business_plan.reviewed"]
+        )
+        for item in plan_audit:
+            assert item.request_id and item.reason is None
+            assert item.actor_id != unrelated_user_id
+            if item.action == "business_plan.reviewed":
+                assert item.actor_id == plan_mentor_user_id
+                assert item.changed_fields == "status,review"
+            else:
+                assert item.actor_id == plan_owner.id
+                assert item.changed_fields in {
+                    "enrollment_id", "status,submission_number", *section_labels
+                }
+        business_profile = db.scalar(
+            select(BusinessProfile).where(
+                BusinessProfile.organization_id == organization_id
+            )
+        )
+        assert business_profile
+        assert business_profile.name == "Browser expanded repair workshop"
+        assert business_profile.version == 2
+        business_revisions = list(
+            db.scalars(
+                select(BusinessProfileRevision)
+                .where(BusinessProfileRevision.profile_id == business_profile.id)
+                .order_by(BusinessProfileRevision.version)
+            )
+        )
+        assert [revision.version for revision in business_revisions] == [1, 2]
+        assert business_revisions[0].snapshot["name"] == "Browser repair workshop"
+        assert business_revisions[1].snapshot["name"] == "Browser expanded repair workshop"
         assert interview and interview.status == "completed"
         assert float(interview.average_score or 0) == 84
         assert selection_cycle and selection_cycle.state == "closed"
@@ -1544,6 +2277,7 @@ with sync_playwright() as playwright:
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     page.screenshot(path=str(evidence / "account-ta-mobile.png"), full_page=True)
     assert not errors, errors
+    participant_context.close()
     browser.close()
 engine.dispose()
 print(
@@ -1554,7 +2288,12 @@ print(
     "delivery, learner/trainer private-material downloads, learning authoring/publication/"
     "cohort access/start/quiz grading/assignment grading and feedback/completion/"
     "certificate eligibility/issuance/public QR verification, attendance policy/QR check-in, "
-    "mentor assignment/session/private-shared notes/goals/actions/reminders/feedback, audit, "
+    "mentor assignment/session/private-shared notes/goals/actions/reminders/feedback, "
+    "business plan autosave/two-tab reconciliation/explicit conflict recovery/"
+    "navigation warnings/confirmed discard/all20sections/independent assigned mentor/"
+    "changes requested/feedback/revision/resubmission/approval/locked snapshots/"
+    "authorization negatives and immutable revisions/submissions/reviews/audit, "
+    "business profile create/reload/update and immutable revision history, audit, "
     "responsive layouts and session recovery; "
     "no JS errors"
 )

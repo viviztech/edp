@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { components } from "../../../../lib/api-contracts";
+import { businessValue } from "../../../../lib/business-values";
 
-type Dashboard = { policy: { day_offsets: number[]; version: number }; profiles: {
-  profile_id: string; enrollment_id: string; name: string; stage: string;
-  due_count: number; completed_count: number }[] };
+type Dashboard = components["schemas"]["StaffDashboard"];
 const copy = {
   en: { title: "Business follow-ups", intro: "Track participant reports and set the schedule for new profiles.",
     policy: "Follow-up days", reason: "Reason for change", save: "Save schedule",
@@ -25,6 +25,11 @@ export default function BusinessStaff({ org, locale, canManage }: {
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const writing = useRef(false);
+  const [paused, setPaused] = useState(false);
+  const refreshLabel = locale === "ta" ? "சேமித்த அட்டவணையைப் புதுப்பி" : "Refresh saved schedule";
+  const pausedLabel = locale === "ta" ? "மீண்டும் சேமிக்கும் முன் அட்டவணையைப் புதுப்பிக்கவும். உங்கள் உள்ளீடு பாதுகாக்கப்பட்டுள்ளது." :
+    "Refresh saved schedule before another save. Your input is kept.";
   useEffect(() => { let active = true;
     void fetch(`/api/businesses/organizations/${org}/staff`, { cache: "no-store" })
       .then(async (response) => { if (!response.ok) throw new Error(); return response.json() as Promise<Dashboard>; })
@@ -32,7 +37,8 @@ export default function BusinessStaff({ org, locale, canManage }: {
       .catch(() => { if (active) setMessage(t.error); });
     return () => { active = false; }; }, [org, t.error]);
   async function save() {
-    if (!data) return;
+    if (!data || writing.current || paused) return;
+    writing.current = true;
     setBusy(true); setMessage("");
     try {
       const days = offsets.split(",").map((part) => Number(part.trim()));
@@ -48,20 +54,33 @@ export default function BusinessStaff({ org, locale, canManage }: {
       if (!response.ok) throw new Error();
       setData({ ...data, policy: await response.json() as Dashboard["policy"] });
       setReason(""); setMessage(t.saved);
-    } catch { setMessage(t.error); } finally { setBusy(false); }
+    } catch { setPaused(true); setMessage(pausedLabel); } finally { writing.current = false; setBusy(false); }
   }
-  return <><header className="program-heading"><div><p className="eyebrow">B02</p>
+  async function refresh() {
+    if (writing.current) return;
+    writing.current = true; setBusy(true);
+    try {
+      const response = await fetch(`/api/businesses/organizations/${org}/staff`, { cache: "no-store" });
+      if (!response.ok) throw new Error();
+      setData(await response.json() as Dashboard); setPaused(false);
+      setMessage(locale === "ta" ? "சேமித்த அட்டவணை புதுப்பிக்கப்பட்டது. உங்கள் உள்ளீட்டை ஒப்பிடவும்." :
+        "Saved schedule refreshed. Compare your input before saving.");
+    } catch { setMessage(t.error); } finally { writing.current = false; setBusy(false); }
+  }
+  return <><header className="program-heading"><div>
     <h1>{t.title}</h1><p>{t.intro}</p></div></header><p role="status">{message}</p>
+    <button type="button" disabled={busy} onClick={() => void refresh()}>{refreshLabel}</button>
     {data && <><section className="program-panel"><h2>{t.policy}</h2>
-      {canManage ? <><label>{t.policy}<input value={offsets} onChange={(e) => setOffsets(e.target.value)}
+      <p>{locale === "ta" ? "சேமித்த அட்டவணை" : "Saved schedule"}: {data.policy.day_offsets.join(", ")} · v{data.policy.version}</p>
+      {canManage ? <fieldset disabled={busy}><label>{t.policy}<input value={offsets} onChange={(e) => setOffsets(e.target.value)}
         aria-describedby="business-schedule-help" /></label>
         <p id="business-schedule-help">{locale === "ta" ? "ஏறுவரிசையில் காற்புள்ளியால் பிரிக்கப்பட்ட நாட்கள்" : "Ascending days separated by commas"}</p>
         <label>{t.reason}<input value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} /></label>
-        <button type="button" disabled={busy || reason.trim().length < 3} onClick={() => void save()}>{t.save}</button></>
+        <button type="button" disabled={busy || paused || reason.trim().length < 3} onClick={() => void save()}>{t.save}</button></fieldset>
         : <p>{data.policy.day_offsets.join(", ")}</p>}</section>
       <section className="program-panel"><h2>{t.title}</h2>
         {data.profiles.length ? <ul className="program-list">{data.profiles.map((item) =>
-          <li key={item.profile_id}><strong>{item.name}</strong> · {item.stage}
+          <li key={item.profile_id}><strong>{item.name}</strong> · {businessValue(locale, item.stage)}
             <p>{t.due}: {item.due_count} · {t.completed}: {item.completed_count}</p></li>)}</ul>
           : <p>{t.empty}</p>}</section></>}
   </>;

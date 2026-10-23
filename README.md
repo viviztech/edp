@@ -2,9 +2,11 @@
 
 Center for Social Justice and Equity. FastAPI + Next.js + Flutter, PostgreSQL + Redis/Celery. The authoritative specification is [EDP_CODEX_MASTER_INPUT.md](EDP_CODEX_MASTER_INPUT.md), read in full before implementation.
 
-This is the **design baseline and minimum development bootstrap**, not a completed EDP application. Foundation registration/verification/reset, browser/mobile sessions, organization RBAC and audit are implemented for local testing. Email delivery and business workflows remain disabled/unimplemented. Milestone 1 completion still requires the outstanding deployment/device verification gates.
+Backend and web vertical slices cover identity/RBAC/audit, public CMS, CRM/Meta intake, applications/selection, enrollment, learning/assessments/certificates, attendance, mentoring, business plans, knowledge/funding resources, post-training tracking, helpdesk, reporting and impact. Phase 9 closes local web/API acceptance for business profiles, follow-ups, outcomes and support tickets. Phase 10 reporting/impact local web/API acceptance, including the final Tamil responsive review, passed on 2026-10-23. Flutter currently covers authentication and public content; applicant/student/alumni domain workflows and native-device verification remain open. This is a local development implementation, not a production release; external delivery providers and operational release gates remain outstanding.
 
-Latest: [foundation authentication report](docs/sdlc/foundation-auth-report.md).
+Current work: [Process 1 baseline verification](docs/sdlc/baseline-verification-plan.md), with fresh evidence in the [baseline report](docs/sdlc/baseline-verification-report.md). Process 1 remains open because the dependency gate reports nine high findings from an unpatched transitive `braces` advisory and exact-revision remote CI is unverified. The approved continuation order is verified baseline, complete web journeys, shared secure files, communications/jobs, Flutter domain workflows, staging/operations and launch acceptance, followed by approved P1 business tools. Each process requires completion evidence and a progress report before the next begins.
+
+Latest: [Phase 10 reporting and impact](docs/sdlc/milestone-10-report.md), [Phase 9 post-training and helpdesk acceptance](docs/sdlc/milestone-09-report.md), [K01 knowledge and funding acceptance](docs/sdlc/milestone-08-report.md), [B01 acceptance](docs/sdlc/b01-acceptance-report.md), [dependency repair](docs/sdlc/dependency-repair-report.md).
 
 Start with [Milestone 1 report](docs/sdlc/milestone-01-report.md), [local setup](docs/deployment/local.md) and [Milestone 1 plan](docs/sdlc/milestone-01-plan.md).
 

@@ -24,14 +24,19 @@ from app.modules.business_plans.routes import router as business_plans_router
 from app.modules.businesses.routes import router as businesses_router
 from app.modules.cms.routes import router as cms_router
 from app.modules.crm.routes import router as crm_router
+from app.modules.helpdesk.routes import router as helpdesk_router
 from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
+from app.modules.knowledge.routes import public_router as knowledge_public_router
+from app.modules.knowledge.routes import router as knowledge_router
 from app.modules.lms.routes import public_router as certificates_router
 from app.modules.lms.routes import router as lms_router
 from app.modules.mentoring.routes import router as mentoring_router
 from app.modules.meta.routes import router as meta_router
 from app.modules.notifications.routes import router as notifications_router
 from app.modules.programs.routes import router as programs_router
+from app.modules.reports.routes import impact_router
+from app.modules.reports.routes import router as reports_router
 from app.modules.selection.routes import router as selection_router
 
 log = structlog.get_logger()
@@ -100,6 +105,11 @@ def create_app() -> FastAPI:
     app.include_router(notifications_router)
     app.include_router(programs_router)
     app.include_router(selection_router)
+    app.include_router(knowledge_router)
+    app.include_router(knowledge_public_router)
+    app.include_router(helpdesk_router)
+    app.include_router(reports_router)
+    app.include_router(impact_router)
 
     @app.exception_handler(AuthError)
     async def auth_error(request: Request, exc: AuthError) -> JSONResponse:
@@ -144,6 +154,10 @@ def create_app() -> FastAPI:
                         or request.url.path.startswith("/api/v1/mentoring/")
                         or request.url.path.startswith("/api/v1/business-plans/")
                         or request.url.path.startswith("/api/v1/businesses/")
+                        or request.url.path.startswith("/api/v1/knowledge/")
+                        or request.url.path.startswith("/api/v1/helpdesk/")
+                        or request.url.path.startswith("/api/v1/reports/")
+                        or request.url.path.startswith("/api/v1/impact/")
                     )
                     and request.method in {"POST", "PATCH", "PUT"}
                 )

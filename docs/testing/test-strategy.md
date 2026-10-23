@@ -26,6 +26,7 @@ Tests prove services and user outcomes rather than mirror implementations. Synth
 9. Funding tracker transitions (K01).
 10. Alumni business follow-up (B02 P1); minimal outcome separately P0 I01.
 11. Ticket lifecycle (S01).
+    Phase 9 adds `scripts/run-helpdesk-browser-test.py`: separate owner, peer, support, admin and unrelated accounts; claim/assignment, shared/private text and files, waiting/reply/resolution/closure/reopen, notices/opt-out, stale-write recovery, ownership negatives, bilingual responsive layouts and B02 policy-freeze/outcome evidence. See the [phase report](../sdlc/milestone-09-report.md) for executed local results; native/remote/operational gates remain distinct.
 12. CMS publish → public web/mobile content (C01).
 13. Unauthorized action denied across UI/API (F03 and every slice).
 14. Sensitive export permission and audit (I01/C02).

@@ -72,9 +72,7 @@ def upgrade() -> None:
         "certificate_templates",
         ["organization_id"],
     )
-    op.create_index(
-        "ix_certificate_templates_course_id", "certificate_templates", ["course_id"]
-    )
+    op.create_index("ix_certificate_templates_course_id", "certificate_templates", ["course_id"])
     op.create_index(
         "uq_certificate_template_published_course",
         "certificate_templates",
@@ -130,9 +128,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.CheckConstraint("status IN ('valid','revoked')", name="certificate_status"),
         sa.CheckConstraint("version > 0", name="certificate_version"),
-        sa.CheckConstraint(
-            "template_version > 0", name="certificate_template_version_snapshot"
-        ),
+        sa.CheckConstraint("template_version > 0", name="certificate_template_version_snapshot"),
         sa.CheckConstraint(
             "(status = 'valid' AND revoked_at IS NULL AND revoke_reason IS NULL) OR "
             "(status = 'revoked' AND revoked_at IS NOT NULL AND revoke_reason IS NOT NULL)",

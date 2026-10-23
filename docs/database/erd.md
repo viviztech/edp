@@ -312,3 +312,59 @@ Record and correction triggers preserve attendance evidence: identifiers, source
 `mentor_profiles` binds one active/inactive profile to an organization user. `mentor_expertise` and `mentor_availability` are profile children; availability stores weekday, local start/end time and IANA timezone. `mentor_assignments` binds a profile to Enrollment and preserves start/end evidence; a partial unique index permits one active assignment per enrollment.
 
 `mentoring_sessions` belongs to an assignment and carries a versioned scheduled/completed/cancelled lifecycle. `mentoring_notes` is append-only with `mentor_private` or `shared_with_participant` visibility. `mentoring_goals`, `mentoring_action_items` and `mentoring_follow_ups` hold versioned outcomes and terminal evidence. `mentoring_feedback` is unique by session/participant and immutable. Every cross-domain or parent reference uses organization-aware composite foreign keys where the parent exposes an organization key.
+
+## K01 knowledge and funding extension
+
+`knowledge_items` stores typed scheme/funding/opportunity entries and an independent English or Tamil edition. `(organization_id, kind, slug, locale)` is unique. Common editorial fields are typed columns; tags are relational `knowledge_item_tags` children. `knowledge_revisions` retains immutable snapshots, action, actor, version and editorial reason. Dates derive availability rather than persisting an expiring open/closed flag.
+
+`knowledge_saved` is a unique participant/item preference. `knowledge_interests` is immutable opportunity-interest evidence. `funding_cases` is unique per participant/item and pins the original published source snapshot. `funding_history` is unique by case/version and append-only. Composite foreign keys repeat organization scope for participants, items, cases and history. Case transitions are sequential; rejection and disbursement are terminal, and only approval can precede disbursement.
+
+```mermaid
+erDiagram
+  knowledge_items ||--o{ knowledge_item_tags : tags
+  knowledge_items ||--o{ knowledge_revisions : evidence
+  knowledge_items ||--o{ knowledge_saved : saved
+  knowledge_items ||--o{ knowledge_interests : interests
+  knowledge_items ||--o{ funding_cases : source
+  participants ||--o{ knowledge_saved : owns
+  participants ||--o{ knowledge_interests : expresses
+  participants ||--o{ funding_cases : tracks
+  funding_cases ||--|{ funding_history : preserves
+```
+
+## Phase 9 physical helpdesk extension
+
+`helpdesk_tickets` references organization, participant owner, account and current assignee; a unique organization/owner/request UUID plus normalized digest supports idempotent creation. Unique ticket numbers identify requests. Queue/owner indexes, category/priority/state/version checks and lifecycle triggers enforce explicit transitions, assignment consistency and fixed ownership.
+
+`helpdesk_messages` is unique by ticket/version. `helpdesk_attachments` references message/ticket/organization together and stores bounded private plain text plus byte size. `helpdesk_history` and `helpdesk_assignments` are unique by ticket/version. These four evidence tables reject update/delete. `helpdesk_notices` binds recipient/ticket/event/version uniquely and supports versioned read state. `helpdesk_preferences` is unique per organization/user. Every ticket child carries organization-aware foreign keys.
+
+```mermaid
+erDiagram
+  participants ||--o{ helpdesk_tickets : opens
+  users ||--o{ helpdesk_tickets : assigned
+  helpdesk_tickets ||--|{ helpdesk_messages : discussion
+  helpdesk_messages ||--o{ helpdesk_attachments : private_files
+  helpdesk_tickets ||--|{ helpdesk_history : evidence
+  helpdesk_tickets ||--o{ helpdesk_assignments : routes
+  helpdesk_tickets ||--o{ helpdesk_notices : updates
+  users ||--o{ helpdesk_notices : receives
+  users ||--o{ helpdesk_preferences : chooses
+```
+
+## Phase 10 physical reporting and impact extension
+
+Migration `f1b7c3d9e456` adds six tables. `impact_definitions` is unique by organization/edition and contains an immutable bilingual enterprise-measurement definition with a guarded draft/published/archived lifecycle. `impact_definition_history` preserves each reasoned version. `impact_records` pins organization, participant, owned enrollment, definition, baseline/outcome stage, observed date and sequential revision; uniqueness protects both observation revisions and actor/request UUID replay. It stores business-started/active and bounded jobs counts without requiring BusinessProfile. Composite organization foreign keys and triggers enforce ownership, pinned editions, revision progression and append-only evidence.
+
+`cohort_impact_snapshots` stores validated normalized filters, generation time, dictionary version, referenced editions and the complete immutable aggregate dashboard. Its list projection contains metadata only. `report_exports` references a snapshot, requester, request UUID/digest, reason, bounded CSV, row/byte counts and 24-hour expiry. `report_export_capabilities` binds the job/requester/organization to a hash-only capability expiring after five minutes. Both export and capability evidence are immutable. Expiry denies access; approved physical retention/disposal remains release work.
+
+```mermaid
+erDiagram
+  organizations ||--o{ impact_definitions : editions
+  impact_definitions ||--|{ impact_definition_history : evidence
+  impact_definitions ||--o{ impact_records : defines
+  enrollments ||--o{ impact_records : measures
+  participants ||--o{ impact_records : reports
+  organizations ||--o{ cohort_impact_snapshots : preserves
+  cohort_impact_snapshots ||--o{ report_exports : exports
+  report_exports ||--o{ report_export_capabilities : authorizes
+```

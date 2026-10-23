@@ -4,6 +4,7 @@ import type { components } from "../../../../lib/api-contracts";
 import { isLocale } from "../../../../lib/messages";
 import { serverApi } from "../../../../lib/server-api";
 import BusinessStaff from "./view";
+import "../../businesses/businesses.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -22,7 +23,7 @@ export default async function BusinessStaffPage({ params, searchParams }: {
   const grant = profile.grants.filter((item) => item.permissions.includes("business.track.view"))
     .find((item) => !requested || item.organization_id === requested);
   if (!grant) return <main><h1>Business tracking</h1><p>Access unavailable.</p></main>;
-  return <main className="program-main">
+  return <main className="program-main business-main">
     <StaffModuleNav locale={locale} organization={grant.organization_id}
       permissions={grant.permissions} active="businesses" />
     <BusinessStaff org={grant.organization_id} locale={locale}

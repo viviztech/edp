@@ -19,7 +19,7 @@ def main() -> None:
     api_root = root / "apps" / "api"
     os.chdir(api_root)
     sys.path.insert(0, str(api_root))
-    config = uvicorn.Config("app.main:app", host=args.host, port=args.port)
+    config = uvicorn.Config("app.main:app", host=args.host, port=args.port, access_log=False)
     server = uvicorn.Server(config)
     if sys.platform == "win32":
         asyncio.run(server.serve(), loop_factory=asyncio.SelectorEventLoop)

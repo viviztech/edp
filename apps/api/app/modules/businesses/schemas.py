@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 BusinessStage = Literal["idea", "starting", "operating", "paused", "closed"]
 FundingStatus = Literal["none", "seeking", "applied", "approved", "disbursed"]
@@ -24,6 +24,11 @@ class ProfileFields(BaseModel):
     revenue_band: RevenueBand
     support_needs: str | None = Field(default=None, max_length=4000)
     public_opt_in: bool = False
+
+    @field_validator("name", "sector", "products_services", mode="before")
+    @classmethod
+    def strip_required_text(cls, value: object) -> object:
+        return value.strip() if isinstance(value, str) else value
 
     @model_validator(mode="after")
     def validate_stage(self) -> "ProfileFields":
@@ -105,6 +110,11 @@ class PolicyUpdate(BaseModel):
     expected_version: int = Field(ge=0)
     day_offsets: list[int] = Field(min_length=1, max_length=12)
     reason: str = Field(min_length=3, max_length=500)
+
+    @field_validator("reason", mode="before")
+    @classmethod
+    def strip_reason(cls, value: object) -> object:
+        return value.strip() if isinstance(value, str) else value
 
     @model_validator(mode="after")
     def validate_offsets(self) -> "PolicyUpdate":

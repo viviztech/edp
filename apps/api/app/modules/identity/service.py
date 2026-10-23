@@ -98,6 +98,9 @@ CERTIFICATE_PERMISSIONS = ["certificate.manage", "certificate.issue"]
 ATTENDANCE_PERMISSIONS = ["attendance.view", "attendance.manage"]
 MENTORING_PERMISSIONS = ["mentoring.view", "mentoring.manage", "mentoring.admin"]
 BUSINESS_TRACK_PERMISSIONS = ["business.track.view", "business.track.manage"]
+KNOWLEDGE_PERMISSIONS = ["knowledge.manage", "funding.manage"]
+TICKET_PERMISSIONS = ["ticket.view", "ticket.assign", "ticket.update", "ticket.admin"]
+REPORT_PERMISSIONS = ["report.view", "report.export", "impact.manage"]
 SELECTION_PERMISSIONS = [
     "selection.cycle.view",
     "selection.cycle.manage",
@@ -140,6 +143,9 @@ PERMISSIONS = [
     *ATTENDANCE_PERMISSIONS,
     *MENTORING_PERMISSIONS,
     *BUSINESS_TRACK_PERMISSIONS,
+    *KNOWLEDGE_PERMISSIONS,
+    *TICKET_PERMISSIONS,
+    *REPORT_PERMISSIONS,
     *SELECTION_PERMISSIONS,
 ]
 
@@ -472,7 +478,11 @@ def seed_roles(db: Session) -> None:
         if name == "Super Admin":
             codes = PERMISSIONS
         elif name == "Content Manager":
-            codes = ["system.access", *CMS_PERMISSIONS]
+            codes = ["system.access", *CMS_PERMISSIONS, "knowledge.manage"]
+        elif name == "Funding Coordinator":
+            codes = ["system.access", *KNOWLEDGE_PERMISSIONS]
+        elif name == "Support Executive":
+            codes = ["system.access", *TICKET_PERMISSIONS[:3]]
         elif name == "CRM Executive":
             codes = ["system.access", *CRM_PERMISSIONS]
         elif name == "Program Director":
@@ -489,6 +499,9 @@ def seed_roles(db: Session) -> None:
                 *ATTENDANCE_PERMISSIONS,
                 *MENTORING_PERMISSIONS,
                 *BUSINESS_TRACK_PERMISSIONS,
+                *KNOWLEDGE_PERMISSIONS,
+                *TICKET_PERMISSIONS,
+                *REPORT_PERMISSIONS,
                 *SELECTION_PERMISSIONS,
             ]
         elif name == "Program Manager":
@@ -505,6 +518,10 @@ def seed_roles(db: Session) -> None:
                 *ATTENDANCE_PERMISSIONS,
                 *MENTORING_PERMISSIONS,
                 *BUSINESS_TRACK_PERMISSIONS,
+                *KNOWLEDGE_PERMISSIONS,
+                *TICKET_PERMISSIONS,
+                "report.view",
+                "impact.manage",
                 "selection.cycle.view",
                 "selection.cycle.manage",
                 "selection.rubric.manage",

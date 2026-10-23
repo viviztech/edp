@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  logging: {
+    incomingRequests: {
+      ignore: [/\/api\/reports\/organizations\/[^/]+\/exports\/[^/]+\/download\//],
+    },
+  },
   images: {
     remotePatterns: [
       {
@@ -21,6 +26,8 @@ const config: NextConfig = {
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       { key: "X-Frame-Options", value: "DENY" },
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+    ] }, { source: "/api/reports/organizations/:org/exports/:id/download/:token", headers: [
+      { key: "Referrer-Policy", value: "no-referrer" },
     ] }];
   },
 };

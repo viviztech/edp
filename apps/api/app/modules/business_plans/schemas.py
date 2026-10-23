@@ -5,10 +5,26 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 SectionCode = Literal[
-    "executive_summary", "problem", "solution", "product_service", "customer_segments",
-    "market", "competition", "value_proposition", "business_model", "pricing",
-    "sales_marketing", "operations", "team", "investment", "revenue_assumptions",
-    "expense_assumptions", "break_even_inputs", "funding_requirement", "risks", "milestones",
+    "executive_summary",
+    "problem",
+    "solution",
+    "product_service",
+    "customer_segments",
+    "market",
+    "competition",
+    "value_proposition",
+    "business_model",
+    "pricing",
+    "sales_marketing",
+    "operations",
+    "team",
+    "investment",
+    "revenue_assumptions",
+    "expense_assumptions",
+    "break_even_inputs",
+    "funding_requirement",
+    "risks",
+    "milestones",
 ]
 
 
@@ -33,6 +49,9 @@ class ReviewPlan(BaseModel):
 
     @model_validator(mode="after")
     def validate_comments(self) -> "ReviewPlan":
+        self.reason = self.reason.strip()
+        if len(self.reason) < 3:
+            raise ValueError("Review reason must contain at least 3 meaningful characters")
         if any(not text.strip() or len(text) > 2000 for text in self.comments.values()):
             raise ValueError("Comments must contain 1 to 2000 characters")
         return self

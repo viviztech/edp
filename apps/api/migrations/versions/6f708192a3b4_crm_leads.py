@@ -1,9 +1,51 @@
 """crm leads"""
-from alembic import op
+
 import sqlalchemy as sa
-revision="6f708192a3b4"; down_revision="5e6f708192a3"; branch_labels=None; depends_on=None
+from alembic import op
+
+revision = "6f708192a3b4"
+down_revision = "5e6f708192a3"
+branch_labels = None
+depends_on = None
+
+
 def upgrade():
- op.create_table("crm_leads",sa.Column("organization_id",sa.Uuid(),nullable=False),sa.Column("name",sa.String(120),nullable=False),sa.Column("email",sa.String(320),nullable=False),sa.Column("phone",sa.String(32),nullable=False),sa.Column("source",sa.String(80),nullable=False),sa.Column("campaign",sa.String(120),nullable=False),sa.Column("status",sa.String(24),nullable=False),sa.Column("assigned_user_id",sa.Uuid()),sa.Column("dedupe_hash",sa.String(64),nullable=False),sa.Column("version",sa.Integer(),nullable=False),sa.Column("notes",sa.Text(),nullable=False),sa.Column("updated_at",sa.DateTime(timezone=True),nullable=False),sa.Column("id",sa.Uuid(),nullable=False),sa.Column("created_at",sa.DateTime(timezone=True),nullable=False),sa.CheckConstraint("status IN ('new','contacted','interested','registration_started','converted','not_interested')",name="crm_lead_status"),sa.CheckConstraint("length(trim(name)) BETWEEN 1 AND 120",name="crm_lead_name"),sa.ForeignKeyConstraint(["organization_id"],["organizations.id"],ondelete="RESTRICT"),sa.ForeignKeyConstraint(["assigned_user_id"],["users.id"],ondelete="RESTRICT"),sa.PrimaryKeyConstraint("id"),sa.UniqueConstraint("organization_id","dedupe_hash"))
- op.create_index("ix_crm_leads_organization_id","crm_leads",["organization_id"]); op.create_index("ix_crm_leads_assigned_user_id","crm_leads",["assigned_user_id"]); op.create_index("ix_crm_lead_queue","crm_leads",["organization_id","status","assigned_user_id"])
+    op.create_table(
+        "crm_leads",
+        sa.Column("organization_id", sa.Uuid(), nullable=False),
+        sa.Column("name", sa.String(120), nullable=False),
+        sa.Column("email", sa.String(320), nullable=False),
+        sa.Column("phone", sa.String(32), nullable=False),
+        sa.Column("source", sa.String(80), nullable=False),
+        sa.Column("campaign", sa.String(120), nullable=False),
+        sa.Column("status", sa.String(24), nullable=False),
+        sa.Column("assigned_user_id", sa.Uuid()),
+        sa.Column("dedupe_hash", sa.String(64), nullable=False),
+        sa.Column("version", sa.Integer(), nullable=False),
+        sa.Column("notes", sa.Text(), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("id", sa.Uuid(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.CheckConstraint(
+            "status IN ('new','contacted','interested','registration_started',"
+            "'converted','not_interested')",
+            name="crm_lead_status",
+        ),
+        sa.CheckConstraint("length(trim(name)) BETWEEN 1 AND 120", name="crm_lead_name"),
+        sa.ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="RESTRICT"),
+        sa.ForeignKeyConstraint(["assigned_user_id"], ["users.id"], ondelete="RESTRICT"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("organization_id", "dedupe_hash"),
+    )
+    op.create_index("ix_crm_leads_organization_id", "crm_leads", ["organization_id"])
+    op.create_index("ix_crm_leads_assigned_user_id", "crm_leads", ["assigned_user_id"])
+    op.create_index(
+        "ix_crm_lead_queue", "crm_leads", ["organization_id", "status", "assigned_user_id"]
+    )
+
+
 def downgrade():
- op.drop_index("ix_crm_lead_queue",table_name="crm_leads"); op.drop_index("ix_crm_leads_assigned_user_id",table_name="crm_leads"); op.drop_index("ix_crm_leads_organization_id",table_name="crm_leads"); op.drop_table("crm_leads")
+    op.drop_index("ix_crm_lead_queue", table_name="crm_leads")
+    op.drop_index("ix_crm_leads_assigned_user_id", table_name="crm_leads")
+    op.drop_index("ix_crm_leads_organization_id", table_name="crm_leads")
+    op.drop_table("crm_leads")

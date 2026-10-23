@@ -21,7 +21,9 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
       if (request.headers.get("content-type") &&
           !request.headers.get("content-type")?.startsWith("application/json")) return fail("invalid_request", 400);
       body = await request.text();
-      if (body.length > 16384) return fail("body_too_large", 413);
+      // Allow the API's bounded text even when JSON escapes expand each character.
+      const bodyLimit = path.endsWith("/review") ? 262144 : path.endsWith("/sections") ? 65536 : 1024;
+      if (new TextEncoder().encode(body).byteLength > bodyLimit) return fail("body_too_large", 413);
       if (body) { try { JSON.parse(body); } catch { return fail("invalid_request", 400); } }
     }
     const upstream = await fetch(config.api + "/api/v1" + path, {

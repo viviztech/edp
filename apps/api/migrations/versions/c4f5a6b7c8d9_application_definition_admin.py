@@ -18,9 +18,7 @@ def upgrade() -> None:
         "application_forms",
         sa.Column("published_by_id", sa.Uuid(), nullable=True),
     )
-    op.create_check_constraint(
-        "application_form_revision", "application_forms", "revision > 0"
-    )
+    op.create_check_constraint("application_form_revision", "application_forms", "revision > 0")
     op.create_foreign_key(
         "fk_application_form_published_by",
         "application_forms",
@@ -95,9 +93,7 @@ def downgrade() -> None:
         "DROP TRIGGER IF EXISTS trg_application_field_policy_immutable ON application_fields"
     )
     op.execute("DROP FUNCTION IF EXISTS protect_application_field_policy")
-    op.execute(
-        "DROP TRIGGER IF EXISTS trg_application_form_policy_immutable ON application_forms"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trg_application_form_policy_immutable ON application_forms")
     op.execute("DROP FUNCTION IF EXISTS protect_application_form_policy")
     op.drop_index("uq_application_form_draft", table_name="application_forms")
     op.drop_index(
@@ -105,11 +101,7 @@ def downgrade() -> None:
         table_name="application_forms",
         if_exists=True,
     )
-    op.drop_constraint(
-        "fk_application_form_published_by", "application_forms", type_="foreignkey"
-    )
-    op.drop_constraint(
-        "application_form_revision", "application_forms", type_="check"
-    )
+    op.drop_constraint("fk_application_form_published_by", "application_forms", type_="foreignkey")
+    op.drop_constraint("application_form_revision", "application_forms", type_="check")
     op.drop_column("application_forms", "published_by_id")
     op.drop_column("application_forms", "revision")

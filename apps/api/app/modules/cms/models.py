@@ -105,7 +105,9 @@ class Revision(Record, Base):
 
 class EditorialEntry(Record, Base):
     __tablename__ = "cms_editorial_entries"
-    organization_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="RESTRICT"), index=True)
+    organization_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="RESTRICT"), index=True
+    )
     kind: Mapped[str] = mapped_column(String(20))
     slug: Mapped[str] = mapped_column(String(120))
     locale: Mapped[str] = mapped_column(String(2))
@@ -123,14 +125,21 @@ class EditorialEntry(Record, Base):
         CheckConstraint("kind IN ('news','event','faq','testimonial')", name="cms_editorial_kind"),
         CheckConstraint("locale IN ('en','ta')", name="cms_editorial_locale"),
         CheckConstraint("state IN ('draft','published','archived')", name="cms_editorial_state"),
-        CheckConstraint("length(trim(title)) > 0 AND length(body) BETWEEN 1 AND 50000", name="cms_editorial_content"),
-        Index("ix_cms_editorial_public", "organization_id", "kind", "locale", "state", "sort_order"),
+        CheckConstraint(
+            "length(trim(title)) > 0 AND length(body) BETWEEN 1 AND 50000",
+            name="cms_editorial_content",
+        ),
+        Index(
+            "ix_cms_editorial_public", "organization_id", "kind", "locale", "state", "sort_order"
+        ),
     )
 
 
 class Asset(Record, Base):
     __tablename__ = "cms_assets"
-    organization_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="RESTRICT"), index=True)
+    organization_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="RESTRICT"), index=True
+    )
     storage_key: Mapped[str] = mapped_column(String(500), unique=True)
     filename: Mapped[str] = mapped_column(String(255))
     media_type: Mapped[str] = mapped_column(String(100))
@@ -139,17 +148,24 @@ class Asset(Record, Base):
     visibility: Mapped[str] = mapped_column(String(16), default="private")
     title: Mapped[str] = mapped_column(String(200))
     __table_args__ = (
-        CheckConstraint("scan_status IN ('pending','clean','infected','rejected')", name="cms_asset_scan"),
+        CheckConstraint(
+            "scan_status IN ('pending','clean','infected','rejected')", name="cms_asset_scan"
+        ),
         CheckConstraint("visibility IN ('private','public')", name="cms_asset_visibility"),
         CheckConstraint("byte_size BETWEEN 1 AND 10485760", name="cms_asset_size"),
-        CheckConstraint("media_type IN ('image/jpeg','image/png','image/webp','application/pdf')", name="cms_asset_type"),
+        CheckConstraint(
+            "media_type IN ('image/jpeg','image/png','image/webp','application/pdf')",
+            name="cms_asset_type",
+        ),
         Index("ix_cms_assets_public", "organization_id", "visibility", "scan_status"),
     )
 
 
 class Enquiry(Record, Base):
     __tablename__ = "contact_enquiries"
-    organization_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="RESTRICT"), index=True)
+    organization_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="RESTRICT"), index=True
+    )
     name: Mapped[str] = mapped_column(String(120))
     email: Mapped[str] = mapped_column(String(320))
     phone: Mapped[str] = mapped_column(String(32), default="")
@@ -161,5 +177,8 @@ class Enquiry(Record, Base):
         UniqueConstraint("organization_id", "dedupe_hash"),
         ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="RESTRICT"),
         CheckConstraint("status IN ('new','reviewed','closed')", name="enquiry_status"),
-        CheckConstraint("length(trim(name)) BETWEEN 1 AND 120 AND length(message) BETWEEN 1 AND 5000", name="enquiry_content"),
+        CheckConstraint(
+            "length(trim(name)) BETWEEN 1 AND 120 AND length(message) BETWEEN 1 AND 5000",
+            name="enquiry_content",
+        ),
     )

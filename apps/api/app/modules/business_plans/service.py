@@ -53,7 +53,9 @@ def submission_view(db: Session, item: BusinessPlanSubmission) -> SubmissionView
             reason=review.reason,
             comments={cast(SectionCode, k): v for k, v in review.comments.items()},
             created_at=review.created_at,
-        ) if review else None,
+        )
+        if review
+        else None,
     )
 
 
@@ -98,12 +100,14 @@ def view(db: Session, plan: BusinessPlan) -> PlanView:
         )
     )
     sections = {cast(SectionCode, item.section_code): item.body for item in latest}
-    submissions = list(db.scalars(
-        select(BusinessPlanSubmission)
-        .where(BusinessPlanSubmission.plan_id == plan.id)
-        .order_by(BusinessPlanSubmission.number.desc())
-        .limit(20)
-    ))
+    submissions = list(
+        db.scalars(
+            select(BusinessPlanSubmission)
+            .where(BusinessPlanSubmission.plan_id == plan.id)
+            .order_by(BusinessPlanSubmission.number.desc())
+            .limit(20)
+        )
+    )
     return PlanView(
         id=plan.id,
         enrollment_id=plan.enrollment_id,
@@ -174,11 +178,17 @@ def create_plan(
     except IntegrityError as exc:
         db.rollback()
         raise AuthError("plan_exists", 409) from exc
-    db.add(AuditLog(
-        actor_id=actor.id, organization_id=org, resource_id=row.id,
-        action="business_plan.created", request_id=request_id,
-        changed_fields="enrollment_id", resource_version=1,
-    ))
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=row.id,
+            action="business_plan.created",
+            request_id=request_id,
+            changed_fields="enrollment_id",
+            resource_version=1,
+        )
+    )
     db.commit()
     return view(db, row)
 
@@ -200,22 +210,36 @@ def save_section(
         raise AuthError("version_conflict", 409)
     row.version += 1
     revision = BusinessPlanRevision(
-        organization_id=org, plan_id=row.id, version=row.version,
-        section_code=data.section_code, body=data.body.strip(), author_user_id=actor.id,
+        organization_id=org,
+        plan_id=row.id,
+        version=row.version,
+        section_code=data.section_code,
+        body=data.body.strip(),
+        author_user_id=actor.id,
     )
     db.add(revision)
-    db.add(AuditLog(
-        actor_id=actor.id, organization_id=org, resource_id=row.id,
-        action="business_plan.section_saved", request_id=request_id,
-        changed_fields=data.section_code, resource_version=row.version,
-    ))
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=row.id,
+            action="business_plan.section_saved",
+            request_id=request_id,
+            changed_fields=data.section_code,
+            resource_version=row.version,
+        )
+    )
     db.commit()
     return view(db, row)
 
 
 def submit_plan(
-    db: Session, org: UUID, actor: User, enrollment_id: UUID,
-    data: SubmitPlan, request_id: str,
+    db: Session,
+    org: UUID,
+    actor: User,
+    enrollment_id: UUID,
+    data: SubmitPlan,
+    request_id: str,
 ) -> PlanView:
     enrollment_for_owner(db, org, actor, enrollment_id)
     row = db.scalar(
@@ -232,61 +256,85 @@ def submit_plan(
     current = view(db, row)
     if current.completed_sections != len(SECTION_CODES):
         raise AuthError("plan_incomplete", 422)
-    count = db.scalar(select(func.max(BusinessPlanSubmission.number)).where(
-        BusinessPlanSubmission.plan_id == row.id
-    )) or 0
+    count = (
+        db.scalar(
+            select(func.max(BusinessPlanSubmission.number)).where(
+                BusinessPlanSubmission.plan_id == row.id
+            )
+        )
+        or 0
+    )
     snapshot = {str(code): body for code, body in current.sections.items()}
     submission = BusinessPlanSubmission(
-        organization_id=org, plan_id=row.id, number=count + 1,
-        snapshot=snapshot, submitted_by_user_id=actor.id,
+        organization_id=org,
+        plan_id=row.id,
+        number=count + 1,
+        snapshot=snapshot,
+        submitted_by_user_id=actor.id,
     )
     row.status = "submitted"
     row.version += 1
     db.add(submission)
     db.flush()
-    db.add(AuditLog(
-        actor_id=actor.id, organization_id=org, resource_id=row.id,
-        action="business_plan.submitted", request_id=request_id,
-        changed_fields="status,submission_number", resource_version=row.version,
-    ))
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=row.id,
+            action="business_plan.submitted",
+            request_id=request_id,
+            changed_fields="status,submission_number",
+            resource_version=row.version,
+        )
+    )
     db.commit()
     return view(db, row)
 
 
 def assigned_submissions(db: Session, org: UUID, actor: User) -> MentorPlans:
     require_permission(db, actor, org, "mentoring.manage")
-    items = list(db.scalars(
-        select(BusinessPlanSubmission)
-        .join(BusinessPlan, BusinessPlan.id == BusinessPlanSubmission.plan_id)
-        .join(MentorAssignment, MentorAssignment.enrollment_id == BusinessPlan.enrollment_id)
-        .join(MentorProfile, MentorProfile.id == MentorAssignment.mentor_profile_id)
-        .where(
-            BusinessPlanSubmission.organization_id == org,
-            MentorAssignment.organization_id == org,
-            MentorAssignment.state == "active",
-            MentorProfile.user_id == actor.id,
-            MentorProfile.organization_id == org,
+    items = list(
+        db.scalars(
+            select(BusinessPlanSubmission)
+            .join(BusinessPlan, BusinessPlan.id == BusinessPlanSubmission.plan_id)
+            .join(MentorAssignment, MentorAssignment.enrollment_id == BusinessPlan.enrollment_id)
+            .join(MentorProfile, MentorProfile.id == MentorAssignment.mentor_profile_id)
+            .where(
+                BusinessPlanSubmission.organization_id == org,
+                MentorAssignment.organization_id == org,
+                MentorAssignment.state == "active",
+                MentorProfile.user_id == actor.id,
+                MentorProfile.organization_id == org,
+            )
+            .order_by(BusinessPlanSubmission.created_at.desc())
+            .limit(100)
         )
-        .order_by(BusinessPlanSubmission.created_at.desc())
-        .limit(100)
-    ))
+    )
     return MentorPlans(submissions=[submission_view(db, item) for item in items])
 
 
 def review_submission(
-    db: Session, org: UUID, actor: User, submission_id: UUID,
-    data: ReviewPlan, request_id: str,
+    db: Session,
+    org: UUID,
+    actor: User,
+    submission_id: UUID,
+    data: ReviewPlan,
+    request_id: str,
 ) -> ReviewView:
     require_permission(db, actor, org, "mentoring.manage")
-    submission = db.scalar(select(BusinessPlanSubmission).where(
-        BusinessPlanSubmission.id == submission_id,
-        BusinessPlanSubmission.organization_id == org,
-    ))
+    submission = db.scalar(
+        select(BusinessPlanSubmission).where(
+            BusinessPlanSubmission.id == submission_id,
+            BusinessPlanSubmission.organization_id == org,
+        )
+    )
     if submission is None:
         raise AuthError("not_found", 404)
-    plan = db.scalar(select(BusinessPlan).where(
-        BusinessPlan.id == submission.plan_id, BusinessPlan.organization_id == org
-    ).with_for_update())
+    plan = db.scalar(
+        select(BusinessPlan)
+        .where(BusinessPlan.id == submission.plan_id, BusinessPlan.organization_id == org)
+        .with_for_update()
+    )
     if plan is None:
         raise AuthError("not_found", 404)
     assigned = db.scalar(
@@ -304,14 +352,18 @@ def review_submission(
         raise AuthError("not_found", 404)
     if plan.status != "submitted" or plan.version != data.expected_version:
         raise AuthError("version_conflict", 409)
-    latest = db.scalar(select(func.max(BusinessPlanSubmission.number)).where(
-        BusinessPlanSubmission.plan_id == plan.id
-    ))
+    latest = db.scalar(
+        select(func.max(BusinessPlanSubmission.number)).where(
+            BusinessPlanSubmission.plan_id == plan.id
+        )
+    )
     if latest != submission.number:
         raise AuthError("version_conflict", 409)
     row = BusinessPlanReview(
-        organization_id=org, submission_id=submission.id,
-        reviewer_user_id=actor.id, decision=data.decision,
+        organization_id=org,
+        submission_id=submission.id,
+        reviewer_user_id=actor.id,
+        decision=data.decision,
         comments={str(k): v.strip() for k, v in data.comments.items()},
         reason=data.reason.strip(),
     )
@@ -323,11 +375,17 @@ def review_submission(
     except IntegrityError as exc:
         db.rollback()
         raise AuthError("review_exists", 409) from exc
-    db.add(AuditLog(
-        actor_id=actor.id, organization_id=org, resource_id=plan.id,
-        action="business_plan.reviewed", request_id=request_id,
-        changed_fields="status,review", resource_version=plan.version,
-    ))
+    db.add(
+        AuditLog(
+            actor_id=actor.id,
+            organization_id=org,
+            resource_id=plan.id,
+            action="business_plan.reviewed",
+            request_id=request_id,
+            changed_fields="status,review",
+            resource_version=plan.version,
+        )
+    )
     db.commit()
     result = submission_view(db, submission).review
     assert result is not None

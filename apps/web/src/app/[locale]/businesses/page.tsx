@@ -3,6 +3,7 @@ import type { components } from "../../../lib/api-contracts";
 import { isLocale } from "../../../lib/messages";
 import { serverApi } from "../../../lib/server-api";
 import BusinessTracking from "./view";
+import "./businesses.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -21,5 +22,5 @@ export default async function BusinessPage({ params, searchParams }: {
   const grant = profile.grants.filter((item) => item.permissions.includes("participant.self"))
     .find((item) => !requested || item.organization_id === requested);
   if (!grant) return <main><h1>Business tracking</h1><p>No participant access.</p></main>;
-  return <main className="program-main"><BusinessTracking org={grant.organization_id} locale={locale} /></main>;
+  return <main className="program-main business-main"><BusinessTracking org={grant.organization_id} locale={locale} /></main>;
 }

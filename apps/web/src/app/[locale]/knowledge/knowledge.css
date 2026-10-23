@@ -1,0 +1,38 @@
+.knowledge-main .program-panel { margin-block: 1rem; min-width: 0; }
+.knowledge-main form { display: grid; gap: 1rem; }
+.knowledge-main label { display: grid; gap: .4rem; min-width: 0; font-size: .95rem; font-weight: 600; }
+.knowledge-main input,
+.knowledge-main select,
+.knowledge-main textarea {
+  width: 100%; min-width: 0; max-width: 100%; min-height: 2.8rem;
+  padding: .65rem .75rem; border: 1px solid #7089a8; border-radius: .45rem;
+  background: #fff; color: var(--ink); font: inherit; font-weight: 400;
+}
+.knowledge-main textarea { min-height: 7rem; resize: vertical; }
+.knowledge-main button {
+  justify-self: start; max-width: 100%; min-height: 2.8rem; margin: .25rem .35rem .25rem 0;
+  padding: .65rem 1rem; border: 1px solid var(--primary); border-radius: .45rem;
+  background: var(--primary); color: var(--primary-foreground); font: inherit; font-weight: 700;
+  white-space: normal; overflow-wrap: anywhere;
+}
+.knowledge-main button:not(:disabled):hover { background: #164e8a; }
+.knowledge-main input:focus-visible,
+.knowledge-main select:focus-visible,
+.knowledge-main textarea:focus-visible,
+.knowledge-main button:focus-visible,
+.knowledge-main summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.knowledge-main input:disabled,
+.knowledge-main select:disabled,
+.knowledge-main textarea:disabled,
+.knowledge-main button:disabled {
+  border-color: #a8b8cd; background: #eaf1fa; color: #526784; opacity: 1; cursor: default;
+}
+.knowledge-main details { margin-block: .75rem; }
+.knowledge-main summary { cursor: pointer; font-weight: 600; }
+.knowledge-main [role="status"] { margin-block: 1rem; overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+  .knowledge-main .program-panel { padding: 1rem; }
+  .knowledge-main input,
+  .knowledge-main select,
+  .knowledge-main textarea { font-size: 1rem; }
+}

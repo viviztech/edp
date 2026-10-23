@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import timedelta
 from typing import Literal, cast
 from uuid import UUID
 
@@ -50,6 +50,7 @@ def owned_enrollment(db: Session, org: UUID, actor: User, enrollment_id: UUID) -
             Enrollment.status.in_(["active", "completed"]),
             Participant.organization_id == org,
             Participant.person_id == actor.person_id,
+            Participant.status.in_(["active", "completed"]),
         )
     )
     if row is None:
@@ -112,7 +113,7 @@ def profile_view(db: Session, row: BusinessProfile) -> ProfileView:
                 id=item.id,
                 offset_days=item.offset_days,
                 due_on=item.due_on,
-            status=cast(Literal["pending", "completed"], item.status),
+                status=cast(Literal["pending", "completed"], item.status),
                 outcome=OutcomeView(
                     id=outcomes[item.id].id,
                     created_at=outcomes[item.id].created_at,
@@ -137,6 +138,7 @@ def mine(db: Session, org: UUID, actor: User) -> MyBusinesses:
                 Enrollment.status.in_(["active", "completed"]),
                 Participant.organization_id == org,
                 Participant.person_id == actor.person_id,
+                Participant.status.in_(["active", "completed"]),
             )
             .order_by(Enrollment.enrolled_at.desc())
             .limit(100)
@@ -192,7 +194,7 @@ def create_profile(
                     organization_id=org,
                     profile_id=row.id,
                     offset_days=offset,
-                    due_on=date.today() + timedelta(days=offset),
+                    due_on=now().date() + timedelta(days=offset),
                 )
             )
         db.add(
@@ -281,7 +283,7 @@ def submit_outcome(
     owned_enrollment(db, org, actor, profile.enrollment_id)
     if followup.status != "pending":
         raise AuthError("outcome_exists", 409)
-    if data.reported_on > date.today():
+    if data.reported_on > now().date():
         raise AuthError("future_report_date", 422)
     row = BusinessOutcomeSnapshot(
         organization_id=org, follow_up_id=followup.id, author_user_id=actor.id, **data.model_dump()
@@ -380,7 +382,7 @@ def staff_dashboard(db: Session, org: UUID, actor: User) -> StaffDashboard:
                 name=item.name,
                 stage=cast(BusinessStage, item.stage),
                 due_count=sum(
-                    f.profile_id == item.id and f.status == "pending" and f.due_on <= date.today()
+                    f.profile_id == item.id and f.status == "pending" and f.due_on <= now().date()
                     for f in followups
                 ),
                 completed_count=sum(

@@ -1,9 +1,15 @@
 param(
-    [string]$PostgresBin = "C:\Program Files\PostgreSQL\17\bin"
+    [string]$PostgresBin = ""
 )
 
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+if (-not $PostgresBin) {
+    $PostgresBin = Join-Path $root ".tool-cache\postgresql17\pgsql\bin"
+    if (-not (Test-Path -LiteralPath (Join-Path $PostgresBin "pg_ctl.exe"))) {
+        $PostgresBin = "C:\Program Files\PostgreSQL\17\bin"
+    }
+}
 $data = Join-Path $root ".local\postgres17\data"
 $pgCtl = Join-Path $PostgresBin "pg_ctl.exe"
 

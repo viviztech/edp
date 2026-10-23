@@ -1,6 +1,6 @@
 # B02 post-training business tracking plan
 
-Status: implementation in progress. B01 browser and remote CI acceptance remain open separately.
+Status: B02 local web/API acceptance is complete in [Phase 9](milestone-09-report.md), including profiles, frozen follow-up schedules, outcomes, ownership and immutable evidence. Earlier focused editing acceptance is recorded in the [dependency repair report](dependency-repair-report.md); B01 acceptance is separate in the [B01 report](b01-acceptance-report.md). Public publishing, final policy decisions, native clients, remote CI and release gates remain open.
 
 ## Scope
 

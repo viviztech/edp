@@ -1,6 +1,30 @@
 # Local development
 
-Prerequisites: Python 3.13, Node 24/npm, Flutter stable SDK and platform SDK, Docker Engine/Desktop with Compose v2. PowerShell users use `npm.cmd` if npm.ps1 is blocked. Docker was absent during initial audit; see milestone report for executed checks.
+Prerequisites: Python 3.13, Node 24/npm 11, Flutter 3.47.0 (the CI-pinned SDK) and platform SDK, Docker Engine/Desktop with Compose v2. Root `.python-version` and `.node-version` record the supported runtime lines; the mobile manifest requires Dart 3.12 or later and Flutter 3.47.0 or later. PowerShell users use `npm.cmd` if npm.ps1 is blocked. Docker was absent during initial audit; see milestone report for executed checks.
+
+### Reproducible host dependencies
+
+Use an isolated `.venv` and the committed locks. Do not replace a system Python installation to satisfy this project's Python 3.13 requirement. On this Windows workspace, uv 0.13.4 is installed under `.tool-cache/bootstrap/bin`; its managed Python installations and cache remain under the ignored `.tool-cache` directory. From the repository root:
+
+```powershell
+python -m pip install --target .tool-cache/bootstrap --cache-dir .tool-cache/pip uv==0.13.4
+$env:UV_PYTHON_INSTALL_DIR = Join-Path $PWD '.tool-cache/python'
+$env:UV_CACHE_DIR = Join-Path $PWD '.tool-cache/uv'
+$edpUv = Join-Path $PWD '.tool-cache/bootstrap/bin/uv.exe'
+& $edpUv python install 3.13 --no-registry --no-bin
+& $edpUv venv --python 3.13 .venv
+& $edpUv pip sync --python .venv/Scripts/python.exe apps/api/requirements-dev.lock
+& $edpUv pip install --python .venv/Scripts/python.exe --no-deps --editable './apps/api[dev]'
+& $edpUv pip check --python .venv/Scripts/python.exe
+```
+
+The first command uses an existing Python only to bootstrap uv; it does not install API dependencies into that interpreter. Python installation stays project-local and does not change the Windows registry or PATH. See the [uv installation instructions](https://docs.astral.sh/uv/getting-started/installation/) for other supported bootstrap methods. If Python 3.13 is already installed, `python -m venv .venv`, `python -m pip install -r apps/api/requirements-dev.lock` and `python -m pip install --no-deps -e './apps/api[dev]'` with the venv active provide the equivalent setup; finish with `python -m pip check`. On macOS/Linux the venv Python is `.venv/bin/python`. The editable install registers API dependency metadata without resolving unlocked versions, so the dependency check can catch a stale lock.
+
+From `apps/web`, run `npm.cmd ci` with Node 24/npm 11. From `apps/mobile`, use Flutter 3.47.0 and run `flutter pub get --enforce-lockfile`. These commands install the recorded versions and fail when a manifest and its lock disagree. Update dependencies deliberately, regenerate the corresponding lock and review the diff before committing.
+
+To update backend locks, run uv from the repository root with `--python-version 3.13 --universal` so the files include platform-specific requirements for Windows and Linux. Compile `apps/api/pyproject.toml` to `apps/api/requirements.lock`; then compile it with `--extra dev --constraint apps/api/requirements.lock` to `apps/api/requirements-dev.lock`. Retain existing output files to preserve pins; add upgrade flags only for an intentional version update. Run the sync, editable install and dependency check again afterward. See [uv's lock workflow](https://docs.astral.sh/uv/pip/compile/) and [Dart lock enforcement](https://dart.dev/tools/pub/cmd/pub-get).
+
+### Local services
 
 1. After installing backend dependencies, run `python scripts/init-local-env.py` with venv Python. It creates ignored API/web/Compose env files with random database/BFF keys and an encryption key; refuses overwrites. Or fill the .env.example files yourself. Never commit secrets.
 2. `docker compose config --quiet` validates required settings.
@@ -9,9 +33,9 @@ Prerequisites: Python 3.13, Node 24/npm, Flutter stable SDK and platform SDK, Do
 5. `docker compose exec worker celery -A app.workers.celery_app:celery_app inspect ping` checks worker; execute `scripts/compose-smoke.py` from host Python for probes and queue round-trip.
 6. `docker compose down` stops containers; do not remove volumes unless intentional disposable reset.
 
-Host backend: `python -m venv .venv`; install `apps/api/requirements-dev.lock`; copy API `.env.example` to `apps/api/.env` and set URLs for isolated PostgreSQL/Redis. On Windows run `.venv\Scripts\python.exe scripts/run-native-api.py` from the repository root so psycopg uses a compatible selector event loop. On macOS/Linux, from apps/api run `python -m uvicorn app.main:app --reload`. Use venv Python for checks. API env is read from the apps/api working directory; Compose injects variables.
+Host backend: complete the dependency setup above, then copy API `.env.example` to `apps/api/.env` and set URLs for isolated PostgreSQL/Redis. On Windows run `.venv\Scripts\python.exe scripts/run-native-api.py` from the repository root so psycopg uses a compatible selector event loop. On macOS/Linux, from apps/api run `python -m uvicorn app.main:app --reload`. Use venv Python for checks. API env is read from the apps/api working directory; Compose injects variables.
 
-Host web: from apps/web `npm.cmd ci`, `npm.cmd run dev -- --hostname 127.0.0.1 --port 3001`. Set `WEB_ORIGIN=http://127.0.0.1:3001` and match API `CORS_ORIGINS`. Mobile: from apps/mobile `flutter pub get`, `flutter run`; Android emulator API host is `10.0.2.2`, physical device needs reachable development host. Use synthetic accounts only. Account UI is at /en/account or /ta/account. For native Flutter pass --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1 on an Android emulator. Release builds require an HTTPS API URL. iOS native verification requires macOS.
+Host web: from apps/web `npm.cmd ci`, `npm.cmd run dev -- --hostname 127.0.0.1 --port 3001`. Set `WEB_ORIGIN=http://127.0.0.1:3001` and match API `CORS_ORIGINS`. Mobile: from apps/mobile `flutter pub get --enforce-lockfile`, `flutter run`; Android emulator API host is `10.0.2.2`, physical device needs reachable development host. Use synthetic accounts only. Account UI is at /en/account or /ta/account. For native Flutter pass --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1 on an Android emulator. Release builds require an HTTPS API URL. iOS native verification requires macOS.
 
 Quality commands and results are in milestone report. Never point migration downgrade or integration tests at shared/production databases.
 
@@ -35,12 +59,20 @@ Rollback code without dropping published data. Schema downgrade is destructive a
 
 ### Project-owned Windows PostgreSQL
 
-This workstation uses an isolated PostgreSQL 17 cluster at `.local/postgres17/data`, bound to `127.0.0.1:55432`. It does not alter the Windows PostgreSQL services on ports 5432 or 5433. The ignored `apps/api/.env` points to database `edp_dev` with the generated `edp_dev` role; `edp_test` is reserved for destructive integration tests. Start and stop this cluster from the repository root with:
+Use an isolated PostgreSQL 17 cluster at `.local/postgres17/data`, bound to `127.0.0.1:55432`. It does not alter Windows PostgreSQL services. Download the [official EDB portable binaries](https://www.enterprisedb.com/download-postgresql-binaries) for PostgreSQL 17 and extract the archive so `pg_ctl.exe` is at `.tool-cache/postgresql17/pgsql/bin/pg_ctl.exe`. The restored toolchain uses the 17.11-3 Windows x64 archive. Initialize once from the repository root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/init-local-postgres.ps1
+```
+
+Initialization generates an `edp_dev` role password in ignored `.local/postgres17/credentials.json`, enables SCRAM password authentication and creates only the synthetic `edp_dev`, `edp_test` and `edp_foundation_e2e` databases. It persistently configures both PostgreSQL `timezone` and `log_timezone` as `UTC`, matching CI and the API's UTC timestamp convention regardless of the workstation timezone. Rerunning initialization applies and reloads these settings for an existing project cluster. It preserves an existing initialized cluster and refuses an unrecognized nonempty data directory. Load the password from this file into local environment variables without printing it; use `postgresql+psycopg://edp_dev:PASSWORD@127.0.0.1:55432/edp_dev` for host development and `edp_test` for destructive integration tests. Existing environment files are not overwritten. Start and stop this cluster from the repository root with:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/start-local-postgres.ps1
 powershell -ExecutionPolicy Bypass -File scripts/stop-local-postgres.ps1
 ```
+
+The start/stop scripts prefer the project-local binaries and fall back to an existing PostgreSQL 17 installation. Pass `-PostgresBin` explicitly if using another binary location. They manage only this project's data directory and never register or modify an operating-system service.
 
 After starting PostgreSQL and Redis, apply schema changes from `apps/api` with `..\..\.venv\Scripts\alembic.exe upgrade head`, seed permissions with `..\..\.venv\Scripts\python.exe -m app.modules.identity.cli seed`, and launch the Windows API with `.venv\Scripts\python.exe scripts/run-native-api.py`. A successful `GET /ready` proves both PostgreSQL and Redis are reachable.
 
@@ -91,3 +123,21 @@ Run Alembic to head before using progress APIs. Existing courses receive the all
 ## L01.3 local private materials
 
 Apply migration `a19d7a38e40b`, rerun `python -m app.modules.identity.cli seed`, and restart API/web. Set `LMS_MATERIAL_ROOT` in the host API environment to a private local directory. Place only synthetic development files beneath it and store their relative path as LessonMaterial.provider_key. Compose mounts `./.local/lms-materials` read-only at `/private-materials`. `LMS_MATERIAL_ACCESS_SECONDS` defaults to 300 and is restricted to 60-900 seconds. Local/test may fall back to BFF_KEY for signing; production must set a separate `LMS_MATERIAL_SIGNING_KEY` of at least 32 characters and an approved private object/video adapter before release. Do not place the material root under the web public directory.
+
+## K01 local knowledge and funding
+
+Apply migration `d9f5a1b7c234`, rerun the identity permission seed and restart API/web. Staff with `knowledge.manage` open `/{locale}/admin/knowledge?organization=UUID`; `funding.manage` separately grants the read-only case queue. Participants need an active organization enrollment and use `/{locale}/knowledge?organization=UUID`. Public `/{locale}/resources` uses `PUBLIC_ORGANIZATION_ID` and `API_INTERNAL_URL`; only published public entries appear there.
+
+After the production web build and test-database migration, run `scripts/run-knowledge-browser-test.py` with the project Python environment. `DATABASE_URL` must select a guarded synthetic test/browser database, never a development/production dataset. Set `PLAYWRIGHT_CHANNEL=chrome` to use installed Chrome where bundled Chromium is unavailable. The runner refuses occupied ports 8101/3101, owns and stops temporary API/web processes, seeds a fresh synthetic organization and records evidence under `.tool-cache/evidence`. It does not need Redis/Celery or external funding providers for this synchronous workflow. The existing foundation runner uses different ports and remains a separate regression check.
+
+## Phase 9 local helpdesk and post-training acceptance
+
+Run Alembic to head (`e0a6b2c8d345`), rerun the identity permission seed and restart API/web. Participants and eligible completed alumni open `/{locale}/helpdesk?organization=UUID`; Support Executives and organization managers use `/{locale}/admin/helpdesk?organization=UUID`. B02 remains at `/{locale}/businesses` and `/{locale}/admin/businesses`.
+
+After migration and a production web build, run `scripts/run-helpdesk-browser-test.py` with the project Python environment and `DATABASE_URL` selecting an isolated synthetic browser/test database. Set `PLAYWRIGHT_CHANNEL=chrome` for installed Chrome. The runner refuses occupied ports 8102/3102, starts hidden owned API/web servers and always stops them. It covers helpdesk plus post-training profiles/policies/outcomes and writes responsive evidence under `.tool-cache/evidence`. In-app ticket notices are committed with ticket events and need no Redis/provider; CRM/Meta scheduled jobs still require their existing worker/beat infrastructure. Never use real support documents in local acceptance.
+
+## Phase 10 local reporting and impact acceptance
+
+Apply Alembic head `f1b7c3d9e456`, rerun the identity role seed and restart API/web. Directors/managers open `/{locale}/admin/reports?organization=UUID`; eligible participants open `/{locale}/impact?organization=UUID`. No measurement policy is seeded: create and publish a synthetic bilingual definition before recording local evidence. B02 profiles are not required. Report dates use UTC regardless of the PostgreSQL session timezone.
+
+After a production web build and isolated database migration, run `scripts/run-reports-browser-test.py` with the project Python environment, a guarded synthetic browser database and `PLAYWRIGHT_CHANNEL=chrome` for installed Chrome. The runner owns hidden API/web servers on 8103/3103, refuses occupied ports, uses fresh synthetic actors/organizations and always stops its processes. Evidence is stored beneath `.tool-cache/evidence`. Bounded report generation/export needs PostgreSQL only; it does not dispatch provider/worker jobs. Core CRM/Meta schedules retain their existing Redis/worker requirements. Use the supplied API runner/structured logging and configure any staging proxy to omit capability URLs from access logs; do not enable raw download URL logging.

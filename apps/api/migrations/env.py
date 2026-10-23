@@ -9,12 +9,15 @@ from app.modules.business_plans import models as business_plan_models  # noqa: F
 from app.modules.businesses import models as business_models  # noqa: F401
 from app.modules.cms import models as cms_models  # noqa: F401
 from app.modules.crm import models as crm_models  # noqa: F401
+from app.modules.helpdesk import models as helpdesk_models  # noqa: F401
 from app.modules.identity import models as identity_models  # noqa: F401
+from app.modules.knowledge import models as knowledge_models  # noqa: F401
 from app.modules.lms import models as lms_models  # noqa: F401
 from app.modules.mentoring import models as mentoring_models  # noqa: F401
 from app.modules.meta import models as meta_models  # noqa: F401
 from app.modules.notifications import models as notification_models  # noqa: F401
 from app.modules.programs import models as program_models  # noqa: F401
+from app.modules.reports import models as report_models  # noqa: F401
 from app.modules.selection import models as selection_models  # noqa: F401
 
 target_metadata = Base.metadata
