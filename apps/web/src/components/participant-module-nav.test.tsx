@@ -8,7 +8,7 @@ afterEach(cleanup);
 describe("participant navigation", () => {
   it("provides learning and all supported participant destinations in the same organization and locale", () => {
     render(<ParticipantModuleNav locale="en" organization={organization} permissions={["participant.self", "lms.learn"]} active="learning" />);
-    for (const route of ["participant", "learning", "attendance", "mentoring", "business-plan", "businesses", "knowledge", "helpdesk", "impact"]) {
+    for (const route of ["updates", "participant", "learning", "attendance", "mentoring", "business-plan", "businesses", "knowledge", "helpdesk", "impact"]) {
       expect(screen.getAllByRole("link").some(link => link.getAttribute("href") === `/en/${route}?organization=${organization}`)).toBe(true);
     }
     expect(screen.getByRole("link", { name: "My learning" }).getAttribute("aria-current")).toBe("page");
@@ -30,6 +30,7 @@ describe("participant navigation", () => {
     expect(screen.getByRole("navigation", { name: "பங்கேற்பாளர் வழிசெலுத்தல்" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "உதவி மையம்" }).getAttribute("href")).toBe(`/ta/helpdesk?organization=${organization}`);
     expect(screen.getByRole("link", { name: "எனது தொழில் விளைவுகள்" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("link", { name: "எனது அறிவிப்புகள்" }).getAttribute("href")).toBe(`/ta/updates?organization=${organization}`);
     expect(screen.getByRole("navigation").textContent).not.toMatch(/\?{2,}|à®|Ã/);
   });
 });

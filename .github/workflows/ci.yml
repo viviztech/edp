@@ -163,3 +163,6 @@ jobs:
       - run: python scripts/run-crm-export-browser-test.py
         env:
           DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_crm_exports_e2e
+      - run: python scripts/run-communications-browser-test.py
+        env:
+          DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_communications_e2e

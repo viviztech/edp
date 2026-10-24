@@ -1,6 +1,6 @@
 # Essential communications implementation plan
 
-Prepared: 2026-10-24. Status: plan only, step 3 of the [six authorized local development steps](remaining-development-plan.md). Implementation starts after the background-job checkpoint and progress report. All work remains local; no real message, provider activation, collection policy, source publication or deployment is authorized.
+Prepared: 2026-10-24. Status: locally accepted, step 3 of the [six authorized local development steps](remaining-development-plan.md), after background-job checkpoint `679ebdc` and its owner progress report. The [checkpoint report](essential-communications-report.md) records final evidence and separate open runtime/release gates. All work remains local; no real message, provider activation, collection policy, source publication or deployment is authorized.
 
 ## Current behavior and outcome
 

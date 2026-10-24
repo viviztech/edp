@@ -1,6 +1,20 @@
 # Notifications contract and N01.1 implementation
 
+Current continuation: [essential communications](../architecture/essential-communications.md) adds configurable global identity email delivery and a separate enrollment participant inbox. The sections below preserve the existing CRM/helpdesk contracts. SMTP capability means server acceptance only, not recipient delivery. All senders remain disabled by default.
+
 Provider-neutral interface: enqueue event/recipient/template version; adapter delivery returns supported provider ID/status or classified retryable/permanent/ambiguous failure. No provider configured or messages sent in bootstrap.
+
+## Global identity email and participant enrollment updates
+
+Verification/password-reset intents are global, encrypted and committed with the challenge/audit before returning. `AUTH_DELIVERY_BACKEND=development` is explicitly a local/test no-delivery queue. `smtp` requires `AUTH_SMTP_ENABLED`, `AUTH_TEMPLATES_APPROVED`, an approved canonical origin/sender, credentials, verified implicit TLS or STARTTLS and explicit `AUTH_DELIVERY_RETENTION_DAYS`. Missing capability fails unavailable outside local/test. SMTP tasks carry only delivery IDs; the request path never contacts the sender.
+
+The versioned English/Tamil message uses a fixed `/{locale}/account/verify` or `/reset` URL and a separately entered code. Code/password never appear in URLs or browser persistence and are cleared after success. A sending marker precedes protocol I/O; uncertain acknowledgements and interrupted sending require operator reconciliation rather than automatic resend. A final accepted DATA acknowledgement is retained even if QUIT fails. The trusted `python -m app.modules.identity.delivery_cli health` command exposes safe aggregate capability/status, while inspect/recover require the exact target/version and an explicit audit reason. Real sender activation and content/retention approval remain operational gates.
+
+Enrollment conversion emits `enrollment.created`. `edp.participant_notifications.consume_outbox` validates its exact relational context, atomically creates a unique typed notice or records suppression, and settles the outbox. Unsupported/invalid/expired/exhausted events retain safe visible reasons. `PARTICIPANT_NOTIFICATION_RETENTION_DAYS` has no default; without it the consumer leaves work pending. The independent batch/attempt settings bound processing. API, worker and the single Beat share these values.
+
+Recipient routes are `/api/v1/participant-notifications/organizations/{org}/mine`, `/preference` and `/{notice_id}/read`; the English/Tamil web inbox is `/{locale}/updates?organization={org}`. Current active account, `participant.self`, owning active/completed enrollment and participant are checked. Notices contain identifiers/topic/template/action and lifecycle metadata, not application answers or contact data. The only action is the same-organization schedule, which reauthorizes. Preferences suppress future events without erasing authorized history or backfilling suppressed events. Mark-read/preference writes require current versions and audit. Operations health is separately organization/permission scoped and exposes aggregate counts, not participant inbox contents.
+
+The three new Beat entries recover identity deliveries, consume enrollment events and purge expired participant notices. Local protocol peers and direct task-function tests do not establish live SMTP or real Redis/worker/Beat operation. SMS/WhatsApp/FCM remain unavailable until separately implemented/configured against approved providers.
 
 ## Future provider contract
 

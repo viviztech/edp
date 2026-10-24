@@ -19,6 +19,9 @@ from app.modules.lms import models as lms_models  # noqa: F401
 from app.modules.mentoring import models as mentoring_models  # noqa: F401
 from app.modules.meta import models as meta_models  # noqa: F401
 from app.modules.notifications import models as notification_models  # noqa: F401
+from app.modules.notifications import (
+    participant_models as participant_notification_models,  # noqa: F401
+)
 from app.modules.programs import models as program_models  # noqa: F401
 from app.modules.reports import models as report_models  # noqa: F401
 from app.modules.selection import models as selection_models  # noqa: F401

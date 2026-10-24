@@ -9,6 +9,12 @@ Program applications are available before enrollment. Participant services becom
 Public information: use Pages on web or the mobile home screen to browse published information in the selected language. Missing translations are unavailable; drafts and archived content are never shown. No sign-in is needed.
 
 
+## Account codes and program updates
+
+An approved account email contains a code and a fixed Verify email or Reset password page. Open the page and enter the code explicitly; opening a link alone never changes an account. The code applies to its own account even if another account is currently signed in. Successful submission clears the code/password. Development uses an operator-retrieved synthetic message and sends no email.
+
+After enrollment, open My updates in your organization navigation. Your enrollment update links to the current program schedule. Mark as read preserves the update until expiry. Update preferences controls future in-app enrollment updates only; it does not change email/other channels or restore previously suppressed updates. If a save is uncertain, check its current state before explicitly retrying. Revoked program access hides the corresponding notices.
+
 ## Apply and track an application
 
 Choose **Apply** from the public website, or open applications from your account. Registration, verification and sign-in preserve a valid chosen organization/intake. An ordinary applicant does not need a staff role. Choose an open intake, start its application and save your draft. Complete the required fields, review the declarations/consents and submit explicitly when ready. Submission records an application number and freezes the submitted answers.

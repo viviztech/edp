@@ -108,6 +108,9 @@ def main() -> None:
                     User.email == args.email.casefold(),
                     VerificationToken.expires_at > now(),
                     VerificationToken.consumed_at.is_(None),
+                    AuthDelivery.transport == "development",
+                    AuthDelivery.status == "development",
+                    AuthDelivery.disposed_at.is_(None),
                 )
                 .order_by(AuthDelivery.created_at.desc())
                 .limit(1)

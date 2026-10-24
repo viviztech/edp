@@ -5,6 +5,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -123,7 +124,74 @@ class AuthDelivery(Record, Base):
         ForeignKey("verification_tokens.id", ondelete="RESTRICT"), unique=True
     )
     encrypted_payload: Mapped[str] = mapped_column(Text)
-    status: Mapped[str] = mapped_column(String(24), default="awaiting_provider")
+    status: Mapped[str] = mapped_column(String(24), default="development")
+    transport: Mapped[str] = mapped_column(String(16), default="development")
+    locale: Mapped[str] = mapped_column(String(2), default="en")
+    template_version: Mapped[str] = mapped_column(String(24), default="auth-v1")
+    message_id: Mapped[str] = mapped_column(
+        String(320), unique=True, default=lambda: f"<auth-{uuid4()}@development.invalid>"
+    )
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    lease_token_digest: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_code: Mapped[str] = mapped_column(String(40), default="")
+    provider_reference: Mapped[str] = mapped_column(String(40), default="")
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    disposed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    __table_args__ = (
+        CheckConstraint("transport IN ('development','smtp')", name="auth_delivery_transport"),
+        CheckConstraint("locale IN ('en','ta')", name="auth_delivery_locale"),
+        CheckConstraint("template_version = 'auth-v1'", name="auth_delivery_template"),
+        CheckConstraint(
+            "version > 0 AND attempt_count BETWEEN 0 AND 10", name="auth_delivery_version"
+        ),
+        CheckConstraint(
+            "(transport = 'development' AND status = 'development') OR "
+            "(transport = 'smtp' AND status IN ('queued','preparing','sending','retrying',"
+            "'accepted','failed','ambiguous','suppressed')) OR status = 'suppressed'",
+            name="auth_delivery_status",
+        ),
+        CheckConstraint(
+            "(status IN ('preparing','sending') AND lease_token_digest ~ '^[0-9a-f]{64}$' "
+            "AND lease_token_digest IS NOT NULL AND lease_until IS NOT NULL "
+            "AND next_attempt_at IS NULL AND completed_at IS NULL) OR "
+            "(status NOT IN ('preparing','sending') AND lease_token_digest IS NULL "
+            "AND lease_until IS NULL)",
+            name="auth_delivery_lease",
+        ),
+        CheckConstraint(
+            "(status IN ('queued','retrying') AND next_attempt_at IS NOT NULL "
+            "AND completed_at IS NULL) OR "
+            "(status IN ('accepted','failed','ambiguous','suppressed') "
+            "AND next_attempt_at IS NULL AND completed_at IS NOT NULL) OR "
+            "(status IN ('development','preparing','sending') AND next_attempt_at IS NULL "
+            "AND completed_at IS NULL)",
+            name="auth_delivery_schedule",
+        ),
+        CheckConstraint(
+            "(disposed_at IS NULL AND length(encrypted_payload) > 0) OR "
+            "(disposed_at IS NOT NULL AND encrypted_payload = '' "
+            "AND status IN ('accepted','failed','ambiguous','suppressed'))",
+            name="auth_delivery_disposal",
+        ),
+        CheckConstraint(
+            "provider_reference IN ('','smtp_250','operator_accepted') "
+            "AND (status <> 'accepted' OR provider_reference <> '')",
+            name="auth_delivery_provider_reference",
+        ),
+        CheckConstraint(
+            "error_code IN ('','challenge_expired','challenge_obsolete','account_ineligible',"
+            "'payload_invalid','configuration_unavailable','message_invalid','tls_unverified',"
+            "'provider_temporary','provider_rejected','connection_failed','acknowledgement_unknown',"
+            "'sending_interrupted','preparation_interrupted','retry_exhausted','operator_failed')",
+            name="auth_delivery_error",
+        ),
+        Index("ix_auth_delivery_due", "status", "next_attempt_at", "id"),
+        Index("ix_auth_delivery_lease", "status", "lease_until", "id"),
+        Index("ix_auth_delivery_retention", "created_at", "id"),
+    )
 
 
 class AuthThrottle(Base):

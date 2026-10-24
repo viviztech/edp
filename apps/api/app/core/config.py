@@ -1,3 +1,4 @@
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Self
@@ -16,6 +17,23 @@ class Settings(BaseSettings):
     redis_url: SecretStr
     bff_key: SecretStr | None = Field(default=None, min_length=32)
     auth_delivery_key: SecretStr | None = None
+    auth_delivery_backend: Literal["development", "smtp"] = "development"
+    auth_smtp_enabled: bool = False
+    auth_templates_approved: bool = False
+    auth_canonical_origin: str | None = Field(default=None, max_length=2048)
+    auth_smtp_host: str | None = Field(default=None, max_length=253)
+    auth_smtp_port: int = Field(default=465, ge=1, le=65535)
+    auth_smtp_tls_mode: Literal["implicit", "starttls"] | None = None
+    auth_smtp_username: SecretStr | None = Field(default=None, min_length=1, max_length=254)
+    auth_smtp_password: SecretStr | None = Field(default=None, min_length=1, max_length=4096)
+    auth_smtp_from_address: str | None = Field(default=None, max_length=254)
+    auth_delivery_retention_days: int | None = Field(default=None, ge=1, le=3650)
+    auth_delivery_max_attempts: int = Field(default=3, ge=1, le=10)
+    auth_delivery_batch_size: int = Field(default=25, ge=1, le=100)
+    auth_delivery_lease_seconds: int = Field(default=120, ge=60, le=900)
+    auth_smtp_stage_timeout_seconds: float = Field(default=3, ge=0.5, le=5)
+    auth_smtp_total_timeout_seconds: float = Field(default=15, ge=1, le=20)
+    auth_smtp_max_message_bytes: int = Field(default=32768, ge=4096, le=65536)
     asset_scanner_key: SecretStr | None = Field(default=None, min_length=16)
     lms_material_root: str | None = None
     lms_material_signing_key: SecretStr | None = Field(default=None, min_length=32)
@@ -25,6 +43,9 @@ class Settings(BaseSettings):
     meta_graph_base_url: Literal["https://graph.facebook.com"] = "https://graph.facebook.com"
     meta_event_retention_days: int | None = Field(default=None, ge=1, le=3650)
     notification_retention_days: int | None = Field(default=None, ge=1, le=3650)
+    participant_notification_retention_days: int | None = Field(default=None, ge=1, le=3650)
+    participant_notification_batch_size: int = Field(default=25, ge=1, le=100)
+    participant_notification_max_attempts: int = Field(default=3, ge=1, le=10)
     crm_export_lease_seconds: int = Field(default=120, ge=60, le=900)
     crm_export_max_attempts: int = Field(default=3, ge=1, le=10)
     crm_export_recovery_batch_size: int = Field(default=25, ge=1, le=100)
@@ -72,6 +93,14 @@ class Settings(BaseSettings):
     @field_validator(
         "bff_key",
         "auth_delivery_key",
+        "auth_canonical_origin",
+        "auth_smtp_host",
+        "auth_smtp_tls_mode",
+        "auth_smtp_username",
+        "auth_smtp_password",
+        "auth_smtp_from_address",
+        "auth_delivery_retention_days",
+        "participant_notification_retention_days",
         "asset_scanner_key",
         "lms_material_root",
         "lms_material_signing_key",
@@ -126,6 +155,45 @@ class Settings(BaseSettings):
         if any(value == "*" or not value.startswith(("http://", "https://")) for value in values):
             raise ValueError("Explicit HTTP origins required")
         return values
+
+    @field_validator("auth_smtp_host")
+    @classmethod
+    def smtp_hostname(cls, value: str | None) -> str | None:
+        if value is not None and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]*", value):
+            raise ValueError("A server-configured SMTP hostname is required")
+        return value
+
+    @field_validator("auth_smtp_from_address")
+    @classmethod
+    def smtp_sender(cls, value: str | None) -> str | None:
+        if value is not None and not re.fullmatch(
+            r"[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9][A-Za-z0-9.-]*", value
+        ):
+            raise ValueError("One plain SMTP sender mailbox is required")
+        return value
+
+    @model_validator(mode="after")
+    def auth_origin(self) -> Self:
+        if self.auth_canonical_origin is not None:
+            value = self.auth_canonical_origin
+            parsed = urlsplit(value)
+            _ = parsed.port
+            loopback = parsed.hostname in {"127.0.0.1", "localhost", "::1"}
+            if (
+                any(ord(char) <= 32 or ord(char) == 127 for char in value)
+                or not parsed.hostname
+                or parsed.username is not None
+                or parsed.password is not None
+                or parsed.path not in {"", "/"}
+                or parsed.query
+                or parsed.fragment
+                or not (
+                    parsed.scheme == "https"
+                    or (self.app_env in {"local", "test"} and loopback and parsed.scheme == "http")
+                )
+            ):
+                raise ValueError("A canonical HTTPS authentication origin is required")
+        return self
 
     @field_validator("files_s3_endpoint_url")
     @classmethod

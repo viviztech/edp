@@ -1,5 +1,7 @@
 # Privacy data inventory
 
+Essential communications adds encrypted global verification/reset delivery intents (challenge linkage, locale/template edition, stable message identity and bounded operational state) and typed participant enrollment notices/preferences (recipient, organization/enrollment/source identifiers, expiry and read version). Tokens/destinations/bodies are excluded from task payloads, logs, staff diagnostics and participant notice content. Identity delivery payload disposal requires explicit `AUTH_DELIVERY_RETENTION_DAYS`; participant notice disposal requires separate `PARTICIPANT_NOTIFICATION_RETENTION_DAYS`. Neither has a business-policy default. Source enrollment/outbox/audit records have separate retention decisions. SMTP and templates remain disabled until explicitly configured and approved; local fixtures never approve real collection or messages.
+
 Owner approvals pending. No real data in development. Default is minimize collection and disable unapproved ingestion; absence of a retention decision is a launch blocker, not permission for indefinite retention.
 
 | Data | Purpose / access | Storage / disposal decision |

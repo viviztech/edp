@@ -10341,6 +10341,278 @@
         }
       }
     },
+    "/api/v1/participant-notifications/organizations/{org}/mine": {
+      "get": {
+        "tags": [
+          "participant-notifications"
+        ],
+        "summary": "Mine",
+        "operationId": "mine_api_v1_participant_notifications_organizations__org__mine_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantNoticeList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/participant-notifications/organizations/{org}/preference": {
+      "get": {
+        "tags": [
+          "participant-notifications"
+        ],
+        "summary": "Preference",
+        "operationId": "preference_api_v1_participant_notifications_organizations__org__preference_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantPreferenceView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "participant-notifications"
+        ],
+        "summary": "Update Preference",
+        "operationId": "update_preference_api_v1_participant_notifications_organizations__org__preference_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParticipantPreferenceEdit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantPreferenceView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/participant-notifications/organizations/{org}/{notice_id}/read": {
+      "post": {
+        "tags": [
+          "participant-notifications"
+        ],
+        "summary": "Mark Read",
+        "operationId": "mark_read_api_v1_participant_notifications_organizations__org___notice_id__read_post",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          },
+          {
+            "name": "notice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Notice Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParticipantMarkRead"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantNoticeView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/participant-notifications/organizations/{org}/operations/health": {
+      "get": {
+        "tags": [
+          "participant-notifications"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_v1_participant_notifications_organizations__org__operations_health_get",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantOutboxHealth"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/programs/organizations/{org}/catalog": {
       "get": {
         "tags": [
@@ -32115,6 +32387,227 @@
           "record"
         ],
         "title": "ParticipantAttendanceView"
+      },
+      "ParticipantMarkRead": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version"
+        ],
+        "title": "ParticipantMarkRead"
+      },
+      "ParticipantNoticeList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ParticipantNoticeView"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "ParticipantNoticeList"
+      },
+      "ParticipantNoticeView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "enrollment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Enrollment Id"
+          },
+          "topic": {
+            "type": "string",
+            "const": "enrollment_created",
+            "title": "Topic",
+            "default": "enrollment_created"
+          },
+          "template_version": {
+            "type": "string",
+            "const": "enrollment-created-v1",
+            "title": "Template Version",
+            "default": "enrollment-created-v1"
+          },
+          "action_kind": {
+            "type": "string",
+            "const": "schedule",
+            "title": "Action Kind",
+            "default": "schedule"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "read_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Read At"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "enrollment_id",
+          "created_at",
+          "expires_at",
+          "read_at",
+          "version"
+        ],
+        "title": "ParticipantNoticeView"
+      },
+      "ParticipantOutboxHealth": {
+        "properties": {
+          "pending_due": {
+            "type": "integer",
+            "title": "Pending Due"
+          },
+          "oldest_due_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldest Due Seconds"
+          },
+          "retrying": {
+            "type": "integer",
+            "title": "Retrying"
+          },
+          "dispatched": {
+            "type": "integer",
+            "title": "Dispatched"
+          },
+          "suppressed": {
+            "type": "integer",
+            "title": "Suppressed"
+          },
+          "unsupported": {
+            "type": "integer",
+            "title": "Unsupported"
+          },
+          "invalid": {
+            "type": "integer",
+            "title": "Invalid"
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed"
+          },
+          "expired": {
+            "type": "integer",
+            "title": "Expired"
+          },
+          "retention_configured": {
+            "type": "boolean",
+            "title": "Retention Configured"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pending_due",
+          "oldest_due_seconds",
+          "retrying",
+          "dispatched",
+          "suppressed",
+          "unsupported",
+          "invalid",
+          "failed",
+          "expired",
+          "retention_configured"
+        ],
+        "title": "ParticipantOutboxHealth"
+      },
+      "ParticipantPreferenceEdit": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "enabled",
+          "expected_version"
+        ],
+        "title": "ParticipantPreferenceEdit"
+      },
+      "ParticipantPreferenceView": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "const": "enrollment_created",
+            "title": "Topic",
+            "default": "enrollment_created"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled",
+          "version"
+        ],
+        "title": "ParticipantPreferenceView"
       },
       "ParticipantStateCommand": {
         "properties": {

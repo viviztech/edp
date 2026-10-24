@@ -2711,6 +2711,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/participant-notifications/organizations/{org}/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mine */
+        get: operations["mine_api_v1_participant_notifications_organizations__org__mine_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/participant-notifications/organizations/{org}/preference": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preference */
+        get: operations["preference_api_v1_participant_notifications_organizations__org__preference_get"];
+        put?: never;
+        /** Update Preference */
+        post: operations["update_preference_api_v1_participant_notifications_organizations__org__preference_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/participant-notifications/organizations/{org}/{notice_id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Read */
+        post: operations["mark_read_api_v1_participant_notifications_organizations__org___notice_id__read_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/participant-notifications/organizations/{org}/operations/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Health */
+        get: operations["health_api_v1_participant_notifications_organizations__org__operations_health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/programs/organizations/{org}/catalog": {
         parameters: {
             query?: never;
@@ -9942,6 +10011,106 @@ export interface components {
             /** Display Name */
             display_name: string;
             record: components["schemas"]["RecordView"] | null;
+        };
+        /** ParticipantMarkRead */
+        ParticipantMarkRead: {
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** ParticipantNoticeList */
+        ParticipantNoticeList: {
+            /** Items */
+            items: components["schemas"]["ParticipantNoticeView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** ParticipantNoticeView */
+        ParticipantNoticeView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /**
+             * Topic
+             * @default enrollment_created
+             * @constant
+             */
+            topic: "enrollment_created";
+            /**
+             * Template Version
+             * @default enrollment-created-v1
+             * @constant
+             */
+            template_version: "enrollment-created-v1";
+            /**
+             * Action Kind
+             * @default schedule
+             * @constant
+             */
+            action_kind: "schedule";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Read At */
+            read_at: string | null;
+            /** Version */
+            version: number;
+        };
+        /** ParticipantOutboxHealth */
+        ParticipantOutboxHealth: {
+            /** Pending Due */
+            pending_due: number;
+            /** Oldest Due Seconds */
+            oldest_due_seconds: number | null;
+            /** Retrying */
+            retrying: number;
+            /** Dispatched */
+            dispatched: number;
+            /** Suppressed */
+            suppressed: number;
+            /** Unsupported */
+            unsupported: number;
+            /** Invalid */
+            invalid: number;
+            /** Failed */
+            failed: number;
+            /** Expired */
+            expired: number;
+            /** Retention Configured */
+            retention_configured: boolean;
+        };
+        /** ParticipantPreferenceEdit */
+        ParticipantPreferenceEdit: {
+            /** Enabled */
+            enabled: boolean;
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** ParticipantPreferenceView */
+        ParticipantPreferenceView: {
+            /**
+             * Topic
+             * @default enrollment_created
+             * @constant
+             */
+            topic: "enrollment_created";
+            /** Enabled */
+            enabled: boolean;
+            /** Version */
+            version: number;
         };
         /** ParticipantStateCommand */
         ParticipantStateCommand: {
@@ -18742,6 +18911,173 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mine_api_v1_participant_notifications_organizations__org__mine_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParticipantNoticeList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preference_api_v1_participant_notifications_organizations__org__preference_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParticipantPreferenceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_preference_api_v1_participant_notifications_organizations__org__preference_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParticipantPreferenceEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParticipantPreferenceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_read_api_v1_participant_notifications_organizations__org___notice_id__read_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                notice_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParticipantMarkRead"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParticipantNoticeView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    health_api_v1_participant_notifications_organizations__org__operations_health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParticipantOutboxHealth"];
+                };
             };
             /** @description Validation Error */
             422: {

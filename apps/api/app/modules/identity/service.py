@@ -1,7 +1,7 @@
 import json
 import secrets
 from datetime import timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from cryptography.fernet import Fernet
 from sqlalchemy import select, update
@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.modules.identity.auth_mail import EDITION, message_identity, smtp_configured
 from app.modules.identity.models import (
     AuditLog,
     AuthDelivery,
@@ -190,7 +191,11 @@ def throttle(db: Session, operation: str, identifier: str, limit: int) -> None:
 
 def delivery_available() -> Fernet:
     settings = get_settings()
-    if settings.app_env not in {"local", "test"} or not settings.auth_delivery_key:
+    development = settings.auth_delivery_backend == "development" and settings.app_env in {
+        "local",
+        "test",
+    }
+    if not settings.auth_delivery_key or not (development or smtp_configured(settings)):
         raise AuthError("delivery_unavailable", 503)
     return Fernet(settings.auth_delivery_key.get_secret_value().encode())
 
@@ -218,7 +223,23 @@ def issue_challenge(db: Session, user: User, purpose: str, request_id: str) -> N
     encrypted = cipher.encrypt(
         json.dumps({"email": user.email, "purpose": purpose, "token": raw}).encode()
     ).decode()
-    db.add(AuthDelivery(token_id=challenge.id, encrypted_payload=encrypted))
+    settings = get_settings()
+    person = db.get(Person, user.person_id)
+    identity = uuid4()
+    development = settings.auth_delivery_backend == "development"
+    db.add(
+        AuthDelivery(
+            id=identity,
+            token_id=challenge.id,
+            encrypted_payload=encrypted,
+            transport=settings.auth_delivery_backend,
+            status="development" if development else "queued",
+            locale=person.locale if person else "en",
+            template_version=EDITION,
+            message_id=message_identity(str(identity), settings),
+            next_attempt_at=None if development else now(),
+        )
+    )
     audit(db, f"auth.{purpose}_requested", request_id, user.id, challenge.id)
 
 

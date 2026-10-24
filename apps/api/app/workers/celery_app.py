@@ -25,8 +25,22 @@ celery_app.conf.update(
         "app.workers.meta_leads",
         "app.workers.notifications",
         "app.workers.files",
+        "app.workers.auth_deliveries",
+        "app.workers.participant_notifications",
     ),
     beat_schedule={
+        "recover-identity-deliveries": {
+            "task": "edp.auth.recover_deliveries",
+            "schedule": 60.0,
+        },
+        "consume-participant-enrollment-events": {
+            "task": "edp.participant_notifications.consume_outbox",
+            "schedule": 60.0,
+        },
+        "purge-participant-notifications": {
+            "task": "edp.participant_notifications.purge_expired",
+            "schedule": 60.0,
+        },
         "recover-crm-exports": {
             "task": "edp.crm.recover_exports",
             "schedule": 60.0,

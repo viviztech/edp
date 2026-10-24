@@ -175,3 +175,7 @@ Applicant entry/context and owner-only closed-intake history, permission-aware p
 ## Background-job recovery checkpoint - 2026-10-24
 
 Step 2 is locally accepted; see [report](background-job-recovery-report.md). CRM durable exports, fenced recovery/current authorization, owner history and Meta exhausted-lease settlement pass recorded backend/migration/web checks and fresh connected English/Tamil Chrome acceptance. Real Redis/worker/one-Beat runtime remains open. Essential communications is next; source publication and deployment remain unauthorized.
+
+## Essential communications checkpoint - 2026-10-24
+
+Step 3 is locally accepted; see [report](essential-communications-report.md). Global configured SMTP challenge delivery and participant enrollment inbox pass 368 API tests (one POSIX skip), 464 web tests, controlled SMTP peers, final 130-table migration roundtrip/drift and both connected communications/foundation browser journeys. Fresh runtime/development/npm audits report zero findings. Real provider/worker/device/CI/staging/UAT gates remain open. Step 4 Flutter domain journeys is next.

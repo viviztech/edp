@@ -348,11 +348,49 @@ class DomainOutbox(Record, Base):
     payload: Mapped[str] = mapped_column(String(1000))
     dispatched: Mapped[bool] = mapped_column(Boolean, default=False)
     dispatched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    state: Mapped[str] = mapped_column(String(16), default="pending")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    next_attempt_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=now, nullable=True
+    )
+    settled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_code: Mapped[str] = mapped_column(String(40), default="")
     __table_args__ = (
+        UniqueConstraint("id", "organization_id", name="uq_domain_outbox_scope"),
         CheckConstraint(
             "(dispatched = false AND dispatched_at IS NULL) OR "
             "(dispatched = true AND dispatched_at IS NOT NULL)",
             name="domain_outbox_dispatch_state",
         ),
+        CheckConstraint(
+            "state IN ('pending','retrying','dispatched','suppressed',"
+            "'unsupported','invalid','failed','expired')",
+            name="domain_outbox_state",
+        ),
+        CheckConstraint(
+            "version > 0 AND attempt_count BETWEEN 0 AND 10", name="domain_outbox_attempts"
+        ),
+        CheckConstraint(
+            "(state IN ('pending','retrying') AND next_attempt_at IS NOT NULL "
+            "AND settled_at IS NULL AND NOT dispatched) OR "
+            "(state = 'dispatched' AND next_attempt_at IS NULL AND settled_at IS NOT NULL "
+            "AND dispatched AND dispatched_at = settled_at) OR "
+            "(state IN ('suppressed','unsupported','invalid','failed','expired') "
+            "AND next_attempt_at IS NULL AND settled_at IS NOT NULL AND NOT dispatched)",
+            name="domain_outbox_settlement",
+        ),
+        CheckConstraint(
+            "(state IN ('pending','dispatched') AND error_code = '') OR "
+            "(state = 'retrying' AND error_code = 'dispatch_error') OR "
+            "(state = 'suppressed' AND error_code IN "
+            "('recipient_unavailable','preference_disabled')) OR "
+            "(state = 'unsupported' AND error_code = 'unsupported_event') OR "
+            "(state = 'invalid' AND error_code = 'invalid_payload') OR "
+            "(state = 'failed' AND error_code = 'retry_exhausted') OR "
+            "(state = 'expired' AND error_code = 'event_expired')",
+            name="domain_outbox_error",
+        ),
         Index("ix_domain_outbox_pending", "dispatched", "created_at", "id"),
+        Index("ix_domain_outbox_due", "state", "next_attempt_at", "id"),
     )
