@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { validMutation } from "../../../../lib/bff-security";
-import { crmPath } from "../../../../lib/crm-security";
+import { crmExportQuery, crmPath } from "../../../../lib/crm-security";
 import { cookieName, csrfName, settings } from "../../../../lib/server-api";
 
 const fail = (code: string, status: number) => NextResponse.json({ error: { code } }, { status, headers: { "Cache-Control": "no-store" } });
@@ -10,7 +10,8 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
   try {
     const config = settings();
     const jar = await cookies();
-    const path = crmPath((await context.params).path, request.method);
+    const segments = (await context.params).path;
+    const path = crmPath(segments, request.method);
     if (!path) return fail("not_found", 404);
     let body: string | undefined;
     if (request.method !== "GET") {
@@ -29,20 +30,26 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
       body = Buffer.concat(chunks).toString("utf8");
       try { JSON.parse(body); } catch { return fail("invalid_request", 400); }
     }
-    const query = new URLSearchParams();
-    const cursor = request.nextUrl.searchParams.get("cursor");
-    if (cursor) {
-      if (!/^[0-9a-f-]{36}$/i.test(cursor)) return fail("invalid_request", 400);
-      query.set("cursor", cursor);
+    let query = new URLSearchParams();
+    if (segments[2] === "exports") {
+      const exportQuery = crmExportQuery(request.nextUrl.searchParams, request.method === "GET" && segments.length === 3);
+      if (exportQuery === null) return fail("invalid_request", 400);
+      query = exportQuery;
+    } else {
+      const cursor = request.nextUrl.searchParams.get("cursor");
+      if (cursor) {
+        if (!/^[0-9a-f-]{36}$/i.test(cursor)) return fail("invalid_request", 400);
+        query.set("cursor", cursor);
+      }
+      const overdue = request.nextUrl.searchParams.get("overdue");
+      if (overdue !== null) {
+        if (overdue !== "true" && overdue !== "false") return fail("invalid_request", 400);
+        query.set("overdue", overdue);
+      }
+      query.set("limit", "25");
     }
-    const overdue = request.nextUrl.searchParams.get("overdue");
-    if (overdue !== null) {
-      if (overdue !== "true" && overdue !== "false") return fail("invalid_request", 400);
-      query.set("overdue", overdue);
-    }
-    query.set("limit", "25");
     const response = await fetch(config.api + "/api/v1" + path + (request.method === "GET" && query.size ? `?${query}` : ""), {
-      method: request.method, body, cache: "no-store", signal: AbortSignal.timeout(15000),
+      method: request.method, body, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15000),
       headers: { "Content-Type": "application/json", "X-BFF-Key": config.key, "X-Browser-Session": jar.get(cookieName)?.value ?? "", "X-CSRF-Token": request.headers.get("x-csrf-token") ?? "" },
     });
     const common = { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" };

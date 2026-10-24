@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import type { components } from "../../../../lib/api-contracts";
 import { crmMessages, type CrmLocale } from "../../../../lib/crm-messages";
+import CrmExports from "./exports";
 
 type Lead = components["schemas"]["LeadView"];
 type Activity = components["schemas"]["ActivityView"];
 type Review = components["schemas"]["DuplicateReviewView"];
-type ExportJob = components["schemas"]["ExportJobView"];
 type RegistrationLink = components["schemas"]["LeadConversionView"];
 type Tag = components["schemas"]["TagView"];
 type LeadStatus = Lead["status"];
@@ -28,7 +28,6 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
   const [overdueOnly, setOverdueOnly] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [tagChoice, setTagChoice] = useState("");
-  const [exportJob, setExportJob] = useState<ExportJob | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [creating, setCreating] = useState(false);
@@ -165,7 +164,7 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
         </div>
       </>}
 
-      {allowed("crm.lead.export") ? <section className="crm-export"><div><p className="eyebrow">{text.exports}</p>{exportJob ? <p>{exportJob.status} ? {exportJob.row_count}</p> : null}</div><div className="actions"><button disabled={busy} onClick={() => run(async () => setExportJob(await api<ExportJob>(`${root}/exports`, "POST", {})))}>{text.requestExport}</button>{exportJob ? <button disabled={busy} onClick={() => run(async () => setExportJob(await api<ExportJob>(`${root}/exports/${exportJob.id}`)))}>{text.checkExport}</button> : null}{exportJob?.status === "completed" ? <a className="crm-download" href={`${root}/exports/${exportJob.id}/download`}>{text.download}</a> : null}</div></section> : null}
+      {allowed("crm.lead.export") ? <CrmExports key={org} org={org} locale={locale} blocked={busy} /> : null}
     </section>
   </div>;
 }

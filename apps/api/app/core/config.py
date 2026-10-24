@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     meta_graph_base_url: Literal["https://graph.facebook.com"] = "https://graph.facebook.com"
     meta_event_retention_days: int | None = Field(default=None, ge=1, le=3650)
     notification_retention_days: int | None = Field(default=None, ge=1, le=3650)
+    crm_export_lease_seconds: int = Field(default=120, ge=60, le=900)
+    crm_export_max_attempts: int = Field(default=3, ge=1, le=10)
+    crm_export_recovery_batch_size: int = Field(default=25, ge=1, le=100)
+    crm_export_max_bytes: int = Field(default=10485760, ge=1024, le=20971520)
+    crm_export_retention_days: int | None = Field(default=None, ge=1, le=3650)
     contact_privacy_version: str = Field(default="v1", min_length=1, max_length=40)
     contact_enquiries_enabled: bool = False
     contact_privacy_notice_url_en: str = Field(default="", max_length=2048)
@@ -74,6 +79,7 @@ class Settings(BaseSettings):
         "meta_graph_api_version",
         "meta_event_retention_days",
         "notification_retention_days",
+        "crm_export_retention_days",
         "files_storage_backend",
         "files_local_root",
         "files_temp_root",

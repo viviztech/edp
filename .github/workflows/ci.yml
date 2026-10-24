@@ -39,6 +39,8 @@ jobs:
       - run: pytest -q
       - run: python ../../scripts/export-openapi.py && git diff --exit-code -- ../../packages/api-contracts/openapi.json
       - run: pip-audit -r requirements.lock
+      - name: Audit complete pinned development dependencies
+        run: pip-audit -r requirements-dev.lock --no-deps --disable-pip
   web:
     runs-on: ubuntu-latest
     defaults:
@@ -158,3 +160,6 @@ jobs:
       - run: python scripts/run-helpdesk-files-browser-test.py
         env:
           DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_helpdesk_files_e2e
+      - run: python scripts/run-crm-export-browser-test.py
+        env:
+          DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_crm_exports_e2e

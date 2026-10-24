@@ -7,6 +7,7 @@ from datetime import timedelta
 from unittest.mock import MagicMock
 from uuid import UUID
 
+import httpx
 import pytest
 from cryptography.fernet import Fernet
 from sqlalchemy import func, select
@@ -164,6 +165,295 @@ def test_recovery_requeues_expired_processing_lease(meta_db, monkeypatch) -> Non
         assert event is not None and event.state == "queued"
         assert event.attempt_count == 1
         assert event.version > 1
+
+
+@pytest.mark.parametrize("attempts", [meta_leads.MAX_ATTEMPTS, meta_leads.MAX_ATTEMPTS + 1])
+def test_recovery_settles_exhausted_leases_once_without_dispatching(
+    meta_db, monkeypatch, attempts
+) -> None:
+    engine, org_id, integration_id, mapping_id = meta_db
+    current = now()
+    monkeypatch.setattr(meta_leads, "now", lambda: current)
+    monkeypatch.setattr(meta_leads.httpx, "Client", lambda **kwargs: pytest.fail("provider called"))
+
+    def event(name, attempt_count, lease, retention):
+        return MetaWebhookEvent(
+            organization_id=org_id,
+            integration_id=integration_id,
+            mapping_id=mapping_id,
+            provider_event_id=name,
+            meta_lead_id=name,
+            page_id="page-1",
+            form_id="form-1",
+            state="processing",
+            attempt_count=attempt_count,
+            version=7,
+            next_attempt_at=lease,
+            metadata_json={},
+            retention_expires_at=retention,
+        )
+
+    expired = current - timedelta(seconds=1)
+    retained = current + timedelta(days=1)
+    with Session(engine) as db:
+        exhausted = event("exhausted", attempts, expired, retained)
+        active = event("active", attempts, current + timedelta(seconds=30), retained)
+        retention_expired = event("retention-expired", attempts, expired, expired)
+        earlier = event("earlier", meta_leads.MAX_ATTEMPTS - 1, expired, retained)
+        db.add_all([exhausted, active, retention_expired, earlier])
+        db.commit()
+        exhausted_id, active_id = exhausted.id, active.id
+        retention_expired_id, earlier_id = retention_expired.id, earlier.id
+
+    sent: list[UUID] = []
+    monkeypatch.setattr(meta_leads, "dispatch_event", lambda db, event_id: sent.append(event_id))
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _: meta_leads.recover_events.run(), range(2)))
+    assert sorted(result["dispatched"] for result in results) == [0, 1]
+    assert sent == [earlier_id]
+    assert meta_leads.recover_events.run() == {"dispatched": 0}
+    assert meta_leads.process_event.run(str(exhausted_id)) == {"status": "ignored"}
+    meta_leads.mark_failed(exhausted_id, attempts, 7, "provider_unavailable", True)
+
+    with Session(engine) as db:
+        exhausted = db.get(MetaWebhookEvent, exhausted_id)
+        assert exhausted is not None
+        assert exhausted.state == "failed" and exhausted.error_code == "retry_exhausted"
+        assert exhausted.processed_at == current and exhausted.next_attempt_at is None
+        assert exhausted.attempt_count == attempts and exhausted.version == 8
+        assert exhausted.lead_id is None
+        assert service.event_view(exhausted).state == "failed"
+        audits = list(
+            db.scalars(
+                select(AuditLog).where(
+                    AuditLog.action == "meta.event.failed",
+                    AuditLog.resource_id == exhausted_id,
+                )
+            )
+        )
+        assert len(audits) == 1
+        assert audits[0].organization_id == org_id and audits[0].resource_version == 8
+        assert audits[0].actor_id is None
+        assert audits[0].changed_fields == "state,error_code,processed_at,next_attempt_at"
+        for untouched_id in (active_id, retention_expired_id):
+            untouched = db.get(MetaWebhookEvent, untouched_id)
+            assert untouched is not None and untouched.state == "processing"
+            assert untouched.version == 7 and untouched.processed_at is None
+        earlier = db.get(MetaWebhookEvent, earlier_id)
+        assert earlier is not None and earlier.state == "queued"
+        assert earlier.attempt_count == meta_leads.MAX_ATTEMPTS - 1 and earlier.version == 8
+        assert db.scalar(select(func.count()).select_from(Lead)) == 0
+
+
+@pytest.mark.parametrize("outcome", ["success", "failure"])
+@pytest.mark.parametrize("replay", [False, True])
+def test_late_final_attempt_cannot_overwrite_settlement_or_replay(
+    meta_db, monkeypatch, outcome, replay
+) -> None:
+    engine, org_id, integration_id, _ = meta_db
+    clock = [now()]
+    monkeypatch.setattr(meta_leads, "now", lambda: clock[0])
+    body, signature = signed_payload()
+    with Session(engine) as db:
+        person = Person(display_name="Synthetic replay operator")
+        db.add(person)
+        db.flush()
+        actor = User(
+            person_id=person.id,
+            email="replay-operator@example.test",
+            password_hash="synthetic-only",
+            status="active",
+        )
+        role = db.scalar(select(Role).where(Role.name == "Marketing Executive"))
+        assert role is not None
+        db.add(actor)
+        db.flush()
+        db.add(UserRole(user_id=actor.id, role_id=role.id, organization_id=org_id))
+        db.commit()
+        actor_id = actor.id
+        service.ingest(db, integration_id, body, json.loads(body), signature, "test-request")
+        event = db.scalar(select(MetaWebhookEvent))
+        assert event is not None
+        event.attempt_count = meta_leads.MAX_ATTEMPTS - 1
+        db.commit()
+        event_id = event.id
+
+    calls = []
+    expected = {}
+    sent = []
+    monkeypatch.setattr(meta_leads, "dispatch_event", lambda db, event_id: sent.append(event_id))
+
+    class ProviderClient:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def get(self, *args, **kwargs):
+            calls.append(event_id)
+            clock[0] += timedelta(seconds=meta_leads.LEASE_SECONDS + 1)
+            assert meta_leads.recover_events.run() == {"dispatched": 0}
+            with Session(engine) as db:
+                event = db.get(MetaWebhookEvent, event_id)
+                assert event is not None and event.state == "failed"
+                assert event.error_code == "retry_exhausted"
+                if replay:
+                    actor = db.get(User, actor_id)
+                    assert actor is not None
+                    service.replay_event(
+                        db,
+                        org_id,
+                        event_id,
+                        actor,
+                        EventReplay(
+                            expected_version=event.version, reason="Synthetic authorized recovery"
+                        ),
+                        "test-replay",
+                    )
+                    db.refresh(event)
+                    # A later replay cycle can reuse the old attempt number. Model its
+                    # current processing claim while the original provider call is late.
+                    event.state = "processing"
+                    event.attempt_count = meta_leads.MAX_ATTEMPTS
+                    event.version += meta_leads.MAX_ATTEMPTS * 2 - 1
+                    event.next_attempt_at = clock[0] + timedelta(seconds=meta_leads.LEASE_SECONDS)
+                    db.commit()
+                expected.update(
+                    state=event.state,
+                    version=event.version,
+                    processed_at=event.processed_at,
+                    next_attempt_at=event.next_attempt_at,
+                    error_code=event.error_code,
+                )
+            if outcome == "failure":
+                raise httpx.ConnectError("Synthetic provider outage")
+            response = MagicMock()
+            response.json.return_value = {
+                "field_data": [{"name": "full_name", "values": ["Synthetic late lead"]}]
+            }
+            return response
+
+    monkeypatch.setattr(meta_leads.httpx, "Client", lambda **kwargs: ProviderClient())
+    result = meta_leads.process_event.run(str(event_id))
+    assert result["status"] == ("ignored" if outcome == "success" else "failed")
+    assert calls == [event_id] and sent == []
+    assert meta_leads.process_event.run(str(event_id)) == {"status": "ignored"}
+    with Session(engine) as db:
+        event = db.get(MetaWebhookEvent, event_id)
+        assert event is not None and event.lead_id is None
+        assert all(getattr(event, key) == value for key, value in expected.items())
+        assert db.scalar(select(func.count()).select_from(Lead)) == 0
+        assert (
+            db.scalar(
+                select(func.count())
+                .select_from(AuditLog)
+                .where(AuditLog.resource_id == event_id, AuditLog.action == "meta.event.failed")
+            )
+            == 1
+        )
+        assert db.scalar(
+            select(func.count())
+            .select_from(AuditLog)
+            .where(AuditLog.resource_id == event_id, AuditLog.action == "meta.event.replayed")
+        ) == int(replay)
+
+
+@pytest.mark.parametrize("outcome", ["completed", "failed"])
+def test_lost_publish_acknowledgement_cannot_resurrect_a_terminal_final_attempt(
+    meta_db, monkeypatch, outcome
+) -> None:
+    engine, org_id, integration_id, _ = meta_db
+    body, signature = signed_payload()
+    expected = {}
+    provider_calls = []
+
+    class ProviderClient:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def get(self, *args, **kwargs):
+            provider_calls.append(True)
+            if outcome == "failed":
+                raise httpx.ConnectError("Synthetic provider unavailable")
+            response = MagicMock()
+            response.json.return_value = {
+                "field_data": [{"name": "full_name", "values": ["Synthetic delivered lead"]}]
+            }
+            return response
+
+    monkeypatch.setattr(meta_leads.httpx, "Client", lambda **kwargs: ProviderClient())
+    with Session(engine, expire_on_commit=False) as publishing:
+        service.ingest(
+            publishing, integration_id, body, json.loads(body), signature, "test-request"
+        )
+        cached = publishing.scalar(select(MetaWebhookEvent))
+        assert cached is not None
+        cached.attempt_count = meta_leads.MAX_ATTEMPTS - 1
+        publishing.commit()
+        event_id = cached.id
+
+        def publish_then_lose_acknowledgement(*args, **kwargs):
+            assert meta_leads.process_event.run(str(event_id))["status"] == outcome
+            with Session(engine) as current:
+                event = current.get(MetaWebhookEvent, event_id)
+                assert event is not None and event.state == outcome
+                expected.update(
+                    version=event.version,
+                    processed_at=event.processed_at,
+                    lead_id=event.lead_id,
+                    error_code=event.error_code,
+                )
+            # The caller still holds the original queued object after the worker
+            # has committed a terminal fifth attempt in a separate transaction.
+            assert cached.state == "queued" and cached.version == 1
+            raise RuntimeError("Synthetic lost broker acknowledgement")
+
+        monkeypatch.setattr(service.celery_app, "send_task", publish_then_lose_acknowledgement)
+        service.dispatch_event(publishing, event_id)
+        publishing.refresh(cached)
+        assert cached.state == outcome and cached.attempt_count == meta_leads.MAX_ATTEMPTS
+        assert cached.next_attempt_at is None
+        assert all(getattr(cached, key) == value for key, value in expected.items())
+        publishing.rollback()
+
+    assert provider_calls == [True]
+    assert meta_leads.process_event.run(str(event_id)) == {"status": "ignored"}
+    assert meta_leads.recover_events.run() == {"dispatched": 0}
+    with Session(engine) as db:
+        audits = list(
+            db.scalars(
+                select(AuditLog).where(
+                    AuditLog.resource_id == event_id,
+                    AuditLog.action == "meta.event." + outcome,
+                )
+            )
+        )
+        assert len(audits) == 1 and audits[0].organization_id == org_id
+        assert audits[0].resource_version == expected["version"] == 3
+        assert db.scalar(select(func.count()).select_from(Lead)) == int(outcome == "completed")
+
+
+def test_dispatch_failure_preserves_recovery_for_current_queued_work(meta_db, monkeypatch) -> None:
+    engine, _, integration_id, _ = meta_db
+    body, signature = signed_payload()
+    with Session(engine, expire_on_commit=False) as db:
+        service.ingest(db, integration_id, body, json.loads(body), signature, "test-request")
+        event = db.scalar(select(MetaWebhookEvent))
+        assert event is not None
+
+        def unavailable(*args, **kwargs):
+            raise RuntimeError("Synthetic broker unavailable")
+
+        monkeypatch.setattr(service.celery_app, "send_task", unavailable)
+        service.dispatch_event(db, event.id)
+        db.refresh(event)
+        assert event.state == "retrying" and event.error_code == "queue_unavailable"
+        assert event.next_attempt_at > now() and event.processed_at is None
+        assert event.version == 2 and event.attempt_count == 0 and event.lead_id is None
 
 
 def test_versioned_configuration_and_scoped_replay(meta_db) -> None:

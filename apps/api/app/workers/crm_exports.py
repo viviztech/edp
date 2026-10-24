@@ -1,109 +1,101 @@
-import csv
-import io
+"""Bounded export dispatch; database claims survive broker and worker loss."""
+
+import time
 from uuid import UUID
 
-from sqlalchemy import create_engine, select
+import structlog
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.modules.crm.models import ExportJob, Lead
-from app.modules.identity.models import AuditLog, now
+from app.modules.crm import export_service as service
+from app.modules.crm.export_service import _safe  # noqa: F401 - compatibility for CSV callers
 from app.workers.celery_app import celery_app
 
-MAX_EXPORT_ROWS = 10000
+MAX_EXPORT_ROWS = service.MAX_EXPORT_ROWS
 engine = create_engine(get_settings().database_url.get_secret_value(), pool_pre_ping=True)
-
-
-def _safe(value: object) -> str:
-    text = "" if value is None else str(value)
-    return "'" + text if text.startswith(("=", "+", "-", "@")) else text
+log = structlog.get_logger()
 
 
 @celery_app.task(name="edp.crm.export_leads")  # type: ignore[untyped-decorator]
 def export_leads(job_id: str) -> dict[str, object]:
+    try:
+        identifier = UUID(job_id)
+    except (ValueError, TypeError, AttributeError):
+        return {"status": "ignored"}
+    policy = get_settings()
     with Session(engine) as db:
-        job = db.scalar(select(ExportJob).where(ExportJob.id == UUID(job_id)).with_for_update())
-        if not job or job.status != "queued":
-            return {"status": "ignored"}
-        job.status = "running"
-        db.commit()
+        lease = service.claim_export(db, identifier, policy)
+    if lease is None:
+        return {"status": "ignored"}
+    try:
+        with Session(engine) as db:
+            output = service.generate_csv(db, lease.organization_id, policy.crm_export_max_bytes)
+        with Session(engine) as db:
+            accepted = service.complete_export(db, lease, output)
+        return {"status": "completed" if accepted else "suppressed"}
+    except Exception as error:
+        code = error.code if isinstance(error, service.ExportLimitError) else "generation_failed"
         try:
-            leads = list(
-                db.scalars(
-                    select(Lead)
-                    .where(Lead.organization_id == job.organization_id)
-                    .order_by(Lead.id)
-                    .limit(MAX_EXPORT_ROWS)
+            with Session(engine) as db:
+                settled = service.fail_export(
+                    db,
+                    lease,
+                    code,
+                    retryable=not isinstance(error, service.ExportLimitError),
+                    settings=policy,
                 )
-            )
-            output = io.StringIO(newline="")
-            writer = csv.writer(output)
-            writer.writerow(
-                [
-                    "id",
-                    "name",
-                    "email",
-                    "phone",
-                    "source",
-                    "campaign",
-                    "status",
-                    "assigned_user_id",
-                    "merged_into_id",
-                    "created_at",
-                ]
-            )
-            for lead in leads:
-                writer.writerow(
-                    [
-                        _safe(value)
-                        for value in (
-                            lead.id,
-                            lead.name,
-                            lead.email,
-                            lead.phone,
-                            lead.source,
-                            lead.campaign,
-                            lead.status,
-                            lead.assigned_user_id,
-                            lead.merged_into_id,
-                            lead.created_at.isoformat(),
-                        )
-                    ]
-                )
-            job.csv_content = output.getvalue()
-            job.row_count = len(leads)
-            job.status = "completed"
-            job.completed_at = now()
-            db.add(
-                AuditLog(
-                    actor_id=None,
-                    organization_id=job.organization_id,
-                    resource_id=job.id,
-                    action="crm.lead.export_completed",
-                    request_id=f"worker:{job.id}",
-                    resource_version=1,
-                    changed_fields="status,row_count",
-                )
-            )
-            db.commit()
-            return {"status": "completed", "rows": len(leads)}
         except Exception:
-            db.rollback()
-            failed = db.get(ExportJob, UUID(job_id))
-            if failed:
-                failed.status = "failed"
-                failed.error_code = "generation_failed"
-                failed.completed_at = now()
-                db.add(
-                    AuditLog(
-                        actor_id=None,
-                        organization_id=failed.organization_id,
-                        resource_id=failed.id,
-                        action="crm.lead.export_failed",
-                        request_id=f"worker:{failed.id}",
-                        resource_version=1,
-                        changed_fields="status,error_code",
-                    )
-                )
-                db.commit()
-            raise
+            # The lease remains discoverable even if its failure could not be recorded.
+            log.warning("crm_export_settlement_interrupted", job_id=str(identifier))
+            return {"status": "interrupted"}
+        return {"status": "settled" if settled else "stale"}
+
+
+def publish_export(identity: UUID) -> None:
+    # This connection is separate from request handling and global broker retries.
+    with celery_app.connection_for_write(
+        connect_timeout=2,
+        transport_options={
+            "socket_connect_timeout": 2,
+            "socket_timeout": 2,
+            "retry_on_timeout": False,
+            "max_retries": 0,
+            "connect_retries_timeout": 2,
+        },
+    ) as connection:
+        celery_app.send_task(
+            "edp.crm.export_leads",
+            args=[str(identity)],
+            connection=connection,
+            retry=False,
+            ignore_result=True,
+            expires=120,
+        )
+
+
+@celery_app.task(name="edp.crm.recover_exports")  # type: ignore[untyped-decorator]
+def recover_exports() -> dict[str, int | bool]:
+    policy = get_settings()
+    with Session(engine) as db:
+        identities, settled = service.recover_exports(db, policy)
+        disposed = service.dispose_expired(db, policy)
+    published = failed = 0
+    deadline = time.monotonic() + 10
+    for identity in identities:
+        if time.monotonic() >= deadline:
+            break
+        try:
+            publish_export(identity)
+            published += 1
+        except Exception:
+            failed += 1
+            log.warning("crm_export_dispatch_unavailable", job_id=str(identity))
+    return {
+        "published": published,
+        "dispatch_failed": failed,
+        "settled": settled,
+        "disposed": disposed,
+        "retention_configured": policy.crm_export_retention_days is not None,
+        "collection_configured": service.configured(policy),
+    }

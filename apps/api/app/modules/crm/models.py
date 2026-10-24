@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -148,6 +149,15 @@ class ExportJob(Record, Base):
     error_code: Mapped[str] = mapped_column(String(40), default="")
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    lease_token_digest: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    next_attempt_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=now, nullable=True
+    )
+    disposed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    legacy_output: Mapped[bool] = mapped_column(Boolean, default=False)
     __table_args__ = (
         CheckConstraint(
             "status IN ('queued','running','completed','failed')",
@@ -158,7 +168,42 @@ class ExportJob(Record, Base):
             "(status <> 'completed' AND csv_content IS NULL)",
             name="crm_export_content_state",
         ),
+        CheckConstraint(
+            "version > 0 AND attempt_count BETWEEN 0 AND 10", name="crm_export_version"
+        ),
+        CheckConstraint("row_count BETWEEN 0 AND 10000", name="crm_export_row_count"),
+        CheckConstraint(
+            "csv_content IS NULL OR (legacy_output AND status = 'completed') "
+            "OR octet_length(csv_content) BETWEEN 1 AND 20971520",
+            name="crm_export_byte_count",
+        ),
+        CheckConstraint(
+            "(status = 'running' AND lease_token_digest IS NOT NULL "
+            "AND lease_token_digest ~ '^[0-9a-f]{64}$' AND lease_until IS NOT NULL "
+            "AND next_attempt_at IS NULL AND completed_at IS NULL) OR "
+            "(status <> 'running' AND lease_token_digest IS NULL AND lease_until IS NULL)",
+            name="crm_export_lease_state",
+        ),
+        CheckConstraint(
+            "(status = 'queued' AND next_attempt_at IS NOT NULL AND completed_at IS NULL) OR "
+            "(status IN ('completed','failed') AND next_attempt_at IS NULL "
+            "AND completed_at IS NOT NULL) OR (status = 'running' AND next_attempt_at IS NULL)",
+            name="crm_export_completion_state",
+        ),
+        CheckConstraint(
+            "error_code IN ('','generation_failed','queue_unavailable','recovered_lease',"
+            "'retry_exhausted','request_expired','requester_unavailable','row_limit_exceeded',"
+            "'output_too_large','expired') AND (status <> 'failed' OR error_code <> '')",
+            name="crm_export_error_code",
+        ),
+        CheckConstraint(
+            "disposed_at IS NULL OR (status = 'failed' AND error_code = 'expired' "
+            "AND csv_content IS NULL AND disposed_at >= expires_at)",
+            name="crm_export_disposal_state",
+        ),
         Index("ix_crm_export_owner", "organization_id", "requested_by_id", "created_at"),
+        Index("ix_crm_export_due", "status", "next_attempt_at", "id"),
+        Index("ix_crm_export_lease", "status", "lease_until", "id"),
     )
 
 

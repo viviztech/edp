@@ -171,3 +171,7 @@ The [baseline plan](baseline-verification-plan.md) and current [report](baseline
 ## Process 2 web journey acceptance - 2026-10-23
 
 Applicant entry/context and owner-only closed-intake history, permission-aware participant navigation, gated bilingual public enquiries with a versioned staff inbox, and editorial/media metadata web workflows are locally accepted. The [completion report](web-journey-completion-report.md) records 128 full API tests plus 13 final editorial/CMS tests, 308 web tests, static checks, builds, migrations/drift, compatible generated contracts and all seven browser scripts across the five runners. English/Tamil screenshots and keyboard targets were reviewed. Public collection remains disabled until approved policy is configured. Secure bytes/scanning, native/provider/operations and baseline security/CI release gates remain open. Notify the owner and continue with shared secure files; no push or deployment is authorized.
+
+## Background-job recovery checkpoint - 2026-10-24
+
+Step 2 is locally accepted; see [report](background-job-recovery-report.md). CRM durable exports, fenced recovery/current authorization, owner history and Meta exhausted-lease settlement pass recorded backend/migration/web checks and fresh connected English/Tamil Chrome acceptance. Real Redis/worker/one-Beat runtime remains open. Essential communications is next; source publication and deployment remain unauthorized.

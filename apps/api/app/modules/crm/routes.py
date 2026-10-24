@@ -15,6 +15,7 @@ from app.modules.crm.schemas import (
     DuplicateReviewCreate,
     DuplicateReviewList,
     DuplicateReviewView,
+    ExportJobList,
     ExportJobView,
     LeadConversionCreate,
     LeadConversionView,
@@ -213,6 +214,13 @@ def request_export(org: UUID, request: Request, db: DB, identity: Principal) -> 
 @router.get("/crm/organizations/{org}/exports/{job_id}", response_model=ExportJobView)
 def export_status(org: UUID, job_id: UUID, db: DB, identity: Principal) -> ExportJobView:
     return service.export_view(service.get_export(db, org, job_id, identity[0]))
+
+
+@router.get("/crm/organizations/{org}/exports", response_model=ExportJobList)
+def export_history(
+    org: UUID, db: DB, identity: Principal, cursor: UUID | None = None, limit: Limit = 25
+) -> ExportJobList:
+    return service.list_exports(db, org, identity[0], cursor, limit)
 
 
 @router.get("/crm/organizations/{org}/exports/{job_id}/download")

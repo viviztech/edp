@@ -2117,7 +2117,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Export History */
+        get: operations["export_history_api_v1_crm_organizations__org__exports_get"];
         put?: never;
         /** Request Export */
         post: operations["request_export_api_v1_crm_organizations__org__exports_post"];
@@ -7075,6 +7076,13 @@ export interface components {
              */
             id: string;
         };
+        /** ExportJobList */
+        ExportJobList: {
+            /** Items */
+            items: components["schemas"]["ExportJobView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
         /** ExportJobView */
         ExportJobView: {
             /**
@@ -7098,6 +7106,8 @@ export interface components {
              * Format: date-time
              */
             expires_at: string;
+            /** Created At */
+            created_at?: string | null;
         };
         /** FailureList */
         FailureList: {
@@ -17319,6 +17329,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DuplicateReviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_history_api_v1_crm_organizations__org__exports_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobList"];
                 };
             };
             /** @description Validation Error */

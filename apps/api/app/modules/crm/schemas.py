@@ -126,6 +126,12 @@ class ExportJobView(BaseModel):
     error_code: str
     completed_at: datetime | None
     expires_at: datetime
+    created_at: datetime | None = None
+
+
+class ExportJobList(BaseModel):
+    items: list[ExportJobView]
+    next_cursor: UUID | None
 
 
 class LeadConversionCreate(BaseModel):

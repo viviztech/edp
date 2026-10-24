@@ -47,6 +47,12 @@ Follow-up reminders: an incomplete CRM call, email, meeting or task with a due t
 
 Selection: configure and publish a rubric, activate the selection cycle after intake closure, assign reviewers and wait for cleared conflicts and submitted scores. Use Application score aggregates to shortlist an evidence-backed application. Schedule its interview with start/end, mode and one or more panel members. Each panel member submits their score once; after all have submitted, complete the interview. A Director or Super Admin can select, waitlist or reject, and can override a terminal result only with a recorded reason. Finalize the cycle after every assigned application has a terminal result. Scores and internal comments are never applicant-visible, and enrollment is completed later through the participant/enrollment workflow.
 
+## CRM exports
+
+In the CRM workspace, **Prepare export** creates a durable job for the current organization under your current export permission. Queued/running work can remain pending while background services are unavailable. Polling is bounded; use the status refresh when needed. A definitive unavailable response means the operator must finish the approved configuration.
+
+Use **Refresh export history** after reloading or losing a creation response, then explicitly open the relevant reference to check its current state. The browser does not repeat an uncertain export request automatically. Only the original requester with current permission can view/download it before its 24-hour access expiry. Failed exports show safe reasons; investigate before explicitly requesting a separate export. Downloads disappear when current authorization or status cannot be confirmed. See [recovery and operator diagnostics](../architecture/background-job-recovery.md).
+
 ## Enrollment and program schedule
 
 After a selection cycle is finalized, open Programs. Selected applicants with a cohort appear under enrollment candidates. Create enrollment only after confirming cohort capacity; the action creates the participant link and changes the applicant receipt to enrolled. Use Participants for reasoned suspend/reactivate/complete transitions. Create bilingual sessions within cohort dates and provide a location for in-person or hybrid delivery. Complete or cancel sessions with a reason.

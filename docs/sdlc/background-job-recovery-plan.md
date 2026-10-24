@@ -1,6 +1,6 @@
 # Background job recovery plan
 
-Prepared: 2026-10-24. Status: **design only; implementation waits for the complete Process 3 secure-file checkpoint and owner progress report**. This is the background-job recovery process in the owner's revised six-process sequence. Essential communications is a separate subsequent process; the broader [communications and jobs plan](communications-jobs-plan.md) remains useful background, but does not authorize starting both processes together.
+Prepared: 2026-10-24. Status: **locally accepted; real broker/worker/Beat runtime and release gates remain open**. The [checkpoint report](background-job-recovery-report.md) records final evidence after secure-files checkpoint `74fb149`. This is the background-job recovery process in the owner's revised six-process sequence. Essential communications is a separate subsequent process; the broader [communications and jobs plan](communications-jobs-plan.md) remains useful background.
 
 All work stays local. This plan authorizes no push, deployment, live provider request, external message or collection-policy change. Preserve the current secure-file work and its acceptance evidence.
 
@@ -56,9 +56,11 @@ Enforce the following through database checks and a transition guard, alongside 
 
 Backfill existing rows explicitly: queued rows receive a due timestamp; running rows receive an already expired synthetic lease so normal recovery can settle them; completed/failed rows preserve existing outcomes. Do not fabricate completed results. Normalize inconsistent legacy timestamps/error fields before enabling stricter constraints. Validate fresh migration, upgrade/downgrade/re-upgrade and zero drift in a newly owned disposable database.
 
+Review refinement: the previous generator capped rows without capping bytes. Preserve an already-completed legacy CSV above the new 20 MiB SQL ceiling through an internal immutable `legacy_output` marker set only by the migration backfill. New inserts cannot select it, and ordinary transitions cannot change it or rewrite terminal bytes. Do not truncate, fail, delete or silently regenerate retained legacy output to satisfy the new ceiling. Test that upgrade preserves its exact bytes while new oversized outputs and forged legacy markers are rejected.
+
 ## Export execution and recovery
 
-API creation commits request metadata and its audit together. Broker publication is best effort after that commit. If publishing fails, retain eligible queued work, return the durable accepted request, and record a sanitized dispatch failure. A database failure still fails the request. Do not claim that a message was published when only its database row exists.
+API creation commits request metadata and its audit together, returning the durable accepted request without request-path broker I/O. The periodic dispatcher publishes after that commit. If publishing fails, retain eligible queued work and record a sanitized dispatch failure. A database failure still fails the request. Do not claim that a message was published when only its database row exists. This refinement removes broker latency from creation while preserving bounded durable rediscovery.
 
 Add a bounded periodic recovery task to the existing Celery schedule. It discovers retained due queued work and expired running leases. Use row locks with `SKIP LOCKED` for settlement, stable ordering and bounded batch sizes. Broker payloads carry only the job UUID. Enqueueing does not mark a job running or consume an execution attempt; repeat publication is safe because workers claim from the database. Broker failure leaves the row discoverable on the next poll.
 
@@ -92,6 +94,10 @@ Expose only safe state, counters and fixed reason codes needed by authorized use
 
 Keep terminal failures visible. If reasoned replay is needed in this slice, define its permission, cumulative attempt budget and unchanged access expiry before adding it; otherwise document that the requester creates a new authorized export after investigating the failure. Do not add an implicit endless reset-to-zero retry path.
 
+Implementation refinement: provide an owner-only, unexpired export history so reloads and uncertain creation responses do not strand the requester without a reference. Require current active-user/export permission, bounded newest-first keyset pagination and scoped cursor lookup. Add only an optional read-only creation timestamp and a list DTO to the public contract; no lease, CSV or requester data is exposed. Selecting history rechecks the current detail before offering a download. The browser may explicitly request a separate export after an ambiguous response, but must not automatically replay the POST or guess which historical job it created.
+
+The trusted operator command `python -m app.modules.crm.export_cli health` reports aggregate due age, expired leases, failures and retained/overdue outputs through read-only bounded database queries. It emits neither identifiers nor CSV/contact contents and is not a public diagnostics endpoint.
+
 ## Meta final-attempt recovery
 
 Keep the existing five-attempt limit, organization/provider deduplication, retention deadline, retry backoff and current scoped replay permissions. Extend recovery selection to include expired `processing` leases at or above the attempt limit, separately from executable due rows.
@@ -99,6 +105,8 @@ Keep the existing five-attempt limit, organization/provider deduplication, reten
 Under a row lock, exhausted expired processing becomes `failed`, with `retry_exhausted`, a processing timestamp, cleared retry deadline, incremented version and a sanitized audit. It is not sent to the provider again. Running leases are left alone. Expired-retention events remain unusable and are handled by their existing approved purge path.
 
 Preserve attempt fencing in both success and failure handlers. Late completion or failure from the dead attempt cannot overwrite the settled terminal state or a subsequent explicitly authorized replay. Retain bounded batches and broker-failure recovery for events that remain executable. This correction uses scripted provider doubles; it needs no Meta credentials or network request.
+
+The adjacent request-path broker-failure fallback must also lock and reload the event before deciding it is still queued. A stale ORM row must never overwrite a concurrently claimed/completed/failed final attempt or regress its version. Add a deterministic concurrent settlement regression, preserving the newer worker result.
 
 ## Acceptance criteria
 

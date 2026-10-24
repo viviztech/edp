@@ -27,6 +27,10 @@ celery_app.conf.update(
         "app.workers.files",
     ),
     beat_schedule={
+        "recover-crm-exports": {
+            "task": "edp.crm.recover_exports",
+            "schedule": 60.0,
+        },
         "recover-private-files": {
             "task": "edp.files.queue_due",
             "schedule": 60.0,

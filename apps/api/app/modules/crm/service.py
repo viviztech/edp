@@ -2,11 +2,12 @@ import hashlib
 from datetime import timedelta
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import literal, select, tuple_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.modules.crm import export_service
 from app.modules.crm.models import (
     DuplicateReview,
     ExportJob,
@@ -23,6 +24,7 @@ from app.modules.crm.schemas import (
     DuplicateResolve,
     DuplicateReviewCreate,
     DuplicateReviewView,
+    ExportJobList,
     ExportJobView,
     LeadConversionCreate,
     LeadConversionView,
@@ -36,7 +38,6 @@ from app.modules.identity.models import AuditLog, Person, User, UserRole, now
 from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
 from app.modules.notifications.models import NotificationIntent
-from app.workers.celery_app import celery_app
 
 
 def view(x: Lead) -> LeadView:
@@ -496,11 +497,46 @@ def export_view(job: ExportJob) -> ExportJobView:
         error_code=job.error_code,
         completed_at=job.completed_at,
         expires_at=job.expires_at,
+        created_at=job.created_at,
+    )
+
+
+def list_exports(
+    db: Session, org: UUID, actor: User, cursor: UUID | None = None, limit: int = 25
+) -> ExportJobList:
+    export_service.require_requester(db, actor.id, org)
+    if not 1 <= limit <= 100:
+        raise AuthError("invalid_request", 422)
+    query = select(ExportJob).where(
+        ExportJob.organization_id == org,
+        ExportJob.requested_by_id == actor.id,
+        ExportJob.expires_at > now(),
+    )
+    if cursor is not None:
+        prior = db.scalar(query.where(ExportJob.id == cursor))
+        if prior is None:
+            raise AuthError("invalid_cursor", 422)
+        query = query.where(
+            tuple_(ExportJob.created_at, ExportJob.id)
+            < tuple_(literal(prior.created_at), literal(prior.id))
+        )
+    rows = list(
+        db.scalars(
+            query.order_by(ExportJob.created_at.desc(), ExportJob.id.desc())
+            .limit(limit + 1)
+            .execution_options(populate_existing=True)
+        )
+    )
+    return ExportJobList(
+        items=[export_view(row) for row in rows[:limit]],
+        next_cursor=rows[limit - 1].id if len(rows) > limit else None,
     )
 
 
 def request_export(db: Session, org: UUID, actor: User, request_id: str) -> ExportJobView:
-    require_permission(db, actor, org, "crm.lead.export")
+    export_service.require_requester(db, actor.id, org)
+    if not export_service.configured(get_settings()):
+        raise AuthError("export_retention_unconfigured", 503)
     job = ExportJob(
         organization_id=org,
         requested_by_id=actor.id,
@@ -520,34 +556,25 @@ def request_export(db: Session, org: UUID, actor: User, request_id: str) -> Expo
         )
     )
     db.commit()
-    try:
-        celery_app.send_task("edp.crm.export_leads", args=[str(job.id)])
-    except Exception as exc:
-        job.status = "failed"
-        job.error_code = "queue_unavailable"
-        job.completed_at = now()
-        db.commit()
-        raise AuthError("export_unavailable", 503) from exc
+    # Beat publishes due IDs independently; HTTP never waits for Redis after commit.
     return export_view(job)
 
 
 def get_export(db: Session, org: UUID, job_id: UUID, actor: User) -> ExportJob:
-    require_permission(db, actor, org, "crm.lead.export")
+    export_service.require_requester(db, actor.id, org)
     job = db.scalar(
-        select(ExportJob).where(
+        select(ExportJob)
+        .where(
             ExportJob.id == job_id,
             ExportJob.organization_id == org,
             ExportJob.requested_by_id == actor.id,
         )
+        .execution_options(populate_existing=True)
     )
     if not job:
         raise AuthError("not_found", 404)
     if job.expires_at <= now():
-        if job.csv_content is not None:
-            job.csv_content = None
-            job.status = "failed"
-            job.error_code = "expired"
-            db.commit()
+        # Access expiry is separate from explicitly approved scheduled disposal.
         raise AuthError("not_found", 404)
     return job
 
@@ -563,7 +590,7 @@ def download_export(db: Session, org: UUID, job_id: UUID, actor: User, request_i
             resource_id=job.id,
             action="crm.lead.export_downloaded",
             request_id=request_id,
-            resource_version=1,
+            resource_version=job.version,
             changed_fields=None,
         )
     )

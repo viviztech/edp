@@ -38,12 +38,23 @@ def mapped_fields(payload: dict[str, Any], mapping: dict[str, str]) -> dict[str,
     }
 
 
-def mark_failed(event_id: UUID, attempt: int, code: str, retrying: bool) -> None:
+def mark_failed(
+    event_id: UUID, attempt: int, claim_version: int, code: str, retrying: bool
+) -> None:
     with Session(engine) as db:
         event = db.scalar(
             select(MetaWebhookEvent).where(MetaWebhookEvent.id == event_id).with_for_update()
         )
-        if not event or event.state != "processing" or event.attempt_count != attempt:
+        current = now()
+        if (
+            not event
+            or event.state != "processing"
+            or event.attempt_count != attempt
+            or event.version != claim_version
+            or event.next_attempt_at is None
+            or event.next_attempt_at <= current
+            or event.retention_expires_at <= current
+        ):
             return
         retrying = retrying and attempt < MAX_ATTEMPTS
         event.state = "retrying" if retrying else "failed"
@@ -89,6 +100,8 @@ def process_event(self: Any, event_id: str) -> dict[str, object]:
         event.version += 1
         event.next_attempt_at = now() + timedelta(seconds=LEASE_SECONDS)
         attempt = event.attempt_count
+        # Replay resets attempts; its later claims must not match an old execution.
+        claim_version = event.version
         db.commit()
 
         integration = db.scalar(
@@ -106,10 +119,10 @@ def process_event(self: Any, event_id: str) -> dict[str, object]:
             )
         )
         if not integration or not mapping:
-            mark_failed(identifier, attempt, "configuration_unavailable", False)
+            mark_failed(identifier, attempt, claim_version, "configuration_unavailable", False)
             return {"status": "failed"}
         if not settings.meta_graph_api_version:
-            mark_failed(identifier, attempt, "graph_version_missing", False)
+            mark_failed(identifier, attempt, claim_version, "graph_version_missing", False)
             return {"status": "failed"}
         token = cipher().decrypt(integration.access_token_ciphertext.encode()).decode()
         meta_lead_id = event.meta_lead_id
@@ -133,33 +146,38 @@ def process_event(self: Any, event_id: str) -> dict[str, object]:
         mark_failed(
             identifier,
             attempt,
+            claim_version,
             "provider_unavailable" if retryable else "provider_rejected",
             retryable,
         )
         return {"status": "retrying" if retryable and attempt < MAX_ATTEMPTS else "failed"}
     except (httpx.RequestError, ValueError):
-        mark_failed(identifier, attempt, "provider_unavailable", True)
+        mark_failed(identifier, attempt, claim_version, "provider_unavailable", True)
         return {"status": "retrying" if attempt < MAX_ATTEMPTS else "failed"}
 
     if not isinstance(payload, dict):
-        mark_failed(identifier, attempt, "provider_invalid_payload", False)
+        mark_failed(identifier, attempt, claim_version, "provider_invalid_payload", False)
         return {"status": "failed"}
 
     values = mapped_fields(payload, field_mapping)
     name = values.get("name", "").strip()
     if not name:
-        mark_failed(identifier, attempt, "mapped_name_missing", False)
+        mark_failed(identifier, attempt, claim_version, "mapped_name_missing", False)
         return {"status": "failed"}
 
     with Session(engine) as db:
         event = db.scalar(
             select(MetaWebhookEvent).where(MetaWebhookEvent.id == identifier).with_for_update()
         )
+        current = now()
         if (
             not event
             or event.state != "processing"
             or event.attempt_count != attempt
-            or event.retention_expires_at <= now()
+            or event.version != claim_version
+            or event.next_attempt_at is None
+            or event.next_attempt_at <= current
+            or event.retention_expires_at <= current
         ):
             return {"status": "ignored"}
         dedupe_hash = hashlib.sha256(
@@ -220,10 +238,10 @@ def recover_events() -> dict[str, int]:
             db.scalars(
                 select(MetaWebhookEvent)
                 .where(
-                    MetaWebhookEvent.attempt_count < MAX_ATTEMPTS,
                     MetaWebhookEvent.retention_expires_at > current,
                     or_(
                         and_(
+                            MetaWebhookEvent.attempt_count < MAX_ATTEMPTS,
                             MetaWebhookEvent.state.in_(("queued", "retrying")),
                             MetaWebhookEvent.next_attempt_at <= current,
                         ),
@@ -238,11 +256,30 @@ def recover_events() -> dict[str, int]:
                 .with_for_update(skip_locked=True)
             )
         )
-        ids = [event.id for event in rows]
+        ids = []
         for event in rows:
+            if event.state == "processing" and event.attempt_count >= MAX_ATTEMPTS:
+                event.state = "failed"
+                event.error_code = "retry_exhausted"
+                event.processed_at = current
+                event.next_attempt_at = None
+                event.version += 1
+                db.add(
+                    AuditLog(
+                        actor_id=None,
+                        organization_id=event.organization_id,
+                        resource_id=event.id,
+                        action="meta.event.failed",
+                        request_id=f"worker:{event.id}",
+                        resource_version=event.version,
+                        changed_fields="state,error_code,processed_at,next_attempt_at",
+                    )
+                )
+                continue
             event.state = "queued"
             event.next_attempt_at = current + timedelta(seconds=LEASE_SECONDS)
             event.version += 1
+            ids.append(event.id)
         db.commit()
         for event_id in ids:
             dispatch_event(db, event_id)

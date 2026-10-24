@@ -534,13 +534,22 @@ def dispatch_event(db: Session, event_id: UUID) -> None:
     try:
         celery_app.send_task("edp.meta.process_event", args=[str(event_id)])
     except Exception:
-        event = db.get(MetaWebhookEvent, event_id)
-        if event and event.state == "queued":
-            event.state = "retrying"
-            event.error_code = "queue_unavailable"
-            event.next_attempt_at = now() + timedelta(minutes=5)
-            event.version += 1
-            db.commit()
+        # A lost acknowledgement may follow real worker execution. Never overwrite
+        # that newer state with a queued object retained in this session's cache.
+        event = db.scalar(
+            select(MetaWebhookEvent)
+            .where(MetaWebhookEvent.id == event_id)
+            .execution_options(populate_existing=True)
+            .with_for_update()
+        )
+        if not event or event.state != "queued":
+            db.rollback()
+            return
+        event.state = "retrying"
+        event.error_code = "queue_unavailable"
+        event.next_attempt_at = now() + timedelta(minutes=5)
+        event.version += 1
+        db.commit()
 
 
 def health(db: Session, org: UUID, actor: User) -> HealthView:
