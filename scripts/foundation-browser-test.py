@@ -7,6 +7,11 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
+from cryptography.fernet import Fernet
+from playwright.sync_api import expect, sync_playwright
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
+
 from app.modules.applications.models import Application, ApplicationForm
 from app.modules.attendance.models import AttendancePolicy, AttendanceRecord
 from app.modules.business_plans.models import (
@@ -70,15 +75,9 @@ from app.modules.selection.models import (
     SelectionCycle,
     SelectionDecision,
 )
-from cryptography.fernet import Fernet
-from playwright.sync_api import expect, sync_playwright
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
 
 engine = create_engine(os.environ["DATABASE_URL"])
-assert engine.url.database in {"edp_foundation_e2e", "edp_test"}, (
-    "Isolated test DB required"
-)
+assert engine.url.database in {"edp_foundation_e2e", "edp_test"}, "Isolated test DB required"
 base = os.environ["WEB_ORIGIN"]
 assert base.startswith(("http://127.0.0.1:", "http://localhost:"))
 email = "synthetic-" + uuid4().hex[:12] + "@example.com"
@@ -105,16 +104,12 @@ def latest_token(purpose):
         )
         assert row is not None
         return json.loads(
-            Fernet(os.environ["AUTH_DELIVERY_KEY"].encode()).decrypt(
-                row.encrypted_payload.encode()
-            )
+            Fernet(os.environ["AUTH_DELIVERY_KEY"].encode()).decrypt(row.encrypted_payload.encode())
         )["token"]
 
 
 with sync_playwright() as playwright:
-    browser = playwright.chromium.launch(
-        channel=os.getenv("PLAYWRIGHT_CHANNEL"), headless=True
-    )
+    browser = playwright.chromium.launch(channel=os.getenv("PLAYWRIGHT_CHANNEL"), headless=True)
     participant_context = browser.new_context(viewport={"width": 1280, "height": 900})
     page = participant_context.new_page()
     errors = []
@@ -138,14 +133,10 @@ with sync_playwright() as playwright:
     page.get_by_label("Name", exact=True).fill("Synthetic E2E")
     page.get_by_label("Email", exact=True).fill(email)
     page.get_by_label("Password", exact=True).fill(password)
-    page.locator("form").get_by_role(
-        "button", name="Create account", exact=True
-    ).click()
+    page.locator("form").get_by_role("button", name="Create account", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("message has been queued")
     page.get_by_role("button", name="Verify email", exact=True).click()
-    page.get_by_label("Verification or reset code", exact=True).fill(
-        latest_token("verify")
-    )
+    page.get_by_label("Verification or reset code", exact=True).fill(latest_token("verify"))
     page.locator("form").get_by_role("button", name="Verify email", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("You can now sign in")
     page.get_by_role("button", name="Sign in", exact=True).click()
@@ -174,9 +165,7 @@ with sync_playwright() as playwright:
         == 403
     )
     assert (
-        page.request.post(
-            base + "/api/session/logout", data={}, headers={"Origin": base}
-        ).status
+        page.request.post(base + "/api/session/logout", data={}, headers={"Origin": base}).status
         == 403
     )
     with Session(engine) as db:
@@ -189,9 +178,7 @@ with sync_playwright() as playwright:
         )
         db.add(organization)
         db.flush()
-        db.add(
-            UserRole(user_id=user.id, role_id=role.id, organization_id=organization.id)
-        )
+        db.add(UserRole(user_id=user.id, role_id=role.id, organization_id=organization.id))
         coordinator_person = Person(display_name="Synthetic Coordinator")
         db.add(coordinator_person)
         db.flush()
@@ -203,9 +190,7 @@ with sync_playwright() as playwright:
         )
         db.add(coordinator)
         db.flush()
-        coordinator_role = db.scalar(
-            select(Role).where(Role.name == "Training Center Coordinator")
-        )
+        coordinator_role = db.scalar(select(Role).where(Role.name == "Training Center Coordinator"))
         assert coordinator_role
         db.add(
             UserRole(
@@ -295,9 +280,7 @@ with sync_playwright() as playwright:
     expect(page.get_by_role("heading", name="Publishing workspace")).to_be_visible()
     page.get_by_label("Page address", exact=True).fill("eligibility")
     page.get_by_label("Title", exact=True).fill("Who can apply")
-    page.get_by_label("Content", exact=True).fill(
-        "Synthetic eligibility <script>alert(1)</script>"
-    )
+    page.get_by_label("Content", exact=True).fill("Synthetic eligibility <script>alert(1)</script>")
     page.get_by_role("button", name="Save draft", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Saved")
     assert (
@@ -321,9 +304,7 @@ with sync_playwright() as playwright:
         has=public.get_by_role("heading", name="Who can apply", exact=True)
     )
     expect(
-        published_article.get_by_text(
-            "Synthetic eligibility <script>alert(1)</script>", exact=True
-        )
+        published_article.get_by_text("Synthetic eligibility <script>alert(1)</script>", exact=True)
     ).to_be_visible()
     expect(published_article.locator("script")).to_have_count(0)
     page.screenshot(path=str(evidence / "cms-debug.png"), full_page=True)
@@ -333,9 +314,7 @@ with sync_playwright() as playwright:
     public.reload()
     expect(published_article).not_to_contain_text("Unpublished change")
     expect(
-        published_article.get_by_text(
-            "Synthetic eligibility <script>alert(1)</script>", exact=True
-        )
+        published_article.get_by_text("Synthetic eligibility <script>alert(1)</script>", exact=True)
     ).to_be_visible()
     expect(published_article.locator("script")).to_have_count(0)
     page.get_by_label("Content language").select_option("ta")
@@ -373,20 +352,14 @@ with sync_playwright() as playwright:
     page.screenshot(path=str(evidence / "cms-mobile.png"), full_page=True)
     page.set_viewport_size({"width": 1280, "height": 900})
     public.close()
-    page.goto(
-        base + "/en/admin/application-definitions?organization=" + str(organization_id)
-    )
+    page.goto(base + "/en/admin/application-definitions?organization=" + str(organization_id))
     expect(
         page.get_by_role("heading", name="Application definition administration")
     ).to_be_visible()
     page.get_by_role("button", name="New definition", exact=True).click()
-    page.get_by_label("English title", exact=True).fill(
-        "Synthetic enterprise application"
-    )
+    page.get_by_label("English title", exact=True).fill("Synthetic enterprise application")
     page.get_by_label("Tamil title", exact=True).fill("Synthetic Tamil application")
-    page.get_by_label("English label", exact=True).nth(0).fill(
-        "Describe the business idea"
-    )
+    page.get_by_label("English label", exact=True).nth(0).fill("Describe the business idea")
     page.get_by_label("Tamil label", exact=True).nth(0).fill("Synthetic Tamil field")
     acknowledgement_labels = page.locator(".definition-fields textarea")
     while acknowledgement_labels.count() < 4:
@@ -406,9 +379,7 @@ with sync_playwright() as playwright:
     expect(page.locator(".definition-state-draft").first).to_be_visible()
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
-    page.screenshot(
-        path=str(evidence / "application-definitions-mobile.png"), full_page=True
-    )
+    page.screenshot(path=str(evidence / "application-definitions-mobile.png"), full_page=True)
     page.set_viewport_size({"width": 1280, "height": 900})
     with Session(engine) as db:
         actor = db.scalar(select(User).where(User.email == email))
@@ -531,23 +502,17 @@ with sync_playwright() as playwright:
             organization_id,
             cycle.id,
             actor,
-            StateCommand(
-                expected_version=cycle.version, target="open", reason="E2E intake"
-            ),
+            StateCommand(expected_version=cycle.version, target="open", reason="E2E intake"),
             "e2e-cycle-open",
         )
     page.goto(base + "/en/applications?organization=" + str(organization_id))
     expect(page.get_by_role("heading", name="My applications")).to_be_visible()
-    expect(
-        page.get_by_role("heading", name="E2E application cycle", exact=True)
-    ).to_be_visible()
+    expect(page.get_by_role("heading", name="E2E application cycle", exact=True)).to_be_visible()
     page.get_by_role("button", name="Start application", exact=True).click()
     page.get_by_label("Describe the business idea", exact=False).fill(
         "Synthetic repair cooperative"
     )
-    page.get_by_label(
-        "I declare this application is accurate. (Required)", exact=True
-    ).check()
+    page.get_by_label("I declare this application is accurate. (Required)", exact=True).check()
     page.get_by_label(
         "I consent to processing for this application. (Required)", exact=True
     ).check()
@@ -557,9 +522,7 @@ with sync_playwright() as playwright:
     expect(page.locator(".application-receipt")).to_contain_text("EDP-")
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
-    page.screenshot(
-        path=str(evidence / "application-submitted-mobile.png"), full_page=True
-    )
+    page.screenshot(path=str(evidence / "application-submitted-mobile.png"), full_page=True)
     page.set_viewport_size({"width": 1280, "height": 900})
     with Session(engine) as db:
         actor = db.scalar(select(User).where(User.email == email))
@@ -581,9 +544,7 @@ with sync_playwright() as playwright:
     page.get_by_label("Code", exact=True).fill("e2e-selection")
     page.get_by_label("English name", exact=True).fill("E2E selection")
     page.get_by_label("Tamil name", exact=True).fill("Synthetic Tamil selection")
-    page.locator('select[name="application_cycle_id"]').select_option(
-        label="E2E application cycle"
-    )
+    page.locator('select[name="application_cycle_id"]').select_option(label="E2E application cycle")
     page.get_by_role("button", name="Create cycle", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     page.get_by_label("Criterion key", exact=True).fill("business_idea")
@@ -607,17 +568,11 @@ with sync_playwright() as playwright:
         .first.text_content()
     )
     assert application_number and application_number.startswith("EDP-")
-    assignment_form.locator('select[name="application_id"]').select_option(
-        label=application_number
-    )
-    assignment_form.locator('select[name="reviewer_user_id"]').select_option(
-        label="Synthetic E2E"
-    )
+    assignment_form.locator('select[name="application_id"]').select_option(label=application_number)
+    assignment_form.locator('select[name="reviewer_user_id"]').select_option(label="Synthetic E2E")
     assign_button.click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
-    expect(
-        page.get_by_text("Conflict declaration required", exact=False)
-    ).to_be_visible()
+    expect(page.get_by_text("Conflict declaration required", exact=False)).to_be_visible()
     page.get_by_role("button", name="No conflict", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text("No conflict declared.", exact=True)).to_be_visible()
@@ -645,17 +600,11 @@ with sync_playwright() as playwright:
     page.get_by_role("button", name="Shortlist", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     interview_form = page.locator(".selection-interview-form")
-    interview_form.locator('select[name="application_id"]').select_option(
-        label=application_number
-    )
-    interview_form.locator('select[name="selection_cycle_id"]').select_option(
-        label="E2E selection"
-    )
+    interview_form.locator('select[name="application_id"]').select_option(label=application_number)
+    interview_form.locator('select[name="selection_cycle_id"]').select_option(label="E2E selection")
     interview_form.locator('input[name="starts_at"]').fill("2027-01-15T10:00")
     interview_form.locator('input[name="ends_at"]').fill("2027-01-15T11:00")
-    interview_form.locator('select[name="panel_user_ids"]').select_option(
-        label="Synthetic E2E"
-    )
+    interview_form.locator('select[name="panel_user_ids"]').select_option(label="Synthetic E2E")
     interview_form.get_by_role("button", name="Schedule interview", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     score_button = page.get_by_role("button", name="Submit interview score", exact=True)
@@ -692,9 +641,7 @@ with sync_playwright() as playwright:
     schedule_form.locator('input[name="title_en"]').fill("Business foundations")
     schedule_form.locator('input[name="title_ta"]').fill("Synthetic Tamil session")
     session_start = datetime.now(UTC) + timedelta(days=1)
-    schedule_form.locator('input[name="starts_at"]').fill(
-        session_start.strftime("%Y-%m-%dT%H:%M")
-    )
+    schedule_form.locator('input[name="starts_at"]').fill(session_start.strftime("%Y-%m-%dT%H:%M"))
     schedule_form.locator('input[name="ends_at"]').fill(
         (session_start + timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M")
     )
@@ -719,9 +666,7 @@ with sync_playwright() as playwright:
         attendance_session_id = attendance_session.id
 
     page.goto(base + "/en/admin/attendance?organization=" + str(organization_id))
-    expect(
-        page.get_by_role("heading", name="Attendance control", exact=True)
-    ).to_be_visible()
+    expect(page.get_by_role("heading", name="Attendance control", exact=True)).to_be_visible()
     attendance_card = page.locator("article").filter(
         has=page.get_by_role("heading", name="Attendance check-in lab", exact=True)
     )
@@ -730,24 +675,18 @@ with sync_playwright() as playwright:
     policy_form.locator('input[name="late_after_minutes"]').fill("10")
     policy_form.locator('input[name="opens_before_minutes"]').fill("15")
     policy_form.locator('input[name="closes_after_minutes"]').fill("30")
-    policy_form.locator('input[name="reason"]').fill(
-        "Synthetic approved attendance policy"
-    )
+    policy_form.locator('input[name="reason"]').fill("Synthetic approved attendance policy")
     policy_form.get_by_role("button", name="Save policy", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Attendance saved.")
     attendance_card.get_by_role("button", name="Open QR check-in", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Attendance saved.")
-    qr_url = attendance_card.locator('object[type="image/svg+xml"]').get_attribute(
-        "data"
-    )
+    qr_url = attendance_card.locator('object[type="image/svg+xml"]').get_attribute("data")
     assert qr_url and qr_url.startswith("data:image/svg+xml;base64,")
     check_in_token = attendance_card.locator("[data-check-in-token]").text_content()
     assert check_in_token
 
     page.goto(base + "/en/attendance?organization=" + str(organization_id))
-    expect(
-        page.get_by_role("heading", name="My attendance", exact=True)
-    ).to_be_visible()
+    expect(page.get_by_role("heading", name="My attendance", exact=True)).to_be_visible()
     page.get_by_label("Check-in code", exact=True).fill(check_in_token)
     page.get_by_role("button", name="Check in", exact=True).click()
     expect(page.get_by_role("status")).to_have_text("Attendance saved.")
@@ -759,9 +698,7 @@ with sync_playwright() as playwright:
     page.set_viewport_size({"width": 1280, "height": 900})
 
     page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
-    expect(
-        page.get_by_role("heading", name="Course studio", exact=True)
-    ).to_be_visible()
+    expect(page.get_by_role("heading", name="Course studio", exact=True)).to_be_visible()
     course_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Create course", exact=True)
     )
@@ -775,19 +712,17 @@ with sync_playwright() as playwright:
         "Synthetic Tamil course description."
     )
     course_form.get_by_role("button", name="Create", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
 
     module_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Add module", exact=True)
     )
-    module_form.locator('select[name="course_id"]').select_option(
-        label="Enterprise foundations"
-    )
+    module_form.locator('select[name="course_id"]').select_option(label="Enterprise foundations")
     module_form.locator('input[name="position"]').fill("1")
     module_form.locator('input[name="title_en"]').fill("Know the customer")
     module_form.locator('input[name="title_ta"]').fill("Synthetic Tamil module")
     module_form.get_by_role("button", name="Create", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
 
     lesson_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Add lesson", exact=True)
@@ -804,24 +739,36 @@ with sync_playwright() as playwright:
     )
     lesson_form.locator('textarea[name="body_ta"]').fill("Synthetic Tamil lesson body.")
     lesson_form.get_by_role("button", name="Create", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
 
-    material_form = page.locator("form").filter(
-        has=page.get_by_role(
-            "heading", name="Add private material reference", exact=True
-        )
+    # New authoring uses verified shared uploads, covered by the dedicated learning
+    # file journey. Keep this legacy local/test gateway fixture to verify existing
+    # course material and actor-bound delivery remain compatible.
+    catalog_response = page.request.get(
+        base + f"/api/courses/organizations/{organization_id}/catalog"
     )
-    material_form.locator('select[name="lesson_key"]').select_option(
-        label="Enterprise foundations / Know the customer / Customer problem"
+    assert catalog_response.status == 200
+    legacy_course = next(
+        row for row in catalog_response.json()["courses"] if row["code"] == "e2e-foundations"
     )
-    material_form.locator('input[name="position"]').fill("1")
-    material_form.locator('input[name="label_en"]').fill("Customer worksheet")
-    material_form.locator('input[name="label_ta"]').fill("Synthetic Tamil worksheet")
-    material_form.locator('input[name="provider_key"]').fill(
-        "private/e2e/customer-worksheet.pdf"
+    legacy_lesson = legacy_course["modules"][0]["lessons"][0]
+    current_csrf = page.request.get(base + "/api/session/csrf").json()["csrf_token"]
+    legacy_material = page.request.post(
+        base + f"/api/courses/organizations/{organization_id}/materials",
+        headers={"Origin": base, "X-CSRF-Token": current_csrf},
+        data={
+            "course_id": legacy_course["id"],
+            "lesson_id": legacy_lesson["id"],
+            "position": 1,
+            "kind": "document",
+            "label_en": "Customer worksheet",
+            "label_ta": "Synthetic Tamil worksheet",
+            "provider_key": "private/e2e/customer-worksheet.pdf",
+        },
     )
-    material_form.get_by_role("button", name="Create", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    assert legacy_material.status == 201, legacy_material.text()[:300]
+    page.reload()
+    expect(page.get_by_role("heading", name="Course studio", exact=True)).to_be_visible()
 
     assignment_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Add assignment", exact=True)
@@ -842,7 +789,7 @@ with sync_playwright() as playwright:
     assignment_form.locator('input[name="passing_points"]').fill("12")
     assignment_form.locator('input[name="max_submissions"]').fill("2")
     assignment_form.get_by_role("button", name="Create", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
 
     quiz_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Add quiz", exact=True)
@@ -856,13 +803,11 @@ with sync_playwright() as playwright:
     quiz_form.locator('textarea[name="instructions_en"]').fill(
         "Choose the strongest customer statement."
     )
-    quiz_form.locator('textarea[name="instructions_ta"]').fill(
-        "Synthetic Tamil quiz instructions."
-    )
+    quiz_form.locator('textarea[name="instructions_ta"]').fill("Synthetic Tamil quiz instructions.")
     quiz_form.locator('input[name="passing_percent"]').fill("60")
     quiz_form.locator('input[name="max_attempts"]').fill("2")
     quiz_form.get_by_role("button", name="Create", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
 
     question_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Add question", exact=True)
@@ -871,13 +816,11 @@ with sync_playwright() as playwright:
         label="Enterprise foundations / Customer problem / Customer check"
     )
     question_form.locator('input[name="position"]').fill("1")
-    question_form.locator('textarea[name="prompt_en"]').fill(
-        "Which statement is observable?"
-    )
+    question_form.locator('textarea[name="prompt_en"]').fill("Which statement is observable?")
     question_form.locator('textarea[name="prompt_ta"]').fill("Synthetic Tamil question")
     question_form.locator('input[name="points"]').fill("10")
     question_form.get_by_role("button", name="Create", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
 
     choice_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Add answer choice", exact=True)
@@ -889,30 +832,24 @@ with sync_playwright() as playwright:
     choice_form.locator('input[name="label_en"]').fill("Customers probably want it.")
     choice_form.locator('input[name="label_ta"]').fill("Synthetic Tamil wrong choice")
     choice_form.get_by_role("button", name="Create", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
 
     choice_form.locator('select[name="question_key"]').select_option(
         label="Enterprise foundations / Customer check / Which statement is observable?"
     )
     choice_form.locator('input[name="position"]').fill("2")
-    choice_form.locator('input[name="label_en"]').fill(
-        "Five customers reported the same problem."
-    )
+    choice_form.locator('input[name="label_en"]').fill("Five customers reported the same problem.")
     choice_form.locator('input[name="label_ta"]').fill("Synthetic Tamil correct choice")
     choice_form.locator('input[name="is_correct"]').check()
     choice_form.get_by_role("button", name="Create", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
 
     page.once("dialog", lambda dialog: dialog.accept("E2E content approved"))
     page.get_by_role("button", name="Publish course", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
-    template_button = page.get_by_role(
-        "button", name="Create certificate template", exact=True
-    )
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
+    template_button = page.get_by_role("button", name="Create certificate template", exact=True)
     template_form = page.locator("form").filter(has=template_button)
-    template_form.locator('select[name="course_id"]').select_option(
-        label="Enterprise foundations"
-    )
+    template_form.locator('select[name="course_id"]').select_option(label="Enterprise foundations")
     template_form.locator('input[name="code"]').fill("e2e-completion")
     template_form.locator('input[name="title_en"]').fill("Certificate of Completion")
     template_form.locator('input[name="title_ta"]').fill("Synthetic Tamil certificate")
@@ -922,50 +859,36 @@ with sync_playwright() as playwright:
     template_form.locator('textarea[name="statement_ta"]').fill(
         "Synthetic Tamil certificate statement"
     )
-    template_form.locator('input[name="issuer_name"]').fill(
-        "Center for Social Justice and Equity"
-    )
+    template_form.locator('input[name="issuer_name"]').fill("Center for Social Justice and Equity")
     template_button.click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
     page.once("dialog", lambda dialog: dialog.accept("E2E certificate approved"))
     page.get_by_role("button", name="Publish template", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
     pathway_button = page.get_by_role("button", name="Add to cohort", exact=True)
     pathway_form = page.locator("form").filter(has=pathway_button)
-    pathway_form.locator('select[name="course_id"]').select_option(
-        label="Enterprise foundations"
-    )
+    pathway_form.locator('select[name="course_id"]').select_option(label="Enterprise foundations")
     pathway_form.locator('select[name="cohort_id"]').select_option(label="E2E cohort")
     pathway_form.locator('input[name="position"]').fill("1")
     pathway_form.locator('input[name="reason"]').fill("E2E cohort pathway approved")
     pathway_button.click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
     expect(page.get_by_text("Enterprise foundations", exact=True).first).to_be_visible()
 
     page.goto(base + "/en/admin/programs?organization=" + str(organization_id))
-    expect(
-        page.get_by_role("heading", name="Program administration", exact=True)
-    ).to_be_visible()
+    expect(page.get_by_role("heading", name="Program administration", exact=True)).to_be_visible()
     assign_button = page.get_by_role("button", name="Assign delivery staff", exact=True)
     assignment_form = page.locator("form").filter(has=assign_button)
     assignment_form.locator('input[name="email"]').fill(coordinator_email)
-    assignment_form.locator('select[name="center_id"]').select_option(
-        label="E2E center"
-    )
-    assignment_form.get_by_label("Assignment reason", exact=True).fill(
-        "Own E2E center delivery"
-    )
+    assignment_form.locator('select[name="center_id"]').select_option(label="E2E center")
+    assignment_form.get_by_label("Assignment reason", exact=True).fill("Own E2E center delivery")
     assign_button.click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
     expect(page.get_by_text(coordinator_email, exact=False)).to_be_visible()
 
     assignment_form.locator('input[name="email"]').fill(trainer_email)
-    assignment_form.locator('select[name="center_id"]').select_option(
-        label="E2E center"
-    )
-    assignment_form.locator('select[name="cohort_id"]').select_option(
-        label="E2E cohort"
-    )
+    assignment_form.locator('select[name="center_id"]').select_option(label="E2E center")
+    assignment_form.locator('select[name="cohort_id"]').select_option(label="E2E cohort")
     assignment_form.get_by_label("Assignment reason", exact=True).fill(
         "Own E2E cohort learning delivery"
     )
@@ -981,17 +904,11 @@ with sync_playwright() as playwright:
     trainer_page.wait_for_load_state("domcontentloaded")
     trainer_page.get_by_label("Email", exact=True).fill(trainer_email)
     trainer_page.get_by_label("Password", exact=True).fill(trainer_password)
-    trainer_page.locator("form").get_by_role(
-        "button", name="Sign in", exact=True
-    ).click()
+    trainer_page.locator("form").get_by_role("button", name="Sign in", exact=True).click()
     expect(trainer_page.get_by_text("Synthetic Trainer", exact=True)).to_be_visible()
     trainer_page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
-    expect(
-        trainer_page.get_by_role("heading", name="Trainer delivery", exact=True)
-    ).to_be_visible()
-    expect(
-        trainer_page.get_by_text("Enterprise foundations", exact=True)
-    ).to_be_visible()
+    expect(trainer_page.get_by_role("heading", name="Trainer delivery", exact=True)).to_be_visible()
+    expect(trainer_page.get_by_text("Enterprise foundations", exact=True)).to_be_visible()
     expect(trainer_page.get_by_text("Synthetic E2E", exact=True)).to_be_visible()
     expect(trainer_page.get_by_text("Not started", exact=True)).to_be_visible()
     expect(trainer_page.get_by_text("Not attempted", exact=False)).to_be_visible()
@@ -1005,26 +922,16 @@ with sync_playwright() as playwright:
     coordinator_context = browser.new_context(viewport={"width": 1280, "height": 900})
     coordinator_page = coordinator_context.new_page()
     coordinator_errors = []
-    coordinator_page.on(
-        "pageerror", lambda error: coordinator_errors.append(str(error))
-    )
+    coordinator_page.on("pageerror", lambda error: coordinator_errors.append(str(error)))
     coordinator_page.goto(base + "/en/account")
     coordinator_page.wait_for_load_state("domcontentloaded")
     coordinator_page.get_by_label("Email", exact=True).fill(coordinator_email)
     coordinator_page.get_by_label("Password", exact=True).fill(coordinator_password)
-    coordinator_page.locator("form").get_by_role(
-        "button", name="Sign in", exact=True
-    ).click()
+    coordinator_page.locator("form").get_by_role("button", name="Sign in", exact=True).click()
+    expect(coordinator_page.get_by_text("Synthetic Coordinator", exact=True)).to_be_visible()
+    coordinator_page.goto(base + "/en/admin/programs?organization=" + str(organization_id))
     expect(
-        coordinator_page.get_by_text("Synthetic Coordinator", exact=True)
-    ).to_be_visible()
-    coordinator_page.goto(
-        base + "/en/admin/programs?organization=" + str(organization_id)
-    )
-    expect(
-        coordinator_page.get_by_role(
-            "heading", name="Program administration", exact=True
-        )
+        coordinator_page.get_by_role("heading", name="Program administration", exact=True)
     ).to_be_visible()
     expect(
         coordinator_page.locator(".program-list strong", has_text="E2E center").first
@@ -1042,12 +949,8 @@ with sync_playwright() as playwright:
     scoped_schedule_button = coordinator_page.get_by_role(
         "button", name="Schedule session", exact=True
     )
-    scoped_schedule_form = coordinator_page.locator("form").filter(
-        has=scoped_schedule_button
-    )
-    scoped_schedule_form.locator('select[name="cohort_id"]').select_option(
-        label="E2E cohort"
-    )
+    scoped_schedule_form = coordinator_page.locator("form").filter(has=scoped_schedule_button)
+    scoped_schedule_form.locator('select[name="cohort_id"]').select_option(label="E2E cohort")
     scoped_schedule_form.locator('input[name="title_en"]').fill("Coordinator session")
     scoped_schedule_form.locator('input[name="title_ta"]').fill(
         "Synthetic Tamil coordinator session"
@@ -1062,13 +965,9 @@ with sync_playwright() as playwright:
     scoped_schedule_form.locator('select[name="mode"]').select_option("online")
     scoped_schedule_button.click()
     expect(coordinator_page.get_by_role("status")).to_have_text("Change saved.")
-    expect(
-        coordinator_page.get_by_text("Coordinator session", exact=True)
-    ).to_be_visible()
+    expect(coordinator_page.get_by_text("Coordinator session", exact=True)).to_be_visible()
 
-    coordinator_csrf = coordinator_page.request.get(base + "/api/session/csrf").json()[
-        "csrf_token"
-    ]
+    coordinator_csrf = coordinator_page.request.get(base + "/api/session/csrf").json()["csrf_token"]
     denied_session = coordinator_page.request.post(
         base + "/api/programs/organizations/" + str(organization_id) + "/sessions",
         data={
@@ -1088,12 +987,8 @@ with sync_playwright() as playwright:
     assert denied_session.status == 403
 
     coordinator_page.set_viewport_size({"width": 390, "height": 844})
-    assert coordinator_page.evaluate(
-        "document.documentElement.scrollWidth <= window.innerWidth"
-    )
-    coordinator_page.screenshot(
-        path=str(evidence / "coordinator-scope-mobile.png"), full_page=True
-    )
+    assert coordinator_page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    coordinator_page.screenshot(path=str(evidence / "coordinator-scope-mobile.png"), full_page=True)
     coordinator_page.set_viewport_size({"width": 1280, "height": 900})
 
     page.once("dialog", lambda dialog: dialog.accept("E2E assignment ended"))
@@ -1110,16 +1005,12 @@ with sync_playwright() as playwright:
     coordinator_context.close()
 
     page.goto(base + "/en/learning?organization=" + str(organization_id))
-    expect(
-        page.get_by_role("heading", name="My learning path", exact=True)
-    ).to_be_visible()
+    expect(page.get_by_role("heading", name="My learning path", exact=True)).to_be_visible()
     expect(page.get_by_text("Enterprise foundations", exact=True)).to_be_visible()
     expect(page.get_by_text("Customer problem", exact=True)).to_be_visible()
-    expect(
-        page.get_by_text("private/e2e/customer-worksheet.pdf", exact=True)
-    ).not_to_be_visible()
+    expect(page.get_by_text("private/e2e/customer-worksheet.pdf", exact=True)).not_to_be_visible()
     page.get_by_role("button", name="Start course", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
     expect(page.get_by_text("In progress", exact=True)).to_be_visible()
     with page.expect_download() as learner_download:
         page.get_by_role("button", name="Open material", exact=True).click()
@@ -1133,7 +1024,7 @@ with sync_playwright() as playwright:
         "Five interviews showed repeated payment delays."
     )
     assignment_card.get_by_role("button", name="Submit assignment", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
     expect(page.get_by_text("Awaiting trainer review.", exact=True)).to_be_visible()
 
     grading_context = browser.new_context(viewport={"width": 1280, "height": 900})
@@ -1142,15 +1033,11 @@ with sync_playwright() as playwright:
     grading_page.wait_for_load_state("domcontentloaded")
     grading_page.get_by_label("Email", exact=True).fill(trainer_email)
     grading_page.get_by_label("Password", exact=True).fill(trainer_password)
-    grading_page.locator("form").get_by_role(
-        "button", name="Sign in", exact=True
-    ).click()
+    grading_page.locator("form").get_by_role("button", name="Sign in", exact=True).click()
     expect(grading_page.get_by_text("Synthetic Trainer", exact=True)).to_be_visible()
     grading_page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
     expect(
-        grading_page.get_by_text(
-            "Five interviews showed repeated payment delays.", exact=True
-        )
+        grading_page.get_by_text("Five interviews showed repeated payment delays.", exact=True)
     ).to_be_visible()
     grade_form = grading_page.locator("form").filter(
         has=grading_page.get_by_role("button", name="Save grade", exact=True)
@@ -1160,7 +1047,7 @@ with sync_playwright() as playwright:
         "Clear evidence; add interview dates next time."
     )
     grade_form.get_by_role("button", name="Save grade", exact=True).click()
-    expect(grading_page.get_by_role("status")).to_have_text("Change saved.")
+    expect(grading_page.locator(".learning-message")).to_have_text("Change saved.")
     grading_context.close()
 
     page.reload()
@@ -1170,28 +1057,24 @@ with sync_playwright() as playwright:
     expect(page.get_by_text("Customer check", exact=True)).to_be_visible()
     page.get_by_label("Customers probably want it.", exact=True).check()
     page.get_by_role("button", name="Submit quiz", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
     expect(page.get_by_text("Best score: 0%", exact=False)).to_be_visible()
     page.get_by_label("Five customers reported the same problem.", exact=True).check()
     page.get_by_role("button", name="Submit quiz", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
     expect(page.get_by_text("Passed", exact=True)).to_be_visible()
     expect(page.get_by_text("Best score: 100%", exact=False)).to_be_visible()
     page.get_by_role("button", name="Mark lesson complete", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
     expect(page.get_by_text("Completed", exact=True).first).to_be_visible()
     expect(page.get_by_text("100%", exact=True).first).to_be_visible()
     expect(page.get_by_text("Eligible for certificate", exact=True)).to_be_visible()
     page.goto(base + "/en/admin/learning?organization=" + str(organization_id))
-    expect(
-        page.get_by_text("Eligible for certificate", exact=False).last
-    ).to_be_visible()
+    expect(page.get_by_text("Eligible for certificate", exact=False).last).to_be_visible()
     page.once("dialog", lambda dialog: dialog.accept("E2E completion verified"))
     page.get_by_role("button", name="Issue certificate", exact=True).click()
-    expect(page.get_by_role("status")).to_have_text("Change saved.")
-    expect(
-        page.get_by_text("Certificate status: valid", exact=False).first
-    ).to_be_visible()
+    expect(page.locator(".learning-message")).to_have_text("Change saved.")
+    expect(page.get_by_text("Certificate status: valid", exact=False).first).to_be_visible()
     page.goto(base + "/en/learning?organization=" + str(organization_id))
     verify_link = page.get_by_role("link", name="Verify certificate", exact=True)
     expect(verify_link).to_be_visible()
@@ -1203,18 +1086,14 @@ with sync_playwright() as playwright:
     expect(
         public_page.get_by_role("heading", name="Certificate of Completion", exact=True)
     ).to_be_visible()
-    expect(
-        public_page.get_by_text("Certificate status: Valid", exact=True)
-    ).to_be_visible()
+    expect(public_page.get_by_text("Certificate status: Valid", exact=True)).to_be_visible()
     public_context.close()
     verify_link.click()
     expect(
         page.get_by_role("heading", name="Certificate of Completion", exact=True)
     ).to_be_visible()
     expect(page.get_by_text("Certificate status: Valid", exact=True)).to_be_visible()
-    expect(
-        page.get_by_alt_text("Certificate verification QR code", exact=True)
-    ).to_be_visible()
+    expect(page.get_by_alt_text("Certificate verification QR code", exact=True)).to_be_visible()
     page.goto(base + "/en/learning?organization=" + str(organization_id))
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
@@ -1253,12 +1132,8 @@ with sync_playwright() as playwright:
     assignment_panel = page.locator("section.program-panel").filter(
         has=page.get_by_role("heading", name="Assign mentor", exact=True)
     )
-    assignment_panel.locator('select[name="profile"]').select_option(
-        label="Synthetic E2E"
-    )
-    assignment_panel.locator('select[name="enrollment"]').select_option(
-        label="Synthetic E2E"
-    )
+    assignment_panel.locator('select[name="profile"]').select_option(label="Synthetic E2E")
+    assignment_panel.locator('select[name="enrollment"]').select_option(label="Synthetic E2E")
     assignment_panel.get_by_label("Starts").fill(datetime.now(UTC).date().isoformat())
     assignment_panel.get_by_label("Reason").fill("Approved browser mentor match")
     assignment_panel.get_by_role("button", name="Assign mentor", exact=True).click()
@@ -1289,9 +1164,7 @@ with sync_playwright() as playwright:
         label="Browser customer discovery review"
     )
     notes_panel.locator('select[name="visibility"]').select_option("mentor_private")
-    notes_panel.locator('textarea[name="body"]').fill(
-        "Browser private mentor observation"
-    )
+    notes_panel.locator('textarea[name="body"]').fill("Browser private mentor observation")
     notes_panel.get_by_role("button", name="Save", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
     notes_panel = page.locator("section.program-panel").filter(
@@ -1303,12 +1176,8 @@ with sync_playwright() as playwright:
     notes_panel.locator('select[name="session"]').select_option(
         label="Browser customer discovery review"
     )
-    notes_panel.locator('select[name="visibility"]').select_option(
-        "shared_with_participant"
-    )
-    notes_panel.locator('textarea[name="body"]').fill(
-        "Interview five customers before follow-up."
-    )
+    notes_panel.locator('select[name="visibility"]').select_option("shared_with_participant")
+    notes_panel.locator('textarea[name="body"]').fill("Interview five customers before follow-up.")
     notes_panel.get_by_role("button", name="Save", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
 
@@ -1332,9 +1201,7 @@ with sync_playwright() as playwright:
     action_panel.locator('select[name="assignment"]').select_option(
         label="Synthetic E2E · Synthetic E2E"
     )
-    action_panel.locator('select[name="goal"]').select_option(
-        label="Validate customer demand"
-    )
+    action_panel.locator('select[name="goal"]').select_option(label="Validate customer demand")
     action_panel.get_by_label("Action").fill("Complete customer interviews")
     action_panel.get_by_role("button", name="Save", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
@@ -1365,15 +1232,11 @@ with sync_playwright() as playwright:
 
     page.goto(base + "/en/mentoring?organization=" + str(organization_id))
     expect(page.get_by_role("heading", name="My mentoring", exact=True)).to_be_visible()
-    expect(
-        page.get_by_text("Interview five customers before follow-up.")
-    ).to_be_visible()
+    expect(page.get_by_text("Interview five customers before follow-up.")).to_be_visible()
     expect(page.get_by_text("Browser private mentor observation")).to_have_count(0)
     feedback_form = page.locator('form:has(select[name="rating"])')
     feedback_form.locator('select[name="rating"]').select_option("5")
-    feedback_form.locator('textarea[name="comment"]').fill(
-        "Clear browser-tested guidance."
-    )
+    feedback_form.locator('textarea[name="comment"]').fill("Clear browser-tested guidance.")
     feedback_form.get_by_role("button", name="Save", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
     page.set_viewport_size({"width": 390, "height": 844})
@@ -1388,20 +1251,17 @@ with sync_playwright() as playwright:
     ).to_be_visible()
     plan_panel = page.locator("section.program-panel")
     with page.expect_response(
-        lambda response: response.request.method == "POST"
-        and "/api/business-plans/" in response.url
+        lambda response: (
+            response.request.method == "POST" and "/api/business-plans/" in response.url
+        )
     ) as create_plan_response:
         plan_panel.get_by_role("button", name="Start a plan", exact=True).click()
     assert create_plan_response.value.status == 201
     plan_api = create_plan_response.value.url
     plan_id = UUID(create_plan_response.value.json()["id"])
     plan_section_api = plan_api + "/sections"
-    plan_summary = plan_panel.get_by_role(
-        "textbox", name="Executive summary", exact=True
-    )
-    with page.expect_response(
-        lambda response: response.url == plan_section_api
-    ) as first_plan_save:
+    plan_summary = plan_panel.get_by_role("textbox", name="Executive summary", exact=True)
+    with page.expect_response(lambda response: response.url == plan_section_api) as first_plan_save:
         plan_summary.fill("Browser baseline business plan")
     assert first_plan_save.value.status == 200
     assert first_plan_save.value.json()["version"] == 2
@@ -1412,9 +1272,7 @@ with sync_playwright() as playwright:
     other_plan_page.on("pageerror", lambda error: errors.append(str(error)))
     other_plan_page.goto(plan_url)
     other_plan_panel = other_plan_page.locator("section.program-panel")
-    other_summary = other_plan_panel.get_by_role(
-        "textbox", name="Executive summary", exact=True
-    )
+    other_summary = other_plan_panel.get_by_role("textbox", name="Executive summary", exact=True)
     expect(other_summary).to_have_value("Browser baseline business plan")
     with page.expect_response(
         lambda response: response.url == plan_section_api
@@ -1429,18 +1287,17 @@ with sync_playwright() as playwright:
         other_summary.fill("Browser preserved local business plan")
     assert stale_plan_save.value.status == 409
     assert stale_plan_save.value.request.post_data_json["expected_version"] == 2
-    expect(
-        other_plan_panel.get_by_role("heading", name="Review conflicting edits")
-    ).to_be_visible()
+    expect(other_plan_panel.get_by_role("heading", name="Review conflicting edits")).to_be_visible()
     expect(other_summary).to_have_value("Browser preserved local business plan")
     expect(other_plan_panel.get_by_text("Saved version", exact=True)).to_be_visible()
     expect(other_plan_panel.get_by_text("Your edits", exact=True)).to_be_visible()
     expect(other_plan_panel.locator("pre")).to_have_text(
-        ["Browser remotely saved business plan", "Browser preserved local business plan"]
+        [
+            "Browser remotely saved business plan",
+            "Browser preserved local business plan",
+        ]
     )
-    expect(
-        other_plan_panel.get_by_role("button", name="Submit for mentor review")
-    ).to_be_disabled()
+    expect(other_plan_panel.get_by_role("button", name="Submit for mentor review")).to_be_disabled()
     with other_plan_page.expect_response(
         lambda response: response.url == plan_section_api
     ) as recovered_plan_save:
@@ -1484,14 +1341,14 @@ with sync_playwright() as playwright:
     assert independent_recovery.value.request.post_data_json["expected_version"] == 5
     assert independent_recovery.value.json()["version"] == 6
     expect(other_plan_panel.get_by_role("status")).to_have_text("Saved")
-    expect(
-        other_plan_panel.get_by_role("textbox", name="Problem", exact=True)
-    ).to_have_value("Browser remotely saved customer problem")
+    expect(other_plan_panel.get_by_role("textbox", name="Problem", exact=True)).to_have_value(
+        "Browser remotely saved customer problem"
+    )
     other_plan_page.reload()
     expect(other_summary).to_have_value("Browser preserved local business plan")
-    expect(
-        other_plan_panel.get_by_role("textbox", name="Solution", exact=True)
-    ).to_have_value("Browser independently saved repair solution")
+    expect(other_plan_panel.get_by_role("textbox", name="Solution", exact=True)).to_have_value(
+        "Browser independently saved repair solution"
+    )
 
     # Leave a real overlapping conflict paused so navigation warnings cannot race
     # the autosave debounce. Canceling warnings must keep the unsaved text intact.
@@ -1507,9 +1364,7 @@ with sync_playwright() as playwright:
     ) as navigation_plan_conflict:
         plan_summary.fill("Browser unsaved navigation draft")
     assert navigation_plan_conflict.value.status == 409
-    expect(
-        plan_panel.get_by_role("heading", name="Review conflicting edits")
-    ).to_be_visible()
+    expect(plan_panel.get_by_role("heading", name="Review conflicting edits")).to_be_visible()
     page.once("dialog", lambda dialog: dialog.dismiss())
     with page.expect_event("dialog") as link_warning:
         page.get_by_role("link", name="Your account", exact=True).click()
@@ -1529,9 +1384,7 @@ with sync_playwright() as playwright:
     page.once("dialog", lambda dialog: dialog.accept())
     plan_panel.get_by_role("button", name="Load saved version", exact=True).click()
     expect(plan_summary).to_have_value("Browser saved navigation comparison")
-    expect(
-        plan_panel.get_by_role("heading", name="Review conflicting edits")
-    ).to_have_count(0)
+    expect(plan_panel.get_by_role("heading", name="Review conflicting edits")).to_have_count(0)
     page.reload()
     expect(plan_summary).to_have_value("Browser saved navigation comparison")
     expect(plan_panel.get_by_role("textbox", name="Problem", exact=True)).to_have_value(
@@ -1554,19 +1407,13 @@ with sync_playwright() as playwright:
     page.goto(base + "/en/admin/mentoring?organization=" + str(organization_id))
     page.get_by_role("button", name="End assignment", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
-    profile_panel.locator('select[name="user_id"]').select_option(
-        label="Synthetic Plan Mentor"
-    )
+    profile_panel.locator('select[name="user_id"]').select_option(label="Synthetic Plan Mentor")
     profile_panel.get_by_label("Headline").fill("Independent business-plan mentor")
     profile_panel.get_by_label("Biography").fill("Reviews synthetic plan evidence.")
     profile_panel.get_by_role("button", name="Save", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
-    assignment_panel.locator('select[name="profile"]').select_option(
-        label="Synthetic Plan Mentor"
-    )
-    assignment_panel.locator('select[name="enrollment"]').select_option(
-        label="Synthetic E2E"
-    )
+    assignment_panel.locator('select[name="profile"]').select_option(label="Synthetic Plan Mentor")
+    assignment_panel.locator('select[name="enrollment"]').select_option(label="Synthetic E2E")
     assignment_panel.get_by_label("Starts").fill(datetime.now(UTC).date().isoformat())
     assignment_panel.get_by_label("Reason").fill("Independent B01 review handoff")
     assignment_panel.get_by_role("button", name="Assign mentor", exact=True).click()
@@ -1578,12 +1425,8 @@ with sync_playwright() as playwright:
     plan_mentor_page.goto(base + "/en/account")
     plan_mentor_page.get_by_label("Email", exact=True).fill(plan_mentor_email)
     plan_mentor_page.get_by_label("Password", exact=True).fill(plan_mentor_password)
-    plan_mentor_page.locator("form").get_by_role(
-        "button", name="Sign in", exact=True
-    ).click()
-    expect(
-        plan_mentor_page.get_by_text("Synthetic Plan Mentor", exact=True)
-    ).to_be_visible()
+    plan_mentor_page.locator("form").get_by_role("button", name="Sign in", exact=True).click()
+    expect(plan_mentor_page.get_by_text("Synthetic Plan Mentor", exact=True)).to_be_visible()
     plan_review_url = base + "/en/admin/business-plans?organization=" + str(organization_id)
     plan_root = base + "/api/business-plans/organizations/" + str(organization_id)
     plan_mentor_page.goto(plan_review_url)
@@ -1591,15 +1434,20 @@ with sync_playwright() as playwright:
         plan_mentor_page.get_by_text("No submitted plans are assigned to you.", exact=True)
     ).to_be_visible()
     assert plan_mentor_page.request.get(plan_root + "/mine").status == 403
-    mentor_csrf = plan_mentor_page.request.get(base + "/api/session/csrf").json()[
-        "csrf_token"
-    ]
+    mentor_csrf = plan_mentor_page.request.get(base + "/api/session/csrf").json()["csrf_token"]
     mentor_headers = {"Origin": base, "X-CSRF-Token": mentor_csrf}
-    assert plan_mentor_page.request.post(
-        plan_section_api,
-        data={"expected_version": 7, "section_code": "problem", "body": "Unauthorized"},
-        headers=mentor_headers,
-    ).status == 403
+    assert (
+        plan_mentor_page.request.post(
+            plan_section_api,
+            data={
+                "expected_version": 7,
+                "section_code": "problem",
+                "body": "Unauthorized",
+            },
+            headers=mentor_headers,
+        ).status
+        == 403
+    )
 
     unrelated_context = browser.new_context(viewport={"width": 1280, "height": 900})
     unrelated_page = unrelated_context.new_page()
@@ -1607,30 +1455,34 @@ with sync_playwright() as playwright:
     unrelated_page.goto(base + "/en/account")
     unrelated_page.get_by_label("Email", exact=True).fill(unrelated_email)
     unrelated_page.get_by_label("Password", exact=True).fill(unrelated_password)
-    unrelated_page.locator("form").get_by_role(
-        "button", name="Sign in", exact=True
-    ).click()
-    expect(
-        unrelated_page.get_by_text("Synthetic Unrelated Actor", exact=True)
-    ).to_be_visible()
+    unrelated_page.locator("form").get_by_role("button", name="Sign in", exact=True).click()
+    expect(unrelated_page.get_by_text("Synthetic Unrelated Actor", exact=True)).to_be_visible()
     unrelated_page.goto(plan_url)
     expect(
         unrelated_page.get_by_text("No active enrollment is available.", exact=True)
     ).to_be_visible()
     assert unrelated_page.request.get(plan_root + "/mine").json() == {"entries": []}
-    unrelated_csrf = unrelated_page.request.get(base + "/api/session/csrf").json()[
-        "csrf_token"
-    ]
+    unrelated_csrf = unrelated_page.request.get(base + "/api/session/csrf").json()["csrf_token"]
     unrelated_headers = {"Origin": base, "X-CSRF-Token": unrelated_csrf}
     assert unrelated_page.request.post(plan_api, data={}, headers=unrelated_headers).status == 404
-    assert unrelated_page.request.post(
-        plan_section_api,
-        data={"expected_version": 7, "section_code": "problem", "body": "Unauthorized"},
-        headers=unrelated_headers,
-    ).status == 404
-    assert unrelated_page.request.get(
-        base + "/api/business-plans/organizations/" + str(uuid4()) + "/mine"
-    ).status == 403
+    assert (
+        unrelated_page.request.post(
+            plan_section_api,
+            data={
+                "expected_version": 7,
+                "section_code": "problem",
+                "body": "Unauthorized",
+            },
+            headers=unrelated_headers,
+        ).status
+        == 404
+    )
+    assert (
+        unrelated_page.request.get(
+            base + "/api/business-plans/organizations/" + str(uuid4()) + "/mine"
+        ).status
+        == 403
+    )
     unrelated_page.goto(plan_review_url)
     expect(
         unrelated_page.get_by_text("No submitted plans are assigned to you.", exact=True)
@@ -1705,11 +1557,18 @@ with sync_playwright() as playwright:
         expect(plan_panel.get_by_role("textbox", name=section_label, exact=True)).to_have_attribute(
             "readonly", ""
         )
-    assert page.request.post(
-        plan_section_api,
-        data={"expected_version": plan_version, "section_code": "problem", "body": "Locked"},
-        headers={"Origin": base, "X-CSRF-Token": csrf},
-    ).status == 409
+    assert (
+        page.request.post(
+            plan_section_api,
+            data={
+                "expected_version": plan_version,
+                "section_code": "problem",
+                "body": "Locked",
+            },
+            headers={"Origin": base, "X-CSRF-Token": csrf},
+        ).status
+        == 409
+    )
     forbidden_review = {
         "expected_version": plan_version,
         "decision": "approved",
@@ -1717,17 +1576,23 @@ with sync_playwright() as playwright:
         "comments": {},
     }
     assert unrelated_page.request.get(plan_root + "/assigned").json() == {"submissions": []}
-    assert unrelated_page.request.post(
-        first_review_api, data=forbidden_review, headers=unrelated_headers
-    ).status == 404
+    assert (
+        unrelated_page.request.post(
+            first_review_api, data=forbidden_review, headers=unrelated_headers
+        ).status
+        == 404
+    )
     # Even the former assigned mentor, who also has Super Admin and owns the
     # plan, cannot review it after the assignment has ended.
     assert page.request.get(plan_root + "/assigned").json() == {"submissions": []}
-    assert page.request.post(
-        first_review_api,
-        data=forbidden_review,
-        headers={"Origin": base, "X-CSRF-Token": csrf},
-    ).status == 404
+    assert (
+        page.request.post(
+            first_review_api,
+            data=forbidden_review,
+            headers={"Origin": base, "X-CSRF-Token": csrf},
+        ).status
+        == 404
+    )
 
     plan_mentor_page.reload()
     first_review_card = plan_mentor_page.locator("section.program-panel").filter(
@@ -1759,11 +1624,14 @@ with sync_playwright() as playwright:
     expect(first_review_card.get_by_text(first_review_comment, exact=False)).to_be_visible()
     plan_mentor_page.reload()
     expect(first_review_card.get_by_text(first_review_reason, exact=True)).to_be_visible()
-    assert plan_mentor_page.request.post(
-        first_review_api,
-        data={**forbidden_review, "expected_version": plan_version},
-        headers=mentor_headers,
-    ).status == 409
+    assert (
+        plan_mentor_page.request.post(
+            first_review_api,
+            data={**forbidden_review, "expected_version": plan_version},
+            headers=mentor_headers,
+        ).status
+        == 409
+    )
 
     page.reload()
     expect(plan_panel.get_by_text("Changes requested", exact=True)).to_be_visible()
@@ -1801,7 +1669,10 @@ with sync_playwright() as playwright:
     second_submission_plan = second_submission_response.value.json()
     assert second_submission_plan["version"] == plan_version
     second_submission = second_submission_plan["submissions"][0]
-    revised_plan_snapshot = {**submitted_plan_snapshot, "executive_summary": revised_summary}
+    revised_plan_snapshot = {
+        **submitted_plan_snapshot,
+        "executive_summary": revised_summary,
+    }
     assert second_submission["number"] == 2
     assert second_submission["snapshot"] == revised_plan_snapshot
     assert second_submission_plan["submissions"][1]["snapshot"] == submitted_plan_snapshot
@@ -1861,32 +1732,41 @@ with sync_playwright() as playwright:
         )
     ).to_be_visible()
     expect(plan_panel.get_by_text(second_review_reason, exact=True)).to_be_visible()
-    assert page.request.post(
-        plan_section_api,
-        data={"expected_version": plan_version, "section_code": "problem", "body": "Locked"},
-        headers={"Origin": base, "X-CSRF-Token": csrf},
-    ).status == 409
-    assert page.request.post(
-        plan_api + "/submit",
-        data={"expected_version": plan_version},
-        headers={"Origin": base, "X-CSRF-Token": csrf},
-    ).status == 409
-    assert plan_mentor_page.request.post(
-        second_review_api,
-        data={**forbidden_review, "expected_version": plan_version},
-        headers=mentor_headers,
-    ).status == 409
+    assert (
+        page.request.post(
+            plan_section_api,
+            data={
+                "expected_version": plan_version,
+                "section_code": "problem",
+                "body": "Locked",
+            },
+            headers={"Origin": base, "X-CSRF-Token": csrf},
+        ).status
+        == 409
+    )
+    assert (
+        page.request.post(
+            plan_api + "/submit",
+            data={"expected_version": plan_version},
+            headers={"Origin": base, "X-CSRF-Token": csrf},
+        ).status
+        == 409
+    )
+    assert (
+        plan_mentor_page.request.post(
+            second_review_api,
+            data={**forbidden_review, "expected_version": plan_version},
+            headers=mentor_headers,
+        ).status
+        == 409
+    )
     plan_mentor_context.close()
     unrelated_context.close()
 
     page.goto(base + "/en/businesses?organization=" + str(organization_id))
-    expect(
-        page.get_by_role("heading", name="My business", exact=True, level=1)
-    ).to_be_visible()
+    expect(page.get_by_role("heading", name="My business", exact=True, level=1)).to_be_visible()
     business_panel = page.locator("section.program-panel")
-    business_panel.get_by_label("Business name", exact=True).fill(
-        "Browser repair workshop"
-    )
+    business_panel.get_by_label("Business name", exact=True).fill("Browser repair workshop")
     business_panel.get_by_label("Sector", exact=True).fill("Repair services")
     business_panel.get_by_role("textbox", name="Products and services", exact=True).fill(
         "Synthetic bicycle repair services"
@@ -1894,9 +1774,7 @@ with sync_playwright() as playwright:
     business_panel.get_by_role("button", name="Save business", exact=True).click()
     expect(business_panel.get_by_role("status")).to_have_text("Saved.")
     business_panel.get_by_text("Profile versions", exact=True).click()
-    expect(
-        business_panel.locator("details").last.get_by_role("listitem")
-    ).to_have_count(1)
+    expect(business_panel.locator("details").last.get_by_role("listitem")).to_have_count(1)
 
     page.reload()
     expect(business_panel.get_by_label("Business name", exact=True)).to_have_value(
@@ -1915,15 +1793,11 @@ with sync_playwright() as playwright:
     expect(business_panel.get_by_label("Business name", exact=True)).to_have_value(
         "Browser expanded repair workshop"
     )
-    expect(
-        business_panel.get_by_role("textbox", name="Support needed", exact=True)
-    ).to_have_value(
+    expect(business_panel.get_by_role("textbox", name="Support needed", exact=True)).to_have_value(
         "Synthetic equipment advice"
     )
     business_panel.get_by_text("Profile versions", exact=True).click()
-    expect(
-        business_panel.locator("details").last.get_by_role("listitem")
-    ).to_have_count(2)
+    expect(business_panel.locator("details").last.get_by_role("listitem")).to_have_count(2)
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     page.screenshot(path=str(evidence / "business-tracking-mobile.png"), full_page=True)
@@ -1931,9 +1805,7 @@ with sync_playwright() as playwright:
 
     with Session(engine) as db:
         assignment = db.scalar(
-            select(ReviewAssignment).where(
-                ReviewAssignment.organization_id == organization_id
-            )
+            select(ReviewAssignment).where(ReviewAssignment.organization_id == organization_id)
         )
         assert assignment and assignment.conflict_status == "clear"
         assert assignment.status == "completed"
@@ -1942,13 +1814,9 @@ with sync_playwright() as playwright:
         application = db.scalar(
             select(Application).where(Application.organization_id == organization_id)
         )
-        interview = db.scalar(
-            select(Interview).where(Interview.organization_id == organization_id)
-        )
+        interview = db.scalar(select(Interview).where(Interview.organization_id == organization_id))
         selection_cycle = db.scalar(
-            select(SelectionCycle).where(
-                SelectionCycle.organization_id == organization_id
-            )
+            select(SelectionCycle).where(SelectionCycle.organization_id == organization_id)
         )
         decisions = list(
             db.scalars(
@@ -1965,9 +1833,7 @@ with sync_playwright() as playwright:
         )
         program_sessions = list(
             db.scalars(
-                select(ProgramSession).where(
-                    ProgramSession.organization_id == organization_id
-                )
+                select(ProgramSession).where(ProgramSession.organization_id == organization_id)
             )
         )
         staff_assignment = db.scalar(
@@ -1989,21 +1855,15 @@ with sync_playwright() as playwright:
         outbox = db.scalar(
             select(DomainOutbox).where(DomainOutbox.organization_id == organization_id)
         )
-        course = db.scalar(
-            select(Course).where(Course.organization_id == organization_id)
-        )
+        course = db.scalar(select(Course).where(Course.organization_id == organization_id))
         cohort_course = db.scalar(
             select(CohortCourse).where(CohortCourse.organization_id == organization_id)
         )
         course_enrollment = db.scalar(
-            select(CourseEnrollment).where(
-                CourseEnrollment.organization_id == organization_id
-            )
+            select(CourseEnrollment).where(CourseEnrollment.organization_id == organization_id)
         )
         assert application and application.state == "enrolled"
-        assert (
-            participant and enrollment and enrollment.participant_id == participant.id
-        )
+        assert participant and enrollment and enrollment.participant_id == participant.id
         assert {item.title_en for item in program_sessions} == {
             "Business foundations",
             "Coordinator session",
@@ -2036,9 +1896,7 @@ with sync_playwright() as playwright:
         assert assignment_grade.passed is True
         quiz_attempts = list(
             db.scalars(
-                select(QuizAttempt).where(
-                    QuizAttempt.course_enrollment_id == course_enrollment.id
-                )
+                select(QuizAttempt).where(QuizAttempt.course_enrollment_id == course_enrollment.id)
             )
         )
         assert len(quiz_attempts) == 2
@@ -2059,9 +1917,7 @@ with sync_playwright() as playwright:
             select(Certificate).where(Certificate.organization_id == organization_id)
         )
         attendance_policy = db.scalar(
-            select(AttendancePolicy).where(
-                AttendancePolicy.organization_id == organization_id
-            )
+            select(AttendancePolicy).where(AttendancePolicy.organization_id == organization_id)
         )
         attendance_record = db.scalar(
             select(AttendanceRecord).where(
@@ -2078,20 +1934,14 @@ with sync_playwright() as playwright:
             )
         )
         mentoring_session = db.scalar(
-            select(MentoringSession).where(
-                MentoringSession.organization_id == organization_id
-            )
+            select(MentoringSession).where(MentoringSession.organization_id == organization_id)
         )
         mentoring_notes = list(
             db.scalars(
-                select(MentoringNote).where(
-                    MentoringNote.organization_id == organization_id
-                )
+                select(MentoringNote).where(MentoringNote.organization_id == organization_id)
             )
         )
-        mentoring_goal = db.scalar(
-            select(Goal).where(Goal.organization_id == organization_id)
-        )
+        mentoring_goal = db.scalar(select(Goal).where(Goal.organization_id == organization_id))
         mentoring_action = db.scalar(
             select(ActionItem).where(ActionItem.organization_id == organization_id)
         )
@@ -2099,9 +1949,7 @@ with sync_playwright() as playwright:
             select(FollowUp).where(FollowUp.organization_id == organization_id)
         )
         mentoring_feedback = db.scalar(
-            select(MentoringFeedback).where(
-                MentoringFeedback.organization_id == organization_id
-            )
+            select(MentoringFeedback).where(MentoringFeedback.organization_id == organization_id)
         )
         assert certificate_template and certificate_template.state == "published"
         assert certificate and certificate.status == "valid"
@@ -2164,10 +2012,12 @@ with sync_playwright() as playwright:
         )
         assert [item.number for item in plan_submissions] == [1, 2]
         assert [str(item.id) for item in plan_submissions] == [
-            first_submission["id"], second_submission["id"]
+            first_submission["id"],
+            second_submission["id"],
         ]
         assert [item.snapshot for item in plan_submissions] == [
-            submitted_plan_snapshot, revised_plan_snapshot
+            submitted_plan_snapshot,
+            revised_plan_snapshot,
         ]
         plan_reviews = list(
             db.scalars(
@@ -2180,10 +2030,17 @@ with sync_playwright() as playwright:
                 .order_by(BusinessPlanSubmission.number)
             )
         )
-        assert [item.decision for item in plan_reviews] == ["changes_requested", "approved"]
-        assert [item.reason for item in plan_reviews] == [first_review_reason, second_review_reason]
+        assert [item.decision for item in plan_reviews] == [
+            "changes_requested",
+            "approved",
+        ]
+        assert [item.reason for item in plan_reviews] == [
+            first_review_reason,
+            second_review_reason,
+        ]
         assert [item.comments for item in plan_reviews] == [
-            {"executive_summary": first_review_comment}, {}
+            {"executive_summary": first_review_comment},
+            {},
         ]
         assert {item.reviewer_user_id for item in plan_reviews} == {plan_mentor_user_id}
         plan_owner = db.scalar(select(User).where(User.email == email))
@@ -2193,7 +2050,10 @@ with sync_playwright() as playwright:
         plan_audit = list(
             db.scalars(
                 select(AuditLog)
-                .where(AuditLog.organization_id == organization_id, AuditLog.resource_id == plan_id)
+                .where(
+                    AuditLog.organization_id == organization_id,
+                    AuditLog.resource_id == plan_id,
+                )
                 .order_by(AuditLog.resource_version)
             )
         )
@@ -2201,8 +2061,13 @@ with sync_playwright() as playwright:
         assert [item.action for item in plan_audit] == (
             ["business_plan.created"]
             + ["business_plan.section_saved"] * 26
-            + ["business_plan.submitted", "business_plan.reviewed", "business_plan.section_saved",
-               "business_plan.submitted", "business_plan.reviewed"]
+            + [
+                "business_plan.submitted",
+                "business_plan.reviewed",
+                "business_plan.section_saved",
+                "business_plan.submitted",
+                "business_plan.reviewed",
+            ]
         )
         for item in plan_audit:
             assert item.request_id and item.reason is None
@@ -2213,12 +2078,12 @@ with sync_playwright() as playwright:
             else:
                 assert item.actor_id == plan_owner.id
                 assert item.changed_fields in {
-                    "enrollment_id", "status,submission_number", *section_labels
+                    "enrollment_id",
+                    "status,submission_number",
+                    *section_labels,
                 }
         business_profile = db.scalar(
-            select(BusinessProfile).where(
-                BusinessProfile.organization_id == organization_id
-            )
+            select(BusinessProfile).where(BusinessProfile.organization_id == organization_id)
         )
         assert business_profile
         assert business_profile.name == "Browser expanded repair workshop"
@@ -2242,9 +2107,7 @@ with sync_playwright() as playwright:
     page.screenshot(path=str(evidence / "selection-mobile.png"), full_page=True)
     page.set_viewport_size({"width": 1280, "height": 900})
     page.goto(base + "/en/admin?organization=" + str(uuid4()))
-    expect(
-        page.get_by_text("You do not have access to this workspace.")
-    ).to_be_visible()
+    expect(page.get_by_text("You do not have access to this workspace.")).to_be_visible()
     page.goto(base + "/en/account")
     page.wait_for_load_state("domcontentloaded")
     page.get_by_role("button", name="Sign out all devices", exact=True).click()
@@ -2252,19 +2115,13 @@ with sync_playwright() as playwright:
     assert page.request.get(base + "/api/session/me").status == 401
     page.get_by_role("button", name="Forgot password", exact=True).click()
     page.get_by_label("Email", exact=True).fill(email)
-    page.locator("form").get_by_role(
-        "button", name="Forgot password", exact=True
-    ).click()
+    page.locator("form").get_by_role("button", name="Forgot password", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("message has been queued")
     page.get_by_role("button", name="Reset password", exact=True).click()
-    page.get_by_label("Verification or reset code", exact=True).fill(
-        latest_token("reset")
-    )
+    page.get_by_label("Verification or reset code", exact=True).fill(latest_token("reset"))
     new_password = secrets.token_urlsafe(24)
     page.get_by_label("Password", exact=True).fill(new_password)
-    page.locator("form").get_by_role(
-        "button", name="Reset password", exact=True
-    ).click()
+    page.locator("form").get_by_role("button", name="Reset password", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("You can now sign in")
     page.get_by_role("button", name="Sign in", exact=True).click()
     page.get_by_label("Email", exact=True).fill(email)

@@ -4,6 +4,18 @@ Prerequisites: Python 3.13, Node 24/npm 11, Flutter 3.47.0 (the CI-pinned SDK) a
 
 ### Reproducible host dependencies
 
+Windows Code Integrity note (2026-10-24): this machine blocks the unsigned uv-managed Python executable. Do not disable or bypass that policy. The verified [official PSF Python 3.13.17 installer](https://www.python.org/downloads/release/python-31317/) was installed per user into `.tool-cache/psf-python-3.13.17`, without PATH, launcher, shortcuts or file associations. Its official SHA-256 and valid Python Software Foundation Authenticode signature were checked before execution. The installer may register its per-user installation; the system Python remains unchanged.
+
+The existing dependency environment was preserved using the standard venv upgrade command, followed by the security-fixed bundled pip. Its interpreter now runs Python 3.13.17 with a valid PSF signature; `pip check`, API dependency imports and strict MyPy pass. For this restored workspace, continue using `.venv/Scripts/python.exe` and explicit interpreter selection when invoking uv, rather than selecting its blocked managed interpreter:
+
+```powershell
+.tool-cache/psf-python-3.13.17/python.exe -m venv --upgrade --without-pip .venv
+.venv/Scripts/python.exe -m ensurepip --upgrade
+.venv/Scripts/python.exe -m pip check
+```
+
+For a new environment, install the committed locks as described below using a policy-permitted Python 3.13 interpreter. Do not treat a Python 3.14 check as API runtime acceptance.
+
 Use an isolated `.venv` and the committed locks. Do not replace a system Python installation to satisfy this project's Python 3.13 requirement. On this Windows workspace, uv 0.13.4 is installed under `.tool-cache/bootstrap/bin`; its managed Python installations and cache remain under the ignored `.tool-cache` directory. From the repository root:
 
 ```powershell

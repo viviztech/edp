@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { GET, PATCH, POST } from "./route";
+import { GET, PATCH, POST, PUT } from "./route";
 
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: (name: string) => ({ value: name === "edp_csrf" ? "csrf" : "session" }) }) }));
 vi.mock("../../../../lib/server-api", () => ({ cookieName: "edp_session", csrfName: "edp_csrf", settings: () => ({ api: "http://api", key: "private-key", origin: "http://localhost:3000" }) }));
@@ -14,13 +14,23 @@ function request(path = collection, method = "GET", query = "", body = "{}", ori
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe("CMS editorial and media BFF", () => {
-  it("rejects unsupported media mutations and external paths before forwarding", async () => {
+  it("rejects unbound scanner mutations and external paths before forwarding", async () => {
     const mock = vi.fn(); vi.stubGlobal("fetch", mock);
     const assets = ["organizations", org, "assets"];
-    expect((await POST(request(assets, "POST"), context(assets))).status).toBe(404);
-    expect((await POST(request([...assets, id, "publish"], "POST"), context([...assets, id, "publish"]))).status).toBe(404);
+    expect((await POST(request([...assets,id,"scan"], "POST"), context([...assets,id,"scan"]))).status).toBe(404);
+    expect((await PUT(request([...assets,id,"content"], "PUT"), context([...assets,id,"content"]))).status).toBe(404);
     expect((await GET(request(), context(["https:", "outside.example"]))).status).toBe(404);
     expect(mock).not.toHaveBeenCalled();
+  });
+  it("streams only the scoped raw source with quoted version, origin, and server-held credentials", async()=>{
+    const path=["organizations",org,"assets",id,"source","content"];
+    const mock=vi.fn(async(_url:string,init:RequestInit)=>{expect(await new Response(init.body).text()).toBe("%PDF-synthetic");return Response.json({source:{state:"quarantined"}});});vi.stubGlobal("fetch",mock);
+    const make=(type="application/pdf",origin="http://localhost:3000")=>new NextRequest(`http://localhost:3000/api/cms/${path.join("/")}`,{method:"PUT",body:"%PDF-synthetic",headers:{origin,"x-csrf-token":"csrf","content-type":type,"if-match":'"2"',"X-BFF-Key":"caller-secret"}});
+    expect((await PUT(make("constructor"),context(path))).status).toBe(400);
+    expect((await PUT(make("application/pdf","https://foreign.example"),context(path))).status).toBe(403);
+    expect(mock).not.toHaveBeenCalled();
+    expect((await PUT(make(),context(path))).status).toBe(200);
+    expect(mock.mock.calls[0][1].headers).toMatchObject({"X-BFF-Key":"private-key","X-Browser-Session":"session","If-Match":'"2"'});
   });
   it("rejects invalid routes, queries, origin, JSON and byte size without forwarding", async () => {
     const mock = vi.fn(); vi.stubGlobal("fetch", mock);

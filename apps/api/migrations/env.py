@@ -10,9 +10,11 @@ from app.modules.businesses import models as business_models  # noqa: F401
 from app.modules.cms import models as cms_models  # noqa: F401
 from app.modules.crm import models as crm_models  # noqa: F401
 from app.modules.files import models as file_models  # noqa: F401
+from app.modules.helpdesk import file_models as helpdesk_file_models  # noqa: F401
 from app.modules.helpdesk import models as helpdesk_models  # noqa: F401
 from app.modules.identity import models as identity_models  # noqa: F401
 from app.modules.knowledge import models as knowledge_models  # noqa: F401
+from app.modules.lms import file_models as lms_file_models  # noqa: F401
 from app.modules.lms import models as lms_models  # noqa: F401
 from app.modules.mentoring import models as mentoring_models  # noqa: F401
 from app.modules.meta import models as meta_models  # noqa: F401

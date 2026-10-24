@@ -12,5 +12,15 @@ describe("helpdesk fixed routing", () => {
   it("bounds filters/cursors and rejects duplicate or unsupported parameters", () => {
     expect(helpdeskQuery(new URLSearchParams("queue=unassigned&status=open&category=banking&priority=high&limit=100"))).toContain("queue=unassigned");
     for (const query of ["limit=101", "status=deleted", "queue=all", "cursor=invalid", "status=open&status=closed", "user=other", "limit=0", "limit=01"]) expect(helpdeskQuery(new URLSearchParams(query))).toBeNull();
+    expect(helpdeskQuery(new URLSearchParams("constructor=value"))).toBeNull();
+  });
+  it("closes raw bytes and staged metadata to exact typed file routes and paging only",()=>{
+    const files=["organizations",org,"tickets",ticket,"files"];
+    for(const [method,suffix] of [["GET",[]],["POST",[]],["GET",[ticket]],["DELETE",[ticket]],["PUT",[ticket,"content"]],["GET",[ticket,"content"]]] as const)expect(helpdeskPath([...files,...suffix],method)).toContain("/files");
+    for(const [method,suffix] of [["POST",[ticket,"scan"]],["POST",[ticket,"publish"]],["DELETE",[ticket,"content"]],["PUT",[]]] as const)expect(helpdeskPath([...files,...suffix],method)).toBeNull();
+    expect(helpdeskQuery(new URLSearchParams(`limit=25&cursor=${ticket}`),files,"GET")).toContain("limit=25");
+    for(const query of ["internal=true","owner=other","queue=organization","status=clean","cursor=bad","limit=1&limit=2"])expect(helpdeskQuery(new URLSearchParams(query),files,"GET")).toBeNull();
+    expect(helpdeskQuery(new URLSearchParams("limit=25"),[...files,ticket,"content"],"GET")).toBeNull();
+    expect(helpdeskQuery(new URLSearchParams("limit=25"),files,"POST")).toBeNull();
   });
 });

@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { validMutation } from "../../../../lib/bff-security";
-import { selectionAdminPath } from "../../../../lib/selection-security";
+import { selectionAdminPath, selectionQuery } from "../../../../lib/selection-security";
+import { applicationFileTransport } from "../../../../lib/application-file-transport";
 import { cookieName, csrfName, settings } from "../../../../lib/server-api";
 
 const fail = (code: string, status: number) => NextResponse.json(
@@ -12,8 +13,14 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
   try {
     const config = settings();
     const jar = await cookies();
-    const path = selectionAdminPath((await context.params).path, request.method);
+    const segments = (await context.params).path;
+    const path = selectionAdminPath(segments, request.method);
     if (!path) return fail("not_found", 404);
+    const query = selectionQuery(segments, request.method, request.nextUrl.searchParams);
+    if (query === null || request.nextUrl.search.length > 1024) return fail("invalid_request", 400);
+    if (request.method === "GET" && segments.length === 7 && segments[4] === "documents" && segments[6] === "content") {
+      return applicationFileTransport(request, config.api + "/api/v1" + path, { "X-BFF-Key": config.key, "X-Browser-Session": jar.get(cookieName)?.value ?? "" }, segments[5]);
+    }
     let body: string | undefined;
     if (request.method !== "GET") {
       if (!validMutation(request.headers.get("origin"), config.origin, jar.get(csrfName)?.value, request.headers.get("x-csrf-token"))) return fail("csrf_failed", 403);
@@ -32,7 +39,7 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
       body = Buffer.concat(chunks).toString("utf8");
       try { JSON.parse(body); } catch { return fail("invalid_request", 400); }
     }
-    const upstream = await fetch(config.api + "/api/v1" + path, {
+    const upstream = await fetch(config.api + "/api/v1" + path + query, {
       method: request.method, body, cache: "no-store", signal: AbortSignal.timeout(15000),
       headers: {
         "Content-Type": "application/json", "X-BFF-Key": config.key,

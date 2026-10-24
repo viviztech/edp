@@ -5,9 +5,14 @@ import qrcode
 import qrcode.image.svg
 from fastapi import APIRouter, Path, Request
 from fastapi.responses import FileResponse, Response
+from starlette.concurrency import run_in_threadpool
 
-from app.modules.identity.routes import DB, Principal
+from app.modules.files.http import private_download
+from app.modules.files.runtime import get_private_storage
+from app.modules.identity.routes import DB, Principal, principal
+from app.modules.identity.security import AuthError
 from app.modules.lms import service
+from app.modules.lms.material_access import SharedMaterial
 from app.modules.lms.schemas import (
     AssignmentCreate,
     AssignmentGradeCommand,
@@ -240,15 +245,51 @@ def trainer_material_access(
     )
 
 
-@router.get("/material-delivery/{token}", response_class=FileResponse)
-def material_delivery(
+@router.get("/material-delivery/{token}", response_class=Response)
+async def material_delivery(
     org: UUID,
     token: str,
     request: Request,
     db: DB,
     identity: Principal,
-) -> FileResponse:
-    material = service.deliver_material(db, org, token, identity[0], request.state.request_id)
+) -> Response:
+    material = await run_in_threadpool(
+        service.deliver_material, db, org, token, identity[0], request.state.request_id
+    )
+    if isinstance(material, SharedMaterial):
+
+        def snapshot() -> Response:
+            return private_download(get_private_storage(), material.object, material.file_id)
+
+        response = await run_in_threadpool(snapshot)
+        try:
+
+            def reauthorize() -> None:
+                from app.modules.lms.file_service import material_reference
+
+                db.expire_all()
+                actor, _ = principal(request, db)
+                current = service.authorized_material(db, org, token, actor)
+                if material_reference(db, org, current) != (material.object, material.file_id):
+                    raise AuthError("file_integrity_error", 503)
+                service._audit(
+                    db,
+                    actor,
+                    org,
+                    current.id,
+                    "lms.material.delivered",
+                    request.state.request_id,
+                    1,
+                    "course_id,material_id",
+                )
+                service._commit(db)
+
+            await run_in_threadpool(reauthorize)
+            return response
+        except BaseException:
+            if response.background:
+                await response.background()
+            raise
     return FileResponse(
         material.path,
         media_type=material.media_type,

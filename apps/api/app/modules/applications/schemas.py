@@ -4,6 +4,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.modules.applications.document_schemas import (
+    DocumentRequirementInput,
+    DocumentRequirementView,
+)
+
 FieldType = Literal["text", "textarea", "number", "date", "boolean"]
 DefinitionState = Literal["draft", "published", "retired"]
 AcknowledgementKind = Literal["declaration", "consent"]
@@ -75,6 +80,9 @@ class FormView(BaseModel):
     title_ta: str
     fields: list[FieldView]
     acknowledgements: list[AcknowledgementView]
+    document_requirements: list[DocumentRequirementView] = Field(default_factory=list)
+    collection_enabled: bool = False
+    max_upload_bytes: int = 10485760
 
 
 class DefinitionFieldInput(BaseModel):
@@ -112,6 +120,9 @@ class DefinitionContent(BaseModel):
     title_ta: str = Field(min_length=1, max_length=160)
     fields: list[DefinitionFieldInput] = Field(min_length=1, max_length=100)
     acknowledgements: list[AcknowledgementInput] = Field(default_factory=list, max_length=20)
+    document_requirements: list[DocumentRequirementInput] = Field(
+        default_factory=list, max_length=20
+    )
 
     @field_validator("title_en", "title_ta")
     @classmethod
@@ -126,6 +137,9 @@ class DefinitionContent(BaseModel):
             raise ValueError("Duplicate field key")
         if len(acknowledgement_keys) != len(set(acknowledgement_keys)):
             raise ValueError("Duplicate acknowledgement key")
+        document_keys = [item.key for item in self.document_requirements]
+        if len(document_keys) != len(set(document_keys)):
+            raise ValueError("Duplicate document requirement key")
         return self
 
 

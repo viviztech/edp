@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applicationPath, applicationQuery } from "./application-security";
+import { applicationDocumentContent, applicationPath, applicationQuery } from "./application-security";
 
 const id = "11111111-1111-4111-8111-111111111111";
 
@@ -25,5 +25,21 @@ describe("applicationPath", () => {
     expect(applicationPath(["organizations", id, "all"], "GET")).toBeNull();
     expect(applicationPath(["organizations", "invalid", "cycles"], "GET")).toBeNull();
     expect(applicationPath(["organizations", id, "cycles", id, "application"], "POST")).toBeNull();
+  });
+  it("closes document metadata and bytes to typed organization/application bindings", () => {
+    const documents = ["organizations", id, "applications", id, "documents"];
+    for (const [method, suffix] of [["GET", []], ["POST", []], ["GET", [id]], ["DELETE", [id]], ["GET", [id, "content"]], ["PUT", [id, "content"]]] as const) {
+      expect(applicationPath([...documents, ...suffix], method)).toContain("/applications/");
+    }
+    expect(applicationDocumentContent([...documents, id, "content"])).toBe(true);
+    expect(applicationDocumentContent([...documents, id])).toBe(false);
+    for (const suffix of ["upload", "scan", "publish", "storage", "activate"]) {
+      expect(applicationPath([...documents, id, suffix], "POST")).toBeNull();
+    }
+    expect(applicationPath([...documents, id, "content"], "DELETE")).toBeNull();
+    expect(applicationPath(["organizations", id, "files", id, "content"], "GET")).toBeNull();
+    expect(applicationQuery(documents, "GET", new URLSearchParams(`limit=25&cursor=${id}`))).toContain("limit=25");
+    expect(applicationQuery(documents, "GET", new URLSearchParams("include_removed=true"))).toBeNull();
+    expect(applicationQuery([...documents, id, "content"], "GET", new URLSearchParams("download=true"))).toBeNull();
   });
 });

@@ -9,6 +9,10 @@ export function learningPath(path: string[], method: string): string | null {
       `organizations/${id}/my-learning`,
       `organizations/${id}/trainer-delivery`,
       `organizations/${id}/material-delivery/${token}`,
+      `organizations/${id}/my-learning/${id}/assignments/${id}/files(?:/${id}(?:/content)?)?`,
+      `organizations/${id}/trainer-delivery/${id}/assignment-submissions/${id}/files(?:/${id}/content)?`,
+      `organizations/${id}/courses/${id}/assignments/${id}/file-rule`,
+      `organizations/${id}/courses/${id}/material-files(?:/${id}(?:/content)?)?`,
     ],
     POST: [
       `organizations/${id}`,
@@ -24,9 +28,27 @@ export function learningPath(path: string[], method: string): string | null {
       `organizations/${id}/trainer-delivery/${id}/assignment-submissions/${id}/grade`,
       `organizations/${id}/my-learning/${id}/materials/${id}/access`,
       `organizations/${id}/trainer-delivery/${id}/materials/${id}/access`,
+      `organizations/${id}/my-learning/${id}/assignments/${id}/files`,
+      `organizations/${id}/material-files`,
+    ],
+    PUT: [
+      `organizations/${id}/my-learning/${id}/assignments/${id}/files/${id}/content`,
+      `organizations/${id}/courses/${id}/material-files/${id}/content`,
+      `organizations/${id}/courses/${id}/assignments/${id}/file-rule`,
+    ],
+    DELETE: [
+      `organizations/${id}/my-learning/${id}/assignments/${id}/files/${id}`,
+      `organizations/${id}/courses/${id}/material-files/${id}`,
     ],
   };
   return rules[method]?.some((rule) => new RegExp(`^${rule}$`).test(value))
     ? `/courses/${value}`
     : null;
+}
+
+export function learningQuery(path: string, query: URLSearchParams): boolean {
+  const paged = /\/courses\/[^/]+\/material-files$/.test(path);
+  return [...query.keys()].every((key) => paged && ["cursor", "limit"].includes(key) && query.getAll(key).length === 1)
+    && (!query.has("cursor") || new RegExp(`^${id}$`).test(query.get("cursor") ?? ""))
+    && (!query.has("limit") || /^(?:[1-9][0-9]?|100)$/.test(query.get("limit") ?? ""));
 }

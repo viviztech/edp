@@ -25,6 +25,6 @@ export default async function MediaAdminPage({ params, searchParams }: {
   return <main id="main" tabIndex={-1} className="content-admin-main">
     <StaffModuleNav locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="media" />
     <h1>{text.title}</h1><p>{text.intro}</p>
-    <MediaMetadata key={`${locale}-${grant.organization_id}`} org={grant.organization_id} locale={locale} />
+    <MediaMetadata key={`${locale}-${grant.organization_id}`} org={grant.organization_id} locale={locale} permissions={grant.permissions} />
   </main>;
 }

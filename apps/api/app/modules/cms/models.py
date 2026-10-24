@@ -147,7 +147,37 @@ class Asset(Record, Base):
     scan_status: Mapped[str] = mapped_column(String(16), default="pending")
     visibility: Mapped[str] = mapped_column(String(16), default="private")
     title: Mapped[str] = mapped_column(String(200))
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    client_request_id: Mapped[UUID | None] = mapped_column(nullable=True)
+    request_digest: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    public_file_id: Mapped[UUID | None] = mapped_column(nullable=True)
+    public_storage_version: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    public_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    public_byte_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
     __table_args__ = (
+        UniqueConstraint("id", "organization_id"),
+        UniqueConstraint("organization_id", "client_request_id"),
+        ForeignKeyConstraint(
+            ["public_file_id", "id", "organization_id"],
+            [
+                "cms_asset_files.file_id",
+                "cms_asset_files.asset_id",
+                "cms_asset_files.organization_id",
+            ],
+            name="fk_cms_public_asset_binding",
+            use_alter=True,
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("version > 0", name="cms_asset_version"),
+        CheckConstraint(
+            "(public_file_id IS NULL AND public_storage_version IS NULL AND public_sha256 IS NULL "
+            "AND public_byte_size IS NULL) OR (public_file_id IS NOT NULL "
+            "AND public_storage_version IS NOT NULL AND length(public_storage_version) > 0 "
+            "AND public_sha256 IS NOT NULL AND public_byte_size IS NOT NULL "
+            "AND public_sha256 ~ '^[0-9a-f]{64}$' "
+            "AND public_byte_size > 0)",
+            name="cms_asset_public_evidence",
+        ),
         CheckConstraint(
             "scan_status IN ('pending','clean','infected','rejected')", name="cms_asset_scan"
         ),
@@ -158,6 +188,41 @@ class Asset(Record, Base):
             name="cms_asset_type",
         ),
         Index("ix_cms_assets_public", "organization_id", "visibility", "scan_status"),
+    )
+
+
+class AssetFile(Record, Base):
+    """Immutable typed bytes; both roles share the asset's policy count context."""
+
+    __tablename__ = "cms_asset_files"
+    asset_id: Mapped[UUID] = mapped_column()
+    organization_id: Mapped[UUID] = mapped_column()
+    owner_person_id: Mapped[UUID] = mapped_column()
+    purpose: Mapped[str] = mapped_column(String(32), default="cms_asset")
+    file_id: Mapped[UUID] = mapped_column()
+    role: Mapped[str] = mapped_column(String(24))
+    __table_args__ = (
+        UniqueConstraint("asset_id", "role"),
+        UniqueConstraint("file_id", "asset_id", "organization_id"),
+        ForeignKeyConstraint(
+            ["asset_id", "organization_id"],
+            ["cms_assets.id", "cms_assets.organization_id"],
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["file_id", "organization_id", "owner_person_id", "purpose", "asset_id"],
+            [
+                "file_objects.id",
+                "file_objects.organization_id",
+                "file_objects.owner_person_id",
+                "file_objects.purpose",
+                "file_objects.resource_id",
+            ],
+            name="fk_cms_asset_file_context",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("purpose = 'cms_asset'", name="cms_asset_file_purpose"),
+        CheckConstraint("role IN ('source','public_derivative')", name="cms_asset_file_role"),
     )
 
 

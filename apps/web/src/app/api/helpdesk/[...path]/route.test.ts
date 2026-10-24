@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { GET, POST } from "./route";
+import { DELETE, GET, POST, PUT } from "./route";
+import { helpdeskFileMaxBytes } from "../../../../lib/helpdesk-file-transport";
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: (name: string) => ({ value: name === "edp_csrf" ? "csrf" : "session" }) }) }));
 vi.mock("../../../../lib/server-api", () => ({ cookieName: "edp_session", csrfName: "edp_csrf", settings: () => ({ api: "http://api", key: "private-key", origin: "http://localhost:3000" }) }));
 const org = "11111111-1111-4111-8111-111111111111";
@@ -51,5 +52,26 @@ describe("helpdesk BFF", () => {
   it("returns an unavailable response for upstream network failure", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("timeout")));
     expect((await POST(request("{}"), context())).status).toBe(503);
+  });
+  it("streams only exact scoped file content with MIME/version, CSRF and server credentials",async()=>{
+    const parts=["organizations",org,"tickets",ticket,"files",ticket,"content"];
+    const mock=vi.fn(async(_url:string,init:RequestInit)=>{expect(await new Response(init.body).text()).toBe("%PDF-synthetic");return Response.json({state:"staged",file:{state:"quarantined"}});});vi.stubGlobal("fetch",mock);
+    const make=(media="application/pdf",origin="http://localhost:3000",extra:Record<string,string>={})=>new NextRequest(`http://localhost:3000/api/helpdesk/${parts.join("/")}`,{method:"PUT",body:"%PDF-synthetic",headers:{origin,"content-type":media,"if-match":'"3"',"x-csrf-token":"csrf","X-BFF-Key":"browser",...extra}});
+    for(const media of ["constructor","toString","__proto__","text/html"]){expect((await PUT(make(media),context(parts))).status).toBe(400);}
+    expect((await PUT(make("application/pdf","https://other.example"),context(parts))).status).toBe(403);
+    expect((await PUT(make("application/pdf",undefined,{"if-match":"3"}),context(parts))).status).toBe(400);
+    expect((await PUT(make("application/pdf",undefined,{"content-encoding":"gzip"}),context(parts))).status).toBe(400);
+    expect((await PUT(make("application/pdf",undefined,{"content-length":String(helpdeskFileMaxBytes+1)}),context(parts))).status).toBe(413);
+    expect(mock).not.toHaveBeenCalled();
+    expect((await PUT(make(),context(parts))).status).toBe(200);expect(mock.mock.calls[0][1].headers).toMatchObject({"X-BFF-Key":"private-key","X-Browser-Session":"session","If-Match":'"3"'});
+  });
+  it("uses binding-based safe download names and keeps file removal a bounded JSON command",async()=>{
+    const parts=["organizations",org,"tickets",ticket,"files",ticket];
+    const mock=vi.fn().mockResolvedValueOnce(new Response("private file",{headers:{"content-type":"text/plain; charset=utf-8","content-length":"12","set-cookie":"secret=value","content-disposition":"inline; filename=provider-secret"}})).mockResolvedValueOnce(Response.json({state:"removed",version:4}));vi.stubGlobal("fetch",mock);
+    const result=await GET(new NextRequest(`http://localhost:3000/api/helpdesk/${[...parts,"content"].join("/")}`),context([...parts,"content"]));
+    expect(await result.text()).toBe("private file");expect(result.headers.get("content-disposition")).toBe(`attachment; filename="helpdesk-file-${ticket}.txt"`);expect(result.headers.has("set-cookie")).toBe(false);expect(result.headers.get("content-security-policy")).toContain("sandbox");
+    const remove=new NextRequest(`http://localhost:3000/api/helpdesk/${parts.join("/")}`,{method:"DELETE",body:'{"expected_version":3}',headers:{origin:"http://localhost:3000","x-csrf-token":"csrf","content-type":"application/json"}});
+    expect((await DELETE(remove,context(parts))).status).toBe(200);expect(mock.mock.calls[1][1]).toMatchObject({method:"DELETE",body:'{"expected_version":3}'});
+    expect((await GET(new NextRequest(`http://localhost:3000/api/helpdesk/${parts.join("/")}?internal=true`),context(parts))).status).toBe(400);
   });
 });

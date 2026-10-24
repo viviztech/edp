@@ -33,6 +33,7 @@ function mockApi(options: { ticket?: Ticket; empty?: boolean; stale?: boolean; l
       if (path.endsWith("/assignees")) return response({ items: [{ id: user, display_name: "Support executive" }], next_cursor: null });
       if (path.endsWith("/notices")) return response({ items: [{ id, ticket_id: id, event: "shared_reply", ticket_version: 2, version: 1, read_at: null, created_at: time }], next_cursor: null });
       if (path.endsWith("/preference")) return response(preference);
+      if (path.endsWith("/files")) return response({ collection_enabled:false, max_upload_bytes:10485760, policy:null, items:[], next_cursor:null });
     }
     const body = JSON.parse(String(init?.body)) as Record<string, unknown>; writes.push({ path, body });
     expect(new Headers(init?.headers).get("x-csrf-token")).toBe("csrf");

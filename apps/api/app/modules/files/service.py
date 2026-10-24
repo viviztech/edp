@@ -354,8 +354,20 @@ def _owned(
 
 
 def create_file(
-    db: Session, ctx: AuthorizedFileContext, actor: User, data: FileCreate, request_id: str
+    db: Session,
+    ctx: AuthorizedFileContext,
+    actor: User,
+    data: FileCreate,
+    request_id: str,
+    *,
+    commit: bool = True,
+    allow_retired_policy: bool = False,
 ) -> FileView:
+    """Create after domain authorization; a domain unit of work may own the commit.
+
+    Retired editions require the domain to prove an immutable published policy pin.
+    These internal switches must never be copied from a browser request.
+    """
     _context(ctx, actor)
     if not db.scalar(
         select(Organization.id)
@@ -383,8 +395,11 @@ def create_file(
         if existing.request_digest != fingerprint:
             raise AuthError("idempotency_conflict", 409)
         return file_view(existing)
-    policy = _policy(db, ctx.organization_id, data.policy_id)
-    if policy.state != "published" or policy.purpose != ctx.purpose:
+    policy = _policy(db, ctx.organization_id, data.policy_id, True)
+    usable = policy.state == "published" or (
+        allow_retired_policy and policy.state == "retired" and policy.published_at is not None
+    )
+    if not usable or policy.purpose != ctx.purpose:
         raise AuthError("file_policy_unavailable", 409)
     if data.media_type not in policy.allowed_mime_types or data.byte_size > policy.max_file_bytes:
         raise AuthError("file_policy_rejected", 422)
@@ -423,7 +438,10 @@ def create_file(
     db.add(row)
     db.flush()
     _audit(db, row, actor, "object.created", request_id, "purpose,policy_id,state")
-    _commit(db)
+    if commit:
+        _commit(db)
+    else:
+        db.flush()
     return file_view(row)
 
 
@@ -732,6 +750,8 @@ def freeze_evidence(
     file_id: UUID,
     expected_version: int,
     request_id: str,
+    *,
+    commit: bool = True,
 ) -> FileView:
     row = _owned(db, ctx, actor, file_id, True)
     if row.version != expected_version or row.state != "clean":
@@ -739,7 +759,10 @@ def freeze_evidence(
     row.evidence_frozen = True
     _touch(row)
     _audit(db, row, actor, "evidence.frozen", request_id, "evidence_frozen,version")
-    _commit(db)
+    if commit:
+        _commit(db)
+    else:
+        db.flush()
     return file_view(row)
 
 

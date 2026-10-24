@@ -4,7 +4,7 @@ Choose Your account, then Create account. Supply name, email and a 12?128 charac
 
 Forgot password requests a reset message without revealing whether an email is registered. Reset password consumes its code and signs out all existing sessions. Account shows active devices; sign out one device or all devices. An expired/revoked session requires sign-in again. After a network failure, reconnect before assuming remote device revocation succeeded.
 
-Program applications are available before enrollment. Participant services become available according to your current organization permissions and enrollment. Account links preserve the selected organization and language. Use synthetic information during local acceptance; secure supporting-document uploads are not available yet.
+Program applications are available before enrollment. Participant services become available according to your current organization permissions and enrollment. Account links preserve the selected organization and language. Use synthetic information during local acceptance. Application document controls appear only for configured requirements when the organization's file service is enabled.
 
 Public information: use Pages on web or the mobile home screen to browse published information in the selected language. Missing translations are unavailable; drafts and archived content are never shown. No sign-in is needed.
 
@@ -14,6 +14,16 @@ Public information: use Pages on web or the mobile home screen to browse publish
 Choose **Apply** from the public website, or open applications from your account. Registration, verification and sign-in preserve a valid chosen organization/intake. An ordinary applicant does not need a staff role. Choose an open intake, start its application and save your draft. Complete the required fields, review the declarations/consents and submit explicitly when ready. Submission records an application number and freezes the submitted answers.
 
 **Saved and submitted applications** lists your own records independently of currently open intakes. Use its continuation controls to see later records, continue an available draft or view a submitted receipt and status history. Intake closure does not remove your earlier application; a closed draft is read-only. Scores, reviewer comments and internal decision reasons are never shown. If a chosen intake is unavailable, the page does not silently substitute a different application. Refresh and check the selected record after an interrupted or stale request before continuing.
+
+## Attach application documents
+
+The application shows its own document labels, instructions, notice, allowed formats, file counts and current upload limit. Follow those configured requirements; the platform does not assume a required document list. An unavailable collection notice means files cannot currently be uploaded. Save your application answers before changing documents. Draft saving does not require accepting the final declarations yet.
+
+Choose **Upload document**, select the file and explicitly upload it. Keep the page open while it is registered and verified. **Recover the same document registration** recovers an interrupted registration without creating a duplicate. **Read current document** checks an interrupted upload before another command; the page never resends bytes automatically. Continue a registered upload only through its explicit continuation control.
+
+Files awaiting scanning, rejected or unsafe files, and files unavailable under retention rules cannot satisfy submission. Refresh document status to check progress. **Replace document** creates a new identity; **Remove document** removes it from the draft while its stored bytes remain governed by retention. Neither control is available after submission. An unexpected application-version change preserves your entered answers; reload only after reviewing and confirming any unsaved changes you intend to discard.
+
+Complete the required clean documents, then review and accept the final declarations/consents before submitting. The receipt records immutable document versions, byte counts and digests. Download access is checked again each time and may become unavailable after expiry or another access change.
 
 ## Send a public enquiry
 
@@ -33,7 +43,13 @@ Start the assigned course and complete any prerequisite lesson shown for the qui
 
 ## Submit an assignment
 
-Start the course and complete the assignment lesson's prerequisites. Enter the requested text response and submit it when ready. A submitted revision cannot be edited. Wait for trainer feedback before sending another revision; the page shows the score, pass state, feedback and remaining submissions. File attachments are not available in this release. Assignment results do not yet change the course completion percentage.
+Start the course and complete the assignment lesson's prerequisites. Enter the requested text response. **Assignment files** shows any approved file rule, notice, formats, upload limit and counts. Assignments without a file rule remain text-only, including when file collection is disabled. Assignment results remain separate from the lesson completion percentage.
+
+For configured attachments, select an allowed file and choose **Upload selected file**. Wait for a verified clean result, then explicitly check **Include file** for each file you intend to submit. Uploading alone does not include it. Meet the displayed minimum and maximum before submitting. Pending scans, unsafe files and expired evidence cannot satisfy the requirement or be downloaded. **Refresh saved files** checks progress; automatic scan checks stop after a bounded number of reads.
+
+Keep the original selected file after an interrupted request. **Retry the same metadata request** recovers its original registration. **Review saved file** checks whether bytes were received; choose **Resend the reviewed file** only after reviewing saved state. An active upload lease may prevent an immediate resend. **Resume this saved upload** requires the exact original type, size and digest. Remove an unused staged file before starting a replacement. Your response text remains in the form during file recovery.
+
+A submitted revision cannot be edited. Its file receipt records the immutable version and digest. Wait for trainer feedback before sending another revision; the page shows the score, pass state, feedback and remaining submissions. After an uncertain submission response, read the saved state before submitting again. Later file access still depends on current enrollment, retention and the enabled file service.
 
 ## Certificate eligibility and verification
 
@@ -68,6 +84,10 @@ Progress is your report of external activity. The platform does not submit an ap
 ## Get help and track business progress
 
 Open **Helpdesk** from your participant schedule, choose a category and priority, describe the issue and create a ticket. You may attach up to three small plain-text `.txt` files (32 KiB each). Avoid passwords, identity numbers or banking details. The ticket number identifies your request. Shared replies and history appear in its details; internal staff notes remain private. Download files through their ticket links.
+
+For other approved file formats, create the ticket first, then use **Secure attachments** in its reply. Collection requires an enabled service and published policy. Read the notice and limits, choose a file and upload it privately. Wait for a clean scan, then explicitly select the file before sending the reply. Uploading alone does not send it. Files retain their original policy edition; each reply selects files from one edition. Pending or unavailable scanning never authorizes attachment or download.
+
+If an upload response is lost, keep the selected file and use **Retry the same upload** to check saved state first. A stale reply retains your text: refresh the ticket, review the latest conversation and send explicitly. Remove an unused staged file; posted evidence cannot be replaced. Files appear only through currently authorized ticket links. Existing TXT attachments continue to work when secure collection is disabled.
 
 Reply when more information is requested. When staff resolve the ticket, close it if the issue is settled. To reopen a resolved or closed ticket, provide a reason; the request returns to the unassigned queue while retaining its history. **Ticket updates** shows in-app notices; mark them read or turn off future notices in this workspace. These are not email/SMS/push messages.
 

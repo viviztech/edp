@@ -111,6 +111,13 @@ class Application(Record, Base):
     __table_args__ = (
         UniqueConstraint("id", "form_id"),
         UniqueConstraint("id", "organization_id", name="uq_application_organization_scope"),
+        UniqueConstraint(
+            "id",
+            "form_id",
+            "organization_id",
+            "person_id",
+            name="uq_application_document_owner_scope",
+        ),
         UniqueConstraint("person_id", "cycle_id", name="uq_application_person_cycle"),
         CheckConstraint(
             "state IN ('draft','submitted','under_review','shortlisted',"
@@ -225,4 +232,175 @@ class ApplicationStatusHistory(Record, Base):
             name="application_history_to_state",
         ),
         CheckConstraint("application_version > 0", name="application_history_version"),
+    )
+
+
+class DocumentRequirement(Record, Base):
+    __tablename__ = "application_document_requirements"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    form_id: Mapped[UUID] = mapped_column(index=True)
+    requirement_key: Mapped[str] = mapped_column(String(80))
+    label_en: Mapped[str] = mapped_column(String(200))
+    label_ta: Mapped[str] = mapped_column(String(200))
+    instructions_en: Mapped[str] = mapped_column(String(2000))
+    instructions_ta: Mapped[str] = mapped_column(String(2000))
+    file_policy_id: Mapped[UUID] = mapped_column()
+    purpose: Mapped[str] = mapped_column(String(32), default="application_document")
+    min_files: Mapped[int] = mapped_column(Integer)
+    max_files: Mapped[int] = mapped_column(Integer)
+    position: Mapped[int] = mapped_column(Integer)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["form_id", "organization_id"],
+            ["application_forms.id", "application_forms.organization_id"],
+            name="fk_document_requirement_form_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["file_policy_id", "organization_id", "purpose"],
+            ["file_policies.id", "file_policies.organization_id", "file_policies.purpose"],
+            name="fk_document_requirement_policy_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("form_id", "requirement_key"),
+        UniqueConstraint("form_id", "position"),
+        UniqueConstraint(
+            "id",
+            "form_id",
+            "organization_id",
+            "file_policy_id",
+            name="uq_document_requirement_scope",
+        ),
+        CheckConstraint("purpose = 'application_document'", name="document_requirement_purpose"),
+        CheckConstraint(
+            "min_files BETWEEN 0 AND 100 AND max_files BETWEEN 1 AND 100 "
+            "AND min_files <= max_files AND position >= 0",
+            name="document_requirement_counts",
+        ),
+        CheckConstraint(
+            "requirement_key ~ '^[a-z][a-z0-9_]*$' AND length(trim(label_en)) > 0 "
+            "AND length(trim(label_ta)) > 0 AND length(trim(instructions_en)) > 0 "
+            "AND length(trim(instructions_ta)) > 0",
+            name="document_requirement_text",
+        ),
+    )
+
+
+class ApplicationDocument(Record, Base):
+    __tablename__ = "application_documents"
+    organization_id: Mapped[UUID] = mapped_column(index=True)
+    application_id: Mapped[UUID] = mapped_column(index=True)
+    form_id: Mapped[UUID] = mapped_column()
+    requirement_id: Mapped[UUID] = mapped_column()
+    owner_person_id: Mapped[UUID] = mapped_column()
+    file_policy_id: Mapped[UUID] = mapped_column()
+    file_id: Mapped[UUID] = mapped_column(unique=True)
+    purpose: Mapped[str] = mapped_column(String(32), default="application_document")
+    client_request_id: Mapped[UUID] = mapped_column()
+    request_digest: Mapped[str] = mapped_column(String(64))
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    replaced_by_id: Mapped[UUID | None] = mapped_column(nullable=True)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["application_id", "form_id", "organization_id", "owner_person_id"],
+            [
+                "applications.id",
+                "applications.form_id",
+                "applications.organization_id",
+                "applications.person_id",
+            ],
+            name="fk_application_document_owner_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["requirement_id", "form_id", "organization_id", "file_policy_id"],
+            [
+                "application_document_requirements.id",
+                "application_document_requirements.form_id",
+                "application_document_requirements.organization_id",
+                "application_document_requirements.file_policy_id",
+            ],
+            name="fk_application_document_requirement_scope",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["file_id", "organization_id", "owner_person_id", "purpose", "id"],
+            [
+                "file_objects.id",
+                "file_objects.organization_id",
+                "file_objects.owner_person_id",
+                "file_objects.purpose",
+                "file_objects.resource_id",
+            ],
+            name="fk_application_document_file_scope",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("organization_id", "client_request_id"),
+        UniqueConstraint(
+            "id", "application_id", "file_id", name="uq_application_document_evidence"
+        ),
+        UniqueConstraint(
+            "id",
+            "application_id",
+            "requirement_id",
+            "organization_id",
+            "owner_person_id",
+            name="uq_application_document_replacement_scope",
+        ),
+        ForeignKeyConstraint(
+            [
+                "replaced_by_id",
+                "application_id",
+                "requirement_id",
+                "organization_id",
+                "owner_person_id",
+            ],
+            [
+                "application_documents.id",
+                "application_documents.application_id",
+                "application_documents.requirement_id",
+                "application_documents.organization_id",
+                "application_documents.owner_person_id",
+            ],
+            name="fk_application_document_replacement_scope",
+            ondelete="RESTRICT",
+            deferrable=True,
+            initially="DEFERRED",
+        ),
+        CheckConstraint("purpose = 'application_document'", name="application_document_purpose"),
+        CheckConstraint(
+            "replaced_by_id IS NULL OR (removed_at IS NOT NULL AND replaced_by_id <> id)",
+            name="application_document_replacement",
+        ),
+        CheckConstraint("request_digest ~ '^[0-9a-f]{64}$'", name="application_document_digest"),
+        Index("ix_application_document_active", "application_id", "removed_at", "id"),
+    )
+
+
+class ApplicationDocumentEvidence(Record, Base):
+    __tablename__ = "application_document_evidence"
+    application_id: Mapped[UUID] = mapped_column(index=True)
+    document_id: Mapped[UUID] = mapped_column(unique=True)
+    file_id: Mapped[UUID] = mapped_column()
+    file_version: Mapped[int] = mapped_column(Integer)
+    storage_version: Mapped[str] = mapped_column(String(1024))
+    byte_size: Mapped[int] = mapped_column(Integer)
+    sha256: Mapped[str] = mapped_column(String(64))
+    frozen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["document_id", "application_id", "file_id"],
+            [
+                "application_documents.id",
+                "application_documents.application_id",
+                "application_documents.file_id",
+            ],
+            name="fk_application_document_evidence_scope",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "file_version > 0 AND byte_size > 0 AND length(storage_version) > 0 "
+            "AND sha256 ~ '^[0-9a-f]{64}$'",
+            name="application_document_evidence_values",
+        ),
     )

@@ -1,6 +1,7 @@
 export function applicationPath(path: string[], method: string): string | null {
   const id = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
   const root = `organizations/${id}`;
+  const documents = `${root}/applications/${id}/documents`;
   const rules: Record<string, string[]> = {
     GET: [
       "mine",
@@ -8,13 +9,19 @@ export function applicationPath(path: string[], method: string): string | null {
       `${root}/draft`,
       `${root}/cycles`,
       `${root}/cycles/${id}/application`,
+      documents,
+      `${documents}/${id}`,
+      `${documents}/${id}/content`,
     ],
     POST: [
       `${root}/draft`,
       `${root}/cycles/${id}/draft`,
       `${root}/draft/${id}/submit`,
+      documents,
     ],
     PATCH: [`${root}/draft/${id}`],
+    DELETE: [`${documents}/${id}`],
+    PUT: [`${documents}/${id}/content`],
   };
   const value = path.join("/");
   return rules[method]?.some((rule) => new RegExp(`^${rule}$`).test(value))
@@ -24,11 +31,18 @@ export function applicationPath(path: string[], method: string): string | null {
 
 export function applicationQuery(path: string[], method: string, search: URLSearchParams): string | null {
   if ([...search.keys()].some((key) => search.getAll(key).length !== 1)) return null;
-  if (path.length !== 1 || path[0] !== "mine" || method !== "GET") return search.size === 0 ? "" : null;
+  const paged = (path.length === 1 && path[0] === "mine")
+    || (path.length === 5 && path[0] === "organizations" && path[2] === "applications" && path[4] === "documents");
+  if (!paged || method !== "GET") return search.size === 0 ? "" : null;
   if ([...search.keys()].some((key) => key !== "limit" && key !== "cursor")) return null;
   const limit = search.get("limit");
   const cursor = search.get("cursor");
   if (limit !== null && (!/^[1-9][0-9]{0,2}$/.test(limit) || Number(limit) > 100)) return null;
   if (cursor !== null && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cursor)) return null;
   return search.size ? `?${search.toString()}` : "";
+}
+
+export function applicationDocumentContent(path: string[]): boolean {
+  return path.length === 7 && path[0] === "organizations" && path[2] === "applications"
+    && path[4] === "documents" && path[6] === "content";
 }

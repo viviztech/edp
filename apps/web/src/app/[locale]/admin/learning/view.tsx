@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { AssignmentRuleEditor, LearningMaterialManager } from "../../../../components/learning-file-authoring";
 import type { components } from "../../../../lib/api-contracts";
 import { learningMessages } from "../../../../lib/learning-messages";
 
@@ -43,10 +44,12 @@ export default function LearningWorkspace({
   const [delivery, setDelivery] = useState<Delivery>(emptyDelivery);
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState<string>(text.loading);
+  const [fileEdits, setFileEdits] = useState<Record<string, boolean>>({});
   const canManage = permissions.includes("lms.course.manage");
   const canPublish = permissions.includes("lms.course.publish");
   const canAssign = permissions.includes("lms.course.assign");
   const canAssess = permissions.includes("lms.assessment.manage");
+  const canViewFilePolicies = permissions.includes("files.policy.view");
   const canManageCertificates = permissions.includes("certificate.manage");
   const canIssueCertificates = permissions.includes("certificate.issue");
 
@@ -126,6 +129,7 @@ export default function LearningWorkspace({
   }
 
   function publish(course: Course) {
+    if (hasFileEdits(course.id)) return;
     const reason = window.prompt(text.reason);
     if (!reason || reason.trim().length < 3) return;
     void run(() => request(
@@ -166,6 +170,8 @@ export default function LearningWorkspace({
 
   const title = (item: { title_en: string; title_ta: string }) =>
     locale === "ta" ? item.title_ta : item.title_en;
+  const hasFileEdits = (courseId: string) => Object.entries(fileEdits)
+    .some(([key, value]) => value && (key === courseId || key.startsWith(courseId + ":")));
   const draftCourses = catalog.courses.filter((course) => course.state === "draft");
   const publishedCourses = catalog.courses.filter((course) => course.state === "published");
   const draftModules = draftCourses.flatMap((course) => course.modules.map((module) => ({
@@ -392,39 +398,6 @@ export default function LearningWorkspace({
         <label><input name="is_correct" type="checkbox" /> {text.correctChoice}</label>
         <button disabled={busy}>{text.create}</button>
       </form>}
-      <form onSubmit={(event) => submit(event, "/materials", (data) => {
-        const key = String(data.lesson_key).split(":");
-        return {
-          course_id: key[0],
-          lesson_id: key[1],
-          position: Number(data.position),
-          kind: data.kind,
-          label_en: data.label_en,
-          label_ta: data.label_ta,
-          provider_key: data.provider_key,
-        };
-      })}>
-        <h2>{text.addMaterial}</h2>
-        <Select
-          label={text.lesson}
-          name="lesson_key"
-          choose={text.choose}
-          options={draftLessons.map(({ course, module, lesson }) => [
-            `${course.id}:${lesson.id}`,
-            `${title(course)} / ${title(module)} / ${title(lesson)}`,
-          ])}
-        />
-        <Field label={text.position} name="position" type="number" />
-        <label>{text.kind}<select name="kind">
-          <option value="document">Document</option>
-          <option value="video">Video</option>
-          <option value="link">Link</option>
-        </select></label>
-        <Field label={text.englishTitle} name="label_en" />
-        <Field label={text.tamilTitle} name="label_ta" />
-        <Field label={text.providerKey} name="provider_key" />
-        <button disabled={busy}>{text.create}</button>
-      </form>
     </section>}
 
     <section className="learning-catalog">
@@ -455,14 +428,20 @@ export default function LearningWorkspace({
                   {lesson.quizzes.map((quiz) => <small key={quiz.id}>
                     {text.quiz}: {title(quiz)} - {quiz.questions.length} {text.questions} - {quiz.passing_percent}%
                   </small>)}
-                  {lesson.assignments.map((assignment) => <small key={assignment.id}>
-                    {text.assignment}: {title(assignment)} - {assignment.maximum_points} {text.points}
-                  </small>)}
+                  {lesson.assignments.map((assignment) => <div key={assignment.id}>
+                    <small>{text.assignment}: {title(assignment)} - {assignment.maximum_points} {text.points}</small>
+                    {canAssess && <AssignmentRuleEditor key={`${org}:${course.id}:${assignment.id}`} org={org} courseId={course.id} assignmentId={assignment.id}
+                      locale={locale} editable={course.state === "draft"} disabled={busy} canViewPolicies={canViewFilePolicies}
+                      onSaved={load} onDirty={dirty => setFileEdits(current => current[course.id + ":" + assignment.id] === dirty ? current : { ...current, [course.id + ":" + assignment.id]: dirty })} />}
+                  </div>)}
                 </li>)}</ol>
               </li>)}
             </ol>}
+            {canManage && <LearningMaterialManager key={`${org}:${course.id}`} org={org} course={course} locale={locale}
+              canUpload={canViewFilePolicies} externalBusy={busy} onSaved={load}
+              onDirty={dirty => setFileEdits(current => current[course.id] === dirty ? current : { ...current, [course.id]: dirty })} />}
             {canPublish && course.state === "draft" &&
-              <button disabled={busy} onClick={() => publish(course)}>{text.publish}</button>}
+              <button disabled={busy || hasFileEdits(course.id)} onClick={() => publish(course)}>{text.publish}</button>}
           </article>
         </li>)}
       </ol>

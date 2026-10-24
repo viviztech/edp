@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     files_local_root: str | None = None
     files_temp_root: str | None = None
     files_max_bytes: int = Field(default=10485760, ge=1, le=10485760)
-    files_upload_lease_seconds: int = Field(default=120, ge=30, le=3600)
+    files_upload_lease_seconds: int = Field(default=120, ge=30, le=900)
     files_scan_lease_seconds: int = Field(default=120, ge=30, le=900)
     files_scan_max_attempts: int = Field(default=3, ge=1, le=10)
     files_cleanup_batch_size: int = Field(default=25, ge=1, le=100)

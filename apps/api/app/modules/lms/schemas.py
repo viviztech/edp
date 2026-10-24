@@ -306,6 +306,14 @@ class LearningAssignmentView(AssignmentCreate):
 class AssignmentSubmissionCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     response_text: str = Field(min_length=1, max_length=10000)
+    file_ids: list[UUID] = Field(default_factory=list, max_length=100)
+
+    @field_validator("file_ids")
+    @classmethod
+    def unique_file_ids(cls, value: list[UUID]) -> list[UUID]:
+        if len(value) != len(set(value)):
+            raise ValueError("Duplicate file binding")
+        return value
 
     @field_validator("response_text")
     @classmethod

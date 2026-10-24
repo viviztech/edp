@@ -120,6 +120,7 @@ class LessonMaterial(Record, Base):
             ondelete="RESTRICT",
         ),
         UniqueConstraint("lesson_id", "position"),
+        UniqueConstraint("id", "course_id", "organization_id", name="uq_material_file_scope"),
         CheckConstraint("position > 0", name="lesson_material_position"),
         CheckConstraint("kind IN ('video','document','link')", name="lesson_material_kind"),
         CheckConstraint("is_private = true", name="lesson_material_private"),
@@ -473,6 +474,14 @@ class AssignmentSubmission(Record, Base):
         ),
         UniqueConstraint("course_enrollment_id", "assignment_id", "revision"),
         UniqueConstraint("id", "assignment_id", "course_id", "organization_id"),
+        UniqueConstraint(
+            "id",
+            "course_enrollment_id",
+            "assignment_id",
+            "course_id",
+            "organization_id",
+            name="uq_submission_file_owner_scope",
+        ),
         CheckConstraint("revision > 0", name="assignment_submission_revision"),
         CheckConstraint(
             "char_length(response_text) BETWEEN 1 AND 10000",

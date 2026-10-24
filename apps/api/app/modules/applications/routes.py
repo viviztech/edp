@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Request
 
 from app.modules.applications import service
+from app.modules.applications.document_routes import owner_router as document_owner_router
 from app.modules.applications.schemas import (
     ApplicationHistoryList,
     ApplicationHistoryQuery,
@@ -180,3 +181,4 @@ def submit(
 
 
 router.include_router(organization_router)
+router.include_router(document_owner_router)

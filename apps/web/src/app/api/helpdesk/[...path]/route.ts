@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { validMutation } from "../../../../lib/bff-security";
-import { helpdeskPath, helpdeskQuery } from "../../../../lib/helpdesk-security";
+import { helpdeskPath, helpdeskQuery, helpdeskFileContent } from "../../../../lib/helpdesk-security";
+import { helpdeskFileTransport } from "../../../../lib/helpdesk-file-transport";
 import { cookieName, csrfName, settings } from "../../../../lib/server-api";
 
 const fail = (code: string, status: number) => NextResponse.json({ error: { code } }, {
@@ -10,15 +11,18 @@ const fail = (code: string, status: number) => NextResponse.json({ error: { code
 
 async function handle(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
   try {
-    const path = helpdeskPath((await context.params).path, request.method);
+    const parts=(await context.params).path;
+    const path = helpdeskPath(parts, request.method);
     if (!path) return fail("not_found", 404);
-    const query = helpdeskQuery(request.nextUrl.searchParams);
-    if (query === null || (request.method !== "GET" && query) || (path.includes("/attachments/") && query)) return fail("invalid_request", 400);
+    const query = helpdeskQuery(request.nextUrl.searchParams,parts,request.method);
+    if (query === null || request.nextUrl.search.length>1024 || (request.method !== "GET" && query) || (path.includes("/attachments/") && query)) return fail("invalid_request", 400);
     const config = settings(); const jar = await cookies(); let body: string | undefined;
-    if (request.method === "POST") {
+    if(request.method!=="GET" && !validMutation(request.headers.get("origin"),config.origin,jar.get(csrfName)?.value,request.headers.get("x-csrf-token"))) return fail("csrf_failed",403);
+    if(helpdeskFileContent(parts)) return helpdeskFileTransport(request,config.api+"/api/v1"+path,{"X-BFF-Key":config.key,"X-Browser-Session":jar.get(cookieName)?.value??"","X-CSRF-Token":request.headers.get("x-csrf-token")??""},parts[5]);
+    if (request.method !== "GET") {
       if (!validMutation(request.headers.get("origin"), config.origin, jar.get(csrfName)?.value,
         request.headers.get("x-csrf-token"))) return fail("csrf_failed", 403);
-      if (!request.headers.get("content-type")?.startsWith("application/json")) return fail("invalid_request", 400);
+      if (request.headers.get("content-type")?.split(";")[0].trim().toLowerCase()!=="application/json") return fail("invalid_request", 400);
       const reader = request.body?.getReader(); if (!reader) return fail("invalid_request", 400);
       const chunks: Uint8Array[] = []; let size = 0;
       while (true) { const { done, value } = await reader.read(); if (done) break;
@@ -46,3 +50,5 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
 }
 export const GET = handle;
 export const POST = handle;
+export const PUT = handle;
+export const DELETE = handle;

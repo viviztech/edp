@@ -1,5 +1,7 @@
 # Process 1 / verified development baseline report
 
+Current dependency update (2026-10-24): the unsuppressed npm audit and complete Python runtime/development lock audits report zero vulnerabilities after compatible security fixes. The historical nine-high `braces` result below has been superseded; no gate was suppressed. See the [secure-file continuation checkpoint](secure-files-acceptance-report.md) and `.local/dependency-audit-20261024.json`. Exact-revision remote CI remains unverified under the local-only instruction.
+
 Recorded: 2026-10-23. Status: local functional verification complete; Process 1 remains open because the dependency security gate and exact-revision remote CI are not green. Scope and completion criteria are in the [baseline plan](baseline-verification-plan.md). This record distinguishes current checks from historical milestone evidence and does not declare a release.
 
 ## Changes

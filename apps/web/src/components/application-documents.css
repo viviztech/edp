@@ -1,0 +1,27 @@
+.application-documents,.definition-documents,.definition-recovery{min-width:0;overflow-wrap:anywhere}
+.application-documents{margin-block:1.5rem;padding:clamp(.85rem,2.5vw,1.5rem);border:1px solid var(--line);background:#fff}
+.application-documents ul{list-style:none;display:grid;gap:.85rem;padding:0}
+.application-documents li,.application-document-requirement{min-width:0;margin-block:1rem;padding:1rem;border:1px solid var(--line);background:#f7faff}
+.application-documents h2,.application-documents h3,.application-documents h4{margin-top:0}
+.application-documents dl,.definition-documents dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:.35rem .75rem}
+.application-documents dt,.definition-documents dt{font-weight:700}
+.application-documents dd,.definition-documents dd{margin:0;min-width:0}
+.application-documents button{min-height:2.65rem;max-width:100%;padding:.55rem .8rem;border:1px solid var(--line);background:#fff;color:var(--accent);font:inherit;cursor:pointer;white-space:normal;overflow-wrap:anywhere}
+.application-documents button:disabled{opacity:.55;cursor:not-allowed}
+.application-documents a{display:inline-block;margin-block:.5rem;text-decoration:underline;text-underline-offset:.2rem}
+.application-documents :is(button,a,input):focus-visible{outline:3px solid var(--highlight);outline-offset:3px}
+.application-document-picker{display:grid;gap:.8rem;padding:1rem;border:2px solid var(--accent)}
+.application-document-picker label{display:grid;gap:.4rem;font-weight:700}
+.application-document-picker input{min-width:0;width:100%;font:inherit}
+.application-file-digest{display:block;overflow-wrap:anywhere;word-break:break-all}
+.definition-documents fieldset{min-width:0;margin:0;border:0;padding:0}
+.definition-main{overflow-wrap:anywhere}
+.definition-editor form{grid-template-columns:minmax(0,1fr)}
+.definition-editor :is(form,fieldset,label,input,select,textarea){min-width:0;max-width:100%}
+.definition-main button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.definition-main .definition-section-head{flex-wrap:wrap}
+.definition-documents fieldset:disabled :is(input,select,textarea){background:#edf3fb;color:#506784}
+.definition-documents .definition-section-head,.definition-recovery article{margin-block:1rem}
+.definition-recovery{border:2px solid var(--accent);padding:1rem;margin-block:1rem}
+.reviewer-documents{margin-bottom:0}
+@media(max-width:600px){.application-documents dl,.definition-documents dl{grid-template-columns:1fr}.application-documents dd,.definition-documents dd{margin-bottom:.5rem}.application-documents li,.application-document-requirement{padding:.75rem}}

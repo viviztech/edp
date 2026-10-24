@@ -368,3 +368,20 @@ erDiagram
   cohort_impact_snapshots ||--o{ report_exports : exports
   report_exports ||--o{ report_export_capabilities : authorizes
 ```
+
+## Process 3 typed private files
+
+`file_policies` holds immutable published editions for an organization/purpose, with explicit formats, counts, size, notices and retention/disposal rules. `file_objects` holds the immutable typed organization/owner/resource identity, expected and verified byte identity, storage/scan proof, leases, expiry, holds and frozen evidence. Storage keys and provider versions remain private implementation data. Metadata is retained after byte disposal.
+
+| Binding tables | Domain boundary and immutable proof |
+| --- | --- |
+| `application_document_requirements` | Published application-form edition, bilingual requirement and pinned `application_document` policy |
+| `application_documents`, `application_document_evidence` | Exact organization/form/application/owner/requirement/file; submitted object/version/hash/size snapshot |
+| `cms_asset_files` | Exact organization/asset/owner/file and source or sanitized public-derivative role; publication pins verified evidence on the asset |
+| `assignment_file_rules`, `assignment_files` | Course/assignment published policy and count rule; exact owner course enrollment, target revision, immutable submission and frozen proof |
+| `lesson_material_files` | Course/material/owner/file, request digest and idempotency UUID, retained active/removed state/version and published proof |
+| `helpdesk_files` | Organization/ticket/author/file; immutable posted message/internal visibility and frozen proof. `helpdesk_messages.shared_file_ids` is fixed when the message is inserted |
+
+Composite foreign keys and triggers enforce domain ownership, purpose and resource identity. Deferred submission/message constraints prevent direct SQL from bypassing required clean evidence or adding files after an immutable record is posted. Parent locks serialize counts, removal and publication; operational file versions do not rewrite frozen domain proof. Removed draft material reserves history and its original lesson position; it cannot be resurrected or served, and published material cannot be removed.
+
+Migrations extend the foundation in order `h3d9e5f1a678` → `i4e0f6a2b789` → `j5f1a7b3c890` → `k6a2b8c4d901` → `l7b3c9d5e012` → `m8c4d0e6f123`. See the [acceptance ledger](../sdlc/secure-files-acceptance-report.md) for fresh full-chain upgrade/downgrade and global schema-drift evidence.

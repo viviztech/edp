@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { TrainerSubmissionFiles } from "../../../../components/learning-assignment-files";
 import type { components } from "../../../../lib/api-contracts";
 import { learningMessages } from "../../../../lib/learning-messages";
 
@@ -158,6 +159,7 @@ export default function TrainerLearningWorkspace({
               <ul>{learner.assignment_submissions.map((submission) => <li key={submission.id}>
                 <strong>{value(submission.title_en, submission.title_ta)} - {text.revision} {submission.revision}</strong>
                 <p>{submission.response_text}</p>
+                <TrainerSubmissionFiles key={`${org}:${course.course_id}:${submission.id}`} org={org} courseId={course.course_id} submissionId={submission.id} locale={locale} />
                 {submission.grade
                   ? <p>{submission.grade.score_points}/{submission.maximum_points} - {
                     submission.grade.passed ? text.passed : text.notPassed

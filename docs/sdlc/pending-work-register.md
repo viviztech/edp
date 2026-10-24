@@ -1,18 +1,18 @@
 # Pending Work Register
 
 **Recorded:** 2026-09-25  
-**Updated:** 2026-10-23
+**Updated:** 2026-10-24
 **Purpose:** Preserve the outstanding work associated with completed implementation slices before the project proceeds to the next scheduled module.
 
 ## Current position
 
 Earlier foundation/learning/mentoring slices, B01, K01 and Phase 9 B02/S01 are accepted for their documented local web/API scope. Phase 10 reporting and impact local web/API acceptance, including final Tamil responsive review, passed on 2026-10-23. These slices are not formally released, and the milestone Definition of Done remains open where remote CI, native-device validation, external providers, staging, production operations, or client approval are required.
 
-[Process 2 web journeys](web-journey-completion-report.md) are locally accepted on 2026-10-23; shared secure files is next. The owner instructed that baseline commit `c9877ab` and further development remain local; remote CI is deferred and no push is authorized. The [baseline report](baseline-verification-report.md) records fresh Phase 10, API/database, migration, contract and web evidence. Nine high dependency findings from unpatched transitive `braces` and unverified exact-revision remote CI keep Process 1 security/release gates open while authorized local development continues. Earlier dated entries below preserve their historical evidence; this current-position section and the latest checkpoint supersede their descriptions of future work or resolved legacy static-analysis debt.
+[Process 2 web journeys](web-journey-completion-report.md) and [Process 3 secure files](secure-files-acceptance-report.md) are locally accepted. The 2026-10-24 checkpoint records 289 API tests passed, one POSIX-only skip, 406 web tests passed, ten final-build browser runners, zero migration drift and deterministic contracts. Current npm and complete Python runtime/development audits report zero findings. The historical nine-high braces result is superseded. All source remains local; exact-revision remote CI remains deferred and no push is authorized. This section and the latest checkpoint supersede historical descriptions below.
 
 ## Immediate closure work
 
-Process 3 is now active under the [secure-files plan](secure-files-plan.md). The owner selected configurable policies; the [foundation checkpoint](secure-file-foundation-report.md) is locally verified. A01.3 application documents is the next implementation slice, followed by CMS/learning/helpdesk bindings. Real collection and maintenance remain disabled, and no document list or retention policy has been approved.
+Process 3 is locally accepted under the [secure-files plan](secure-files-plan.md). Application documents, CMS verified media, learning and helpdesk bindings passed combined local checks, browser acceptance and visual review. Explicit draft material removal/replacement retains history; incomplete active material blocks publication. Real collection and maintenance remain disabled, and no real document list or retention policy has been approved. The next authorized local process is [background-job recovery](background-job-recovery-plan.md), followed separately by essential communications; see the [six-step plan](remaining-development-plan.md).
 
 These tasks should be completed before or alongside the next feature implementation:
 
@@ -21,7 +21,7 @@ These tasks should be completed before or alongside the next feature implementat
 | P0 | Commit and push the P01.3 implementation and flow documentation | Completed in `ae7cff4` as recorded on 2026-09-26; current-baseline review and source-control work are tracked separately below |
 | P0 | Close Phase 10 final responsive acceptance | Completed 2026-10-23: fresh reporting/impact Chrome assertions, Tamil responsive controls and single-line numeric cells pass with no JavaScript errors; focused screenshots visually inspected. See the [Phase 10 report](milestone-10-report.md) |
 | P0 | Review the current changes, prepare the intended revision and obtain green GitHub Actions for that revision | Baseline captured locally as `c9877ab`; remote CI remains unverified and is deferred under the owner's 2026-10-23 local-only instruction. No push is authorized |
-| P0 | Resolve dependency security findings without weakening scans | Compatible Vitest and `ip-address` updates applied; nine high findings from unpatched transitive `braces` remain. See the current [baseline report](baseline-verification-report.md) and historical [dependency repair report](dependency-repair-report.md) |
+| P0 | Resolve dependency security findings without weakening scans | Resolved in the 2026-10-24 local checkpoint: npm and complete Python runtime/development audits report zero findings after compatible transitive, pip and filelock fixes. Historical reports retain their dated results; no advisory or package is ignored. |
 | P0 | Resolve repository-wide Ruff and strict MyPy checks | Resolved locally 2026-10-21: repository-wide Ruff, formatting and strict MyPy pass; see the [dependency repair report](dependency-repair-report.md). Remote CI remains unverified. |
 | P1 | Reconcile superseded milestone-report wording | Completed 2026-09-26: the P01.2 checkpoint now explicitly points to the superseding P01.3 implementation |
 
@@ -29,7 +29,7 @@ These tasks should be completed before or alongside the next feature implementat
 
 | Area | Pending work | Classification |
 | --- | --- | --- |
-| Applications | A01.3 supporting-document upload, private storage, malware scanning, retention, and access control | Planned implementation |
+| Secure files | Local implementation and acceptance complete 2026-10-24; live storage/scanner, Linux/device, operational holds and approved real collection rules remain open | External runtime and policy gates |
 | Flutter | Applicant/student/alumni domain workflows, deep links, and Android/iOS secure-storage/session/device acceptance; secure refresh storage, rotation and session-revocation controls are implemented | Domain implementation remains open; native runtime verification is deferred under ADR 0004 |
 | Background processing | Full Redis, Celery worker, and Celery Beat container/runtime acceptance | Environment acceptance |
 | Notifications | Production email, SMS, FCM, and WhatsApp adapters, credentials, and delivery-status validation | Provider integration |
@@ -76,10 +76,10 @@ The open-questions register still requires decisions or confirmed owners for:
 
 The following distinguish deferred channel/integration implementation from acceptance still needed for the documented local slices:
 
-- L02 follow-up: secure assignment file evidence, approved certificate signatories/PDF presentation and any attendance gate; L02.3 core eligibility/issuance/verification is complete locally
+- L02 follow-up: secure assignment file evidence is locally accepted in Process 3; approved certificate signatories/PDF presentation and any attendance gate remain open; core eligibility/issuance/verification is complete locally
 - M01 mentoring is complete locally; provider reminder delivery and native mobile remain deferred
 - K01 native client and approved live resource ownership/content; web/API local acceptance is recorded below
-- S01 native client, broader secure attachments, approved support policy and external notification delivery; local web/API acceptance is recorded below
+- S01 native client, approved support/retention policy and external notification delivery remain open; broader private attachments are locally accepted in Process 3
 - I01 policy/native/release gates and exact-revision CI; reporting/impact local web/API acceptance, including final responsive review, is complete as documented in the [Phase 10 report](milestone-10-report.md)
 
 ## B01.1 continuation — 2026-10-08

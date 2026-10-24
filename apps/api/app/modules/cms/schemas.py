@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.modules.files.schemas import FileCreate, FilePolicyView, FileState, FileView
+
 Locale = Literal["en", "ta"]
 
 
@@ -127,6 +129,24 @@ class AssetCreate(BaseModel):
     media_type: Literal["image/jpeg", "image/png", "image/webp", "application/pdf"]
     byte_size: int = Field(ge=1, le=10485760)
     title: str = Field(min_length=1, max_length=200)
+    client_request_id: UUID | None = None
+
+
+class AssetSourceCreate(FileCreate):
+    expected_version: int = Field(ge=1)
+
+
+class AssetCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    expected_version: int = Field(ge=1)
+    expected_file_version: int | None = Field(default=None, ge=1)
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class AssetPolicy(BaseModel):
+    enabled: bool
+    policy: FilePolicyView | None
+    max_upload_bytes: int
 
 
 class AssetView(BaseModel):
@@ -138,6 +158,11 @@ class AssetView(BaseModel):
     scan_status: Literal["pending", "clean", "infected", "rejected"]
     visibility: Literal["private", "public"]
     public_url: str | None
+    version: int = 1
+    byte_state: FileState | Literal["unbacked"] = "unbacked"
+    source: FileView | None = None
+    prepared: FileView | None = None
+    can_publish: bool = False
 
 
 class AssetList(BaseModel):

@@ -91,6 +91,7 @@ def ticket(db: Session, org: UUID, ticket_id: UUID, *, lock: bool = False) -> He
     query = select(HelpdeskTicket).where(
         HelpdeskTicket.id == ticket_id, HelpdeskTicket.organization_id == org
     )
+    query = query.execution_options(populate_existing=True)
     row = db.scalar(query.with_for_update() if lock else query)
     if row is None:
         raise AuthError("not_found", 404)
@@ -195,7 +196,11 @@ def add_message(
     body: str,
     internal: bool,
     attachments: list[AttachmentInput],
-) -> None:
+    file_ids: list[UUID] | None = None,
+) -> HelpdeskMessage:
+    # The message's immutable selection is checked against the new ticket version.
+    # Flush that parent transition before inserting its message evidence.
+    db.flush()
     message = HelpdeskMessage(
         organization_id=row.organization_id,
         ticket_id=row.id,
@@ -203,6 +208,7 @@ def add_message(
         author_user_id=actor.id,
         body=body,
         internal=internal,
+        shared_file_ids=file_ids or [],
     )
     db.add(message)
     db.flush()
@@ -217,6 +223,7 @@ def add_message(
                 size_bytes=len(attachment.content.encode("utf-8")),
             )
         )
+    return message
 
 
 def notify(
@@ -355,6 +362,8 @@ def detail(db: Session, org: UUID, ticket_id: UUID, actor: User) -> TicketView:
 def messages(
     db: Session, org: UUID, ticket_id: UUID, actor: User, cursor: UUID | None, limit: int
 ) -> MessageList:
+    from app.modules.helpdesk.file_service import posted_message_files
+
     row = ticket(db, org, ticket_id)
     audience = access(db, row, actor)
     query = select(HelpdeskMessage).where(
@@ -396,6 +405,7 @@ def messages(
                     for a in attachments
                     if a.message_id == message.id
                 ],
+                files=posted_message_files(db, org, message.id),
             )
             for message in rows[:limit]
         ],
@@ -481,10 +491,14 @@ def reply(
         raise AuthError("helpdesk_reopen_required", 409)
     if data.internal and audience != "staff":
         raise AuthError("forbidden", 403)
+    from app.modules.helpdesk.file_service import freeze_message, validate_message_files
+
+    validate_message_files(db, row, actor, data.file_ids, data.internal)
     row.version += 1
     if audience == "owner" and row.status == "waiting_for_user":
         row.status = "in_progress"
-    add_message(db, row, actor, data.body, data.internal, data.attachments)
+    message = add_message(db, row, actor, data.body, data.internal, data.attachments, data.file_ids)
+    freeze_message(db, row, message, actor, request_id)
     evidence(
         db,
         row,

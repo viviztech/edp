@@ -1282,6 +1282,232 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/applications/organizations/{org}/applications/{application_id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Documents */
+        get: operations["documents_api_v1_applications_organizations__org__applications__application_id__documents_get"];
+        put?: never;
+        /** Create */
+        post: operations["create_api_v1_applications_organizations__org__applications__application_id__documents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/applications/{application_id}/documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_v1_applications_organizations__org__applications__application_id__documents__document_id__get"];
+        put?: never;
+        post?: never;
+        /** Remove */
+        delete: operations["remove_api_v1_applications_organizations__org__applications__application_id__documents__document_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/organizations/{org}/applications/{application_id}/documents/{document_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download */
+        get: operations["download_api_v1_applications_organizations__org__applications__application_id__documents__document_id__content_get"];
+        /** Upload */
+        put: operations["upload_api_v1_applications_organizations__org__applications__application_id__documents__document_id__content_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listing */
+        get: operations["listing_api_v1_cms_organizations__org__assets_get"];
+        put?: never;
+        /** Create */
+        post: operations["create_api_v1_cms_organizations__org__assets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets/policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Policy */
+        get: operations["policy_api_v1_cms_organizations__org__assets_policy_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets/{asset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_v1_cms_organizations__org__assets__asset_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets/{asset_id}/source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Source Intent */
+        post: operations["source_intent_api_v1_cms_organizations__org__assets__asset_id__source_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets/{asset_id}/source/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Source Download */
+        get: operations["source_download_api_v1_cms_organizations__org__assets__asset_id__source_content_get"];
+        /** Source Upload */
+        put: operations["source_upload_api_v1_cms_organizations__org__assets__asset_id__source_content_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets/{asset_id}/prepare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Prepare */
+        post: operations["prepare_api_v1_cms_organizations__org__assets__asset_id__prepare_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets/{asset_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish */
+        post: operations["publish_api_v1_cms_organizations__org__assets__asset_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cms/organizations/{org}/assets/{asset_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke */
+        post: operations["revoke_api_v1_cms_organizations__org__assets__asset_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/organizations/{org}/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Listing */
+        get: operations["public_listing_api_v1_public_organizations__org__assets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/organizations/{org}/assets/{asset_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Content */
+        get: operations["public_content_api_v1_public_organizations__org__assets__asset_id__content_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cms/organizations/{org}/pages": {
         parameters: {
             query?: never;
@@ -1591,58 +1817,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/cms/organizations/{org}/assets": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Asset List */
-        get: operations["asset_list_api_v1_cms_organizations__org__assets_get"];
-        put?: never;
-        /** Asset Create */
-        post: operations["asset_create_api_v1_cms_organizations__org__assets_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/cms/organizations/{org}/assets/{asset_id}/publish": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Asset Publish */
-        post: operations["asset_publish_api_v1_cms_organizations__org__assets__asset_id__publish_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/public/organizations/{org}/assets": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Asset Public */
-        get: operations["asset_public_api_v1_public_organizations__org__assets_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/internal/cms/organizations/{org}/assets/{asset_id}/scan": {
         parameters: {
             query?: never;
@@ -1652,8 +1826,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Asset Scan */
-        post: operations["asset_scan_api_v1_internal_cms_organizations__org__assets__asset_id__scan_post"];
+        /** Retired Asset Scan */
+        post: operations["retired_asset_scan_api_v1_internal_cms_organizations__org__assets__asset_id__scan_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3942,6 +4116,270 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reviewer Documents */
+        get: operations["reviewer_documents_api_v1_selection_organizations__org__assignments__assignment_id__documents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/selection/organizations/{org}/assignments/{assignment_id}/documents/{document_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reviewer Download */
+        get: operations["reviewer_download_api_v1_selection_organizations__org__assignments__assignment_id__documents__document_id__content_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/assignments/{assignment_id}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Assignment Files */
+        get: operations["assignment_files_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files_get"];
+        put?: never;
+        /** Create Assignment File */
+        post: operations["create_assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/assignments/{assignment_id}/files/{binding_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Assignment File */
+        get: operations["assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files__binding_id__get"];
+        put?: never;
+        post?: never;
+        /** Remove Assignment File */
+        delete: operations["remove_assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files__binding_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/my-learning/{course_id}/assignments/{assignment_id}/files/{binding_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Assignment File */
+        get: operations["download_assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files__binding_id__content_get"];
+        /** Upload Assignment File */
+        put: operations["upload_assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files__binding_id__content_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/trainer-delivery/{course_id}/assignment-submissions/{submission_id}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Trainer Files */
+        get: operations["trainer_files_api_v1_courses_organizations__org__trainer_delivery__course_id__assignment_submissions__submission_id__files_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/trainer-delivery/{course_id}/assignment-submissions/{submission_id}/files/{binding_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Trainer File Download */
+        get: operations["trainer_file_download_api_v1_courses_organizations__org__trainer_delivery__course_id__assignment_submissions__submission_id__files__binding_id__content_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/courses/{course_id}/assignments/{assignment_id}/file-rule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get File Rule */
+        get: operations["get_file_rule_api_v1_courses_organizations__org__courses__course_id__assignments__assignment_id__file_rule_get"];
+        /** Configure File Rule */
+        put: operations["configure_file_rule_api_v1_courses_organizations__org__courses__course_id__assignments__assignment_id__file_rule_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/courses/{course_id}/material-files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Material Files */
+        get: operations["material_files_api_v1_courses_organizations__org__courses__course_id__material_files_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/material-files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Material File */
+        post: operations["create_material_file_api_v1_courses_organizations__org__material_files_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/courses/{course_id}/material-files/{material_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Material File */
+        get: operations["material_file_api_v1_courses_organizations__org__courses__course_id__material_files__material_id__get"];
+        put?: never;
+        post?: never;
+        /** Remove Material File */
+        delete: operations["remove_material_file_api_v1_courses_organizations__org__courses__course_id__material_files__material_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/organizations/{org}/courses/{course_id}/material-files/{material_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Author Material */
+        get: operations["download_author_material_api_v1_courses_organizations__org__courses__course_id__material_files__material_id__content_get"];
+        /** Upload Material File */
+        put: operations["upload_material_file_api_v1_courses_organizations__org__courses__course_id__material_files__material_id__content_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/helpdesk/organizations/{org}/tickets/{ticket_id}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listing */
+        get: operations["listing_api_v1_helpdesk_organizations__org__tickets__ticket_id__files_get"];
+        put?: never;
+        /** Create */
+        post: operations["create_api_v1_helpdesk_organizations__org__tickets__ticket_id__files_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/helpdesk/organizations/{org}/tickets/{ticket_id}/files/{binding_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_v1_helpdesk_organizations__org__tickets__ticket_id__files__binding_id__get"];
+        put?: never;
+        post?: never;
+        /** Remove */
+        delete: operations["remove_api_v1_helpdesk_organizations__org__tickets__ticket_id__files__binding_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/helpdesk/organizations/{org}/tickets/{ticket_id}/files/{binding_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download */
+        get: operations["download_api_v1_helpdesk_organizations__org__tickets__ticket_id__files__binding_id__content_get"];
+        /** Upload */
+        put: operations["upload_api_v1_helpdesk_organizations__org__tickets__ticket_id__files__binding_id__content_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -4306,6 +4744,53 @@ export interface components {
             /** Aggregate Score */
             aggregate_score: string | null;
         };
+        /** ApplicationDocumentList */
+        ApplicationDocumentList: {
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /** Application Version */
+            application_version: number;
+            /** Collection Enabled */
+            collection_enabled: boolean;
+            /** Max Upload Bytes */
+            max_upload_bytes: number;
+            /** Document Requirements */
+            document_requirements: components["schemas"]["DocumentRequirementView"][];
+            /** Items */
+            items: components["schemas"]["ApplicationDocumentView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** ApplicationDocumentResult */
+        ApplicationDocumentResult: {
+            /** Application Version */
+            application_version: number;
+            document: components["schemas"]["ApplicationDocumentView"];
+        };
+        /** ApplicationDocumentView */
+        ApplicationDocumentView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Requirement Id
+             * Format: uuid
+             */
+            requirement_id: string;
+            file: components["schemas"]["FileView"];
+            /** Usable */
+            usable: boolean;
+            /** Removed At */
+            removed_at: string | null;
+            /** Replaced By Id */
+            replaced_by_id: string | null;
+            submitted_evidence: components["schemas"]["DocumentEvidenceView"] | null;
+        };
         /** ApplicationHistoryItem */
         ApplicationHistoryItem: {
             /**
@@ -4352,6 +4837,15 @@ export interface components {
             /** Next Cursor */
             next_cursor: string | null;
         };
+        /** AssetCommand */
+        AssetCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /** Expected File Version */
+            expected_file_version?: number | null;
+            /** Reason */
+            reason: string;
+        };
         /** AssetCreate */
         AssetCreate: {
             /** Filename */
@@ -4365,6 +4859,8 @@ export interface components {
             byte_size: number;
             /** Title */
             title: string;
+            /** Client Request Id */
+            client_request_id?: string | null;
         };
         /** AssetList */
         AssetList: {
@@ -4373,15 +4869,37 @@ export interface components {
             /** Next Cursor */
             next_cursor: string | null;
         };
-        /** AssetScanResult */
-        AssetScanResult: {
-            /** Clean */
-            clean: boolean;
+        /** AssetPolicy */
+        AssetPolicy: {
+            /** Enabled */
+            enabled: boolean;
+            policy: components["schemas"]["FilePolicyView"] | null;
+            /** Max Upload Bytes */
+            max_upload_bytes: number;
+        };
+        /** AssetSourceCreate */
+        AssetSourceCreate: {
             /**
-             * Reason
-             * @default
+             * Client Request Id
+             * Format: uuid
              */
-            reason: string;
+            client_request_id: string;
+            /**
+             * Policy Id
+             * Format: uuid
+             */
+            policy_id: string;
+            /**
+             * Media Type
+             * @enum {string}
+             */
+            media_type: "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain";
+            /** Byte Size */
+            byte_size: number;
+            /** Sha256 */
+            sha256: string;
+            /** Expected Version */
+            expected_version: number;
         };
         /** AssetView */
         AssetView: {
@@ -4410,6 +4928,23 @@ export interface components {
             visibility: "private" | "public";
             /** Public Url */
             public_url: string | null;
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+            /**
+             * Byte State
+             * @default unbacked
+             */
+            byte_state: ("pending" | "uploading" | "quarantined" | "scanning" | "clean" | "infected" | "rejected" | "deleted") | "unbacked";
+            source?: components["schemas"]["FileView"] | null;
+            prepared?: components["schemas"]["FileView"] | null;
+            /**
+             * Can Publish
+             * @default false
+             */
+            can_publish: boolean;
         };
         /** AssigneeList */
         AssigneeList: {
@@ -4447,6 +4982,96 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** AssignmentFileIntent */
+        AssignmentFileIntent: {
+            /**
+             * Client Request Id
+             * Format: uuid
+             */
+            client_request_id: string;
+            /**
+             * Media Type
+             * @enum {string}
+             */
+            media_type: "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain";
+            /** Byte Size */
+            byte_size: number;
+            /** Sha256 */
+            sha256: string;
+            /** Expected Revision */
+            expected_revision: number;
+        };
+        /** AssignmentFileList */
+        AssignmentFileList: {
+            /** Collection Enabled */
+            collection_enabled: boolean;
+            /** Max Upload Bytes */
+            max_upload_bytes: number;
+            /** Next Revision */
+            next_revision: number;
+            rule: components["schemas"]["AssignmentFileRuleView"] | null;
+            /** Items */
+            items: components["schemas"]["AssignmentFileView"][];
+        };
+        /** AssignmentFileRuleCommand */
+        AssignmentFileRuleCommand: {
+            /**
+             * Policy Id
+             * Format: uuid
+             */
+            policy_id: string;
+            /** Minimum Files */
+            minimum_files: number;
+            /** Maximum Files */
+            maximum_files: number;
+            /** Expected Version */
+            expected_version?: number | null;
+        };
+        /** AssignmentFileRuleView */
+        AssignmentFileRuleView: {
+            /**
+             * Policy Id
+             * Format: uuid
+             */
+            policy_id: string;
+            /** Minimum Files */
+            minimum_files: number;
+            /** Maximum Files */
+            maximum_files: number;
+            /** Version */
+            version: number;
+            /** Allowed Mime Types */
+            allowed_mime_types: ("application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain")[];
+            /** Max File Bytes */
+            max_file_bytes: number;
+            /** Notice En */
+            notice_en: string;
+            /** Notice Ta */
+            notice_ta: string;
+        };
+        /** AssignmentFileView */
+        AssignmentFileView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Target Revision */
+            target_revision: number;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "removed" | "submitted";
+            /** Version */
+            version: number;
+            file: components["schemas"]["FileView"];
+            /** Submission Id */
+            submission_id: string | null;
+            evidence: components["schemas"]["LearningFileEvidence"] | null;
+            /** Usable */
+            usable: boolean;
+        };
         /** AssignmentGradeCommand */
         AssignmentGradeCommand: {
             /** Score Points */
@@ -4477,6 +5102,8 @@ export interface components {
         AssignmentSubmissionCreate: {
             /** Response Text */
             response_text: string;
+            /** File Ids */
+            file_ids?: string[];
         };
         /** AssignmentSubmissionView */
         AssignmentSubmissionView: {
@@ -5717,6 +6344,8 @@ export interface components {
             fields: components["schemas"]["DefinitionFieldInput"][];
             /** Acknowledgements */
             acknowledgements?: components["schemas"]["AcknowledgementInput"][];
+            /** Document Requirements */
+            document_requirements?: components["schemas"]["DocumentRequirementInput"][];
         };
         /** DefinitionFieldInput */
         DefinitionFieldInput: {
@@ -5754,6 +6383,8 @@ export interface components {
             fields: components["schemas"]["DefinitionFieldInput"][];
             /** Acknowledgements */
             acknowledgements?: components["schemas"]["AcknowledgementInput"][];
+            /** Document Requirements */
+            document_requirements?: components["schemas"]["DocumentRequirementInput"][];
             /** Expected Revision */
             expected_revision: number;
         };
@@ -5779,6 +6410,18 @@ export interface components {
             fields: components["schemas"]["FieldView"][];
             /** Acknowledgements */
             acknowledgements: components["schemas"]["AcknowledgementView"][];
+            /** Document Requirements */
+            document_requirements?: components["schemas"]["DocumentRequirementView"][];
+            /**
+             * Collection Enabled
+             * @default false
+             */
+            collection_enabled: boolean;
+            /**
+             * Max Upload Bytes
+             * @default 10485760
+             */
+            max_upload_bytes: number;
             /**
              * State
              * @enum {string}
@@ -5793,6 +6436,138 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** DocumentCreate */
+        DocumentCreate: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Client Request Id
+             * Format: uuid
+             */
+            client_request_id: string;
+            /**
+             * Requirement Id
+             * Format: uuid
+             */
+            requirement_id: string;
+            /**
+             * Media Type
+             * @enum {string}
+             */
+            media_type: "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain";
+            /** Byte Size */
+            byte_size: number;
+            /** Sha256 */
+            sha256: string;
+            /** Replaces Document Id */
+            replaces_document_id?: string | null;
+        };
+        /** DocumentEvidenceView */
+        DocumentEvidenceView: {
+            /**
+             * File Id
+             * Format: uuid
+             */
+            file_id: string;
+            /** File Version */
+            file_version: number;
+            /** Sha256 */
+            sha256: string;
+            /** Byte Size */
+            byte_size: number;
+            /**
+             * Frozen At
+             * Format: date-time
+             */
+            frozen_at: string;
+        };
+        /** DocumentFilePolicyView */
+        DocumentFilePolicyView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Edition */
+            edition: number;
+            /** Name */
+            name: string;
+            /** Allowed Mime Types */
+            allowed_mime_types: ("application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain")[];
+            /** Max File Bytes */
+            max_file_bytes: number;
+            /** Max Upload Bytes */
+            max_upload_bytes: number;
+            /** Max Files */
+            max_files: number;
+            /** Retention Days */
+            retention_days: number;
+            /** Rejected Retention Days */
+            rejected_retention_days: number;
+            /** Notice En */
+            notice_en: string;
+            /** Notice Ta */
+            notice_ta: string;
+            /** Allow Frozen Disposal */
+            allow_frozen_disposal: boolean;
+        };
+        /** DocumentRemove */
+        DocumentRemove: {
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** DocumentRequirementInput */
+        DocumentRequirementInput: {
+            /** Key */
+            key: string;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /** Instructions En */
+            instructions_en: string;
+            /** Instructions Ta */
+            instructions_ta: string;
+            /**
+             * File Policy Id
+             * Format: uuid
+             */
+            file_policy_id: string;
+            /** Min Files */
+            min_files: number;
+            /** Max Files */
+            max_files: number;
+        };
+        /** DocumentRequirementView */
+        DocumentRequirementView: {
+            /** Key */
+            key: string;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+            /** Instructions En */
+            instructions_en: string;
+            /** Instructions Ta */
+            instructions_ta: string;
+            /**
+             * File Policy Id
+             * Format: uuid
+             */
+            file_policy_id: string;
+            /** Min Files */
+            min_files: number;
+            /** Max Files */
+            max_files: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Position */
+            position: number;
+            file_policy: components["schemas"]["DocumentFilePolicyView"];
         };
         /** DraftSave */
         DraftSave: {
@@ -6557,6 +7332,89 @@ export interface components {
              */
             updated_at: string;
         };
+        /** FileView */
+        FileView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Owner Person Id
+             * Format: uuid
+             */
+            owner_person_id: string;
+            /**
+             * Purpose
+             * @enum {string}
+             */
+            purpose: "application_document" | "cms_asset" | "assignment_submission" | "lms_material" | "helpdesk_attachment";
+            /**
+             * Resource Id
+             * Format: uuid
+             */
+            resource_id: string;
+            /**
+             * Policy Id
+             * Format: uuid
+             */
+            policy_id: string;
+            /**
+             * Client Request Id
+             * Format: uuid
+             */
+            client_request_id: string;
+            /**
+             * Media Type
+             * @enum {string}
+             */
+            media_type: "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain";
+            /** Byte Size */
+            byte_size: number;
+            /** Sha256 */
+            sha256: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "pending" | "uploading" | "quarantined" | "scanning" | "clean" | "infected" | "rejected" | "deleted";
+            /** Version */
+            version: number;
+            /** Verified At */
+            verified_at: string | null;
+            /** Scanned At */
+            scanned_at: string | null;
+            /** Scan Attempts */
+            scan_attempts: number;
+            /** Failure Code */
+            failure_code: string | null;
+            /**
+             * Retention Until
+             * Format: date-time
+             */
+            retention_until: string;
+            /** Legal Hold */
+            legal_hold: boolean;
+            /** Evidence Frozen */
+            evidence_frozen: boolean;
+            /** Deleted At */
+            deleted_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** FollowUpCreate */
         FollowUpCreate: {
             /**
@@ -6596,6 +7454,18 @@ export interface components {
             fields: components["schemas"]["FieldView"][];
             /** Acknowledgements */
             acknowledgements: components["schemas"]["AcknowledgementView"][];
+            /** Document Requirements */
+            document_requirements?: components["schemas"]["DocumentRequirementView"][];
+            /**
+             * Collection Enabled
+             * @default false
+             */
+            collection_enabled: boolean;
+            /**
+             * Max Upload Bytes
+             * @default 10485760
+             */
+            max_upload_bytes: number;
         };
         /** FundingCaseCreate */
         FundingCaseCreate: {
@@ -6772,6 +7642,120 @@ export interface components {
             completed: number;
             /** Expired */
             expired: number;
+        };
+        /** HelpdeskFileEvidence */
+        HelpdeskFileEvidence: {
+            /**
+             * File Id
+             * Format: uuid
+             */
+            file_id: string;
+            /** File Version */
+            file_version: number;
+            /** Sha256 */
+            sha256: string;
+            /** Byte Size */
+            byte_size: number;
+            /**
+             * Frozen At
+             * Format: date-time
+             */
+            frozen_at: string;
+        };
+        /** HelpdeskFileIntent */
+        HelpdeskFileIntent: {
+            /**
+             * Client Request Id
+             * Format: uuid
+             */
+            client_request_id: string;
+            /**
+             * Policy Id
+             * Format: uuid
+             */
+            policy_id: string;
+            /** Internal */
+            internal: boolean;
+            /**
+             * Media Type
+             * @enum {string}
+             */
+            media_type: "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain";
+            /** Byte Size */
+            byte_size: number;
+            /** Sha256 */
+            sha256: string;
+        };
+        /** HelpdeskFileList */
+        HelpdeskFileList: {
+            /** Collection Enabled */
+            collection_enabled: boolean;
+            /** Max Upload Bytes */
+            max_upload_bytes: number;
+            policy: components["schemas"]["HelpdeskFilePolicyView"] | null;
+            /** Items */
+            items: components["schemas"]["HelpdeskFileView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** HelpdeskFilePolicyView */
+        HelpdeskFilePolicyView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Edition */
+            edition: number;
+            /** Name */
+            name: string;
+            /** Allowed Mime Types */
+            allowed_mime_types: ("application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain")[];
+            /** Max File Bytes */
+            max_file_bytes: number;
+            /** Max Upload Bytes */
+            max_upload_bytes: number;
+            /** Max Files */
+            max_files: number;
+            /** Retention Days */
+            retention_days: number;
+            /** Rejected Retention Days */
+            rejected_retention_days: number;
+            /** Notice En */
+            notice_en: string;
+            /** Notice Ta */
+            notice_ta: string;
+            /** Allow Frozen Disposal */
+            allow_frozen_disposal: boolean;
+        };
+        /** HelpdeskFileRemove */
+        HelpdeskFileRemove: {
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** HelpdeskFileView */
+        HelpdeskFileView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Message Id */
+            message_id: string | null;
+            /** Internal */
+            internal: boolean;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "staged" | "removed" | "posted";
+            /** Version */
+            version: number;
+            file: components["schemas"]["FileView"];
+            policy: components["schemas"]["HelpdeskFilePolicyView"];
+            /** Usable */
+            usable: boolean;
+            evidence: components["schemas"]["HelpdeskFileEvidence"] | null;
         };
         /** HelpdeskPreferenceView */
         HelpdeskPreferenceView: {
@@ -8012,6 +8996,30 @@ export interface components {
             /** Certificate Templates */
             certificate_templates: components["schemas"]["CertificateTemplateView"][];
         };
+        /** LearningFileEvidence */
+        LearningFileEvidence: {
+            /**
+             * File Id
+             * Format: uuid
+             */
+            file_id: string;
+            /** File Version */
+            file_version: number;
+            /** Sha256 */
+            sha256: string;
+            /** Byte Size */
+            byte_size: number;
+            /**
+             * Frozen At
+             * Format: date-time
+             */
+            frozen_at: string;
+        };
+        /** LearningFileRemove */
+        LearningFileRemove: {
+            /** Expected Version */
+            expected_version: number;
+        };
         /** LessonCompletionCommand */
         LessonCompletionCommand: {
             /** Expected Course Enrollment Version */
@@ -8356,6 +9364,74 @@ export interface components {
             /** Provider Key */
             provider_key: string;
         };
+        /** MaterialFileIntent */
+        MaterialFileIntent: {
+            /**
+             * Client Request Id
+             * Format: uuid
+             */
+            client_request_id: string;
+            /**
+             * Media Type
+             * @enum {string}
+             */
+            media_type: "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "text/plain";
+            /** Byte Size */
+            byte_size: number;
+            /** Sha256 */
+            sha256: string;
+            /**
+             * Policy Id
+             * Format: uuid
+             */
+            policy_id: string;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Position */
+            position: number;
+            /** Label En */
+            label_en: string;
+            /** Label Ta */
+            label_ta: string;
+        };
+        /** MaterialFileList */
+        MaterialFileList: {
+            /** Collection Enabled */
+            collection_enabled: boolean;
+            /** Max Upload Bytes */
+            max_upload_bytes: number;
+            /** Items */
+            items: components["schemas"]["MaterialFileView"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** MaterialFileView */
+        MaterialFileView: {
+            /**
+             * Material Id
+             * Format: uuid
+             */
+            material_id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "removed";
+            /** Version */
+            version: number;
+            file: components["schemas"]["FileView"];
+            evidence: components["schemas"]["LearningFileEvidence"] | null;
+            /** Usable */
+            usable: boolean;
+        };
         /** MentorAssignmentView */
         MentorAssignmentView: {
             /**
@@ -8440,6 +9516,8 @@ export interface components {
             internal: boolean;
             /** Attachments */
             attachments?: components["schemas"]["AttachmentInput"][];
+            /** File Ids */
+            file_ids?: string[];
         };
         /** MessageList */
         MessageList: {
@@ -8471,6 +9549,8 @@ export interface components {
             created_at: string;
             /** Attachments */
             attachments: components["schemas"]["AttachmentView"][];
+            /** Files */
+            files?: components["schemas"]["HelpdeskFileView"][];
         };
         /** ModerationCommand */
         ModerationCommand: {
@@ -14172,6 +15252,621 @@ export interface operations {
             };
         };
     };
+    documents_api_v1_applications_organizations__org__applications__application_id__documents_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDocumentList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_api_v1_applications_organizations__org__applications__application_id__documents_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDocumentResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detail_api_v1_applications_organizations__org__applications__application_id__documents__document_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                application_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDocumentResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_api_v1_applications_organizations__org__applications__application_id__documents__document_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                application_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentRemove"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDocumentResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_api_v1_applications_organizations__org__applications__application_id__documents__document_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                application_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_api_v1_applications_organizations__org__applications__application_id__documents__document_id__content_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "if-match"?: string | null;
+            };
+            path: {
+                org: string;
+                application_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDocumentResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listing_api_v1_cms_organizations__org__assets_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_api_v1_cms_organizations__org__assets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssetCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    policy_api_v1_cms_organizations__org__assets_policy_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetPolicy"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detail_api_v1_cms_organizations__org__assets__asset_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    source_intent_api_v1_cms_organizations__org__assets__asset_id__source_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssetSourceCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    source_download_api_v1_cms_organizations__org__assets__asset_id__source_content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    source_upload_api_v1_cms_organizations__org__assets__asset_id__source_content_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    prepare_api_v1_cms_organizations__org__assets__asset_id__prepare_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssetCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_api_v1_cms_organizations__org__assets__asset_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssetCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_api_v1_cms_organizations__org__assets__asset_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssetCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_listing_api_v1_public_organizations__org__assets_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_content_api_v1_public_organizations__org__assets__asset_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     pages_api_v1_cms_organizations__org__pages_get: {
         parameters: {
             query?: {
@@ -14921,76 +16616,7 @@ export interface operations {
             };
         };
     };
-    asset_list_api_v1_cms_organizations__org__assets_get: {
-        parameters: {
-            query?: {
-                cursor?: string | null;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                org: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AssetList"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    asset_create_api_v1_cms_organizations__org__assets_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                org: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AssetCreate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AssetView"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    asset_publish_api_v1_cms_organizations__org__assets__asset_id__publish_post: {
+    retired_asset_scan_api_v1_internal_cms_organizations__org__assets__asset_id__scan_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -15008,77 +16634,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AssetView"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    asset_public_api_v1_public_organizations__org__assets_get: {
-        parameters: {
-            query?: {
-                cursor?: string | null;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                org: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AssetList"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    asset_scan_api_v1_internal_cms_organizations__org__assets__asset_id__scan_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                org: string;
-                asset_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AssetScanResult"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AssetView"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -20438,6 +21994,840 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FilePolicyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reviewer_documents_api_v1_selection_organizations__org__assignments__assignment_id__documents_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDocumentList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reviewer_download_api_v1_selection_organizations__org__assignments__assignment_id__documents__document_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                assignment_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assignment_files_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentFileList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentFileIntent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files__binding_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                assignment_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files__binding_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                assignment_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearningFileRemove"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files__binding_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                assignment_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_assignment_file_api_v1_courses_organizations__org__my_learning__course_id__assignments__assignment_id__files__binding_id__content_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "if-match"?: string | null;
+            };
+            path: {
+                org: string;
+                course_id: string;
+                assignment_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trainer_files_api_v1_courses_organizations__org__trainer_delivery__course_id__assignment_submissions__submission_id__files_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentFileView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trainer_file_download_api_v1_courses_organizations__org__trainer_delivery__course_id__assignment_submissions__submission_id__files__binding_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                submission_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_file_rule_api_v1_courses_organizations__org__courses__course_id__assignments__assignment_id__file_rule_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentFileRuleView"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    configure_file_rule_api_v1_courses_organizations__org__courses__course_id__assignments__assignment_id__file_rule_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentFileRuleCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentFileRuleView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    material_files_api_v1_courses_organizations__org__courses__course_id__material_files_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialFileList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_material_file_api_v1_courses_organizations__org__material_files_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialFileIntent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    material_file_api_v1_courses_organizations__org__courses__course_id__material_files__material_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_material_file_api_v1_courses_organizations__org__courses__course_id__material_files__material_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearningFileRemove"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_author_material_api_v1_courses_organizations__org__courses__course_id__material_files__material_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                course_id: string;
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_material_file_api_v1_courses_organizations__org__courses__course_id__material_files__material_id__content_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "if-match"?: string | null;
+            };
+            path: {
+                org: string;
+                course_id: string;
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listing_api_v1_helpdesk_organizations__org__tickets__ticket_id__files_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+                ticket_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HelpdeskFileList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_api_v1_helpdesk_organizations__org__tickets__ticket_id__files_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                ticket_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HelpdeskFileIntent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HelpdeskFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detail_api_v1_helpdesk_organizations__org__tickets__ticket_id__files__binding_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                ticket_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HelpdeskFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_api_v1_helpdesk_organizations__org__tickets__ticket_id__files__binding_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                ticket_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HelpdeskFileRemove"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HelpdeskFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_api_v1_helpdesk_organizations__org__tickets__ticket_id__files__binding_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                ticket_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_api_v1_helpdesk_organizations__org__tickets__ticket_id__files__binding_id__content_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "if-match"?: string | null;
+            };
+            path: {
+                org: string;
+                ticket_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HelpdeskFileView"];
                 };
             };
             /** @description Validation Error */

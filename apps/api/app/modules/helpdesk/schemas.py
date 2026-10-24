@@ -5,6 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
 
+from app.modules.helpdesk.file_schemas import HelpdeskFileView
+
 Category = Literal[
     "funding",
     "registration",
@@ -86,6 +88,14 @@ class MessageCreate(Strict):
     body: Body
     internal: bool = False
     attachments: list[AttachmentInput] = Field(default_factory=list, max_length=3)
+    file_ids: list[UUID] = Field(default_factory=list, max_length=100)
+
+    @field_validator("file_ids")
+    @classmethod
+    def unique_file_ids(cls, value: list[UUID]) -> list[UUID]:
+        if len(value) != len(set(value)):
+            raise ValueError("Duplicate file")
+        return value
 
 
 class AssignmentChange(TicketCommand):
@@ -162,6 +172,7 @@ class MessageView(BaseModel):
     author_user_id: UUID
     created_at: datetime
     attachments: list[AttachmentView]
+    files: list[HelpdeskFileView] = Field(default_factory=list)
 
 
 class MessageList(BaseModel):

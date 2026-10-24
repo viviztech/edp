@@ -116,3 +116,45 @@ jobs:
       - run: python scripts/run-helpdesk-browser-test.py
       - run: python scripts/run-reports-browser-test.py
       - run: python scripts/run-web-journey-browser-test.py
+
+  browser-files:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: edp_dev
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U edp_dev -d postgres"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_file_policy_e2e
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: python -m pip install -r apps/api/requirements-dev.lock
+      - run: python -m pip install --no-deps -e './apps/api[dev]' && python -m pip check
+      - run: python -m playwright install --with-deps chromium
+      - run: npm ci && npm run build
+        working-directory: apps/web
+      - run: python scripts/run-file-policy-browser-test.py
+      - run: python scripts/run-application-files-browser-test.py
+        env:
+          DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_application_files_e2e
+      - run: python scripts/run-cms-media-browser-test.py
+        env:
+          DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_cms_files_e2e
+      - run: python scripts/run-learning-files-browser-test.py
+        env:
+          DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_learning_files_e2e
+      - run: python scripts/run-helpdesk-files-browser-test.py
+        env:
+          DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_helpdesk_files_e2e

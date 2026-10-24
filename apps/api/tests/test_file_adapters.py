@@ -18,7 +18,12 @@ from botocore.response import StreamingBody
 from botocore.stub import ANY, Stubber
 
 from app.modules.files.scanner import ClamAVScanner
-from app.modules.files.storage import LocalPrivateStorage, S3PrivateStorage, StorageError
+from app.modules.files.storage import (
+    LocalPrivateStorage,
+    S3PrivateStorage,
+    StorageError,
+    StoredObject,
+)
 
 PDF = b"%PDF-1.4\nSynthetic private document\n%%EOF"
 
@@ -70,6 +75,24 @@ def test_local_recovery_refuses_incomplete_or_mismatched_bytes(tmp_path):
     with pytest.raises(StorageError, match="storage_size_mismatch"):
         storage.recover(object_key, stored.media_type, stored.byte_size, stored.sha256)
     assert target.read_bytes() == b"partial"
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        ValueError("domain rejection"),
+        FileNotFoundError("consumer lookup"),
+        RuntimeError("consumer error"),
+    ],
+)
+def test_local_open_preserves_consumer_exception_and_closes_snapshot(tmp_path, failure):
+    storage = LocalPrivateStorage(tmp_path / "objects", max_bytes=1024)
+    ref = put(storage, key())
+    with pytest.raises(type(failure)) as raised:
+        with storage.open(ref) as source:
+            assert source.read() == PDF
+            raise failure
+    assert raised.value is failure and source.closed
 
 
 def test_storage_uses_only_explicit_private_temp_directory_when_configured(tmp_path, monkeypatch):
@@ -254,6 +277,38 @@ def object_response(content=PDF, version="opaque-version", **overrides):
         "ServerSideEncryption": "AES256",
         **overrides,
     }
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        ValueError("domain rejection"),
+        FileNotFoundError("consumer lookup"),
+        RuntimeError("consumer error"),
+    ],
+)
+def test_s3_open_preserves_consumer_exception_and_closes_snapshot(failure):
+    s3 = client()
+    ref = StoredObject(key(), "opaque-version", "application/pdf", len(PDF), digest(PDF))
+    storage = S3PrivateStorage(s3, bucket="private-test", max_bytes=1024)
+    with Stubber(s3) as stub:
+        add_private(stub)
+        stub.add_response(
+            "get_object",
+            {**object_response(), "Body": StreamingBody(io.BytesIO(PDF), len(PDF))},
+            {
+                "Bucket": "private-test",
+                "Key": ref.key,
+                "VersionId": ref.version_id,
+                "ChecksumMode": "ENABLED",
+            },
+        )
+        with pytest.raises(type(failure)) as raised:
+            with storage.open(ref) as source:
+                assert source.read() == PDF
+                raise failure
+        assert raised.value is failure and source.closed
+        stub.assert_no_pending_responses()
 
 
 def test_s3_conditional_checksummed_put_pinned_read_and_delete_without_provider_calls():

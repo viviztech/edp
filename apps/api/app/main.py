@@ -1,4 +1,5 @@
 import asyncio
+import re
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import Literal
@@ -18,6 +19,9 @@ from starlette.exceptions import HTTPException
 from app.core.config import get_settings
 from app.core.database import create_engine
 from app.core.logging import configure_logging
+from app.modules.applications.document_routes import (
+    reviewer_router as application_documents_reviewer_router,
+)
 from app.modules.applications.routes import router as applications_router
 from app.modules.attendance.routes import router as attendance_router
 from app.modules.business_plans.routes import router as business_plans_router
@@ -25,11 +29,13 @@ from app.modules.businesses.routes import router as businesses_router
 from app.modules.cms.routes import router as cms_router
 from app.modules.crm.routes import router as crm_router
 from app.modules.files.policy_routes import router as file_policy_router
+from app.modules.helpdesk.file_routes import router as helpdesk_files_router
 from app.modules.helpdesk.routes import router as helpdesk_router
 from app.modules.identity.routes import router as identity_router
 from app.modules.identity.security import AuthError
 from app.modules.knowledge.routes import public_router as knowledge_public_router
 from app.modules.knowledge.routes import router as knowledge_router
+from app.modules.lms.file_routes import router as lms_files_router
 from app.modules.lms.routes import public_router as certificates_router
 from app.modules.lms.routes import router as lms_router
 from app.modules.mentoring.routes import router as mentoring_router
@@ -41,6 +47,26 @@ from app.modules.reports.routes import router as reports_router
 from app.modules.selection.routes import router as selection_router
 
 log = structlog.get_logger()
+_UUID_PATH = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+_APPLICATION_DOCUMENT_UPLOAD = re.compile(
+    rf"/api/v1/applications/organizations/{_UUID_PATH}/applications/{_UUID_PATH}"
+    rf"/documents/{_UUID_PATH}/content"
+)
+_CMS_SOURCE_UPLOAD = re.compile(
+    rf"/api/v1/cms/organizations/{_UUID_PATH}/assets/{_UUID_PATH}/source/content"
+)
+_ASSIGNMENT_FILE_UPLOAD = re.compile(
+    rf"/api/v1/courses/organizations/{_UUID_PATH}/my-learning/{_UUID_PATH}"
+    rf"/assignments/{_UUID_PATH}/files/{_UUID_PATH}/content"
+)
+_MATERIAL_FILE_UPLOAD = re.compile(
+    rf"/api/v1/courses/organizations/{_UUID_PATH}/courses/{_UUID_PATH}"
+    rf"/material-files/{_UUID_PATH}/content"
+)
+_HELPDESK_FILE_UPLOAD = re.compile(
+    rf"/api/v1/helpdesk/organizations/{_UUID_PATH}/tickets/{_UUID_PATH}"
+    rf"/files/{_UUID_PATH}/content"
+)
 
 
 class Probe(BaseModel):
@@ -112,6 +138,9 @@ def create_app() -> FastAPI:
     app.include_router(reports_router)
     app.include_router(impact_router)
     app.include_router(file_policy_router)
+    app.include_router(application_documents_reviewer_router)
+    app.include_router(lms_files_router)
+    app.include_router(helpdesk_files_router)
 
     @app.exception_handler(AuthError)
     async def auth_error(request: Request, exc: AuthError) -> JSONResponse:
@@ -162,7 +191,7 @@ def create_app() -> FastAPI:
                         or request.url.path.startswith("/api/v1/impact/")
                         or request.url.path.startswith("/api/v1/files/")
                     )
-                    and request.method in {"POST", "PATCH", "PUT"}
+                    and request.method in {"POST", "PATCH", "PUT", "DELETE"}
                 )
                 or (
                     request.url.path.startswith("/api/v1/meta/")
@@ -182,7 +211,14 @@ def create_app() -> FastAPI:
                     and request.method == "POST"
                 )
             )
-            if bounded_body:
+            domain_upload = request.method == "PUT" and bool(
+                _APPLICATION_DOCUMENT_UPLOAD.fullmatch(request.url.path)
+                or _CMS_SOURCE_UPLOAD.fullmatch(request.url.path)
+                or _ASSIGNMENT_FILE_UPLOAD.fullmatch(request.url.path)
+                or _MATERIAL_FILE_UPLOAD.fullmatch(request.url.path)
+                or _HELPDESK_FILE_UPLOAD.fullmatch(request.url.path)
+            )
+            if bounded_body and not domain_upload:
                 body_limit = (
                     32768
                     if request.url.path.startswith("/api/v1/public/organizations/")

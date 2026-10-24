@@ -7,6 +7,8 @@ from sqlalchemy import delete, func, select, text, tuple_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
+from app.modules.applications import document_policy
 from app.modules.applications.models import (
     Application,
     ApplicationAcknowledgement,
@@ -103,6 +105,9 @@ def form_view(db: Session, form: ApplicationForm, fields: list[ApplicationField]
             )
             for item in _acknowledgements(db, form.id)
         ],
+        document_requirements=document_policy.requirement_views(db, form.id),
+        collection_enabled=get_settings().files_enabled,
+        max_upload_bytes=get_settings().files_max_bytes,
     )
 
 
@@ -161,6 +166,7 @@ def _replace_policy(
     form: ApplicationForm,
     data: DefinitionContent,
 ) -> list[ApplicationField]:
+    document_policy.replace_requirements(db, form, data.document_requirements)
     db.execute(delete(ApplicationField).where(ApplicationField.form_id == form.id))
     db.execute(
         delete(ApplicationAcknowledgementDefinition).where(
@@ -253,10 +259,12 @@ def create_definition(
     request_id: str,
 ) -> DefinitionView:
     require_permission(db, actor, org, "application.form.create")
+    edition = _next_version(db, org)
+    document_policy.validate_requirements(db, org, actor, data.document_requirements)
     _ensure_no_draft(db, org)
     form = ApplicationForm(
         organization_id=org,
-        version=_next_version(db, org),
+        version=edition,
         revision=1,
         state="draft",
         title_en=data.title_en,
@@ -273,7 +281,7 @@ def create_definition(
             form,
             "application.definition_created",
             request_id,
-            "title_en,title_ta,fields,acknowledgements",
+            "title_en,title_ta,fields,acknowledgements,document_requirements",
         )
         db.commit()
     except IntegrityError as exc:
@@ -296,6 +304,7 @@ def update_definition(
         raise AuthError("application_definition_immutable", 409)
     if form.revision != data.expected_revision:
         raise AuthError("version_conflict", 409)
+    document_policy.validate_requirements(db, org, actor, data.document_requirements)
     form.title_en = data.title_en
     form.title_ta = data.title_ta
     form.revision += 1
@@ -307,7 +316,7 @@ def update_definition(
         form,
         "application.definition_updated",
         request_id,
-        "title_en,title_ta,fields,acknowledgements",
+        "title_en,title_ta,fields,acknowledgements,document_requirements",
     )
     db.commit()
     return definition_view(db, form, fields)
@@ -330,6 +339,9 @@ def copy_definition(
     _ensure_no_draft(db, org)
     source_fields = _fields(db, source.id)
     source_acknowledgements = _acknowledgements(db, source.id)
+    source_requirements = document_policy.requirements(db, source.id)
+    if source_requirements:
+        require_permission(db, actor, org, "files.policy.view")
     form = ApplicationForm(
         organization_id=org,
         version=_next_version(db, org),
@@ -367,6 +379,9 @@ def copy_definition(
             for item in source_acknowledgements
         ]
         db.add_all([*fields, *acknowledgements])
+        document_policy.replace_requirements(
+            db, form, [document_policy.requirement_input(row) for row in source_requirements]
+        )
         _audit_definition(
             db,
             actor,
@@ -397,6 +412,15 @@ def publish_definition(
         raise AuthError("invalid_transition", 409)
     if form.revision != data.expected_revision:
         raise AuthError("version_conflict", 409)
+    document_policy.validate_requirements(
+        db,
+        org,
+        actor,
+        [
+            document_policy.requirement_input(row)
+            for row in document_policy.requirements(db, form.id)
+        ],
+    )
     fields = _fields(db, form.id)
     acknowledgements = _acknowledgements(db, form.id)
     required_kinds = {item.kind for item in acknowledgements if item.required}
@@ -950,6 +974,10 @@ def submit(
     if not accepted_ids.issubset(allowed_ids) or not required_ids.issubset(accepted_ids):
         raise AuthError("acknowledgement_required", 422)
     submitted_at = now()
+    # Domain evidence and file freezing share this transaction with submission.
+    from app.modules.applications.document_service import freeze_submission_documents
+
+    freeze_submission_documents(db, application, actor, request_id, submitted_at)
     sequence = db.scalar(text("SELECT nextval('application_number_seq')"))
     if sequence is None:
         raise AuthError("application_integrity_error", 503)
@@ -992,7 +1020,7 @@ def submit(
             resource_version=application.version,
             changed_fields=(
                 "state,cycle_id,current_revision_id,application_number,submitted_at,"
-                "acknowledgements"
+                "acknowledgements,documents"
             ),
         )
     )

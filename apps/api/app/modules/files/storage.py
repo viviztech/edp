@@ -398,6 +398,7 @@ class LocalPrivateStorage:
     def open(self, ref: StoredObject) -> Iterator[BinaryIO]:
         validate_key(ref.key)
         _validate_metadata(ref.media_type, ref.byte_size, ref.sha256, self.max_bytes)
+        consumer_error: BaseException | None = None
         try:
             with (
                 self._parent(ref.key) as (parent, parent_fd, name),
@@ -415,12 +416,20 @@ class LocalPrivateStorage:
                 ) as verified:
                     if self._version(opened, ref.sha256) != ref.version_id:
                         raise StorageError("storage_version_mismatch")
-                    yield verified
+                    try:
+                        yield verified
+                    except BaseException as error:
+                        consumer_error = error
+                        raise
         except StorageError:
             raise
-        except FileNotFoundError:
+        except FileNotFoundError as error:
+            if error is consumer_error:
+                raise
             raise StorageError("storage_not_found") from None
-        except Exception:
+        except Exception as error:
+            if error is consumer_error:
+                raise
             raise StorageError() from None
 
     def delete(self, ref: StoredObject) -> None:
@@ -643,13 +652,20 @@ class S3PrivateStorage:
         validate_key(ref.key)
         _validate_metadata(ref.media_type, ref.byte_size, ref.sha256, self.max_bytes)
         self._version(ref.version_id)
+        consumer_error: BaseException | None = None
         try:
             self._private_versioned()
             with self._open(ref) as opened:
-                yield opened
+                try:
+                    yield opened
+                except BaseException as error:
+                    consumer_error = error
+                    raise
         except StorageError:
             raise
         except Exception as error:
+            if error is consumer_error:
+                raise
             code = (
                 "storage_not_found"
                 if _provider_code(error) in {"NoSuchKey", "NoSuchVersion", "404"}

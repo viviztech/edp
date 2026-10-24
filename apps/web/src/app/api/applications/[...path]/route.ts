@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { applicationPath, applicationQuery } from "../../../../lib/application-security";
+import { applicationDocumentContent, applicationPath, applicationQuery } from "../../../../lib/application-security";
+import { applicationFileTransport } from "../../../../lib/application-file-transport";
 import { validMutation } from "../../../../lib/bff-security";
 import { cookieName, csrfName, settings } from "../../../../lib/server-api";
 
@@ -16,11 +17,20 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
     if (!path) return fail("not_found", 404);
     const query = applicationQuery(segments, request.method, request.nextUrl.searchParams);
     if (query === null || request.nextUrl.search.length > 1024) return fail("invalid_request", 400);
-    let body: string | undefined;
     if (request.method !== "GET") {
       if (!validMutation(request.headers.get("origin"), config.origin, jar.get(csrfName)?.value, request.headers.get("x-csrf-token"))) {
         return fail("csrf_failed", 403);
       }
+    }
+    const credentials = {
+      "X-BFF-Key": config.key, "X-Browser-Session": jar.get(cookieName)?.value ?? "",
+      "X-CSRF-Token": request.headers.get("x-csrf-token") ?? "",
+    };
+    if (applicationDocumentContent(segments)) {
+      return applicationFileTransport(request, config.api + "/api/v1" + path, credentials, segments[5]);
+    }
+    let body: string | undefined;
+    if (request.method !== "GET") {
       if (!request.headers.get("content-type")?.startsWith("application/json")) return fail("invalid_request", 400);
       const reader = request.body?.getReader();
       if (!reader) return fail("invalid_request", 400);
@@ -40,9 +50,7 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
     const upstream = await fetch(config.api + "/api/v1" + path + query, {
       method: request.method, body, cache: "no-store", signal: AbortSignal.timeout(15000),
       headers: {
-        "Content-Type": "application/json", "X-BFF-Key": config.key,
-        "X-Browser-Session": jar.get(cookieName)?.value ?? "",
-        "X-CSRF-Token": request.headers.get("x-csrf-token") ?? "",
+        "Content-Type": "application/json", ...credentials,
       },
     });
     return NextResponse.json(await upstream.json(), {
@@ -56,3 +64,5 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
 export const GET = handle;
 export const POST = handle;
 export const PATCH = handle;
+export const PUT = handle;
+export const DELETE = handle;

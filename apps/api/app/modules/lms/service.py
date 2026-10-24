@@ -21,6 +21,7 @@ from app.modules.identity.service import require_permission
 from app.modules.lms.material_access import (
     AccessMode,
     LocalMaterial,
+    SharedMaterial,
     issue_access,
     resolve_local_material,
     verify_access,
@@ -330,7 +331,7 @@ def _course(db: Session, org: UUID, course_id: UUID, lock: bool = False) -> Cour
         Course.organization_id == org,
     )
     if lock:
-        statement = statement.with_for_update()
+        statement = statement.with_for_update().execution_options(populate_existing=True)
     item = db.scalar(statement)
     if not item:
         raise AuthError("not_found", 404)
@@ -342,7 +343,11 @@ def _require_draft(item: Course) -> None:
         raise AuthError("course_structure_frozen", 409)
 
 
-def _admin_structure(db: Session, item: Course) -> AdminCourseView:
+def _admin_structure(
+    db: Session, item: Course, *, include_removed_materials: bool = False
+) -> AdminCourseView:
+    from app.modules.lms.file_models import MaterialFile
+
     modules = list(
         db.scalars(
             select(CourseModule)
@@ -357,11 +362,18 @@ def _admin_structure(db: Session, item: Course) -> AdminCourseView:
             .order_by(Lesson.module_id, Lesson.position, Lesson.id)
         )
     )
+    material_query = select(LessonMaterial).where(LessonMaterial.course_id == item.id)
+    if not include_removed_materials:
+        material_query = material_query.where(
+            ~LessonMaterial.id.in_(
+                select(MaterialFile.material_id).where(MaterialFile.state == "removed")
+            )
+        )
     materials = list(
         db.scalars(
-            select(LessonMaterial)
-            .where(LessonMaterial.course_id == item.id)
-            .order_by(LessonMaterial.lesson_id, LessonMaterial.position, LessonMaterial.id)
+            material_query.order_by(
+                LessonMaterial.lesson_id, LessonMaterial.position, LessonMaterial.id
+            )
         )
     )
     learning_assignments = list(
@@ -560,7 +572,7 @@ def catalog(db: Session, org: UUID, actor: User) -> LearningCatalogView:
         )
     )
     return LearningCatalogView(
-        courses=[_admin_structure(db, item) for item in courses],
+        courses=[_admin_structure(db, item, include_removed_materials=True) for item in courses],
         assignments=[assignment_view(item) for item in assignments],
         progress_summaries=_progress_summaries(
             db, assignments, {item.id: item for item in courses}
@@ -771,6 +783,8 @@ def create_material(
     request_id: str,
 ) -> MaterialAdminView:
     require_permission(db, actor, org, "lms.course.manage")
+    if data.provider_key.startswith("shared-file:"):
+        raise AuthError("typed_material_file_required", 422)
     course = _course(db, org, data.course_id, lock=True)
     _require_draft(course)
     lesson = db.scalar(
@@ -836,6 +850,9 @@ def publish_course(
     ):
         raise AuthError("completion_rule_invalid", 422)
     _validate_quizzes_for_publish(db, item.id)
+    from app.modules.lms.file_service import prepare_course_publication
+
+    prepare_course_publication(db, item, actor, request_id)
     item.state = "published"
     item.version += 1
     item.published_at = now()
@@ -1566,6 +1583,7 @@ def trainer_delivery(
 
 
 def _material_access_view(
+    db: Session,
     org: UUID,
     actor: User,
     course: Course,
@@ -1573,6 +1591,11 @@ def _material_access_view(
     mode: str,
 ) -> MaterialAccessView:
     settings = get_settings()
+    from app.modules.lms.file_service import material_reference
+
+    shared = material.provider_key.startswith("shared-file:")
+    if shared:
+        material_reference(db, org, material)
     token, expires_at = issue_access(
         settings,
         org,
@@ -1580,6 +1603,7 @@ def _material_access_view(
         course.id,
         material.id,
         cast(AccessMode, mode),
+        require_local_root=not shared,
     )
     return MaterialAccessView(
         url=f"/api/courses/organizations/{org}/material-delivery/{token}",
@@ -1596,7 +1620,7 @@ def learner_material_access(
     request_id: str,
 ) -> MaterialAccessView:
     course, _, material = _learner_material_context(db, org, course_id, material_id, actor)
-    view = _material_access_view(org, actor, course, material, "learner")
+    view = _material_access_view(db, org, actor, course, material, "learner")
     _audit(
         db,
         actor,
@@ -1629,7 +1653,7 @@ def trainer_material_access(
     )
     if not material:
         raise AuthError("not_found", 404)
-    view = _material_access_view(org, actor, course, material, "trainer")
+    view = _material_access_view(db, org, actor, course, material, "trainer")
     _audit(
         db,
         actor,
@@ -1644,13 +1668,12 @@ def trainer_material_access(
     return view
 
 
-def deliver_material(
+def authorized_material(
     db: Session,
     org: UUID,
     token: str,
     actor: User,
-    request_id: str,
-) -> LocalMaterial:
+) -> LessonMaterial:
     settings = get_settings()
     claims = verify_access(settings, token)
     if claims.organization_id != org or claims.actor_id != actor.id:
@@ -1671,7 +1694,26 @@ def deliver_material(
         if not trainer_material:
             raise AuthError("not_found", 404)
         material = trainer_material
-    resolved = resolve_local_material(settings, material.provider_key)
+    return material
+
+
+def deliver_material(
+    db: Session, org: UUID, token: str, actor: User, request_id: str
+) -> LocalMaterial | SharedMaterial:
+    from app.modules.lms.file_service import material_reference
+
+    material = authorized_material(db, org, token, actor)
+    reference = material_reference(db, org, material)
+    resolved: LocalMaterial | SharedMaterial = (
+        SharedMaterial(*reference)
+        if reference
+        else resolve_local_material(get_settings(), material.provider_key)
+    )
+    if isinstance(resolved, SharedMaterial):
+        # The byte gateway audits delivery after verifying its snapshot and
+        # rechecking the current session and course access.
+        db.rollback()
+        return resolved
     _audit(
         db,
         actor,
@@ -2254,6 +2296,9 @@ def submit_assignment(
     )
     db.add(item)
     db.flush()
+    from app.modules.lms.file_service import freeze_submission
+
+    freeze_submission(db, item, actor, data.file_ids, request_id)
     _audit(
         db,
         actor,

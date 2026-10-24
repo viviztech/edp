@@ -22,13 +22,13 @@ export default async function ApplicationDefinitionsPage({
   let response: Response;
   try { response = await serverApi("/auth/me"); } catch { response = new Response(null, { status: 503 }); }
   if (response.status === 401) redirect(`/${locale}/account`);
-  if (!response.ok) return <main><h1>{text.workspace}</h1><p>{text.error}</p></main>;
+  if (!response.ok) return <main id="main" tabIndex={-1}><h1>{text.workspace}</h1><p>{text.error}</p></main>;
   const profile = await response.json() as components["schemas"]["Profile"];
   const requested = (await searchParams).organization;
   const grants = profile.grants.filter((grant) => grant.permissions.includes("application.form.view"));
   const grant = grants.find((item) => !requested || item.organization_id === requested);
-  if (!grant) return <main><h1>{text.workspace}</h1><p>{text.error}</p><Link href={`/${locale}/admin`}>Admin</Link></main>;
-  return <main className="definition-main">
+  if (!grant) return <main id="main" tabIndex={-1}><h1>{text.workspace}</h1><p>{text.error}</p><Link href={`/${locale}/admin`}>Admin</Link></main>;
+  return <main id="main" tabIndex={-1} className="definition-main">
     <StaffModuleNav locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="applicationDefinitions" />
     <header className="definition-heading">
       <div><p className="eyebrow">{text.eyebrow}</p><h1>{text.title}</h1><p>{text.intro}</p></div>

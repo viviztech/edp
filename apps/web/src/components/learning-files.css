@@ -1,0 +1,16 @@
+.learning-files { border: 1px solid var(--line, #d8dfd9); padding: 1rem; margin: 1rem 0; min-width: 0; max-width: 100%; }
+.learning-files h3, .learning-files h4, .learning-files p, .learning-files dd { overflow-wrap: anywhere; }
+.learning-files fieldset { min-width: 0; max-width: 100%; border: 0; padding: 0; }
+.learning-files label { display: grid; gap: .4rem; margin: .75rem 0; min-width: 0; }
+.learning-files input, .learning-files select, .learning-files textarea { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; }
+.learning-files input[type="checkbox"] { width: auto; }
+.learning-files .learning-file-check { display: flex; align-items: flex-start; gap: .6rem; }
+.learning-files button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.learning-file-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: .75rem 0; }
+.learning-file-digest { display: block; overflow-wrap: anywhere; font-size: .8rem; }
+.learning-file-list { list-style: none; margin: 1rem 0; padding: 0; }
+.learning-file-list > li { border-top: 1px solid var(--line, #d8dfd9); padding: .8rem 0; min-width: 0; }
+.learning-file-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.learning-files dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: .5rem; }
+.learning-files dd { margin: 0; }
+@media(max-width: 600px) { .learning-file-grid, .learning-files dl { grid-template-columns: minmax(0, 1fr); } .learning-files { padding: .75rem; } }

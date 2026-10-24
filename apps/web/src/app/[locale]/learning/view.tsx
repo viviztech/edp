@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { AssignmentFiles } from "../../../components/learning-assignment-files";
 import type { components } from "../../../lib/api-contracts";
 import { learningMessages } from "../../../lib/learning-messages";
+import { learningFileWords } from "../../../lib/learning-file-messages";
 
 type Locale = "en" | "ta";
 type Learning = components["schemas"]["MyLearningView"];
@@ -17,6 +19,9 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
   const [learning, setLearning] = useState<Learning>({ courses: [] });
   const [message, setMessage] = useState<string>(text.loading);
   const [busy, setBusy] = useState(true);
+  const [fileReady, setFileReady] = useState<Record<string, boolean>>({});
+  const [uncertainAssignments, setUncertainAssignments] = useState<Record<string, boolean>>({});
+  const mutationLock = useRef(false);
 
   const load = useCallback(async () => {
     const response = await fetch(root + "/my-learning", { cache: "no-store" });
@@ -39,7 +44,9 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
     return () => { active = false; };
   }, [load, text.error]);
 
-  async function mutate(path: string, data?: object) {
+  async function mutate(path: string, data?: object, assignmentId?: string) {
+    if (mutationLock.current) return;
+    mutationLock.current = true;
     setBusy(true);
     try {
       const csrf = await fetch("/api/session/csrf", { cache: "no-store" });
@@ -56,8 +63,10 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
       await load();
       setMessage(text.saved);
     } catch {
-      setMessage(text.error);
+      setMessage(assignmentId ? learningFileWords[locale].uncertain : text.error);
+      if (assignmentId) setUncertainAssignments(current => ({ ...current, [assignmentId]: true }));
     } finally {
+      mutationLock.current = false;
       setBusy(false);
     }
   }
@@ -87,10 +96,13 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
     assignmentId: string,
   ) {
     event.preventDefault();
-    const responseText = String(new FormData(event.currentTarget).get("response_text") ?? "");
+    if (!fileReady[assignmentId] || uncertainAssignments[assignmentId]) return;
+    const data = new FormData(event.currentTarget);
+    const responseText = String(data.get("response_text") ?? "");
     void mutate(
       "/my-learning/" + courseId + "/assignments/" + assignmentId + "/submissions",
-      { response_text: responseText },
+      { response_text: responseText, file_ids: data.getAll("file_ids").map(String) },
+      assignmentId,
     );
   }
 
@@ -246,12 +258,26 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
                       }<br />{text.feedback}: {submission.grade.feedback}</p>
                       : <small>{text.awaitingReview}</small>}
                   </article>)}
+                  {course.course_enrollment && !lesson.locked && <AssignmentFiles
+                    key={`${org}:${course.id}:${assignment.id}`}
+                    org={org} courseId={course.id} assignmentId={assignment.id} locale={locale}
+                    editable={!busy && assignment.available && assignment.remaining_submissions > 0
+                      && (assignment.submissions.length === 0 || Boolean(assignment.submissions.at(-1)?.grade))}
+                    refreshKey={assignment.submissions.map(item => item.id).join(",")}
+                    onReady={ready => setFileReady(current => current[assignment.id] === ready ? current : { ...current, [assignment.id]: ready })}
+                  />}
+                  {uncertainAssignments[assignment.id] && <button type="button" disabled={busy} onClick={async () => {
+                    setBusy(true);
+                    try { await load(); setUncertainAssignments(current => ({ ...current, [assignment.id]: false })); setMessage(""); }
+                    catch { setMessage(learningFileWords[locale].error); }
+                    finally { setBusy(false); }
+                  }}>{learningFileWords[locale].review}</button>}
                   {assignment.available && assignment.remaining_submissions > 0
                     && (assignment.submissions.length === 0
                       || assignment.submissions.at(-1)?.grade)
                     ? <>
                       <label>{text.assignmentResponse}<textarea name="response_text" required /></label>
-                      <button disabled={busy} type="submit">{text.submitAssignment}</button>
+                      <button disabled={busy || !fileReady[assignment.id] || uncertainAssignments[assignment.id]} type="submit">{text.submitAssignment}</button>
                     </>
                     : assignment.remaining_submissions === 0
                       ? <small>{text.submissionLimitReached}</small>

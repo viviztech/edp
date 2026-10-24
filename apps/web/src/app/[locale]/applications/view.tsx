@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { components } from "../../../lib/api-contracts";
 import { applicationMessages } from "../../../lib/application-messages";
 import ApplicationHistory from "./history";
+import ApplicationDocuments from "./documents";
+import { applicationDocumentWords } from "../../../lib/application-document-content";
 
 type Cycle = components["schemas"]["CycleOpportunityView"];
 type Draft = components["schemas"]["DraftView"];
@@ -21,10 +23,15 @@ export default function ApplicationWorkspace({ locale, org, initialCycle }: {
   const [cycleId, setCycleId] = useState(initialCycle ?? "");
   const selectedCycle = useRef(initialCycle ?? "");
   const [application, setApplication] = useState<Application | null>(null);
+  const currentApplication = useRef<Application | null>(null);
+  const [documentsReady, setDocumentsReady] = useState(true), [documentConflict, setDocumentConflict] = useState(false);
+  const [documentBusy, setDocumentBusy] = useState(false);
+  const [documentPending, setDocumentPending] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
   const [accepted, setAccepted] = useState<string[]>([]);
   const [message, setMessage] = useState("");
-  const [busy, setBusy] = useState(Boolean(org));
+  const [baseBusy, setBusy] = useState(Boolean(org));
+  const busy = baseBusy || documentBusy;
   const [reload, setReload] = useState(0);
   const [historyRevision, setHistoryRevision] = useState(0);
   const selection = useRef({ value: 0 });
@@ -43,10 +50,21 @@ export default function ApplicationWorkspace({ locale, org, initialCycle }: {
   }, []);
 
   const adopt = useCallback((item: Application | null) => {
+    if (item?.id !== currentApplication.current?.id) setDocumentsReady(!item?.form.document_requirements?.length);
+    currentApplication.current = item; setDocumentConflict(false);
     setApplication(item);
     setValues(item ? Object.fromEntries(item.answers.map((answer) => [answer.field_id, answer.value])) : {});
     setAccepted(item && item.state !== "draft" ? item.accepted_acknowledgements.map((entry) => entry.definition_id) : []);
   }, []);
+
+  const documentVersion = useCallback((version: number, expected?: number) => {
+    const current = currentApplication.current;
+    if (!current || version <= current.version) return;
+    if (expected !== undefined && current.version === expected && version === expected + 1) {
+      const updated = { ...current, version };
+      currentApplication.current = updated; setApplication(updated); setHistoryRevision(value => value + 1);
+    } else { setDocumentConflict(true); setMessage(applicationDocumentWords[locale].changed); }
+  }, [locale]);
 
   const fetchApplication = useCallback(async (selected: string): Promise<Application | null> => {
     try { return await request<Application>(`${root}/cycles/${selected}/application`); }
@@ -98,7 +116,7 @@ export default function ApplicationWorkspace({ locale, org, initialCycle }: {
   }, [accepted, application, values]);
 
   useEffect(() => {
-    if (!dirty && !busy) return;
+    if (!dirty && !busy && !documentPending) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
     const guardLink = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -111,9 +129,9 @@ export default function ApplicationWorkspace({ locale, org, initialCycle }: {
     window.addEventListener("beforeunload", warn);
     document.addEventListener("click", guardLink, true);
     return () => { window.removeEventListener("beforeunload", warn); document.removeEventListener("click", guardLink, true); };
-  }, [busy, dirty, t.leave]);
+  }, [busy, dirty, documentPending, t.leave]);
 
-  function canNavigate() { return !busy && (!dirty || window.confirm(t.leave)); }
+  function canNavigate() { return !busy && (!(dirty || documentPending) || window.confirm(t.leave)); }
 
   async function selectCycle(id: string) {
     if (id === cycleId || !canNavigate()) return;
@@ -149,6 +167,7 @@ export default function ApplicationWorkspace({ locale, org, initialCycle }: {
 
   async function save() {
     if (busy || !cycles.some((item) => item.id === cycleId)) return;
+    if (documentConflict) { setMessage(applicationDocumentWords[locale].changed); return; }
     setBusy(true); setMessage("");
     try { await persist(); setMessage(t.saved); setHistoryRevision((value) => value + 1); }
     catch (error) { setMessage(error instanceof Error && error.message === "version_conflict" ? t.conflict : t.error); }
@@ -159,6 +178,7 @@ export default function ApplicationWorkspace({ locale, org, initialCycle }: {
     if (busy || !application || application.state !== "draft" || !cycles.some((item) => item.id === cycleId)) return;
     if (application.form.fields.some((field) => field.required && !(values[field.id] ?? "").trim())) { setMessage(t.incomplete); return; }
     if (application.form.acknowledgements.some((item) => item.required && !accepted.includes(item.id))) { setMessage(t.acknowledgement); return; }
+    if (documentConflict || !documentsReady) { setMessage(applicationDocumentWords[locale].cleanRequired); return; }
     if (!window.confirm(t.confirm)) return;
     setBusy(true); setMessage("");
     try {
@@ -169,12 +189,12 @@ export default function ApplicationWorkspace({ locale, org, initialCycle }: {
       adopt(result); setMessage(t.submitted); setHistoryRevision((value) => value + 1);
     } catch (error) {
       const code = error instanceof Error ? error.message : "";
-      setMessage(code === "version_conflict" ? t.conflict : code === "application_incomplete" ? t.incomplete : code === "acknowledgement_required" ? t.acknowledgement : t.error);
+      setMessage(code === "version_conflict" ? t.conflict : code === "application_incomplete" ? t.incomplete : code.includes("document") || code.includes("file") ? applicationDocumentWords[locale].cleanRequired : code === "acknowledgement_required" ? t.acknowledgement : t.error);
     } finally { setBusy(false); }
   }
 
   const cycle = cycles.find((item) => item.id === cycleId);
-  const editable = application?.state === "draft" && Boolean(cycle);
+  const editable = application?.state === "draft" && Boolean(cycle) && !documentConflict;
   function control(field: Field) {
     const label = locale === "ta" ? field.label_ta : field.label_en;
     const value = values[field.id] ?? "";
@@ -202,14 +222,15 @@ export default function ApplicationWorkspace({ locale, org, initialCycle }: {
       <p className="eyebrow">{t.states[application.state]}</p><strong>{t.receipt}: {application.application_number}</strong><p>{t.submittedAt}: {new Date(application.submitted_at).toLocaleString(locale)}</p><p>{t.immutable}</p>
     </div> : null}
     {application ? <><div className="application-progress"><strong>{application.completion_percent}%</strong><span>{t.completion}</span><small>{t.version}: {application.version}</small></div>
-      <form className="application-form" onSubmit={(event) => { event.preventDefault(); void save(); }}>
+      <form className="application-form" noValidate onSubmit={(event) => { event.preventDefault(); void save(); }}>
         <h2>{locale === "ta" ? application.form.title_ta : application.form.title_en}</h2>
         {application.form.fields.length ? application.form.fields.map(control) : <p>{t.empty}</p>}
         <fieldset className="application-acknowledgements" disabled={busy || !editable}><legend>{t.declarations}</legend>
           {application.form.acknowledgements.map((item) => <label key={item.id}><input type="checkbox" required={item.required} checked={accepted.includes(item.id)} onChange={(event) => setAccepted((current) => event.target.checked ? [...current, item.id] : current.filter((id) => id !== item.id))} /><span>{locale === "ta" ? item.label_ta : item.label_en}{item.required ? ` (${t.required})` : ""}</span></label>)}
         </fieldset>
-        {editable ? <div className="application-actions"><button type="submit" disabled={busy}>{t.save}</button><button className="application-submit" type="button" disabled={busy} onClick={() => void submit()}>{t.submit}</button></div> : null}
+        {editable ? <div className="application-actions"><button type="submit" disabled={busy}>{t.save}</button><button className="application-submit" type="button" disabled={busy || !documentsReady} onClick={() => void submit()}>{t.submit}</button></div> : null}
       </form>
+      {org && !!application.form.document_requirements?.length && <ApplicationDocuments key={application.id} org={org} applicationId={application.id} applicationVersion={application.version} requirements={application.form.document_requirements} collectionEnabled={application.form.collection_enabled ?? false} maxUploadBytes={application.form.max_upload_bytes ?? 0} locale={locale} readOnly={!editable} blocked={busy || documentConflict} dirty={dirty} onBusy={setDocumentBusy} onVersion={documentVersion} onReadiness={setDocumentsReady} onPendingChange={setDocumentPending} />}
       {application.state !== "draft" ? <div className="application-history"><h2>{t.history}</h2><ol>{application.status_history.map((item) => <li key={`${item.application_version}-${item.created_at}`}><strong>{t.states[item.to_state as keyof typeof t.states] ?? item.to_state}</strong><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString(locale)}</time></li>)}</ol></div> : null}
     </> : null}
   </section>;

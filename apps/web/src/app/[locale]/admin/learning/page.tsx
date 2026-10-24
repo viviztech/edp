@@ -27,7 +27,7 @@ export default async function LearningAdminPage({
     response = new Response(null, { status: 503 });
   }
   if (response.status === 401) redirect(`/${locale}/account`);
-  if (!response.ok) return <main><h1>{text.workspace}</h1><p>{text.error}</p></main>;
+  if (!response.ok) return <main id="main" tabIndex={-1}><h1>{text.workspace}</h1><p>{text.error}</p></main>;
   const profile = await response.json() as components["schemas"]["Profile"];
   const requested = (await searchParams).organization;
   const grants = profile.grants.filter((grant) =>
@@ -35,11 +35,11 @@ export default async function LearningAdminPage({
     || grant.permissions.includes("lms.delivery.view"));
   const grant = grants.find((item) => !requested || item.organization_id === requested);
   if (!grant) {
-    return <main><h1>{text.workspace}</h1><p>{text.error}</p>
+    return <main id="main" tabIndex={-1}><h1>{text.workspace}</h1><p>{text.error}</p>
       <Link href={`/${locale}/admin`}>Admin</Link></main>;
   }
   const canAuthor = grant.permissions.includes("lms.course.view");
-  return <main className="learning-main">
+  return <main id="main" tabIndex={-1} className="learning-main">
     <StaffModuleNav
       locale={locale}
       organization={grant.organization_id}

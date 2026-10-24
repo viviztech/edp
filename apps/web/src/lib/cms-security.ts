@@ -4,12 +4,18 @@ export function cmsPath(path: string[], method: string): string | null {
   const value = path.join("/");
   const base = `organizations/${id}/pages`;
   const editorial = `organizations/${id}/editorial`;
+  const assets = `organizations/${id}/assets`;
   const rules: Record<string, string[]> = {
-    GET: [base, `${base}/${id}`, `${base}/${id}/translations/(en|ta)/(preview|revisions)`, editorial, `${editorial}/${id}`, `organizations/${id}/assets`],
-    POST: [base, `${base}/${id}/translations`, `${base}/${id}/translations/(en|ta)/(publish|archive|restore)`, editorial, `${editorial}/${id}/(publish|archive|restore)`],
+    GET: [base, `${base}/${id}`, `${base}/${id}/translations/(en|ta)/(preview|revisions)`, editorial, `${editorial}/${id}`, assets, `${assets}/policy`, `${assets}/${id}`, `${assets}/${id}/source/content`],
+    POST: [base, `${base}/${id}/translations`, `${base}/${id}/translations/(en|ta)/(publish|archive|restore)`, editorial, `${editorial}/${id}/(publish|archive|restore)`, assets, `${assets}/${id}/(source|prepare|publish|revoke)`],
     PATCH: [`${base}/${id}/translations/(en|ta)`, `${editorial}/${id}`],
+    PUT: [`${assets}/${id}/source/content`],
   };
   return rules[method]?.some(rule => new RegExp(`^${rule}$`).test(value)) ? "/cms/" + value : null;
+}
+
+export function cmsSourceContent(path: string[]): boolean {
+  return path.length === 6 && path[2] === "assets" && path[4] === "source" && path[5] === "content";
 }
 
 export function cmsQuery(path: string[], method: string, input: URLSearchParams): string | null {

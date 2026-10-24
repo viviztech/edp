@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../../lib/api-contracts";
 import { selectionMessages } from "../../../../lib/selection-messages";
+import ReviewerDocuments from "./documents";
 
 type Workspace = components["schemas"]["SelectionWorkspace"];
 type Cycle = components["schemas"]["SelectionCycleView"];
@@ -226,6 +227,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
                 {item.moderation_status === "included" ? text.exclude : text.restore}
               </button>}
             </div>}
+            {canReview && item.reviewer_user_id === actor && item.conflict_status === "clear" && item.moderation_status === "included" && <ReviewerDocuments org={org} assignment={item.id} locale={locale} />}
           </li>
         )}</ul>
         {!workspace.assignments.length && <p>{text.empty}</p>}

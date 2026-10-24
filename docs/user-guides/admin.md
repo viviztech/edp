@@ -24,13 +24,21 @@ If creation is uncertain, use **Retry the same draft request** to recover the sa
 
 This workspace configures policy only. It does not provide uploads, enable collection, override legal holds or certify legal approval. Required documents, approved notices/retention and deployment controls remain separate owner decisions. See [policy administration](../architecture/file-policy-administration.md).
 
+## Configure application documents
+
+In **Application definitions**, add only approved document requirements. Enter both language labels and instructions, choose a published application-document policy edition, and set explicit minimum and maximum counts. A zero minimum makes the requirement optional. New requirements have no document, count or policy defaults. Viewing and using policies requires `files.policy.view` alongside the relevant form permission. Applicants receive their pinned rules without access to the staff policy workspace.
+
+Save and review the full draft before publication. Published forms keep their original document rules; copy to a new form edition for changes. Unsaved input blocks switching or publication. After an interrupted or stale write, load the saved definition, compare all fields and requirements, then explicitly adopt its revision while keeping the intended edits. No write is retried automatically.
+
+Assigned reviewers with a clear conflict state can choose **Read assigned application documents** in Selection. Check the pinned requirement and submitted file version, digest and time. Only currently usable evidence offers a download; quarantine, unsafe bytes, expiry or withdrawn access prevent delivery. The reviewer's earlier displayed link does not preserve access after reassignment, conflict or permission changes. See [application document operation](../architecture/application-documents-web-journey.md).
+
 ## News, events, FAQs and testimonials
 
 Open **Content studio** in the intended organization. Select the content type and language, then create a separate locale draft using the same permanent slug as its counterpart. Save and review the draft before publishing. Creation, editing, publication and archiving each require their own permission. Published entries must be archived with a reason and restored to draft before editing; archiving removes the entry from public discovery immediately. Republish the reviewed draft when ready.
 
 Unsaved changes block switching to another entry. On a version conflict, keep the entered draft, load the latest saved values, compare them, then explicitly choose the latest version while retaining the intended changes before saving. Never replay a stale publication command without checking the current state.
 
-**Media records** shows only recorded filename/type/size, scan state and visibility for staff with media-view permission. It does not offer secure uploads, downloads or publication. Those operations await the shared secure-file development process; metadata is not proof that file bytes have been stored or scanned.
+**Secure media** distinguishes historical metadata from verified files. Upload, preparation, publication and revocation require the corresponding permissions and enabled file service; see the secure-media workflow below. Recorded scan flags alone never authorize bytes.
 
 CRM assignment notices: staff with crm.lead.view can open /{locale}/admin/notifications, choose their organization, and view their own in-app notices. A new notice appears after the background worker handles an assignment to them, provided their grant, active account, ownership and preference still allow it. Mark a notice read to acknowledge it. Turn assignment notices off or on using the preference control; changes affect pending and future notices, while already delivered notices remain. The CRM link opens the scoped lead queue for follow-up. A conflict means the item or preference changed; reload before trying again.
 
@@ -50,9 +58,13 @@ Provision the staff account and grant Training Center Coordinator in the correct
 
 ## Learning course studio
 
-Open Learning from the staff workspace. Create a bilingual course, then add modules and lessons in their intended positive-number order. Add only private provider references; do not paste public credentials or real participant data. Publication freezes the structure, requires every module to contain a lesson, and records the approval reason. After publication, add the course to a planned or active cohort at a unique pathway position.
+Open Learning from the staff workspace. Create a bilingual course, then add modules and lessons in their intended positive-number order. Publication freezes the structure, requires every module to contain a lesson, and records the approval reason. After publication, add the course to a planned or active cohort at a unique pathway position.
 
-Participants with an active enrollment open My learning path. They see only published courses assigned to their enrolled cohorts and can start each course once; repeated start requests return the same record. Private material labels are visible, while the provider reference and download URL remain hidden until the approved media service is configured.
+Participants with an active enrollment open My learning path. They see only published courses assigned to their enrolled cohorts and can start each course once; repeated start requests return the same record. Private material access checks the current enrollment or trainer assignment each time. Shared private files require enabled collection and usable verified bytes. Older local/test references remain compatible; the studio does not ask staff to enter provider keys or claim a video-provider connection.
+
+Under **Private learning files**, staff with course management and file policy view permissions choose an approved published learning-material policy, lesson, unused position and both language labels. Read the notice and current byte limit, select the file and upload it. Pending or rejected files cannot be published with the course. **Refresh saved files** checks scanner progress; scanner failure never approves a file. A failed policy lookup can be retried without clearing entered labels.
+
+If a metadata response is interrupted, keep the selected file and use **Retry the same metadata request**; its identity and input stay fixed. After an interrupted byte response, use **Review saved file** before explicitly choosing **Resend the reviewed file** if still needed. Upload leases remain authoritative, so an active upload may need time before resending is possible. **Resume this saved upload** requires the exact original bytes. **Remove staged file** is available only while the course is draft and retains history and the used position; a replacement needs a new request and unused position. Published materials are read-only.
 
 ## Configure course completion
 
@@ -64,7 +76,11 @@ Before publishing a course, open Learning and add a quiz to a lesson. Set its bi
 
 ## Configure an assignment
 
-Before publishing a course, add an assignment to its lesson. Enter the bilingual title and instructions, maximum and passing points, order, and the number of allowed submissions. Review these settings before publication because the definition is frozen with the course. This release accepts text responses only; do not request files or sensitive personal evidence in the instructions.
+Before publishing a course, add an assignment to its lesson. Enter the bilingual title and instructions, maximum and passing points, order, and the number of allowed submissions. Review these settings before publication because the definition is frozen with the course. Assignments without a file rule continue to accept text-only responses.
+
+To collect approved evidence, an assessment manager with file policy view permission uses **Assignment file rules** to choose a published assignment-submission policy and enter explicit minimum and maximum counts. The controls begin blank. A zero minimum makes attachments optional. Do not invent document requirements or enable collection without the owner's approved policy and notices. Publishing a policy or course does not enable the file service.
+
+Unsaved rules and pending material changes pause publication of their course. A stale or uncertain rule save preserves entered counts: choose **Review latest file rules**, compare saved values, then explicitly choose **Use the reviewed version and keep my values** before another save. Published course rules cannot be edited. See [learning file web operation](../architecture/learning-files-web-journey.md).
 
 ## Publish and issue certificates
 
@@ -98,9 +114,23 @@ Public visitors see published public entries. Actively enrolled participants can
 
 Open **Helpdesk** in the selected organization. **Assigned tickets** contains your current work. **Unassigned tickets** exposes minimal category/priority/number information: enter an assignment reason and claim a ticket to see its discussion. Organization administrators can review the organization queue and route work to an eligible active staff user. Handing over removes the previous assignee's future access.
 
-Move Assigned to In progress, then request information with Waiting for user or resolve the issue. An owner reply resumes work. Resolve before closing; only the owner or organization admin can reopen, with a reason, returning the ticket to the claim queue. Priority changes also need a reason. **Internal note** keeps the message and any attached text files staff-only. Shared replies/status changes create minimal owner notices; assignments and owner replies create assignee notices. Internal notes never notify the participant. There is no promised SLA or outbound provider delivery.
+Move Assigned to In progress, then request information with Waiting for user or resolve the issue. An owner reply resumes work. Resolve before closing; only the owner or organization admin can reopen, with a reason, returning the ticket to the claim queue. Priority changes also need a reason. **Internal note** keeps the message and every attachment staff-only. Shared replies/status changes create minimal owner notices; assignments and owner replies create assignee notices. Internal notes never notify the participant. There is no promised SLA or outbound provider delivery.
+
+After opening a writable ticket, **Secure attachments** shows the current published notice and limits. Choose shared reply or internal note before registering a file: its visibility stays fixed. Uploads remain private and staged until scanning confirms clean bytes and you explicitly select them for the message. New file registration uses the current policy; existing files retain their original policy notice and limits. A message can select files from one edition only. Refresh pending scan status; unavailable scanning never becomes clean. Interrupted uploads retain their file and request identity and check saved state before retrying. Stale replies preserve text and selection for explicit review. Remove an unused staged file; posted evidence is read-only. Current assignment/access is rechecked on downloads, including after handover. The existing bounded TXT attachments remain available.
 
 On stale/interrupted changes, refresh and compare before retrying. Keep unnecessary personal or financial details out of notes, files and reasons. The business follow-up schedule applies to new profiles only; existing dates stay frozen. Use **Refresh saved schedule** after a conflict; your proposed offsets and reason remain available. Staff summaries show submitted/due counts, while only the owner can submit an outcome.
+
+## Publish and revoke secure media
+
+Open **Secure media** for the intended organization. View permission is required alongside create or publish permission; a role name alone does not authorize an action. Older records marked **Metadata only — no verified bytes** remain inspectable but cannot be opened or published as files.
+
+Collection requires an enabled file service and a published media policy. Read its notice and byte limits before choosing a PDF, JPEG, PNG or WebP file. An image policy must allow both the source and public copy. Enter a media title and select **Register and upload**. Keep the selected file until the result is confirmed. If the response is interrupted, use **Retry this registration or upload**: the workspace first checks the saved typed record and does not blindly resend a completed upload. Use **Start a new registration** to choose different bytes.
+
+Choose **Inspect media**, then **Refresh status** to inspect quarantine, scanning, rejection or scanner-unavailable state. Unavailable scanning does not become clean. Clean private sources can be downloaded by currently authorized staff. Sources are immutable; a replacement needs a new media record.
+
+For a clean image, enter a reason and choose **Prepare public image**. This produces a separate copy without original metadata; that copy must also pass scanning. If its source policy was retired before preparation, register a fresh source under the current policy. A clean PDF is published as a download. Review the current record and enter a reason before **Publish media**. A stale-version error preserves your reason: refresh and review before retrying.
+
+**Revoke public access** removes future public byte access and discovery; previously downloaded bytes cannot be recalled. Retention expiry also prevents public delivery. Revocation is separate from approved retention, legal holds and disposal. No real collection or provider activation is approved merely by publishing a synthetic test policy.
 
 ## Reporting, measurement definitions and exports
 

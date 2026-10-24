@@ -52,5 +52,13 @@ def test_production_requires_a_dedicated_material_signing_key(tmp_path):
     assert missing.value.code == "material_provider_not_configured"
 
     configured = settings(str(tmp_path), app_env="production", signing_key="s" * 32)
-    token, _ = issue_access(configured, uuid4(), uuid4(), uuid4(), uuid4(), "trainer")
+    with pytest.raises(AuthError):
+        issue_access(configured, uuid4(), uuid4(), uuid4(), uuid4(), "trainer")
+    with pytest.raises(AuthError):
+        resolve_local_material(configured, "guide.pdf")
+    # Shared storage gateways do not require a legacy local path. The domain
+    # validates their typed clean pin before issuing this actor-bound token.
+    token, _ = issue_access(
+        configured, uuid4(), uuid4(), uuid4(), uuid4(), "trainer", require_local_root=False
+    )
     assert verify_access(configured, token).mode == "trainer"

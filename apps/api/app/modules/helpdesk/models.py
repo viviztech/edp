@@ -12,7 +12,10 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    Uuid,
+    text,
 )
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -80,6 +83,11 @@ class HelpdeskMessage(Record, Base):
     author_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     internal: Mapped[bool] = mapped_column(Boolean, default=False)
     body: Mapped[str] = mapped_column(Text)
+    shared_file_ids: Mapped[list[UUID]] = mapped_column(
+        ARRAY(Uuid()),
+        default=list,
+        server_default=text("'{}'::uuid[]"),
+    )
     __table_args__ = (
         ForeignKeyConstraint(
             ["ticket_id", "organization_id"],
@@ -87,6 +95,15 @@ class HelpdeskMessage(Record, Base):
             ondelete="RESTRICT",
         ),
         UniqueConstraint("id", "ticket_id", "organization_id"),
+        UniqueConstraint(
+            "id",
+            "ticket_id",
+            "organization_id",
+            "author_user_id",
+            "internal",
+            name="uq_helpdesk_message_file_scope",
+        ),
+        CheckConstraint("cardinality(shared_file_ids) <= 100", name="helpdesk_message_file_count"),
         UniqueConstraint("ticket_id", "ticket_version"),
         CheckConstraint("ticket_version > 0", name="helpdesk_message_version"),
         CheckConstraint("length(body) BETWEEN 1 AND 8000", name="helpdesk_message_body"),

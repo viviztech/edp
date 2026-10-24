@@ -12,7 +12,9 @@ The learner section shows each quiz's attempt count, best percentage and pass st
 
 ## Grade assignments
 
-The learner section lists text assignment submissions for participants in your assigned cohort. For an ungraded revision, enter points within the displayed maximum and useful feedback, then save the grade. The pass state is calculated from the assignment threshold. A saved grade is permanent; verify the learner, revision, score and feedback before submitting. Revoked or expired staff scope removes grading access immediately.
+The learner section lists assignment response text and **Immutable submitted evidence** for participants in your assigned cohort. A file receipt identifies the frozen version and digest. **Download verified file** appears only for usable frozen evidence; pending scans, expiry or withdrawn access prevent delivery. **Refresh saved files** repeats current access checks. A receipt or earlier link does not preserve access after the trainer assignment or permission ends.
+
+For an ungraded revision, enter points within the displayed maximum and useful feedback, then save the grade. The pass state is calculated from the assignment threshold. A saved grade is permanent; verify the learner, revision, response and submitted evidence before saving. Revoked or expired staff scope removes grading and file access immediately. Trainers cannot change or replace submitted learner files.
 
 ## Certificate eligibility
 

@@ -8,8 +8,8 @@ from urllib.parse import urlparse
 from uuid import UUID, uuid4
 
 from app.modules.cms import asset_service, editorial_service
-from app.modules.cms.models import EditorialEntry
-from app.modules.cms.schemas import AssetCreate, EditorialCommand, EditorialDraft
+from app.modules.cms.models import Asset, EditorialEntry
+from app.modules.cms.schemas import EditorialCommand, EditorialDraft
 from app.modules.identity.models import (
     AuditLog,
     Organization,
@@ -123,33 +123,23 @@ with Session(engine) as db:
     wrong_locale = fixture_entry(db, author, org, "tamil-cursor", locale="ta")
     viewer_draft = fixture_entry(db, author, org, "viewer-draft", publish=False)
     metadata = []
-    # Synthetic recorded states only: these fixtures contain no bytes and do not
-    # represent a working secure upload, scanner or download implementation.
+    # Simulate pre-pipeline legacy records directly. Recorded clean/public flags
+    # are not scanner evidence and never authorize bytes or a public URL.
     for status in ("pending", "clean", "infected", "public"):
-        asset = asset_service.create(
-            db,
-            org,
-            author,
-            AssetCreate(
-                filename=f"synthetic-{status}-{suffix}.pdf",
-                media_type="application/pdf",
-                byte_size=1234,
-                title=f"Synthetic {status} metadata {suffix}",
-            ),
-            "synthetic-metadata-create",
+        asset = Asset(
+            organization_id=org,
+            storage_key=f"synthetic-legacy/{uuid4()}",
+            filename=f"synthetic-{status}-{suffix}.pdf",
+            media_type="application/pdf",
+            byte_size=1234,
+            title=f"Synthetic {status} metadata {suffix}",
+            scan_status="clean" if status == "public" else status,
+            visibility="public" if status == "public" else "private",
         )
-        if status != "pending":
-            asset = asset_service.scan_result(
-                db,
-                org,
-                asset.id,
-                status != "infected",
-                "Synthetic recorded metadata fixture",
-                "synthetic-recorded-status",
-            )
-        if status == "public":
-            asset = asset_service.publish(db, org, asset.id, author, "synthetic-recorded-public")
-        metadata.append(asset)
+        db.add(asset)
+        db.flush()
+        metadata.append(asset_service.view(db, asset))
+    db.commit()
 
 evidence = Path(".tool-cache/evidence")
 evidence.mkdir(parents=True, exist_ok=True)
@@ -354,39 +344,59 @@ with sync_playwright() as playwright:
         assert page.request.get(base + root + "/" + str(foreign.id)).status == 404
         assert public.request.get(base + root).status == 401
 
-        page.goto(base + f"/en/admin/media?organization={org}")
-        expect(page.get_by_role("heading", name="Media metadata", exact=True)).to_be_visible()
+        viewer.goto(base + f"/en/admin/media?organization={org}")
+        expect(viewer.get_by_role("heading", name="Secure media", exact=True)).to_be_visible()
         expect(
-            page.get_by_text(
-                "Secure file upload, storage, scanning and authorized byte delivery are pending.",
+            viewer.get_by_text(
+                "Older metadata records have no verified bytes.",
                 exact=False,
             )
         ).to_be_visible()
         for asset in metadata:
-            item = page.locator(".media-metadata-list li").filter(
-                has=page.get_by_role("heading", name=asset.title, exact=True)
+            item = viewer.locator(".media-metadata-list li").filter(
+                has=viewer.get_by_role("heading", name=asset.title, exact=True)
             )
             expect(item).to_contain_text(asset.filename)
             expect(item).to_contain_text(asset.scan_status.capitalize())
             expect(item).to_contain_text(asset.visibility.capitalize())
-        expect(page.locator("main input[type=file], main a[download]")).to_have_count(0)
-        expect(page.locator(".media-metadata-list a, .media-metadata-list button")).to_have_count(0)
+            expect(item).to_contain_text("Metadata only — no verified bytes")
+            item.get_by_role("button", name="Inspect media: " + asset.title, exact=True).click()
+            expect(viewer.get_by_role("region", name="Inspect media", exact=True)).to_contain_text(
+                "Metadata only — no verified bytes"
+            )
+            assert asset.public_url is None and not asset.can_publish
+        expect(viewer.locator("main input[type=file], main a[download]")).to_have_count(0)
+        expect(viewer.locator(".media-metadata-list a")).to_have_count(0)
         for asset in metadata:
-            assert page.locator(f"main a[href*='{asset.id}']").count() == 0
+            assert viewer.locator(f"main a[href*='{asset.id}']").count() == 0
         assets_path = f"/api/cms/organizations/{org}/assets"
-        asset_response = page.request.get(base + assets_path)
+        asset_response = viewer.request.get(base + assets_path)
         assert asset_response.status == 200 and "storage_key" not in asset_response.text()
-        assert mutate(page, "POST", assets_path, {}).status == 404
         assert (
-            mutate(page, "POST", assets_path + "/" + str(metadata[-1].id) + "/publish", {}).status
+            mutate(
+                viewer,
+                "POST",
+                assets_path,
+                {
+                    "filename": "denied-synthetic.pdf",
+                    "media_type": "application/pdf",
+                    "byte_size": 3,
+                    "title": "Denied synthetic metadata",
+                    "client_request_id": str(uuid4()),
+                },
+            ).status
+            == 403
+        )
+        assert (
+            mutate(viewer, "POST", assets_path + "/" + str(metadata[-1].id) + "/scan", {}).status
             == 404
         )
-        assert page.request.get(base + f"/api/cms/organizations/{other_org}/assets").status == 403
-        responsive(page, "metadata-en")
-        page.goto(base + f"/ta/admin/media?organization={org}")
-        expect(page.locator("html")).to_have_attribute("lang", "ta")
-        expect(page.locator(".media-metadata-list li")).to_have_count(4)
-        responsive(page, "metadata-ta")
+        assert viewer.request.get(base + f"/api/cms/organizations/{other_org}/assets").status == 403
+        responsive(viewer, "metadata-en")
+        viewer.goto(base + f"/ta/admin/media?organization={org}")
+        expect(viewer.locator("html")).to_have_attribute("lang", "ta")
+        expect(viewer.locator(".media-metadata-list li")).to_have_count(4)
+        responsive(viewer, "metadata-ta")
 
         with Session(engine) as db:
             author = db.get(User, actors["author"]["id"])

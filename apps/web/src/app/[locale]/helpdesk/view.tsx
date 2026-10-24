@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import type { components } from "../../../lib/api-contracts";
 import { categories, label, priorities, statuses, textAttachments, words, type AttachmentInput, type Locale, type Ticket } from "./content";
+import SecureHelpdeskFiles, { PostedHelpdeskFiles } from "./secure-files";
+import { secureFileWords } from "./secure-files-content";
 
 type TicketList = components["schemas"]["TicketList"];
 type MessageList = components["schemas"]["MessageList"];
@@ -82,10 +84,11 @@ export default function HelpdeskWorkspace({ org, locale, staff = false, userId, 
   const [createPending, setCreatePending] = useState<Create | null>(null); const createForm = useRef<HTMLFormElement>(null);
   const [createFileError, setCreateFileError] = useState(false); const [readingCreate, setReadingCreate] = useState(false); const [readingReply, setReadingReply] = useState(false); const [createDirty, setCreateDirty] = useState(false);
   const [claimReason, setClaimReason] = useState(""); const [claimPaused, setClaimPaused] = useState(false);
-  const ticketDirty = Boolean(reply || replyFiles.length || assignmentReason || statusReason || priorityReason || reopenReason);
+  const [sharedFileIds,setSharedFileIds] = useState<string[]>([]),[fileBusy,setFileBusy] = useState(false),[sharedFileDirty,setSharedFileDirty] = useState(false),[filesRevision,setFilesRevision] = useState(0);
+  const ticketDirty = Boolean(reply || replyFiles.length || sharedFileIds.length || sharedFileDirty || assignmentReason || statusReason || priorityReason || reopenReason);
   const dirty = ticketDirty || Boolean(claimReason);
-  useEffect(() => { const guard = (event: BeforeUnloadEvent) => { if (dirty || createPending || createDirty || busy || readingCreate || readingReply) { event.preventDefault(); event.returnValue = ""; } };
-    window.addEventListener("beforeunload", guard); return () => window.removeEventListener("beforeunload", guard); }, [dirty, createPending, createDirty, busy, readingCreate, readingReply]);
+  useEffect(() => { const guard = (event: BeforeUnloadEvent) => { if (dirty || createPending || createDirty || busy || fileBusy || readingCreate || readingReply) { event.preventDefault(); event.returnValue = ""; } };
+    window.addEventListener("beforeunload", guard); return () => window.removeEventListener("beforeunload", guard); }, [dirty, createPending, createDirty, busy, fileBusy, readingCreate, readingReply]);
 
   const loadList = useCallback(async (search: string, append = false) => {
     const current = ++listGeneration.current;
@@ -99,12 +102,13 @@ export default function HelpdeskWorkspace({ org, locale, staff = false, userId, 
   }, [base, canAssign, loadList, staff, t.error]);
 
   async function loadTicket(id: string, preserve = false) {
-    if (lock.current || readingReply) return;
+    if (lock.current || readingReply || fileBusy) return;
     if (!preserve && dirty && !window.confirm(t.discard)) return;
     const current = ++generation.current; setBusy(true); setMessage("");
     try { const [detail, conversation, events] = await Promise.all([get<Ticket>(`${base}/tickets/${id}`), get<MessageList>(`${base}/tickets/${id}/messages?limit=25`), get<HistoryList>(`${base}/tickets/${id}/history?limit=25`)]);
       if (generation.current !== current) return;
       setTicket(detail); setMessages(conversation); setHistory(events); setPaused(false);
+      setFilesRevision(old=>old+1);
       setBatch((old) => old && ({ ...old, items: old.items.map((item) => item.id === id ? detail : item) }));
       if (!preserve) clearTicketDrafts();
       else setMessage(t.refreshed);
@@ -112,21 +116,22 @@ export default function HelpdeskWorkspace({ org, locale, staff = false, userId, 
     finally { if (generation.current === current) setBusy(false); }
   }
   function clearTicketDrafts() {
+    setSharedFileIds([]);setSharedFileDirty(false);
     setReply(""); setInternal(false); setReplyFiles([]); setReplyFileKey((old) => old + 1); setAssignmentReason(""); setStatusReason(""); setPriorityReason(""); setReopenReason(""); setReplyError(""); setClaimReason("");
   }
   async function write(path: string, body: object, clear: () => void) {
-    if (!ticket || lock.current || paused) return; lock.current = true; setBusy(true); setMessage("");
+    if (!ticket || lock.current || paused || fileBusy) return; lock.current = true; setBusy(true); setMessage("");
     let committed = false;
     try { const response = await helpdeskMutation(`${base}/tickets/${ticket.id}/${path}`, { expected_version: ticket.version, ...body });
       if (!response.ok) { setPaused(true); setMessage(response.status === 403 ? t.access : t.conflict); return; }
       const latest = await response.json() as Ticket; committed = true; setTicket(latest); clear();
       setBatch((old) => old && ({ ...old, items: old.items.map((item) => item.id === latest.id ? latest : item) }));
       const [conversation, events] = await Promise.all([get<MessageList>(`${base}/tickets/${latest.id}/messages?limit=25`), get<HistoryList>(`${base}/tickets/${latest.id}/history?limit=25`)]);
-      setMessages(conversation); setHistory(events); setMessage(t.done);
+      setMessages(conversation); setHistory(events); setFilesRevision(old=>old+1); setMessage(t.done);
     } catch { setPaused(true); setMessage(committed ? `${t.done} ${t.refresh}` : t.conflict); } finally { lock.current = false; setBusy(false); }
   }
   async function create(body: Create) {
-    if (lock.current) return; lock.current = true; setBusy(true); setMessage(""); setCreatePending(body);
+    if (lock.current || fileBusy) return; lock.current = true; setBusy(true); setMessage(""); setCreatePending(body);
     try { const response = await helpdeskMutation(`${base}/tickets`, body); if (!response.ok) {
       if ([400, 403, 422].includes(response.status)) { setCreatePending(null); setCreateError(response.status === 403 ? t.access : t.error); } else setCreateError(t.creationRecovery); return;
     }
@@ -142,7 +147,7 @@ export default function HelpdeskWorkspace({ org, locale, staff = false, userId, 
     void create({ request_id: crypto.randomUUID(), category: category as Create["category"], subject: String(form.get("subject")), body: String(form.get("body")), priority: priority as Create["priority"], attachments: createFiles });
   }
   async function claim(item: TicketList["items"][number]) {
-    if (lock.current || claimPaused || readingReply || claimReason.trim().length < 3) return;
+    if (lock.current || fileBusy || claimPaused || readingReply || claimReason.trim().length < 3) return;
     if (ticket && ticket.id !== item.id && ticketDirty && !window.confirm(t.discard)) return;
     lock.current = true; setBusy(true); setMessage("");
     try { const response = await helpdeskMutation(`${base}/tickets/${item.id}/assignment`, { expected_version: item.version, assignee_user_id: userId, reason: claimReason });
@@ -154,45 +159,48 @@ export default function HelpdeskWorkspace({ org, locale, staff = false, userId, 
   const allowedStatuses = !ticket ? [] : ticket.status === "assigned" ? ["in_progress"] : ticket.status === "in_progress" ? ["waiting_for_user", "resolved"] : ticket.status === "waiting_for_user" ? ["in_progress", "resolved"] : ticket.status === "resolved" ? ["closed"] : [];
   const writable = ticket?.access === "owner" || admin || (ticket?.access === "staff" && ticket.assignee_user_id === userId && canUpdate);
   const staffAccess = staff && ticket?.access === "staff";
-  const disabled = busy || paused || readingCreate || readingReply; const choiceStatus = allowedStatuses.includes(nextStatus) ? nextStatus : allowedStatuses[0];
+  const disabled = busy || fileBusy || paused || readingCreate || readingReply; const choiceStatus = allowedStatuses.includes(nextStatus) ? nextStatus : allowedStatuses[0];
 
   return <div className="helpdesk-workspace"><h1>{staff ? t.staff : t.title}</h1><p role="status" aria-live="polite">{message}</p>
     {!staff && <section className="helpdesk-panel" aria-label={t.create}><h2>{t.create}</h2><p role="alert">{createError}</p>
-      <form ref={createForm} onChange={() => setCreateDirty(true)} onSubmit={submitCreate}><fieldset disabled={busy || Boolean(createPending)}><label>{t.category}<select name="category" defaultValue="general">{categories.map((value) => <option key={value} value={value}>{label(value, locale)}</option>)}</select></label>
+      <form ref={createForm} onChange={() => setCreateDirty(true)} onSubmit={submitCreate}><fieldset disabled={busy || fileBusy || Boolean(createPending)}><label>{t.category}<select name="category" defaultValue="general">{categories.map((value) => <option key={value} value={value}>{label(value, locale)}</option>)}</select></label>
         <label>{t.subject}<input name="subject" required minLength={3} maxLength={200} /></label><label>{t.description}<textarea name="body" required maxLength={8000} /></label>
         <label>{t.priority}<select name="priority" defaultValue="normal">{priorities.filter((value) => value !== "urgent").map((value) => <option key={value} value={value}>{label(value, locale)}</option>)}</select></label>
-        <Files locale={locale} disabled={busy || Boolean(createPending)} files={createFiles} clearKey={createFileKey} onReading={setReadingCreate} change={(files, error) => { setCreateFiles(files); setCreateFileError(Boolean(error)); setCreateError(error ?? ""); }} />
+        <Files locale={locale} disabled={busy || fileBusy || Boolean(createPending)} files={createFiles} clearKey={createFileKey} onReading={setReadingCreate} change={(files, error) => { setCreateFiles(files); setCreateFileError(Boolean(error)); setCreateError(error ?? ""); }} />
+        <p className="helpdesk-hint">{secureFileWords[locale].afterCreate}</p>
         <button disabled={createFileError || readingCreate}>{t.create}</button></fieldset></form>
-      {createPending && <button disabled={busy} onClick={() => { void create(createPending); }}>{t.recoverCreate}</button>}</section>}
+      {createPending && <button disabled={busy || fileBusy} onClick={() => { void create(createPending); }}>{t.recoverCreate}</button>}</section>}
     <section className="helpdesk-panel" aria-label={staff ? t.staff : t.mine}><h2>{staff ? t.staff : t.mine}</h2>
       <form aria-label={t.filters} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); const search = new URLSearchParams(staff ? { limit: "25" } : { limit: "25", queue: "mine" });
         for (const [key, value] of data) if (String(value)) search.set(key, String(value)); setQuery(search.toString()); setLoading(true); void loadList(search.toString()); }}>
-        {staff && <label>{t.queue}<select name="queue" disabled={busy} defaultValue="assigned"><option value="assigned">{t.assigned}</option>{canAssign && <option value="unassigned">{t.unassigned}</option>}{admin && <option value="organization">{t.organization}</option>}</select></label>}
-        <label>{t.status}<select name="status" disabled={busy}><option value="">{t.all}</option>{statuses.map((value) => <option key={value} value={value}>{label(value, locale)}</option>)}</select></label>
-        <label>{t.category}<select name="category" disabled={busy}><option value="">{t.all}</option>{categories.map((value) => <option key={value} value={value}>{label(value, locale)}</option>)}</select></label>
-        <label>{t.priority}<select name="priority" disabled={busy}><option value="">{t.all}</option>{priorities.map((value) => <option key={value} value={value}>{label(value, locale)}</option>)}</select></label><button disabled={busy}>{t.apply}</button></form>
-      <button disabled={busy} onClick={() => { setLoading(true); void loadList(query); }}>{t.refreshList}</button>{loading ? <p>{t.loading}</p> : !batch?.items.length && <p>{t.empty}</p>}
-      {batch?.items.some((item) => item.access === "claim") && <label>{t.assignmentReason}<textarea value={claimReason} disabled={busy || claimPaused} minLength={3} maxLength={500} onChange={(event) => setClaimReason(event.target.value)} /></label>}
-      <ul>{batch?.items.map((item) => <li key={item.id}>{item.access === "claim" ? <><p>{item.number}</p><button disabled={busy || readingReply || claimPaused || claimReason.trim().length < 3} onClick={() => { void claim(item); }}>{t.claim}: {item.number}</button></> : <button disabled={busy || readingReply} aria-pressed={ticket?.id === item.id} onClick={() => { void loadTicket(item.id); }}>{item.number}: {item.subject}</button>}
+        {staff && <label>{t.queue}<select name="queue" disabled={busy || fileBusy} defaultValue="assigned"><option value="assigned">{t.assigned}</option>{canAssign && <option value="unassigned">{t.unassigned}</option>}{admin && <option value="organization">{t.organization}</option>}</select></label>}
+        <label>{t.status}<select name="status" disabled={busy || fileBusy}><option value="">{t.all}</option>{statuses.map((value) => <option key={value} value={value}>{label(value, locale)}</option>)}</select></label>
+        <label>{t.category}<select name="category" disabled={busy || fileBusy}><option value="">{t.all}</option>{categories.map((value) => <option key={value} value={value}>{label(value, locale)}</option>)}</select></label>
+        <label>{t.priority}<select name="priority" disabled={busy || fileBusy}><option value="">{t.all}</option>{priorities.map((value) => <option key={value} value={value}>{label(value, locale)}</option>)}</select></label><button disabled={busy || fileBusy}>{t.apply}</button></form>
+      <button disabled={busy || fileBusy} onClick={() => { setLoading(true); void loadList(query); }}>{t.refreshList}</button>{loading ? <p>{t.loading}</p> : !batch?.items.length && <p>{t.empty}</p>}
+      {batch?.items.some((item) => item.access === "claim") && <label>{t.assignmentReason}<textarea value={claimReason} disabled={busy || fileBusy || claimPaused} minLength={3} maxLength={500} onChange={(event) => setClaimReason(event.target.value)} /></label>}
+      <ul>{batch?.items.map((item) => <li key={item.id}>{item.access === "claim" ? <><p>{item.number}</p><button disabled={busy || fileBusy || readingReply || claimPaused || claimReason.trim().length < 3} onClick={() => { void claim(item); }}>{t.claim}: {item.number}</button></> : <button disabled={busy || fileBusy || readingReply} aria-pressed={ticket?.id === item.id} onClick={() => { void loadTicket(item.id); }}>{item.number}: {item.subject}</button>}
         <p>{label(item.status, locale)} · {label(item.priority, locale)} · {label(item.category, locale)}</p></li>)}</ul>
-      {batch?.next_cursor && <button disabled={busy || loading} onClick={() => { setLoading(true); void loadList(`${query}&cursor=${batch.next_cursor}`, true); }}>{t.more}</button>}</section>
+      {batch?.next_cursor && <button disabled={busy || fileBusy || loading} onClick={() => { setLoading(true); void loadList(`${query}&cursor=${batch.next_cursor}`, true); }}>{t.more}</button>}</section>
     {ticket ? <section className="helpdesk-panel" aria-label={t.details}><h2>{ticket.subject}</h2><p>{ticket.number} · {label(ticket.status, locale)} · {label(ticket.priority, locale)} · {t.version} {ticket.version}</p>
       {ticket.access === "staff" && <p>{t.assignedTo}: {assignees?.items.find((item) => item.id === ticket.assignee_user_id)?.display_name ?? (ticket.assignee_user_id ? ticket.assignee_user_id : t.noAssignee)}</p>}
-      <button disabled={busy} onClick={() => { void loadTicket(ticket.id, true); }}>{t.refresh}</button>
+      <button disabled={busy || fileBusy} onClick={() => { void loadTicket(ticket.id, true); }}>{t.refresh}</button>
       <section aria-label={t.messages}><h3>{t.messages}</h3>{messages && !messages.items.length && <p>{t.noMessages}</p>}
-        {messages?.items.map((item) => <article key={item.id} className={item.internal ? "helpdesk-note" : "helpdesk-message"}>{item.internal && <strong>{t.privateNote}</strong>}<p className="helpdesk-prose">{item.body}</p><time>{new Date(item.created_at).toLocaleString(locale)}</time>
-          {item.attachments.map((attachment) => <p key={attachment.id}><a href={`${base}/tickets/${ticket.id}/attachments/${attachment.id}`} download>{t.download}: {attachment.filename}</a> ({attachment.size_bytes} B)</p>)}</article>)}
-        {messages?.next_cursor && <button disabled={busy} onClick={async () => { setBusy(true); try { const more = await get<MessageList>(`${base}/tickets/${ticket.id}/messages?limit=25&cursor=${messages.next_cursor}`);
+        {messages?.items.filter(item=>!item.internal||staffAccess).map((item) => <article key={item.id} className={item.internal ? "helpdesk-note" : "helpdesk-message"}>{item.internal && <strong>{t.privateNote}</strong>}<p className="helpdesk-prose">{item.body}</p><time>{new Date(item.created_at).toLocaleString(locale)}</time>
+          {item.attachments.map((attachment) => <p key={attachment.id}><a href={`${base}/tickets/${ticket.id}/attachments/${attachment.id}`} download>{t.download}: {attachment.filename}</a> ({attachment.size_bytes} B)</p>)}
+          <PostedHelpdeskFiles files={item.files??[]} base={`${base}/tickets/${ticket.id}`} locale={locale} staff={Boolean(staffAccess)}/></article>)}
+        {messages?.next_cursor && <button disabled={busy || fileBusy} onClick={async () => { setBusy(true); try { const more = await get<MessageList>(`${base}/tickets/${ticket.id}/messages?limit=25&cursor=${messages.next_cursor}`);
           setMessages((old) => old && ({ items: [...old.items, ...more.items.filter((item) => !old.items.some((entry) => entry.id === item.id))], next_cursor: more.next_cursor })); } catch { setMessage(t.error); } finally { setBusy(false); } }}>{t.more}</button>}
       </section>
-      {writable && !["closed", "resolved"].includes(ticket.status) && <form aria-label={t.reply} onSubmit={(event) => { event.preventDefault(); void write("messages", { body: reply, internal: staffAccess && internal, attachments: replyFiles }, () => { setReply(""); setReplyFiles([]); setReplyFileKey((old) => old + 1); }); }}>
+      {writable && !["closed", "resolved"].includes(ticket.status) && <form aria-label={t.reply} onSubmit={(event) => { event.preventDefault(); void write("messages", { body: reply, internal: staffAccess && internal, attachments: replyFiles, ...(sharedFileIds.length?{file_ids:sharedFileIds}:{}) }, () => { setReply(""); setReplyFiles([]); setSharedFileIds([]); setReplyFileKey((old) => old + 1); }); }}>
         <label>{t.reply}<textarea value={reply} required maxLength={8000} disabled={disabled} onChange={(event) => setReply(event.target.value)} /></label>
-        {staffAccess && <label className="helpdesk-check"><input type="checkbox" checked={internal} disabled={disabled} onChange={(event) => setInternal(event.target.checked)} />{t.internal}</label>}
+        {staffAccess && <label className="helpdesk-check"><input type="checkbox" checked={internal} disabled={disabled} onChange={(event) => {setInternal(event.target.checked);setSharedFileIds([]);}} />{t.internal}</label>}
         <Files locale={locale} disabled={disabled} files={replyFiles} clearKey={replyFileKey} onReading={setReadingReply} change={(files, error) => { setReplyFiles(files); setReplyError(error ?? ""); }} /><p role="alert">{replyError}</p>
+        <SecureHelpdeskFiles key={ticket.id} base={`${base}/tickets/${ticket.id}`} locale={locale} internal={Boolean(staffAccess&&internal)} disabled={busy||paused||readingCreate||readingReply} selected={sharedFileIds} onSelect={setSharedFileIds} onBusy={setFileBusy} onDirty={setSharedFileDirty} revision={filesRevision}/>
         <button disabled={disabled || readingReply || Boolean(replyError) || !reply.trim()}>{staffAccess && internal ? t.saveNote : t.send}</button></form>}
       {staff && canAssign && ticket.access === "staff" && (admin || ticket.assignee_user_id === userId || !ticket.assignee_user_id) && !["closed", "resolved"].includes(ticket.status) && <form aria-label={t.assign} onSubmit={(event) => { event.preventDefault(); void write("assignment", { assignee_user_id: assignee, reason: assignmentReason }, () => setAssignmentReason("")); }}>
         <label>{t.assignee}<select disabled={disabled} value={assignee} onChange={(event) => setAssignee(event.target.value)}>{assignees?.items.map((item) => <option key={item.id} value={item.id}>{item.display_name}</option>)}</select></label>
-        {assignees?.next_cursor && <button type="button" disabled={busy} onClick={async () => { try { const more = await get<AssigneeList>(`${base}/assignees?limit=25&cursor=${assignees.next_cursor}`);
+        {assignees?.next_cursor && <button type="button" disabled={busy || fileBusy} onClick={async () => { try { const more = await get<AssigneeList>(`${base}/assignees?limit=25&cursor=${assignees.next_cursor}`);
           setAssignees((old) => old && ({ items: [...old.items, ...more.items.filter((item) => !old.items.some((entry) => entry.id === item.id))], next_cursor: more.next_cursor })); } catch { setMessage(t.error); } }}>{t.more}</button>}
         <label>{t.assignmentReason}<textarea required minLength={3} maxLength={500} value={assignmentReason} disabled={disabled} onChange={(event) => setAssignmentReason(event.target.value)} /></label>
         <button disabled={disabled || assignmentReason.trim().length < 3 || assignee === ticket.assignee_user_id}>{t.assign}</button>{!ticket.assignee_user_id && <button type="button" disabled={disabled || assignmentReason.trim().length < 3}
@@ -207,7 +215,7 @@ export default function HelpdeskWorkspace({ org, locale, staff = false, userId, 
       {(ticket.access === "owner" || admin) && ["resolved", "closed"].includes(ticket.status) && <form aria-label={t.reopen} onSubmit={(event) => { event.preventDefault(); void write("reopen", { reason: reopenReason }, () => setReopenReason("")); }}>
         <label>{t.reopenReason}<textarea required minLength={3} maxLength={500} disabled={disabled} value={reopenReason} onChange={(event) => setReopenReason(event.target.value)} /></label><button disabled={disabled || reopenReason.trim().length < 3}>{t.reopen}</button></form>}
       <section aria-label={t.history}><h3>{t.history}</h3>{history && !history.items.length && <p>{t.noHistory}</p>}<ol>{history?.items.map((item) => <li key={item.id}><p>{label(item.event, locale)} · {label(item.status, locale)} · {label(item.priority, locale)} · {t.version} {item.version}</p>{item.reason && <p className="helpdesk-prose">{item.reason}</p>}<time>{new Date(item.created_at).toLocaleString(locale)}</time></li>)}</ol>
-        {history?.next_cursor && <button disabled={busy} onClick={async () => { setBusy(true); try { const more = await get<HistoryList>(`${base}/tickets/${ticket.id}/history?limit=25&cursor=${history.next_cursor}`);
+        {history?.next_cursor && <button disabled={busy || fileBusy} onClick={async () => { setBusy(true); try { const more = await get<HistoryList>(`${base}/tickets/${ticket.id}/history?limit=25&cursor=${history.next_cursor}`);
           setHistory((old) => old && ({ items: [...old.items, ...more.items.filter((item) => !old.items.some((entry) => entry.id === item.id))], next_cursor: more.next_cursor })); } catch { setMessage(t.error); } finally { setBusy(false); } }}>{t.more}</button>}</section>
     </section> : <p>{t.chooseTicket}</p>}
     <Notices base={base} locale={locale} open={(id) => { void loadTicket(id); }} />

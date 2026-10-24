@@ -10,6 +10,7 @@ from typing import Literal
 from uuid import UUID
 
 from app.core.config import Settings
+from app.modules.files.storage import StoredObject
 from app.modules.identity.security import AuthError
 
 AccessMode = Literal["learner", "trainer"]
@@ -30,6 +31,12 @@ class LocalMaterial:
     path: Path
     media_type: str
     filename: str
+
+
+@dataclass(frozen=True)
+class SharedMaterial:
+    object: StoredObject
+    file_id: UUID
 
 
 def _secret(settings: Settings) -> bytes:
@@ -56,8 +63,12 @@ def issue_access(
     course_id: UUID,
     material_id: UUID,
     mode: AccessMode,
+    *,
+    require_local_root: bool = True,
 ) -> tuple[str, datetime]:
-    if not settings.lms_material_root:
+    if require_local_root and (
+        not settings.lms_material_root or settings.app_env not in {"local", "test"}
+    ):
         raise AuthError("material_provider_not_configured", 503)
     expires_at = datetime.now(UTC) + timedelta(seconds=settings.lms_material_access_seconds)
     payload = json.dumps(
@@ -105,7 +116,7 @@ def verify_access(settings: Settings, token: str) -> MaterialAccessClaims:
 
 
 def resolve_local_material(settings: Settings, provider_key: str) -> LocalMaterial:
-    if not settings.lms_material_root:
+    if not settings.lms_material_root or settings.app_env not in {"local", "test"}:
         raise AuthError("material_provider_not_configured", 503)
     root = Path(settings.lms_material_root).resolve()
     key = Path(provider_key)

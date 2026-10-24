@@ -19,13 +19,13 @@ export default async function SelectionPage({ params, searchParams }: {
   let response: Response;
   try { response = await serverApi("/auth/me"); } catch { response = new Response(null, { status: 503 }); }
   if (response.status === 401) redirect(`/${locale}/account`);
-  if (!response.ok) return <main><h1>{text.workspace}</h1><p>{text.error}</p></main>;
+  if (!response.ok) return <main id="main" tabIndex={-1}><h1>{text.workspace}</h1><p>{text.error}</p></main>;
   const profile = await response.json() as components["schemas"]["Profile"];
   const requested = (await searchParams).organization;
   const grants = profile.grants.filter((grant) => grant.permissions.includes("selection.cycle.view"));
   const grant = grants.find((item) => !requested || item.organization_id === requested);
-  if (!grant) return <main><h1>{text.workspace}</h1><p>{text.error}</p><Link href={`/${locale}/admin`}>Admin</Link></main>;
-  return <main className="program-main">
+  if (!grant) return <main id="main" tabIndex={-1}><h1>{text.workspace}</h1><p>{text.error}</p><Link href={`/${locale}/admin`}>Admin</Link></main>;
+  return <main id="main" tabIndex={-1} className="program-main">
     <StaffModuleNav locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="selection" />
     <header className="program-heading"><div><p className="eyebrow">{text.eyebrow}</p><h1>{text.title}</h1><p>{text.intro}</p></div><Link href={`/${locale}/admin?organization=${grant.organization_id}`}>Admin</Link></header>
     <SelectionWorkspace key={grant.organization_id} org={grant.organization_id} actor={profile.id} locale={locale} permissions={grant.permissions} />

@@ -1,24 +1,15 @@
-from secrets import compare_digest
 from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Query, Request, Response
 from sqlalchemy import select
 
-from app.core.config import get_settings
 from app.modules.cms import editorial_service, enquiry_service, repository, service
-from app.modules.cms.asset_service import create as create_asset
-from app.modules.cms.asset_service import publish as publish_asset
-from app.modules.cms.asset_service import scan_result as asset_scan_result
-from app.modules.cms.asset_service import view as asset_view
+from app.modules.cms.asset_routes import router as asset_router
 from app.modules.cms.enquiry_service import create as create_enquiry
 from app.modules.cms.enquiry_service import list_staff as list_enquiries
-from app.modules.cms.models import Asset, EditorialEntry, Page, Revision, Translation
+from app.modules.cms.models import EditorialEntry, Page, Revision, Translation
 from app.modules.cms.schemas import (
-    AssetCreate,
-    AssetList,
-    AssetScanResult,
-    AssetView,
     Command,
     CreatePage,
     Edit,
@@ -49,6 +40,7 @@ from app.modules.identity.security import AuthError
 from app.modules.identity.service import require_permission
 
 router = APIRouter(prefix="/api/v1", tags=["cms"])
+router.include_router(asset_router)
 STAFF = "/cms/organizations/{org}/pages"
 PUBLIC = "/public/organizations/{org}/pages"
 Limit = Annotated[int, Query(ge=1, le=100)]
@@ -368,60 +360,10 @@ def editorial_public_detail(
     return editorial_service.view(e)
 
 
-ASSET_STAFF = "/cms/organizations/{org}/assets"
-ASSET_PUBLIC = "/public/organizations/{org}/assets"
-
-
-@router.post(ASSET_STAFF, response_model=AssetView, status_code=201)
-def asset_create(
-    org: UUID, data: AssetCreate, request: Request, db: DB, identity: Principal
-) -> AssetView:
-    return create_asset(db, org, identity[0], data, request.state.request_id)
-
-
-@router.get(ASSET_STAFF, response_model=AssetList)
-def asset_list(
-    org: UUID, db: DB, identity: Principal, cursor: UUID | None = None, limit: Limit = 25
-) -> AssetList:
-    require_permission(db, identity[0], org, "cms.asset.view")
-    q = select(Asset).where(Asset.organization_id == org)
-    q = q.where(Asset.id > cursor) if cursor else q
-    rows = list(db.scalars(q.order_by(Asset.id).limit(limit + 1)))
-    return AssetList(
-        items=[asset_view(a) for a in rows[:limit]],
-        next_cursor=rows[limit - 1].id if len(rows) > limit else None,
-    )
-
-
-@router.post(ASSET_STAFF + "/{asset_id}/publish", response_model=AssetView)
-def asset_publish(
-    org: UUID, asset_id: UUID, request: Request, db: DB, identity: Principal
-) -> AssetView:
-    return publish_asset(db, org, asset_id, identity[0], request.state.request_id)
-
-
-@router.get(ASSET_PUBLIC, response_model=AssetList)
-def asset_public(org: UUID, db: DB, cursor: UUID | None = None, limit: Limit = 25) -> AssetList:
-    q = select(Asset).where(
-        Asset.organization_id == org, Asset.visibility == "public", Asset.scan_status == "clean"
-    )
-    q = q.where(Asset.id > cursor) if cursor else q
-    rows = list(db.scalars(q.order_by(Asset.id).limit(limit + 1)))
-    return AssetList(
-        items=[asset_view(a) for a in rows[:limit]],
-        next_cursor=rows[limit - 1].id if len(rows) > limit else None,
-    )
-
-
-@router.post("/internal/cms/organizations/{org}/assets/{asset_id}/scan", response_model=AssetView)
-def asset_scan(
-    org: UUID, asset_id: UUID, data: AssetScanResult, request: Request, db: DB
-) -> AssetView:
-    configured = get_settings().asset_scanner_key
-    supplied = request.headers.get("X-Asset-Scanner-Key", "")
-    if not configured or not compare_digest(supplied, configured.get_secret_value()):
-        raise AuthError("invalid_client", 403)
-    return asset_scan_result(db, org, asset_id, data.clean, data.reason, request.state.request_id)
+@router.post("/internal/cms/organizations/{org}/assets/{asset_id}/scan")
+def retired_asset_scan(org: UUID, asset_id: UUID) -> None:
+    # No header or claimed boolean can attest to immutable bytes.
+    raise AuthError("asset_scanner_callback_retired", 410)
 
 
 @router.post(

@@ -22,6 +22,8 @@ assert make_url(os.environ["DATABASE_URL"]).database in {
 env = dict(os.environ)
 env.update(
     APP_ENV="local",
+    FILES_ENABLED="false",
+    FILES_MAINTENANCE_ENABLED="false",
     AUTH_DELIVERY_KEY=Fernet.generate_key().decode(),
     BFF_KEY=secrets.token_urlsafe(32),
     PYTHONPATH=str(root / "apps/api"),

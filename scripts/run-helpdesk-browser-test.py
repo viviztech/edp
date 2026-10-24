@@ -36,7 +36,10 @@ for source, destination in (
     ("apps/web/.next/static", "apps/web/.next/standalone/.next/static"),
     ("apps/web/public", "apps/web/.next/standalone/public"),
 ):
-    shutil.copytree(root / source, root / destination, dirs_exist_ok=True)
+    if env.get("BROWSER_SKIP_ARTIFACT_COPY") == "1":
+        assert (root / destination).is_dir(), "Prepared standalone assets are required"
+    else:
+        shutil.copytree(root / source, root / destination, dirs_exist_ok=True)
 cache = root / ".tool-cache"
 cache.mkdir(exist_ok=True)
 for port in (8102, 3102):
