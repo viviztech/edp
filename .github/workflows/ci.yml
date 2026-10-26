@@ -91,6 +91,129 @@ jobs:
       - run: flutter pub get --enforce-lockfile
       - run: dart format --output=none --set-exit-if-changed lib test integration_test
       - run: flutter analyze && flutter test && flutter build web --dart-define=API_BASE_URL=https://example.invalid/api/v1
+  mobile-android-compile:
+    name: Android debug APK (compile only)
+    needs: mobile
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+        working-directory: apps/mobile
+    env:
+      API_BASE_URL: https://example.invalid/api/v1
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '21'}
+      - uses: subosito/flutter-action@v2
+        with: {channel: stable, flutter-version: '3.47.0', cache: true}
+      - name: Record Android compiler and source identity
+        run: |
+          mkdir -p build/native-ci/android
+          git rev-parse HEAD > build/native-ci/android/source-revision.txt
+          git rev-parse HEAD:apps/mobile > build/native-ci/android/mobile-source-tree.txt
+          flutter --version --machine > build/native-ci/android/flutter-version.json
+          java -version 2> build/native-ci/android/java-version.txt
+          cat > build/native-ci/android/acceptance-boundary.txt <<'EOF'
+          scope=compile-only
+          target=android-debug-apk
+          device_execution=not-performed
+          release_accepted=false
+          api_base_url=https://example.invalid/api/v1
+          EOF
+      - name: Resolve locked Flutter dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Keep the dependency lock unchanged
+        run: git diff --exit-code -- pubspec.lock
+      - name: Install project-selected Android SDK packages
+        run: |
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358' > build/native-ci/android/sdk-packages.log 2>&1
+          cat "$ANDROID_HOME/ndk/28.2.13676358/source.properties" > build/native-ci/android/ndk-version.txt
+      - name: Compile debug APK without a live API
+        run: |
+          flutter build apk --debug --no-pub --dart-define=API_BASE_URL="$API_BASE_URL" 2>&1 | tee build/native-ci/android/build.log
+      - name: Package Android compile evidence and SHA-256 manifest
+        run: |
+          git diff --exit-code -- lib android ios pubspec.yaml pubspec.lock
+          test -s build/app/outputs/flutter-apk/app-debug.apk
+          cp build/app/outputs/flutter-apk/app-debug.apk build/native-ci/android/edp-android-debug.apk
+          sha256sum pubspec.lock > build/native-ci/android/pubspec.lock.sha256
+          python3 - <<'PY'
+          from hashlib import sha256
+          from pathlib import Path
+          root = Path('build/native-ci/android')
+          files = sorted(path for path in root.iterdir() if path.is_file() and path.name != 'SHA256SUMS')
+          (root / 'SHA256SUMS').write_text(''.join(f'{sha256(path.read_bytes()).hexdigest()}  {path.name}\n' for path in files), encoding='utf-8')
+          PY
+      - name: Retain Android compile-only artifact and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-compile-${{ github.sha }}
+          path: apps/mobile/build/native-ci/android/
+          if-no-files-found: error
+          retention-days: 7
+  mobile-ios-simulator-compile:
+    name: iOS simulator debug (compile only)
+    needs: mobile
+    runs-on: macos-15
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+        working-directory: apps/mobile
+    env:
+      API_BASE_URL: https://example.invalid/api/v1
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: subosito/flutter-action@v2
+        with: {channel: stable, flutter-version: '3.47.0', cache: true}
+      - name: Record iOS compiler and source identity
+        run: |
+          mkdir -p build/native-ci/ios-simulator
+          git rev-parse HEAD > build/native-ci/ios-simulator/source-revision.txt
+          git rev-parse HEAD:apps/mobile > build/native-ci/ios-simulator/mobile-source-tree.txt
+          flutter --version --machine > build/native-ci/ios-simulator/flutter-version.json
+          xcodebuild -version > build/native-ci/ios-simulator/xcode-version.txt
+          cat > build/native-ci/ios-simulator/acceptance-boundary.txt <<'EOF'
+          scope=compile-only
+          target=ios-simulator-debug
+          signing=disabled
+          device_execution=not-performed
+          release_accepted=false
+          api_base_url=https://example.invalid/api/v1
+          EOF
+      - name: Resolve locked Flutter dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Keep the dependency lock unchanged
+        run: git diff --exit-code -- pubspec.lock
+      - name: Compile unsigned iOS simulator app without a live API
+        run: |
+          flutter build ios --simulator --debug --no-codesign --no-pub --dart-define=API_BASE_URL="$API_BASE_URL" 2>&1 | tee build/native-ci/ios-simulator/build.log
+      - name: Package iOS simulator compile evidence and SHA-256 manifest
+        run: |
+          git diff --exit-code -- lib android ios pubspec.yaml pubspec.lock
+          test -d build/ios/iphonesimulator/Runner.app
+          tar -czf build/native-ci/ios-simulator/edp-ios-simulator-debug.app.tar.gz -C build/ios/iphonesimulator Runner.app
+          shasum -a 256 pubspec.lock > build/native-ci/ios-simulator/pubspec.lock.sha256
+          python3 - <<'PY'
+          from hashlib import sha256
+          from pathlib import Path
+          root = Path('build/native-ci/ios-simulator')
+          files = sorted(path for path in root.iterdir() if path.is_file() and path.name != 'SHA256SUMS')
+          (root / 'SHA256SUMS').write_text(''.join(f'{sha256(path.read_bytes()).hexdigest()}  {path.name}\n' for path in files), encoding='utf-8')
+          PY
+      - name: Retain unsigned iOS simulator compile-only artifact and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-debug-compile-${{ github.sha }}
+          path: apps/mobile/build/native-ci/ios-simulator/
+          if-no-files-found: error
+          retention-days: 7
   compose:
     runs-on: ubuntu-latest
     steps:

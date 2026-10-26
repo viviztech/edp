@@ -7,11 +7,12 @@ exact-revision remote CI remain separate acceptance gates.
 
 ## Verified portable inputs
 
-| Input | Official source | Publisher SHA-256 |
+| Input | Official source | Publisher checksum |
 | --- | --- | --- |
 | Google command-line tools `commandlinetools-win-15859902_latest.zip`, CLI 22.0 | [Android downloads](https://developer.android.com/studio) | `90ae805d20434428bffcb699c290860f19bb5f66a67e6b330067e3de801fb04a` |
 | Microsoft OpenJDK 21.0.12.1 Windows x64 ZIP | [Microsoft release archive](https://learn.microsoft.com/en-us/java/openjdk/older-releases) and its linked checksum | `192441a9d27da813bada974bb88b4cf64d37a9589ed37f204374d411ca5ce07f` |
 | Gradle `9.3.1-all.zip` | [Official distribution checksum](https://services.gradle.org/distributions/gradle-9.3.1-all.zip.sha256) | `17f277867f6914d61b1aa02efab1ba7bb439ad652ca485cd8ca6842fccec6e43` |
+| NDK r28c Windows, revision `28.2.13676358` | [Official Android NDK archive](https://github.com/android/ndk/wiki/Unsupported-Downloads#r28c) | SHA-1 `086bba43ff2f5eb0e387b15c8278bb4e0d89ba1d` |
 
 The JDK and command-line archives were actually hashed and matched against those
 published checksums before extraction. Their archives are held under ignored
@@ -21,6 +22,16 @@ The JDK was extracted under
 `.tool-cache/jdk/jdk-21.0.12.1+1`, and command-line tools under
 `.tool-cache/android-sdk/cmdline-tools/latest`. Official archive verification
 evidence is in ignored `.local/android-toolchain-downloads.json`.
+
+On 2026-10-26 the previously interrupted Gradle and NDK downloads were resumed and
+completed over verified HTTPS. The Gradle archive is 234,893,460 bytes and matches
+the published SHA-256 above; the NDK archive is 748,118,221 bytes and matches
+Google's published SHA-1. Its additional local provenance SHA-256 is
+`6bec98ac2354d8a919760889a1a41d020132e5e8cfa1b1fe51610a72c36a466b`.
+Both ZIPs were checked before guarded workspace extraction/staging. The NDK's
+`source.properties` and Windows Clang binary were verified. Evidence is
+`.local/native-archive-verification-20261026.json`; installing these tools does not
+establish a successful application compilation.
 
 Project-selected packages are API 36, build-tools 36.0.0, platform-tools and
 NDK 28.2.13676358. The official SDK manager obtains package metadata/checksums over
@@ -67,3 +78,17 @@ The compilation define does not contact that URL during a build. Record the actu
 build outcome, source identity and artifact hash in the mobile acceptance report;
 tool installation alone is not a native compilation pass. Keep generated debug
 keys, Gradle/SDK caches and APKs out of source control.
+
+## Current native acceptance
+
+The 2026-10-26 Android debug build reached Gradle execution but was interrupted
+before an exit result or APK was produced. A cached retry is in progress; do not
+count the interrupted attempt as a pass. The current ledger is
+[native completion](../sdlc/native-completion-report.md).
+
+Normal approved tool execution of `adb devices -l` succeeded and reported no
+attached devices. Only device-state counts were retained; the newly started ADB
+daemon was stopped. The restricted sandbox token's earlier profile-directory
+failure is a distinct failed preflight, not evidence of an empty device list.
+Neither `HOME` nor machine/user environment settings were changed. This host has
+no established emulator or macOS/Xcode environment.

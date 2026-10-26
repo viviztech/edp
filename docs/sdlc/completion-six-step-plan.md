@@ -13,7 +13,7 @@ Recorded: 2026-10-26 (Asia/Calcutta). The owner requested completion of the six 
 
 Start each implementation item only after its preceding locally executable checkpoint is verified and reported. Independent read-only investigation of later prerequisites can proceed concurrently. An unavailable external condition does not count as passed and does not prevent independent authorized preparation for subsequent items.
 
-Existing local-only source control remains in effect until source publication is explicitly resolved. Do not send real messages, collect personal data, purchase/provision services, submit to stores or deploy to an unspecified environment. Prepare the concrete result before requesting any final approval. The master specification and release checklist remain binding.
+On 2026-10-26 the owner explicitly authorized pushing the project to `https://github.com/viviztech/edpdigital`. Preserve the separate existing `edp-digital` origin and publish a coherent reviewed project revision to the requested repository. This resolves the earlier local-only source-publication boundary for that destination. Do not send real messages, collect personal data, purchase/provision services, submit to stores or deploy to an unspecified environment. The master specification and release checklist remain binding.
 
 ## Baseline and known failures
 
