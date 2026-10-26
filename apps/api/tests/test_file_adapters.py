@@ -10,6 +10,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import FrozenInstanceError
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from uuid import uuid4
 
 import boto3
@@ -222,6 +223,21 @@ def test_local_conflicting_concurrent_writes_never_overwrite(tmp_path):
     assert len(winners) == 1
     with storage.open(winners[0]) as opened:
         assert opened.read() in {PDF, PDF + b"other"}
+
+
+def test_windows_helpers_fail_closed_before_platform_imports(tmp_path, monkeypatch):
+    import app.modules.files.storage as module
+
+    # Replace only this module's platform reference; do not alter the process's sys module.
+    monkeypatch.setattr(module, "sys", SimpleNamespace(platform="linux"))
+    for helper, argument in (
+        (module._windows_handle, tmp_path / "absent"),
+        (module._windows_close, -1),
+        (module._windows_unlink, io.BytesIO(PDF)),
+    ):
+        with pytest.raises(StorageError, match="storage_configuration_invalid"):
+            helper(argument)
+    assert list(tmp_path.iterdir()) == []
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Windows handle sharing boundary")

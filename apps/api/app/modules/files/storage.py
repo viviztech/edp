@@ -8,6 +8,7 @@ import os
 import re
 import shutil
 import stat
+import sys
 import tempfile
 from collections.abc import Iterator
 from contextlib import AbstractContextManager, ExitStack, contextmanager
@@ -178,6 +179,9 @@ def _posix_flags(*, directory: bool = False) -> int:
 def _windows_handle(
     path: Path, *, directory: bool = False, create: bool = False, delete: bool = False
 ) -> int:
+    if sys.platform != "win32":
+        raise StorageError("storage_configuration_invalid")
+
     import ctypes
     from ctypes import wintypes
 
@@ -232,6 +236,9 @@ def _windows_handle(
 
 
 def _windows_close(handle: int) -> None:
+    if sys.platform != "win32":
+        raise StorageError("storage_configuration_invalid")
+
     import ctypes
     from ctypes import wintypes
 
@@ -242,6 +249,9 @@ def _windows_close(handle: int) -> None:
 
 
 def _windows_unlink(file: BinaryIO) -> None:
+    if sys.platform != "win32":
+        raise StorageError("storage_configuration_invalid")
+
     import ctypes
     import msvcrt
     from ctypes import wintypes
@@ -266,7 +276,7 @@ class LocalPrivateStorage:
         if max_bytes < 1:
             raise StorageError("storage_configuration_invalid")
         self.root = Path(os.path.abspath(root))
-        if os.name == "nt" and self.root.drive.startswith("\\\\"):
+        if sys.platform == "win32" and self.root.drive.startswith("\\\\"):
             raise StorageError("storage_path_invalid")
         self.max_bytes = max_bytes
         self.temp_root = _temp_root(temp_root)
@@ -278,7 +288,7 @@ class LocalPrivateStorage:
         with ExitStack() as stack:
             parent_fd: int | None = None
             path = Path(target.anchor)
-            if os.name == "nt":
+            if sys.platform == "win32":
                 stack.callback(_windows_close, _windows_handle(path, directory=True))
             else:
                 parent_fd = os.open(path, os.O_RDONLY | _posix_flags(directory=True))
@@ -286,7 +296,7 @@ class LocalPrivateStorage:
             for part in target.parent.parts[1:]:
                 path = path / part
                 try:
-                    if os.name == "nt":
+                    if sys.platform == "win32":
                         if create:
                             path.mkdir(mode=0o700, exist_ok=True)
                         if _reparse(path):
@@ -318,7 +328,7 @@ class LocalPrivateStorage:
         create: bool = False,
         delete: bool = False,
     ) -> Iterator[BinaryIO]:
-        if os.name == "nt":
+        if sys.platform == "win32":
             import msvcrt
 
             handle = _windows_handle(parent / name, create=create, delete=delete or create)
@@ -340,13 +350,10 @@ class LocalPrivateStorage:
             info = os.fstat(opened.fileno())
             if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
                 raise StorageError("storage_path_invalid")
-            if os.name != "nt":
+            if sys.platform != "win32":
                 import fcntl
 
-                locking = cast(Any, fcntl)  # POSIX-only attributes are absent from Windows stubs.
-                locking.flock(
-                    opened.fileno(), locking.LOCK_EX if create or delete else locking.LOCK_SH
-                )
+                fcntl.flock(opened.fileno(), fcntl.LOCK_EX if create or delete else fcntl.LOCK_SH)
                 current = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
                 if (current.st_dev, current.st_ino) != (info.st_dev, info.st_ino):
                     raise StorageError("storage_version_mismatch")
@@ -377,7 +384,7 @@ class LocalPrivateStorage:
                             os.fsync(opened.fileno())
                             version = self._version(opened, sha256)
                         except Exception:
-                            if os.name == "nt":
+                            if sys.platform == "win32":
                                 _windows_unlink(opened)
                             else:
                                 os.unlink(name, dir_fd=parent_fd)
@@ -450,7 +457,7 @@ class LocalPrivateStorage:
                     self.max_bytes,
                     self.temp_root,
                 ):
-                    if os.name == "nt":
+                    if sys.platform == "win32":
                         _windows_unlink(opened)
                     else:
                         os.unlink(name, dir_fd=parent_fd)

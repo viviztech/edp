@@ -80,17 +80,77 @@ jobs:
       - run: npm run lint && npm run typecheck && npm test && npm run build
       - run: npm audit --audit-level=high
   mobile:
-    runs-on: ubuntu-latest
+    # The committed font goldens were captured on Windows. Keep strict visual
+    # comparison on that host family; see docs/testing/mobile-goldens.md.
+    runs-on: windows-2022
+    timeout-minutes: 30
     defaults:
       run:
+        shell: pwsh
         working-directory: apps/mobile
     steps:
       - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Record canonical visual runner and source identity
+        run: |
+          New-Item -ItemType Directory -Force -Path build/mobile-quality | Out-Null
+          git rev-parse HEAD | Set-Content build/mobile-quality/source-revision.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git rev-parse 'HEAD:apps/mobile' | Set-Content build/mobile-quality/mobile-source-tree.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          @(
+            'visual_host=windows-2022',
+            "runner_image=$env:ImageOS",
+            "runner_image_version=$env:ImageVersion",
+            "os=$([System.Runtime.InteropServices.RuntimeInformation]::OSDescription)",
+            "powershell=$($PSVersionTable.PSVersion)",
+            'comparator=Flutter LocalFileComparator (pixel-for-pixel)',
+            'baseline_updates=disabled',
+            'native_device_acceptance=not-performed'
+          ) | Set-Content build/mobile-quality/acceptance-boundary.txt
+          Get-FileHash assets/fonts/NotoSansTamil-Regular.ttf, test/goldens/*.png -Algorithm SHA256 |
+            Select-Object Path, Hash | ConvertTo-Json |
+            Set-Content build/mobile-quality/font-and-golden-hashes.json
       - uses: subosito/flutter-action@v2
         with: {channel: stable, flutter-version: '3.47.0', cache: true}
-      - run: flutter pub get --enforce-lockfile
-      - run: dart format --output=none --set-exit-if-changed lib test integration_test
-      - run: flutter analyze && flutter test && flutter build web --dart-define=API_BASE_URL=https://example.invalid/api/v1
+      - name: Record pinned Flutter version
+        run: |
+          flutter --version --machine | Tee-Object -FilePath build/mobile-quality/flutter-version.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Resolve locked Flutter dependencies
+        run: |
+          flutter pub get --enforce-lockfile 2>&1 | Tee-Object -FilePath build/mobile-quality/pub-get.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- pubspec.lock
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Check Dart formatting
+        run: |
+          dart format --output=none --set-exit-if-changed lib test integration_test 2>&1 | Tee-Object -FilePath build/mobile-quality/format.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Analyze Flutter source
+        run: |
+          flutter analyze --no-pub 2>&1 | Tee-Object -FilePath build/mobile-quality/analyze.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run the full suite with strict Windows golden comparisons
+        run: |
+          flutter test --no-pub --reporter expanded 2>&1 | Tee-Object -FilePath build/mobile-quality/tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Compile Flutter web without a live API
+        run: |
+          flutter build web --no-pub --dart-define=API_BASE_URL=https://example.invalid/api/v1 2>&1 | Tee-Object -FilePath build/mobile-quality/web-build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Keep source, locked dependencies and visual masters unchanged
+        run: git diff --exit-code -- lib test integration_test pubspec.yaml pubspec.lock
+      - name: Retain mobile check logs and golden failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-quality-windows-${{ github.sha }}
+          path: |
+            apps/mobile/build/mobile-quality/
+            apps/mobile/test/failures/
+          if-no-files-found: warn
+          retention-days: 7
   mobile-android-compile:
     name: Android debug APK (compile only)
     needs: mobile

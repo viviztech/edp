@@ -1,8 +1,8 @@
 # Native completion checkpoint
 
 Updated: 2026-10-26 (Asia/Calcutta). Item 2 of the
-[six-step plan](completion-six-step-plan.md). Toolchain preparation is complete;
-native compilation and device acceptance remain separate, unclosed checks.
+[six-step plan](completion-six-step-plan.md). Toolchain preparation and Android
+debug compilation are complete; iOS compilation and device acceptance remain open.
 
 ## Delivered preparation and source repair
 
@@ -31,7 +31,7 @@ native compilation and device acceptance remain separate, unclosed checks.
 | --- | --- |
 | Gradle archive | 234,893,460 bytes; publisher SHA-256 `17f277867f6914d61b1aa02efab1ba7bb439ad652ca485cd8ca6842fccec6e43` matches |
 | NDK archive | 748,118,221 bytes; publisher SHA-1 `086bba43ff2f5eb0e387b15c8278bb4e0d89ba1d` matches; source properties and Clang binary present |
-| Android debug compilation | `flutter build apk --debug --no-pub --dart-define=API_BASE_URL=https://example.invalid/api/v1` reached `assembleDebug`; interrupted before a result or APK. Cached retry in progress; no passing compilation claimed |
+| Android debug compilation | Cached retry of `flutter build apk --debug --no-pub --dart-define=API_BASE_URL=https://example.invalid/api/v1` passed with exit zero at 2026-10-26 05:38:42 UTC; initial interrupted attempt is excluded |
 | Android device enumeration | Approved normal ADB invocation succeeds; zero attached devices. Newly started daemon cleaned up; no hardware identifiers recorded |
 | Android runtime | Not executed: no device/emulator established |
 | iOS compilation/runtime | Not executed: this Windows host has no macOS/Xcode environment |
@@ -41,8 +41,16 @@ Evidence paths are ignored local artifacts:
 `.local/native-archive-verification-20261026.json`,
 `.local/native-device-probe-20261026.json` and
 `.tool-cache/completion-step2-native/` (source manifest and build logs).
-An APK hash will be recorded only after a completed successful build against
-unchanged Android/Dart sources. The interrupted log is preserved separately.
+The successful artifact is `apps/mobile/build/app/outputs/flutter-apk/app-debug.apk`,
+165,530,645 bytes, SHA-256
+`ce4b427780cf07f4aa354d52457f744bf57dc81fed4c7958b5a971974695d526`.
+The Android/Dart source manifest is unchanged before/after compilation:
+`8e5c62782d8d648d31639a878db55550849157779e8572e18108ab2464832fba`.
+The exact command, source identity and artifact proof are in
+`.tool-cache/completion-step2-native/acceptance.json`. Gradle also installed API
+34/35 platform dependencies inside the workspace; the application's compile/target
+remains API 36. The interrupted log is preserved separately. The generated APK,
+keys and compiler caches remain ignored and are not published as repository source.
 
 ## Outstanding platform acceptance
 

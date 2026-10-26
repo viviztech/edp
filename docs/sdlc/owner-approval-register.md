@@ -1,0 +1,48 @@
+# Owner approval register
+
+Prepared: 2026-10-26 (Asia/Calcutta), for item 4 of the [six-step plan](completion-six-step-plan.md). This is a review packet mapped to implemented controls, not an approval or evidence that item 4 is complete. Every decision below is **pending**. The accountable roles identify who must decide; no named approver, legal wording, retention period, capacity, service level or deployment choice is inferred.
+
+## Decision records
+
+For each ID, retain these fields with the final reviewed material:
+
+| Record field | Current value / required evidence |
+| --- | --- |
+| Status | Pending owner review |
+| Accountable owner | Role in the decision table; named owner not assigned |
+| Approver and authority | Not supplied; record the actual person and delegated authority |
+| Decision / approved values | Not supplied; attach the exact approved edition or selected values |
+| Scope | Record applicable organization, program, purpose, environment and channel |
+| Approval date / effective date | Not supplied |
+| Approval evidence | Not supplied; reference the attributable approval and reviewed document hash/edition |
+| Implementation evidence | Not supplied; record policy/form/template IDs and versions, configuration identity, revision and actual verification results after implementation |
+
+Keep secrets, personal records and private approvals in their controlled repository or custody system; put references here. An owner may request changes or decline a proposal. A saved setting, published policy, synthetic fixture or successful test cannot supply approval evidence.
+
+| ID | Decision to review and implemented destination | Accountable owner | Status |
+| --- | --- | --- | --- |
+| OA01 | Confirm organization/program names, branding and reviewed English/Tamil editions. Use CMS pages/content/media publication and bilingual program/cohort names; designate the Tamil reviewer and publication owner. | Client/content owner | Pending |
+| OA02 | Approve application fields, declarations/consents and intake details. **Application definitions:** `title_en`, `title_ta`; fields' `key`, `section`, `label_en`, `label_ta`, `field_type`, `required`; acknowledgements' `kind`, bilingual labels and `required`. **Programs:** intake `form_id`, `opens_at`, `closes_at`; cohort `starts_on`, `ends_on`, optional `capacity`. Record expected volumes separately for measured capacity planning. | Program/selection lead; privacy owner for consent | Pending |
+| OA03 | Approve the actual document list and optional/required counts. Application `document_requirements` contain `key`, `label_en`, `label_ta`, `instructions_en`, `instructions_ta`, `file_policy_id`, `min_files`, `max_files`. Select a reviewed published policy edition for each requirement. | Selection lead and privacy owner | Pending |
+| OA04 | Approve file rules separately for `application_document`, `cms_asset`, `assignment_submission`, `lms_material`, `helpdesk_attachment`. **File policies:** `name`, `notice_en`, `notice_ta`, `allowed_mime_types`, `max_file_bytes`, `max_files`, `retention_days`, `rejected_retention_days`, `allow_frozen_disposal`. Publication and later changes require the supported version/reason controls. Policy publication does not enable collection or disposal. | Privacy owner and each purpose's program/content/support owner | Pending |
+| OA05 | Approve selection criteria, bilingual guidance, scoring ranges, conflict handling and authorized override procedure. **Selection rubric:** `key`, `label_en`, `label_ta`, `guidance_en`, `guidance_ta`, `weight`, `minimum_score`, `maximum_score`, `required`; weights must total 100. Retain the published rubric and reasoned decision history. | Selection lead/director | Pending |
+| OA06 | Approve attendance policy and certificate wording/issuer. **Attendance:** `threshold_percent`, `late_after_minutes`, `opens_before_minutes`, `closes_after_minutes`. **Certificate templates:** `title_en`, `title_ta`, `statement_en`, `statement_ta`, `issuer_name`. Decide separately whether signatory/PDF presentation or an additional attendance eligibility gate is required; these are not fields in the current certificate template/eligibility contract. | Program owner | Pending |
+| OA07 | Approve public enquiry notices, consent text and response/disposal arrangements. Configure `CONTACT_PRIVACY_VERSION`, `CONTACT_PRIVACY_NOTICE_URL_EN`, `CONTACT_PRIVACY_NOTICE_URL_TA`, `CONTACT_CONSENT_TEXT_EN`, `CONTACT_CONSENT_TEXT_TA` before separately considering `CONTACT_ENQUIRIES_ENABLED`. | Privacy, content and support owners | Pending |
+| OA08 | Approve channel/event/recipient choices, sender and English/Tamil message editions. Existing identity SMTP uses `AUTH_DELIVERY_BACKEND`, `AUTH_SMTP_ENABLED`, `AUTH_TEMPLATES_APPROVED`, `AUTH_CANONICAL_ORIGIN`, `AUTH_SMTP_FROM_ADDRESS` and verified TLS configuration. Choose SMS/WhatsApp/FCM providers/accounts/templates under item 3; no current setting supplies those missing integrations. Credentials stay in restricted configuration, never this register. | Communications/privacy owners; operations | Pending |
+| OA09 | Approve separate lifecycle rules: `AUTH_DELIVERY_RETENTION_DAYS`, `NOTIFICATION_RETENTION_DAYS`, `PARTICIPANT_NOTIFICATION_RETENTION_DAYS`, `META_EVENT_RETENTION_DAYS`, `CRM_EXPORT_RETENTION_DAYS`. Also decide application/selection/learning/support/outcome records, metadata/audit logs, backups, subject requests, deletion exceptions and legal holds; these are not all implemented deletion jobs. Download expiry is distinct from physical disposal. | Privacy owner; operations implements approved disposal/custody | Pending |
+| OA10 | Name resource/funding content maintainers and approve post-training/impact definitions. **Knowledge:** `official_url`, `last_verified_at`, `opens_on`, `closes_on`, `visibility`, authored locale. **Business follow-up policy:** `day_offsets` (ascending, unique). **Impact definitions:** `title_en`, `title_ta`, `definition_en`, `definition_ta`; current measures are `business_started`, `business_active`, `jobs_created`. Approve measurement instructions, not unsupported causal claims or extra metrics. | Resource/funding, program and impact owners | Pending |
+| OA11 | Approve card/catalogue public disclosures and private contact-data purpose/retention. Business tools use a separate versioned `Sharing.published` command; the entrepreneur must explicitly publish saved details or revoke sharing. Profile `public_opt_in` alone publishes nothing. Quotations are printable commercial records, not statutory invoices. | Client/privacy owner; entrepreneur for each publication | Pending |
+| OA12 | Select hosting/domain/registry/storage/scanner, operating costs and secure configuration custody; name recovery/incident/monitoring/UAT/release/stabilization owners. Approve recovery objectives and measured alert thresholds. The manifest binds `source_revision`, source/configuration hashes, `migration_head`, immutable `images`, `web_origin`, separate `database_roles`, `trusted_proxy_ips` and gate evidence. Monitoring `thresholds` and `responder` need actual decisions. Confirm app identifiers/signing/store ownership and update configuration: `MOBILE_UPDATES_ENABLED`, `MOBILE_MINIMUM_VERSION`, `MOBILE_LATEST_VERSION`, `MOBILE_ANDROID_DOWNLOAD_URL`, `MOBILE_IOS_DOWNLOAD_URL`. Record training/custody acknowledgement and target-specific release approval separately. | Client budget/release owner; operations; security/key custodian; platform owner; named UAT/stabilization leads | Pending |
+
+## Activation and acceptance boundary
+
+The initial [staging release schema](../../infra/deployment/release-manifest.schema.json) requires `synthetic_only=true`, `files_enabled=false`, `senders_enabled=false`, `collection_enabled=false`. This register does not change that contract. A later enabled-runtime release requires its own reviewed configuration and actual acceptance evidence; do not flip flags in the initial synthetic manifest and describe it as accepted.
+
+Keep `FILES_ENABLED` and `FILES_MAINTENANCE_ENABLED`, enquiry/sender activation, real-data collection, provider delivery and deployment subject to their actual technical and owner gates. Existing Android development identity/debug signing is not production signing. Approved policy cannot substitute for native device checks, live service checks, exact-revision CI, staged restore, accessibility/performance evidence, client UAT or training/handover observations.
+
+## Source references for review
+
+- [Configuration](../../apps/api/app/core/config.py), [file-policy fields](../../apps/api/app/modules/files/schemas.py), [application definition fields](../../apps/api/app/modules/applications/schemas.py), [document requirements](../../apps/api/app/modules/applications/document_schemas.py).
+- [Selection](../../apps/api/app/modules/selection/schemas.py), [program/cohort/intake](../../apps/api/app/modules/programs/schemas.py), [attendance](../../apps/api/app/modules/attendance/schemas.py), [learning/certificates](../../apps/api/app/modules/lms/schemas.py).
+- [Knowledge](../../apps/api/app/modules/knowledge/schemas.py), [business follow-ups](../../apps/api/app/modules/businesses/schemas.py), [impact](../../apps/api/app/modules/reports/schemas.py), [business tools](../../apps/api/app/modules/business_tools/schemas.py).
+- [Privacy inventory](../security/privacy-data-inventory.md), [administrator guide](../user-guides/admin.md), [participant guide](../user-guides/participant.md), [operations signals](../../infra/monitoring/signals.json), [incident/custody runbook](../deployment/incident-response.md), [release checklist](release-checklist.md).

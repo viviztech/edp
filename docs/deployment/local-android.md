@@ -81,10 +81,14 @@ keys, Gradle/SDK caches and APKs out of source control.
 
 ## Current native acceptance
 
-The 2026-10-26 Android debug build reached Gradle execution but was interrupted
-before an exit result or APK was produced. A cached retry is in progress; do not
-count the interrupted attempt as a pass. The current ledger is
-[native completion](../sdlc/native-completion-report.md).
+The 2026-10-26 cached Android debug retry passed with exit zero and unchanged
+Android/Dart source. The 165,530,645-byte APK has SHA-256
+`ce4b427780cf07f4aa354d52457f744bf57dc81fed4c7958b5a971974695d526`.
+The initial interrupted attempt remains excluded. Gradle installed API 34/35
+dependency platforms inside this workspace; application compile/target remains
+API 36. See [native completion](../sdlc/native-completion-report.md) and ignored
+`.tool-cache/completion-step2-native/acceptance.json` for exact source/artifact
+proof. This is compilation evidence, with no device installation or release pass.
 
 Normal approved tool execution of `adb devices -l` succeeded and reported no
 attached devices. Only device-state counts were retained; the newly started ADB
