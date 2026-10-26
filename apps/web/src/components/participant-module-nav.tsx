@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Locale } from "../lib/messages";
 
 const modules = [
+  { route: "business-tools", en: "My business tools", ta: "எனது தொழில் கருவிகள்", permission: "participant.self" },
   { route: "updates", en: "My updates", ta: "எனது அறிவிப்புகள்", permission: "participant.self" },
   { route: "participant", en: "My schedule", ta: "எனது அட்டவணை", permission: "participant.self" },
   { route: "learning", en: "My learning", ta: "எனது கற்றல்", permission: "lms.learn" },

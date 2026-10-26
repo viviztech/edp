@@ -25,6 +25,8 @@ from app.modules.applications.document_routes import (
 from app.modules.applications.routes import router as applications_router
 from app.modules.attendance.routes import router as attendance_router
 from app.modules.business_plans.routes import router as business_plans_router
+from app.modules.business_tools.routes import public_router as business_tools_public_router
+from app.modules.business_tools.routes import router as business_tools_router
 from app.modules.businesses.routes import router as businesses_router
 from app.modules.cms.routes import router as cms_router
 from app.modules.crm.routes import router as crm_router
@@ -46,6 +48,7 @@ from app.modules.programs.routes import router as programs_router
 from app.modules.reports.routes import impact_router
 from app.modules.reports.routes import router as reports_router
 from app.modules.selection.routes import router as selection_router
+from app.modules.system.mobile import router as mobile_policy_router
 
 log = structlog.get_logger()
 _UUID_PATH = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
@@ -123,6 +126,8 @@ def create_app() -> FastAPI:
     app.include_router(attendance_router)
     app.include_router(business_plans_router)
     app.include_router(businesses_router)
+    app.include_router(business_tools_router)
+    app.include_router(business_tools_public_router)
     app.include_router(lms_router)
     app.include_router(certificates_router)
     app.include_router(applications_router)
@@ -143,6 +148,7 @@ def create_app() -> FastAPI:
     app.include_router(application_documents_reviewer_router)
     app.include_router(lms_files_router)
     app.include_router(helpdesk_files_router)
+    app.include_router(mobile_policy_router)
 
     @app.exception_handler(AuthError)
     async def auth_error(request: Request, exc: AuthError) -> JSONResponse:
@@ -187,6 +193,7 @@ def create_app() -> FastAPI:
                         or request.url.path.startswith("/api/v1/mentoring/")
                         or request.url.path.startswith("/api/v1/business-plans/")
                         or request.url.path.startswith("/api/v1/businesses/")
+                        or request.url.path.startswith("/api/v1/business-tools/")
                         or request.url.path.startswith("/api/v1/knowledge/")
                         or request.url.path.startswith("/api/v1/helpdesk/")
                         or request.url.path.startswith("/api/v1/reports/")

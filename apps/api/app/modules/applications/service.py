@@ -669,6 +669,10 @@ def save(
         raise AuthError("not_found", 404)
     if application.version != data.expected_version:
         raise AuthError("version_conflict", 409)
+    if application.cycle_id is not None:
+        # Match submission/document locking: an existing draft remains readable
+        # after closure, but scalar edits may not bypass the closed intake.
+        _open_cycle(db, org, application.cycle_id, lock=True)
     form = db.get(ApplicationForm, application.form_id)
     if not form:
         raise AuthError("application_integrity_error", 503)

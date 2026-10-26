@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense, useRef, useState } from "react";
+import { readIntakeContext } from "../lib/intake-context";
 
 type MenuId = "program" | "support" | "updates";
 type Item = { title: string; href: string };
@@ -16,6 +18,23 @@ type Props = {
   program: Item[];
   support: Item[];
 };
+
+function LanguageLink({ locale, label }: { locale: Props["locale"]; label: string }) {
+  const pathname = usePathname();
+  const search = useSearchParams();
+  const target = locale === "en" ? "ta" : "en";
+  const path = pathname.replace(/^\/(?:en|ta)(?=\/|$)/, `/${target}`);
+  const one = (key: string) => {
+    const values = search.getAll(key);
+    return values.length === 1 ? values[0] : undefined;
+  };
+  const context = readIntakeContext({ organization: one("organization"), cycle: one("cycle") });
+  const query = new URLSearchParams();
+  if (context.organization) query.set("organization", context.organization);
+  if (context.cycle) query.set("cycle", context.cycle);
+  // Keep a regular link so the existing unsaved-edit navigation guards can cancel it.
+  return <Link className="site-language" href={path + (query.size ? `?${query}` : "")} lang={target}>{label}</Link>;
+}
 
 export function PublicNavigation({ locale, navigationLabel, labels, program, support }: Props) {
   const [openMenu, setOpenMenu] = useState<MenuId | null>(null);
@@ -81,6 +100,8 @@ export function PublicNavigation({ locale, navigationLabel, labels, program, sup
     <Link href={"/" + locale + "/pages/contact"}>{labels.contact}</Link>
     <Link href={"/" + locale + "/pages/apply"}>{labels.apply}</Link>
     <Link className="site-account" href={"/" + locale + "/account"}>{labels.account}</Link>
-    <Link className="site-language" href={"/" + (locale === "en" ? "ta" : "en")} lang={locale === "en" ? "ta" : "en"}>{labels.language}</Link>
+    <Suspense fallback={<span className="site-language">{labels.language}</span>}>
+      <LanguageLink locale={locale} label={labels.language} />
+    </Suspense>
   </nav>;
 }

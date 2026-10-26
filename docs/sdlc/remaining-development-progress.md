@@ -7,9 +7,9 @@ Updated: 2026-10-24 (Asia/Calcutta). The owner requested completion of all six a
 | 1. Secure files | Accepted | `74fb149`; [acceptance](secure-files-acceptance-report.md) |
 | 2. Background-job recovery | Accepted and reported | `679ebdc`; [report](background-job-recovery-report.md), final CRM browser pass and zero-finding selected-source scan |
 | 3. Essential communications | Accepted and reported | Configured global identity SMTP transport, fixed manual-code web routes, typed enrollment outbox and participant inbox. Controlled protocol tests, full web checks, final migrations and connected browser pass; 368 API tests passed with one POSIX-only skip |
-| 4. Flutter domain journeys | Queued | [plan](flutter-domain-plan.md); applicant/student/alumni source and local API acceptance remain required |
-| 5. Staging operations and launch acceptance preparation | Queued | [plan](staging-operations-plan.md); no deployment authorized |
-| 6. Business tools | Queued | [plan](business-tools-plan.md); digital card, catalogue, quotation, mini CRM in order |
+| 4. Flutter domain journeys | M00–M02 verified; M03/M04/M05 source and initial live API journeys implemented; final checks in progress | [plan](flutter-domain-plan.md), [closure status](development-closure-report.md); source and unavailable native runtime checks remain distinct |
+| 5. Staging operations and launch acceptance preparation | Local artifacts, regression tests and actual PostgreSQL role/restore drills pass on final q3 schema | [report](staging-operations-report.md); Docker/TLS/queue/storage/device/remote acceptance and deployment remain unexecuted |
+| 6. Business tools | All four local vertical slices implemented; final API/web tests, static checks, q3 migration round trip/drift and connected browser acceptance pass | [report](business-tools-report.md), [API](../api/business-tools.md); real collection/sharing policy and release gates remain external |
 
 ## Acceptance boundary
 

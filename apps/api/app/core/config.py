@@ -13,6 +13,15 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     app_env: Literal["local", "test", "staging", "production"] = "local"
+    mobile_updates_enabled: bool = False
+    mobile_minimum_version: str = Field(
+        default="0.1.0", pattern=r"^(0|[1-9][0-9]{0,3})\.(0|[1-9][0-9]{0,3})\.(0|[1-9][0-9]{0,3})$"
+    )
+    mobile_latest_version: str = Field(
+        default="0.1.0", pattern=r"^(0|[1-9][0-9]{0,3})\.(0|[1-9][0-9]{0,3})\.(0|[1-9][0-9]{0,3})$"
+    )
+    mobile_android_download_url: str = Field(default="", max_length=2048)
+    mobile_ios_download_url: str = Field(default="", max_length=2048)
     database_url: SecretStr
     redis_url: SecretStr
     bff_key: SecretStr | None = Field(default=None, min_length=32)
@@ -141,6 +150,30 @@ class Settings(BaseSettings):
         if not value.get_secret_value().startswith("postgresql+psycopg://"):
             raise ValueError("A PostgreSQL psycopg URL is required")
         return value
+
+    @model_validator(mode="after")
+    def mobile_update_policy(self) -> Self:
+        minimum = tuple(int(part) for part in self.mobile_minimum_version.split("."))
+        latest = tuple(int(part) for part in self.mobile_latest_version.split("."))
+        if latest < minimum:
+            raise ValueError("Latest mobile version must be at least the minimum")
+        for destination in (self.mobile_android_download_url, self.mobile_ios_download_url):
+            if destination:
+                parsed = urlsplit(destination)
+                if (
+                    parsed.scheme != "https"
+                    or not parsed.hostname
+                    or parsed.username
+                    or parsed.password
+                    or any(ord(char) <= 32 or ord(char) == 127 for char in destination)
+                ):
+                    raise ValueError("Mobile download destinations require an approved HTTPS URL")
+                _ = parsed.port
+        if self.mobile_updates_enabled and not (
+            self.mobile_android_download_url and self.mobile_ios_download_url
+        ):
+            raise ValueError("Enabled mobile updates need both native download destinations")
+        return self
 
     @field_validator("redis_url")
     @classmethod

@@ -1,5 +1,13 @@
 # API conventions
 
+## Business tools and mobile policy
+
+Owner endpoints are `/api/v1/business-tools/organizations/{org}/profiles/{profile}`: GET/POST `card`, POST `card/sharing`, GET `card/artifact`; GET `catalogue`, POST `catalogue/sharing`, POST `catalogue/items` and `catalogue/items/{id}/update`; GET/POST `quotes`, GET `quotes/{id}`, POST `quotes/{id}/update` and `/issue`, GET `/artifact`; GET/POST `contacts`, POST `contacts/{id}/update`; GET/POST `tasks`, POST `tasks/{id}/update`; GET `history`. Every write carries an immutable UUID `request_id`; updates carry `expected_version`. Same request/digest replays without duplication after current authorization. Changed UUID reuse and stale versions conflict. Lists are bounded with limit/offset; task/contact/history filters are closed enumerations/UUIDs. The BFF accepts at most 50 rows and 10,000 offset and bounds streamed mutation JSON at 128 KiB.
+
+Money and quantities remain decimal strings through UI/JSON output. The server rounds each line to currency cents with ROUND_HALF_UP, sums rounded lines, then subtracts the bounded discount. Catalogue references require current owned available version/currency/price and are rechecked at issue. Issued snapshots cannot be updated. Public `/public/business-tools/cards/{share}` and `/catalogues/{share}` expose only explicit current shares; anonymous requests receive no-store projections. Owner artifact GETs are audited escaped HTML attachments.
+
+`GET /api/v1/public/mobile-policy?platform=android|ios|web` exposes `platform`, `updates_enabled`, semantic `minimum_version`, `latest_version` and nullable `download_url`. Default policy is disabled at `0.1.0`; native activation requires approved HTTPS destinations and latest >= minimum. Web never forces a native update. Unavailable or malformed policy must not invent a mandatory client update. The endpoint is public and no-store, with no identity/device collection.
+
 Base `/api/v1`; FastAPI Pydantic v2 request/response schemas, UUID IDs and UTC RFC3339 timestamps. OpenAPI is authoritative. Health `/health` and readiness `/ready` are infrastructure exceptions; probes expose only status.
 
 Resources use plural nouns; explicit actions for consequential transitions, e.g. `POST /applications/{id}/submit`, not arbitrary status PATCH. Master Section 24 defines module route groups. Authorization runs before object serialization and before all writes. Return minimal public DTOs rather than model dumping.

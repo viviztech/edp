@@ -1,0 +1,15 @@
+.tools-main { max-width: 1150px; margin-inline: auto; }
+.tools-main .program-panel { margin-block: 1.5rem; min-width: 0; }
+.tools-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; margin-block: 1rem; }
+.tools-fields label { display: grid; align-content: start; gap: .4rem; }
+.tools-main input, .tools-main select, .tools-main textarea { max-width: 100%; min-width: 0; font: inherit; padding: .5rem; }
+.tools-main input[type=checkbox] { width: auto; }
+.tools-main fieldset { min-width: 0; padding: 1rem; border: 1px solid #cdd5da; }
+.tools-main button { margin: .4rem .5rem .4rem 0; }
+.tools-main .program-list li, .tools-main p, .tools-main a, .tools-lines li { overflow-wrap: anywhere; }
+.tools-card { max-width: 34rem; padding: 1.5rem; border: 2px solid #255b49; border-radius: .6rem; white-space: pre-wrap; }
+.tools-card h4 { font-size: 1.5rem; margin: 0; }
+.tools-lines { padding-inline-start: 1.5rem; }
+.tools-lines li { border-bottom: 1px solid #cdd5da; padding-block: 1rem; }
+.tools-public { max-width: 760px; margin: 2rem auto; padding: 1rem; overflow-wrap: anywhere; }
+@media print { .site-header, .site-footer, .skip, .participant-modules, .tools-main button { display: none; } .tools-card { break-inside: avoid; } }

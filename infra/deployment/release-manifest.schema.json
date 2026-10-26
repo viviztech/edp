@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EDP initial synthetic staging release contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "environment", "synthetic_only", "source_revision", "source_manifest_sha256", "configuration_sha256", "migration_head", "images", "web_origin", "database_roles", "trusted_proxy_ips", "files_enabled", "senders_enabled", "collection_enabled", "gates"],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "image": {"type": "string", "pattern": "^[a-z0-9][a-z0-9./:_-]{0,220}@sha256:[a-f0-9]{64}$"},
+    "role": {"type": "string", "pattern": "^edp_[a-z0-9_]{1,45}$"},
+    "gate": {"enum": ["passed", "failed", "deferred", "unavailable"]}
+  },
+  "properties": {
+    "schema_version": {"const": 1}, "environment": {"const": "staging"},
+    "synthetic_only": {"const": true},
+    "source_revision": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+    "source_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "configuration_sha256": {"$ref": "#/$defs/sha256"},
+    "migration_head": {"type": "string", "pattern": "^[a-z0-9_]{1,80}$"},
+    "web_origin": {"type": "string", "pattern": "^https://[a-z0-9.-]+(:443)?$", "maxLength": 299},
+    "images": {"type": "object", "additionalProperties": false, "required": ["api", "web", "edge"], "properties": {"api": {"$ref": "#/$defs/image"}, "web": {"$ref": "#/$defs/image"}, "edge": {"$ref": "#/$defs/image"}}},
+    "database_roles": {"type": "object", "additionalProperties": false, "required": ["migration", "api", "worker"], "properties": {"migration": {"$ref": "#/$defs/role"}, "api": {"$ref": "#/$defs/role"}, "worker": {"$ref": "#/$defs/role"}}},
+    "trusted_proxy_ips": {"type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, "items": {"type": "string", "maxLength": 45}},
+    "files_enabled": {"const": false}, "senders_enabled": {"const": false}, "collection_enabled": {"const": false},
+    "gates": {"type": "object", "additionalProperties": false, "required": ["ci", "migration", "runtime", "restore", "security", "accessibility", "performance", "uat"], "properties": {"ci": {"$ref": "#/$defs/gate"}, "migration": {"$ref": "#/$defs/gate"}, "runtime": {"$ref": "#/$defs/gate"}, "restore": {"$ref": "#/$defs/gate"}, "security": {"$ref": "#/$defs/gate"}, "accessibility": {"$ref": "#/$defs/gate"}, "performance": {"$ref": "#/$defs/gate"}, "uat": {"$ref": "#/$defs/gate"}}}
+  }
+}

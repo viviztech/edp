@@ -2,9 +2,24 @@
 
 Choose Your account, then Create account. Supply name, email and a 12?128 character password. Verify email using the single-use code from the account message, then sign in. During local development only, the operator retrieves this message from the encrypted queue; no email is sent. The same account flow is available in Flutter. English/Tamil labels are provided.
 
+## Entrepreneur business tools
+
+Open **My business tools** from participant navigation after saving a business profile. Select the intended business; each business has its own private records. English and Tamil are supported.
+
+- Card: enter deliberately public business details, review the preview and save. **Publish these saved details** is a separate action. **Revoke sharing** removes anonymous access. Editing a saved shared card returns it to private preview. Download the printable copy for browser printing.
+- Catalogue: add bilingual products/services, availability and optional currency/price. Edit and save each item, then make a separate sharing decision. Item changes revoke sharing until republished. Unavailable items stay out of the shared catalogue.
+- Quotation: enter the customer, dates, currency and manual/catalogue lines. Save and review the server's decimal totals. Check the review box and issue the saved version. Issued quotations cannot be edited; download the printable HTML copy and print or save as PDF through your browser. Quotations are not statutory invoices.
+- Contacts/follow-ups: save private lead/customer records, select a contact, and add a follow-up with your local due time. The server stores UTC. Complete or cancel a pending task; terminal tasks and archived contacts remain historical records. Saving a task does not send a reminder.
+
+After an interrupted command, keep the page open and choose **Confirm interrupted request**. It sends the same UUID and payload so an already committed action is not duplicated. For a newer-version conflict, load the latest saved version, compare it with the preserved input, then explicitly keep your edits or use saved details. A rejected validation leaves your input in place. Use synthetic details until real collection and sharing policies are approved.
+
 Forgot password requests a reset message without revealing whether an email is registered. Reset password consumes its code and signs out all existing sessions. Account shows active devices; sign out one device or all devices. An expired/revoked session requires sign-in again. After a network failure, reconnect before assuming remote device revocation succeeded.
 
 Program applications are available before enrollment. Participant services become available according to your current organization permissions and enrollment. Account links preserve the selected organization and language. Use synthetic information during local acceptance. Application document controls appear only for configured requirements when the organization's file service is enabled.
+
+In Flutter, open **My applications**, choose the organization/intake or a saved application, and review the document notice, formats, counts and retention before selecting. **Choose document** makes a temporary private copy; **Upload selected bytes** sends that exact copy. Wait for a usable scan result before submitting. **Replace document** creates a new binding; **Remove document** asks for confirmation. Unsaved form answers remain on screen while document versions refresh.
+
+An interrupted registration offers **Recover this upload registration** using the unchanged request. An interrupted upload requires **Check the saved document status before continuing**; bytes are never resent automatically. Reopening after process death requires reading the saved binding and, if it is still pending, **Reselect identical document**. Selecting another file does not recover an unknown registration. **Verify private download** displays verified proof; **Close and delete private copy**, backgrounding, leaving or signing out removes the private copy. It does not export or open an external viewer. Native file handling requires Android/iOS platform acceptance; student/alumni mobile journeys remain in development.
 
 Public information: use Pages on web or the mobile home screen to browse published information in the selected language. Missing translations are unavailable; drafts and archived content are never shown. No sign-in is needed.
 

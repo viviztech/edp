@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "signals": {
+    "database_ready": {"unit": "boolean", "failure": "zero", "runbook": "database-dependency"},
+    "redis_ready": {"unit": "boolean", "failure": "zero", "runbook": "queue-recovery"},
+    "worker_roundtrip_ok": {"unit": "boolean", "failure": "zero", "runbook": "queue-recovery"},
+    "scheduler_instances": {"unit": "count", "failure": "not_one", "runbook": "queue-recovery"},
+    "outbox_pending_age_seconds": {"unit": "seconds", "threshold_required": true, "runbook": "queue-recovery"},
+    "auth_delivery_pending_age_seconds": {"unit": "seconds", "threshold_required": true, "runbook": "delivery-recovery"},
+    "crm_export_pending_age_seconds": {"unit": "seconds", "threshold_required": true, "runbook": "queue-recovery"},
+    "file_scan_pending_age_seconds": {"unit": "seconds", "threshold_required": true, "runbook": "private-files"},
+    "scanner_signature_age_seconds": {"unit": "seconds", "threshold_required": true, "runbook": "private-files"},
+    "backup_age_seconds": {"unit": "seconds", "threshold_required": true, "runbook": "backup-restore"},
+    "restore_verification_age_seconds": {"unit": "seconds", "threshold_required": true, "runbook": "backup-restore"},
+    "api_error_ratio": {"unit": "ratio", "threshold_required": true, "runbook": "edge-api"}
+  },
+  "forbidden_labels": ["url", "path", "query", "email", "phone", "name", "object_key", "token", "organization", "user", "provider_payload"],
+  "thresholds": {},
+  "responder": null,
+  "external_delivery_enabled": false
+}

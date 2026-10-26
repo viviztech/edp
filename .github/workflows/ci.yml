@@ -3,6 +3,31 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  operations-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - run: python -m pip install -r apps/api/requirements-dev.lock
+      - name: Check local staging and recovery tooling
+        run: >-
+          ruff check --config apps/api/pyproject.toml
+          scripts/deployment_contract.py scripts/recovery_guard.py
+          scripts/operations_monitor.py scripts/collect_operations.py
+          scripts/staging_acceptance.py scripts/staging_drill.py
+          scripts/staging_role_probe.py scripts/tests
+          scripts/run-business-tools-browser-test.py
+      - name: Check operations formatting
+        run: >-
+          ruff format --check --config apps/api/pyproject.toml
+          scripts/deployment_contract.py scripts/recovery_guard.py
+          scripts/operations_monitor.py scripts/collect_operations.py
+          scripts/staging_acceptance.py scripts/staging_drill.py
+          scripts/staging_role_probe.py scripts/tests
+          scripts/run-business-tools-browser-test.py
+      - run: python -m unittest discover -s scripts/tests -q
+      - run: python scripts/deployment_contract.py
   backend:
     runs-on: ubuntu-latest
     services:
@@ -166,3 +191,6 @@ jobs:
       - run: python scripts/run-communications-browser-test.py
         env:
           DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/edp_communications_e2e
+      - run: python scripts/run-business-tools-browser-test.py
+        env:
+          BUSINESS_TOOLS_DATABASE_URL: postgresql+psycopg://edp_dev@localhost:5432/postgres

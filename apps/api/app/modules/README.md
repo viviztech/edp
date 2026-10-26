@@ -1,1 +1,1 @@
-Business modules are intentionally not generated. Add each approved vertical slice with models, schemas, repository, services, routes, permissions and tests after its plan/acceptance criteria.
+Domain modules implement the approved vertical slices with models, schemas, services, routes, scoped permissions and tests. Plans and acceptance evidence are in `docs/sdlc`; generated API contracts are in `packages/api-contracts`. Add further domains incrementally after their scope and acceptance criteria are established.

@@ -1,0 +1,3 @@
+# Mobile update policy
+
+Add the master specification's public app-version policy endpoint. Publish only explicitly configured semantic version numbers and optional approved HTTPS store links, independently of identity or organization. Disabled is the default. Validate that latest is at least minimum and enabled native policies have a download destination. Mobile reads fail open during offline/service failure; an unavailable check cannot invent a mandatory update. Verify default, invalid platform/config, public response and no-store behavior. This creates no store submission or live update activation.

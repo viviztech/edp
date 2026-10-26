@@ -63,7 +63,9 @@ describe("owned application documents", () => {
     expect(writes[0].body).not.toHaveProperty("name"); expect(writes[1].body).toBe(file);
     expect(writes[1].headers).toMatchObject({ "If-Match": '"1"', "Content-Type": "application/pdf", "x-csrf-token": "csrf" });
     expect(await screen.findByText("Verified clean", {}, { timeout: 5000 })).toBeTruthy();
-    expect(writes).toHaveLength(2); expect(callbacks.onReadiness).toHaveBeenLastCalledWith(true);
+    // Readiness is reported by an effect after the clean state is rendered.
+    await waitFor(() => expect(callbacks.onReadiness).toHaveBeenLastCalledWith(true));
+    expect(writes).toHaveLength(2);
   }, 10000);
 
   it("freezes an uncertain registration and recovers the same UUID before any byte continuation", async () => {

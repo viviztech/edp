@@ -1,6 +1,26 @@
 # PostgreSQL logical ERD
 
-Logical target design plus implemented foundation subset. Revision 0001_bootstrap is schema-neutral; revision 1de5e104c2f7 implements people, users, organizations, roles, permissions, role_permissions, user_roles, refresh_sessions, refresh_tokens, verification_tokens, auth_deliveries, auth_throttles and audit_logs. Other domain tables remain unimplemented. UUID PKs unless noted; `created_at/updated_at timestamptz` in UTC; `created_by/updated_by` where justified. `version int NOT NULL DEFAULT 1` on editable workflows. Financial amounts use numeric plus currency, never floats. Statuses constrained and changed through services. All FK columns indexed unless already the leading column of a suitable index.
+Logical target design with implemented slices recorded below. Revision 0001_bootstrap is schema-neutral; subsequent Alembic revisions implement identity, CMS, CRM, applications/selection, programs, learning, attendance, mentoring, plans, knowledge/funding, support, businesses, reporting, files, communications and business tools. UUID PKs unless noted; `created_at/updated_at timestamptz` in UTC; `created_by/updated_by` where justified. `version int NOT NULL DEFAULT 1` on editable workflows. Financial amounts use numeric plus currency, never floats. Statuses constrained and changed through services. All FK columns indexed unless already the leading column of a suitable index.
+
+## Entrepreneur business tools
+
+Migration `q2a8b4c0d567` adds nine relational `tool_*` tables. Each private resource references organization and business profile under composite scope constraints. Cards and catalogue settings have stable random share IDs and versioned explicit sharing; saving content revokes sharing. Quotation lines retain ordered catalogue ID/version references and exact decimal snapshots. Issued quotations/lines, command digests and safe history are immutable through PostgreSQL constraints/triggers. Deferred checks validate quotation line counts and totals. Contacts remain separate from organization marketing leads; tasks retain owner contact, UTC due time and explicit terminal state.
+
+Follow-up revision `q3b9c5d1e678` explicitly rejects a non-null catalogue item reference with a null version. This closes PostgreSQL CHECK's UNKNOWN/null allowance as well as the existing API pair validator.
+
+```mermaid
+erDiagram
+  BUSINESS_PROFILE ||--o| TOOL_CARD : owns
+  BUSINESS_PROFILE ||--o| TOOL_CATALOGUE : owns
+  BUSINESS_PROFILE ||--o{ TOOL_CATALOGUE_ITEM : offers
+  BUSINESS_PROFILE ||--o{ TOOL_QUOTATION : prepares
+  TOOL_QUOTATION ||--|{ TOOL_QUOTATION_LINE : snapshots
+  TOOL_CATALOGUE_ITEM o|--o{ TOOL_QUOTATION_LINE : references
+  BUSINESS_PROFILE ||--o{ TOOL_CONTACT : owns
+  TOOL_CONTACT ||--o{ TOOL_TASK : schedules
+  BUSINESS_PROFILE ||--o{ TOOL_COMMAND : deduplicates
+  BUSINESS_PROFILE ||--o{ TOOL_HISTORY : records
+```
 
 ## Identity and organization
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/api/api_failure.dart';
 import '../../l10n/app_localizations.dart';
 import 'auth_repository.dart';
 import 'providers.dart';
@@ -20,6 +21,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   String? message;
   bool busy = false;
   List<DeviceSession> devices = [];
+  int devicesEpoch = -1;
+  String? devicesOwner;
 
   @override
   void initState() {
@@ -42,14 +45,29 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   Future<void> loadDevices() async {
-    if (ref.read(sessionProvider) == null) {
+    final session = ref.read(sessionStateProvider);
+    if (session.profile == null) {
       devices = [];
+      devicesEpoch = -1;
+      devicesOwner = null;
       return;
     }
-    devices = await ref.read(authRepositoryProvider).sessions();
+    final result = await ref.read(authRepositoryProvider).sessions();
+    if (!mounted) return;
+    final current = ref.read(sessionStateProvider);
+    if (current.generation != session.generation ||
+        current.profile?.id != session.profile!.id) {
+      return;
+    }
+    devices = result;
+    devicesEpoch = session.generation;
+    devicesOwner = session.profile!.id;
   }
 
-  Future<void> run(Future<void> Function() action) async {
+  Future<void> run(
+    Future<void> Function() action, {
+    bool signingOut = false,
+  }) async {
     if (!mounted) return;
     setState(() {
       busy = true;
@@ -60,17 +78,20 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     } catch (error) {
       if (!mounted) return;
       final text = AppLocalizations.of(context)!;
-      final code = error is AuthFailure ? error.code : '';
+      final code = error is ApiFailure ? error.code : '';
       if (code == 'invalid_session') {
         ref.read(sessionProvider.notifier).invalidate();
       }
-      message = switch (code) {
-        'invalid_credentials' => text.authInvalid,
-        'rate_limited' => text.authLimited,
-        'invalid_session' => text.authSessionExpired,
-        'delivery_unavailable' || 'service_unavailable' => text.authUnavailable,
-        _ => text.authError,
-      };
+      message = signingOut
+          ? text.authLogoutUnconfirmed
+          : switch (code) {
+              'invalid_credentials' => text.authInvalid,
+              'rate_limited' => text.authLimited,
+              'invalid_session' => text.authSessionExpired,
+              'delivery_unavailable' ||
+              'service_unavailable' => text.authUnavailable,
+              _ => text.authError,
+            };
     } finally {
       if (mounted) setState(() => busy = false);
     }
@@ -115,7 +136,13 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   @override
   Widget build(BuildContext context) {
     final text = AppLocalizations.of(context)!;
-    final user = ref.watch(sessionProvider);
+    final session = ref.watch(sessionStateProvider);
+    final user = session.profile;
+    final loadedDevices =
+        user != null &&
+        devicesOwner == user.id &&
+        devicesEpoch == session.generation;
+    final visibleDevices = loadedDevices ? devices : const <DeviceSession>[];
     final modes = {
       'login': text.authLogin,
       'register': text.authRegister,
@@ -130,11 +157,25 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
-            if (busy)
+            if (busy || session.status == SessionStatus.restoring)
               Semantics(
                 label: text.authLoading,
                 child: const LinearProgressIndicator(),
               ),
+            if (session.status == SessionStatus.unavailable) ...[
+              Text(text.mobileSessionUnavailable),
+              TextButton(
+                onPressed: busy
+                    ? null
+                    : () => run(() async {
+                        await ref
+                            .read(sessionStateProvider.notifier)
+                            .retryRestore();
+                        await loadDevices();
+                      }),
+                child: Text(text.cmsRetry),
+              ),
+            ],
             if (message != null)
               Semantics(
                 liveRegion: true,
@@ -151,7 +192,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                     : () => run(() async {
                         await ref.read(sessionProvider.notifier).logout();
                         devices = [];
-                      }),
+                      }, signingOut: true),
                 child: Text(text.authLogout),
               ),
               TextButton(
@@ -162,15 +203,21 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                             .read(sessionProvider.notifier)
                             .logout(all: true);
                         devices = [];
-                      }),
+                      }, signingOut: true),
                 child: Text(text.authLogoutAll),
               ),
               Text(
                 text.authSessions,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              if (devices.isEmpty) Text(text.authNoSessions),
-              for (final device in devices)
+              if (loadedDevices && visibleDevices.isEmpty)
+                Text(text.authNoSessions),
+              if (!loadedDevices && !busy)
+                TextButton(
+                  onPressed: () => run(loadDevices),
+                  child: Text(text.cmsRetry),
+                ),
+              for (final device in visibleDevices)
                 ListTile(
                   title: Text(device.name),
                   subtitle: device.current ? Text(text.authCurrent) : null,
@@ -187,7 +234,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                                   .revoke(device.id);
                               await loadDevices();
                             }
-                          }),
+                          }, signingOut: device.current),
                     child: Text(text.authRevoke),
                   ),
                 ),

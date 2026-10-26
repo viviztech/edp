@@ -1,0 +1,342 @@
+{
+  "name": "edp-staging",
+  "services": {
+    "migrate": {
+      "image": "${API_IMAGE:?Immutable API digest required}",
+      "env_file": [
+        "${MIGRATION_ENV_FILE:?Restricted migration environment file required}"
+      ],
+      "command": [
+        "alembic",
+        "upgrade",
+        "head"
+      ],
+      "restart": "no",
+      "read_only": true,
+      "cap_drop": [
+        "ALL"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "pids_limit": 64,
+      "tmpfs": [
+        "/tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "user": "1000:1000",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "stop_grace_period": "120s",
+      "mem_limit": "256m",
+      "cpus": "0.5",
+      "environment": {
+        "APP_ENV": "staging",
+        "AUTH_SMTP_ENABLED": "false",
+        "FILES_ENABLED": "false",
+        "FILES_MAINTENANCE_ENABLED": "false",
+        "CONTACT_ENQUIRIES_ENABLED": "false"
+      }
+    },
+    "api": {
+      "image": "${API_IMAGE:?Immutable API digest required}",
+      "env_file": [
+        "${API_ENV_FILE:?Restricted API environment file required}"
+      ],
+      "environment": {
+        "APP_ENV": "staging",
+        "FILES_ENABLED": "false",
+        "FILES_MAINTENANCE_ENABLED": "false",
+        "AUTH_SMTP_ENABLED": "false",
+        "CONTACT_ENQUIRIES_ENABLED": "false",
+        "AUTH_DELIVERY_BACKEND": "development",
+        "AUTH_CANONICAL_ORIGIN": "${WEB_ORIGIN:?Canonical HTTPS origin required}",
+        "CORS_ORIGINS": "${CORS_ORIGINS:?Exact HTTPS origin JSON array required}"
+      },
+      "command": [
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--no-access-log",
+        "--proxy-headers",
+        "--forwarded-allow-ips",
+        "${TRUSTED_PROXY_IPS:?Explicit private edge addresses required}"
+      ],
+      "read_only": true,
+      "cap_drop": [
+        "ALL"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "restart": "unless-stopped",
+      "pids_limit": 128,
+      "mem_limit": "512m",
+      "cpus": "1.0",
+      "stop_grace_period": "120s",
+      "tmpfs": [
+        "/tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777",
+        "/var/lib/edp/files-tmp:rw,noexec,nosuid,nodev,size=32m,mode=0700,uid=1000,gid=1000"
+      ],
+      "depends_on": {
+        "migrate": {
+          "condition": "service_completed_successfully"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=5)"
+        ],
+        "interval": "15s",
+        "timeout": "6s",
+        "retries": 4
+      },
+      "networks": [
+        "backend"
+      ],
+      "user": "1000:1000",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      }
+    },
+    "worker": {
+      "image": "${API_IMAGE:?Immutable API digest required}",
+      "env_file": [
+        "${WORKER_ENV_FILE:?Restricted worker environment file required}"
+      ],
+      "environment": {
+        "APP_ENV": "staging",
+        "FILES_ENABLED": "false",
+        "FILES_MAINTENANCE_ENABLED": "false",
+        "AUTH_SMTP_ENABLED": "false",
+        "CONTACT_ENQUIRIES_ENABLED": "false",
+        "AUTH_DELIVERY_BACKEND": "development",
+        "AUTH_CANONICAL_ORIGIN": "${WEB_ORIGIN:?Canonical HTTPS origin required}"
+      },
+      "command": [
+        "celery",
+        "-A",
+        "app.workers.celery_app:celery_app",
+        "worker",
+        "--loglevel=WARNING",
+        "--concurrency=2",
+        "--max-tasks-per-child=100"
+      ],
+      "read_only": true,
+      "cap_drop": [
+        "ALL"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "restart": "unless-stopped",
+      "pids_limit": 128,
+      "mem_limit": "768m",
+      "cpus": "1.0",
+      "stop_grace_period": "120s",
+      "tmpfs": [
+        "/tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777",
+        "/var/lib/edp/files-tmp:rw,noexec,nosuid,nodev,size=32m,mode=0700,uid=1000,gid=1000"
+      ],
+      "depends_on": {
+        "migrate": {
+          "condition": "service_completed_successfully"
+        }
+      },
+      "networks": [
+        "backend"
+      ],
+      "user": "1000:1000",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      }
+    },
+    "beat": {
+      "image": "${API_IMAGE:?Immutable API digest required}",
+      "env_file": [
+        "${WORKER_ENV_FILE:?Restricted worker environment file required}"
+      ],
+      "environment": {
+        "APP_ENV": "staging",
+        "FILES_ENABLED": "false",
+        "FILES_MAINTENANCE_ENABLED": "false",
+        "AUTH_SMTP_ENABLED": "false",
+        "CONTACT_ENQUIRIES_ENABLED": "false",
+        "AUTH_DELIVERY_BACKEND": "development",
+        "AUTH_CANONICAL_ORIGIN": "${WEB_ORIGIN:?Canonical HTTPS origin required}"
+      },
+      "command": [
+        "celery",
+        "-A",
+        "app.workers.celery_app:celery_app",
+        "beat",
+        "--loglevel=WARNING",
+        "--schedule=/tmp/edp-beat"
+      ],
+      "read_only": true,
+      "cap_drop": [
+        "ALL"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "restart": "unless-stopped",
+      "pids_limit": 64,
+      "mem_limit": "256m",
+      "cpus": "0.5",
+      "stop_grace_period": "120s",
+      "tmpfs": [
+        "/tmp:rw,noexec,nosuid,nodev,size=16m,mode=1777"
+      ],
+      "scale": 1,
+      "depends_on": {
+        "migrate": {
+          "condition": "service_completed_successfully"
+        }
+      },
+      "networks": [
+        "backend"
+      ],
+      "user": "1000:1000",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      }
+    },
+    "web": {
+      "image": "${WEB_IMAGE:?Immutable web digest required}",
+      "env_file": [
+        "${WEB_ENV_FILE:?Restricted web environment file required}"
+      ],
+      "environment": {
+        "API_INTERNAL_URL": "http://api:8000",
+        "COOKIE_SECURE": "true",
+        "WEB_ORIGIN": "${WEB_ORIGIN:?Canonical HTTPS origin required}"
+      },
+      "read_only": true,
+      "cap_drop": [
+        "ALL"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "restart": "unless-stopped",
+      "pids_limit": 128,
+      "mem_limit": "512m",
+      "cpus": "1.0",
+      "tmpfs": [
+        "/tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777",
+        "/app/.next/cache:rw,noexec,nosuid,nodev,size=64m,uid=1000,gid=1000"
+      ],
+      "depends_on": {
+        "api": {
+          "condition": "service_healthy"
+        }
+      },
+      "networks": [
+        "backend"
+      ],
+      "user": "1000:1000",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "stop_grace_period": "120s"
+    },
+    "edge": {
+      "image": "${EDGE_IMAGE:?Immutable non-root Nginx image digest required}",
+      "user": "101:101",
+      "read_only": true,
+      "cap_drop": [
+        "ALL"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "restart": "unless-stopped",
+      "pids_limit": 64,
+      "mem_limit": "128m",
+      "cpus": "0.5",
+      "ports": [
+        "${STAGING_BIND_IP:?Explicit edge bind address required}:443:8443"
+      ],
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "${NGINX_CONFIG_FILE:?Rendered reviewed config required}",
+          "target": "/etc/nginx/nginx.conf",
+          "read_only": true
+        }
+      ],
+      "secrets": [
+        "tls_certificate",
+        "tls_private_key"
+      ],
+      "tmpfs": [
+        "/tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777"
+      ],
+      "depends_on": {
+        "web": {
+          "condition": "service_started"
+        }
+      },
+      "networks": [
+        "backend",
+        "edge"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "stop_grace_period": "120s"
+    }
+  },
+  "networks": {
+    "backend": {
+      "external": true,
+      "name": "${STAGING_PRIVATE_NETWORK:?Pre-provisioned private service network required}"
+    },
+    "edge": {
+      "external": true,
+      "name": "${STAGING_EDGE_NETWORK:?Pre-provisioned edge network required}"
+    }
+  },
+  "secrets": {
+    "tls_certificate": {
+      "file": "${TLS_CERTIFICATE_FILE:?TLS certificate required}"
+    },
+    "tls_private_key": {
+      "file": "${TLS_PRIVATE_KEY_FILE:?Restricted TLS key required}"
+    }
+  }
+}

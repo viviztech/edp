@@ -25,6 +25,7 @@ from app.modules.applications.schemas import (
 from app.modules.identity.models import AuditLog, Organization, Person, Role, User, UserRole, now
 from app.modules.identity.security import AuthError, hasher
 from app.modules.programs import service as program_service
+from app.modules.programs.models import ApplicationCycle
 from app.modules.programs.schemas import CycleCreate, NamedCreate, StateCommand
 
 pytestmark = pytest.mark.skipif(
@@ -288,3 +289,45 @@ def test_submission_routes_return_stable_receipt(request, submission_db) -> None
     current = client.get(root + f"/cycles/{cycle_id}/application", headers=headers)
     assert current.status_code == 200
     assert current.json()["application_number"] == receipt["application_number"]
+
+
+def test_closed_cycle_draft_is_readable_but_scalar_save_cannot_mutate(submission_db) -> None:
+    engine, org, applicant_id, _, cycle_id, form = submission_db
+    with Session(engine) as db:
+        applicant = db.get(User, applicant_id)
+        assert applicant
+        draft = service.create_cycle_draft(db, org, cycle_id, applicant, "closed-draft")
+        saved = service.save(
+            db,
+            org,
+            draft.id,
+            applicant,
+            DraftSave(
+                expected_version=1,
+                answers=[AnswerInput(field_id=form.fields[0].id, value="Preserved answer")],
+            ),
+            "before-close",
+        )
+        cycle = db.get(ApplicationCycle, cycle_id)
+        assert cycle
+        cycle.state = "closed"
+        cycle.version += 1
+        db.commit()
+        with pytest.raises(AuthError) as closed:
+            service.save(
+                db,
+                org,
+                draft.id,
+                applicant,
+                DraftSave(
+                    expected_version=saved.version,
+                    answers=[AnswerInput(field_id=form.fields[0].id, value="Must not replace")],
+                ),
+                "after-close",
+            )
+        assert closed.value.code == "application_cycle_unavailable"
+        db.rollback()
+        current = service.cycle_application(db, org, cycle_id, applicant)
+        assert current.version == saved.version
+        assert current.answers[0].value == "Preserved answer"
+        assert service.available_cycles(db, org).items == []

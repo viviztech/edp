@@ -73,7 +73,20 @@ describe("application definition requirements and recovery", () => {
     vi.stubGlobal("fetch", vi.fn((input: string, init?: RequestInit) => {
       if (input === "/api/session/csrf") return reply({ csrf_token: "csrf" });
       if (input.startsWith("/api/file-policies")) return reply({ items: [], next_cursor: null });
-      if (init?.method === "POST") { creations++; const body = JSON.parse(String(init.body)); current = { ...original, ...body, document_requirements: [] }; return Promise.reject(new Error("lost after create")); }
+      if (init?.method === "POST") {
+        creations++;
+        const body = JSON.parse(String(init.body)) as components["schemas"]["DefinitionCreate"];
+        current = {
+          ...original, ...body, document_requirements: [],
+          fields: body.fields.map((field, index) => ({
+            ...field, id: `aaaaaaaa-aaaa-4aaa-8aaa-${String(index + 1).padStart(12, "0")}`, position: index + 1,
+          })),
+          acknowledgements: (body.acknowledgements ?? []).map((item, index) => ({
+            ...item, id: `bbbbbbbb-bbbb-4bbb-8bbb-${String(index + 1).padStart(12, "0")}`, position: index + 1,
+          })),
+        };
+        return Promise.reject(new Error("lost after create"));
+      }
       return reply({ items: current ? [current] : [] });
     }));
     render(<ApplicationDefinitionWorkspace org={documentOrg} locale="en" permissions={permissions} />);

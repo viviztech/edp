@@ -582,6 +582,384 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/card": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Card */
+        get: operations["card_api_v1_business_tools_organizations__org__profiles__profile_id__card_get"];
+        put?: never;
+        /** Save Card */
+        post: operations["save_card_api_v1_business_tools_organizations__org__profiles__profile_id__card_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/card/sharing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Share Card */
+        post: operations["share_card_api_v1_business_tools_organizations__org__profiles__profile_id__card_sharing_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/card/artifact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Card */
+        get: operations["download_card_api_v1_business_tools_organizations__org__profiles__profile_id__card_artifact_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/catalogue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalogue */
+        get: operations["catalogue_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/catalogue/sharing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Share Catalogue */
+        post: operations["share_catalogue_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_sharing_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/catalogue/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Item */
+        post: operations["create_item_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_items_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/catalogue/items/{identifier}/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Item */
+        post: operations["update_item_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_items__identifier__update_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/catalogue/items/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Item */
+        get: operations["item_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_items__identifier__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/quotes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Quotes */
+        get: operations["quotes_api_v1_business_tools_organizations__org__profiles__profile_id__quotes_get"];
+        put?: never;
+        /** Create Quote */
+        post: operations["create_quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/quotes/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Quote */
+        get: operations["quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes__identifier__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/quotes/{identifier}/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Quote */
+        post: operations["update_quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes__identifier__update_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/quotes/{identifier}/issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue Quote */
+        post: operations["issue_quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes__identifier__issue_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/quotes/{identifier}/artifact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Quote */
+        get: operations["download_quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes__identifier__artifact_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contacts */
+        get: operations["contacts_api_v1_business_tools_organizations__org__profiles__profile_id__contacts_get"];
+        put?: never;
+        /** Create Contact */
+        post: operations["create_contact_api_v1_business_tools_organizations__org__profiles__profile_id__contacts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/contacts/{identifier}/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Contact */
+        post: operations["update_contact_api_v1_business_tools_organizations__org__profiles__profile_id__contacts__identifier__update_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/contacts/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contact */
+        get: operations["contact_api_v1_business_tools_organizations__org__profiles__profile_id__contacts__identifier__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tasks */
+        get: operations["tasks_api_v1_business_tools_organizations__org__profiles__profile_id__tasks_get"];
+        put?: never;
+        /** Create Task */
+        post: operations["create_task_api_v1_business_tools_organizations__org__profiles__profile_id__tasks_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/tasks/{identifier}/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Task */
+        post: operations["update_task_api_v1_business_tools_organizations__org__profiles__profile_id__tasks__identifier__update_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/tasks/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Task */
+        get: operations["task_api_v1_business_tools_organizations__org__profiles__profile_id__tasks__identifier__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business-tools/organizations/{org}/profiles/{profile_id}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** History */
+        get: operations["history_api_v1_business_tools_organizations__org__profiles__profile_id__history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/business-tools/cards/{share}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Card */
+        get: operations["public_card_api_v1_public_business_tools_cards__share__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/business-tools/catalogues/{share}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Catalogue */
+        get: operations["public_catalogue_api_v1_public_business_tools_catalogues__share__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/courses/organizations/{org}/catalog": {
         parameters: {
             query?: never;
@@ -4450,6 +4828,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/mobile-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mobile Policy */
+        get: operations["mobile_policy_api_v1_public_mobile_policy_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -5391,6 +5786,80 @@ export interface components {
              */
             id: string;
         };
+        /** CardView */
+        CardView: {
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Email
+             * @default
+             */
+            email: string;
+            /** Name En */
+            name_en: string;
+            /**
+             * Name Ta
+             * @default
+             */
+            name_ta: string;
+            /**
+             * Tagline En
+             * @default
+             */
+            tagline_en: string;
+            /**
+             * Tagline Ta
+             * @default
+             */
+            tagline_ta: string;
+            /**
+             * Description En
+             * @default
+             */
+            description_en: string;
+            /**
+             * Description Ta
+             * @default
+             */
+            description_ta: string;
+            /**
+             * Website
+             * @default
+             */
+            website: string;
+            /**
+             * Address En
+             * @default
+             */
+            address_en: string;
+            /**
+             * Address Ta
+             * @default
+             */
+            address_ta: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Version */
+            version: number;
+            /** Published */
+            published: boolean;
+            /**
+             * Share Id
+             * Format: uuid
+             */
+            share_id: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** CatalogView */
         CatalogView: {
             /** Programs */
@@ -5426,6 +5895,78 @@ export interface components {
              * @default []
              */
             staff_assignments: components["schemas"]["StaffAssignmentView"][];
+        };
+        /** CatalogueItemView */
+        CatalogueItemView: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "product" | "service";
+            /** Name En */
+            name_en: string;
+            /**
+             * Name Ta
+             * @default
+             */
+            name_ta: string;
+            /**
+             * Description En
+             * @default
+             */
+            description_en: string;
+            /**
+             * Description Ta
+             * @default
+             */
+            description_ta: string;
+            /**
+             * Available
+             * @default true
+             */
+            available: boolean;
+            /** Price */
+            price?: string | null;
+            /**
+             * Currency
+             * @default INR
+             * @enum {string}
+             */
+            currency: "INR" | "USD" | "EUR" | "GBP";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Version */
+            version: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** CataloguePage */
+        CataloguePage: {
+            settings: components["schemas"]["CatalogueView"] | null;
+            /** Items */
+            items: components["schemas"]["CatalogueItemView"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** CatalogueView */
+        CatalogueView: {
+            /** Version */
+            version: number;
+            /** Published */
+            published: boolean;
+            /**
+             * Share Id
+             * Format: uuid
+             */
+            share_id: string;
         };
         /** CenterCreate */
         CenterCreate: {
@@ -6029,6 +6570,80 @@ export interface components {
              */
             updated_at: string;
         };
+        /** CreateCatalogueItem */
+        CreateCatalogueItem: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "product" | "service";
+            /** Name En */
+            name_en: string;
+            /**
+             * Name Ta
+             * @default
+             */
+            name_ta: string;
+            /**
+             * Description En
+             * @default
+             */
+            description_en: string;
+            /**
+             * Description Ta
+             * @default
+             */
+            description_ta: string;
+            /**
+             * Available
+             * @default true
+             */
+            available: boolean;
+            /** Price */
+            price?: number | string | null;
+            /**
+             * Currency
+             * @default INR
+             * @enum {string}
+             */
+            currency: "INR" | "USD" | "EUR" | "GBP";
+        };
+        /** CreateContact */
+        CreateContact: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Email
+             * @default
+             */
+            email: string;
+            /** Name */
+            name: string;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Status
+             * @default lead
+             * @enum {string}
+             */
+            status: "lead" | "customer" | "archived";
+        };
         /** CreatePage */
         CreatePage: {
             /** Title */
@@ -6100,6 +6715,71 @@ export interface components {
              */
             enrollment_id: string;
         };
+        /** CreateQuotation */
+        CreateQuotation: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Customer Name */
+            customer_name: string;
+            /**
+             * Customer Address
+             * @default
+             */
+            customer_address: string;
+            /**
+             * Issued On
+             * Format: date
+             */
+            issued_on: string;
+            /** Valid Until */
+            valid_until?: string | null;
+            /**
+             * Currency
+             * @default INR
+             * @enum {string}
+             */
+            currency: "INR" | "USD" | "EUR" | "GBP";
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Discount
+             * @default 0.00
+             */
+            discount: number | string;
+            /** Lines */
+            lines: components["schemas"]["QuotationLineInput"][];
+        };
+        /** CreateTask */
+        CreateTask: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Title */
+            title: string;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+            /**
+             * Contact Id
+             * Format: uuid
+             */
+            contact_id: string;
+        };
         /** CriterionInput */
         CriterionInput: {
             /** Key */
@@ -6160,6 +6840,101 @@ export interface components {
             id: string;
             /** Position */
             position: number;
+        };
+        /** CustomerContactPage */
+        CustomerContactPage: {
+            /** Items */
+            items: components["schemas"]["CustomerContactView"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** CustomerContactView */
+        CustomerContactView: {
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Email
+             * @default
+             */
+            email: string;
+            /** Name */
+            name: string;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Status
+             * @default lead
+             * @enum {string}
+             */
+            status: "lead" | "customer" | "archived";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Version */
+            version: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** CustomerTaskPage */
+        CustomerTaskPage: {
+            /** Items */
+            items: components["schemas"]["CustomerTaskView"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** CustomerTaskView */
+        CustomerTaskView: {
+            /** Title */
+            title: string;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Contact Id
+             * Format: uuid
+             */
+            contact_id: string;
+            /** Version */
+            version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "completed" | "cancelled";
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** CycleCommand */
         CycleCommand: {
@@ -9631,6 +10406,22 @@ export interface components {
             /** Files */
             files?: components["schemas"]["HelpdeskFileView"][];
         };
+        /** MobilePolicy */
+        MobilePolicy: {
+            /**
+             * Platform
+             * @enum {string}
+             */
+            platform: "android" | "ios" | "web";
+            /** Updates Enabled */
+            updates_enabled: boolean;
+            /** Minimum Version */
+            minimum_version: string;
+            /** Latest Version */
+            latest_version: string;
+            /** Download Url */
+            download_url: string | null;
+        };
         /** ModerationCommand */
         ModerationCommand: {
             /** Expected Version */
@@ -10328,6 +11119,118 @@ export interface components {
              */
             updated_at: string;
         };
+        /** PublicCard */
+        PublicCard: {
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Email
+             * @default
+             */
+            email: string;
+            /** Name En */
+            name_en: string;
+            /**
+             * Name Ta
+             * @default
+             */
+            name_ta: string;
+            /**
+             * Tagline En
+             * @default
+             */
+            tagline_en: string;
+            /**
+             * Tagline Ta
+             * @default
+             */
+            tagline_ta: string;
+            /**
+             * Description En
+             * @default
+             */
+            description_en: string;
+            /**
+             * Description Ta
+             * @default
+             */
+            description_ta: string;
+            /**
+             * Website
+             * @default
+             */
+            website: string;
+            /**
+             * Address En
+             * @default
+             */
+            address_en: string;
+            /**
+             * Address Ta
+             * @default
+             */
+            address_ta: string;
+            /**
+             * Share Id
+             * Format: uuid
+             */
+            share_id: string;
+        };
+        /** PublicCatalogue */
+        PublicCatalogue: {
+            /**
+             * Share Id
+             * Format: uuid
+             */
+            share_id: string;
+            /** Items */
+            items: components["schemas"]["PublicCatalogueItem"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** PublicCatalogueItem */
+        PublicCatalogueItem: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "product" | "service";
+            /** Name En */
+            name_en: string;
+            /**
+             * Name Ta
+             * @default
+             */
+            name_ta: string;
+            /**
+             * Description En
+             * @default
+             */
+            description_en: string;
+            /**
+             * Description Ta
+             * @default
+             */
+            description_ta: string;
+            /**
+             * Available
+             * @default true
+             */
+            available: boolean;
+            /** Price */
+            price?: string | null;
+            /**
+             * Currency
+             * @default INR
+             * @enum {string}
+             */
+            currency: "INR" | "USD" | "EUR" | "GBP";
+        };
         /** PublicCertificateView */
         PublicCertificateView: {
             /** Verification Code */
@@ -10802,6 +11705,93 @@ export interface components {
              */
             created_at: string;
         };
+        /** QuotationLineInput */
+        QuotationLineInput: {
+            /** Description */
+            description: string;
+            /** Quantity */
+            quantity: number | string;
+            /** Unit Price */
+            unit_price: number | string;
+            /** Catalogue Item Id */
+            catalogue_item_id?: string | null;
+            /** Catalogue Version */
+            catalogue_version?: number | null;
+        };
+        /** QuotationLineView */
+        QuotationLineView: {
+            /** Description */
+            description: string;
+            /** Quantity */
+            quantity: string;
+            /** Unit Price */
+            unit_price: string;
+            /** Catalogue Item Id */
+            catalogue_item_id?: string | null;
+            /** Catalogue Version */
+            catalogue_version?: number | null;
+            /** Line Total */
+            line_total: string;
+        };
+        /** QuotationPage */
+        QuotationPage: {
+            /** Items */
+            items: components["schemas"]["QuotationView"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** QuotationView */
+        QuotationView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Business Name */
+            business_name: string;
+            /** Version */
+            version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "issued";
+            /** Customer Name */
+            customer_name: string;
+            /** Customer Address */
+            customer_address: string;
+            /**
+             * Issued On
+             * Format: date
+             */
+            issued_on: string;
+            /** Valid Until */
+            valid_until: string | null;
+            /**
+             * Currency
+             * @enum {string}
+             */
+            currency: "INR" | "USD" | "EUR" | "GBP";
+            /** Notes */
+            notes: string;
+            /** Lines */
+            lines: components["schemas"]["QuotationLineView"][];
+            /** Subtotal */
+            subtotal: string;
+            /** Discount */
+            discount: string;
+            /** Total */
+            total: string;
+            /** Issued At */
+            issued_at: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** ReadNotice */
         ReadNotice: {
             /** Expected Version */
@@ -11270,6 +12260,68 @@ export interface components {
              */
             updated_at: string;
         };
+        /** SaveCard */
+        SaveCard: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Email
+             * @default
+             */
+            email: string;
+            /** Name En */
+            name_en: string;
+            /**
+             * Name Ta
+             * @default
+             */
+            name_ta: string;
+            /**
+             * Tagline En
+             * @default
+             */
+            tagline_en: string;
+            /**
+             * Tagline Ta
+             * @default
+             */
+            tagline_ta: string;
+            /**
+             * Description En
+             * @default
+             */
+            description_en: string;
+            /**
+             * Description Ta
+             * @default
+             */
+            description_ta: string;
+            /**
+             * Website
+             * @default
+             */
+            website: string;
+            /**
+             * Address En
+             * @default
+             */
+            address_en: string;
+            /**
+             * Address Ta
+             * @default
+             */
+            address_ta: string;
+            /** Expected Version */
+            expected_version: number;
+        };
         /** SaveSection */
         SaveSection: {
             /** Expected Version */
@@ -11432,6 +12484,18 @@ export interface components {
             target: "completed" | "cancelled";
             /** Reason */
             reason: string;
+        };
+        /** Sharing */
+        Sharing: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Published */
+            published: boolean;
         };
         /** StaffAssignmentCreate */
         StaffAssignmentCreate: {
@@ -11939,6 +13003,44 @@ export interface components {
             /** Expires In */
             expires_in: number;
         };
+        /** ToolHistoryPage */
+        ToolHistoryPage: {
+            /** Items */
+            items: components["schemas"]["ToolHistoryView"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** ToolHistoryView */
+        ToolHistoryView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "card" | "catalogue" | "catalogue_item" | "quote" | "contact" | "task";
+            /**
+             * Resource Id
+             * Format: uuid
+             */
+            resource_id: string;
+            /** Version */
+            version: number;
+            /** Action */
+            action: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Changed Fields */
+            changed_fields: string[];
+        };
         /** TrainerAssignmentSubmissionView */
         TrainerAssignmentSubmissionView: {
             /**
@@ -12115,6 +13217,84 @@ export interface components {
             /** Published Revision Id */
             published_revision_id: string | null;
         };
+        /** UpdateCatalogueItem */
+        UpdateCatalogueItem: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "product" | "service";
+            /** Name En */
+            name_en: string;
+            /**
+             * Name Ta
+             * @default
+             */
+            name_ta: string;
+            /**
+             * Description En
+             * @default
+             */
+            description_en: string;
+            /**
+             * Description Ta
+             * @default
+             */
+            description_ta: string;
+            /**
+             * Available
+             * @default true
+             */
+            available: boolean;
+            /** Price */
+            price?: number | string | null;
+            /**
+             * Currency
+             * @default INR
+             * @enum {string}
+             */
+            currency: "INR" | "USD" | "EUR" | "GBP";
+        };
+        /** UpdateContact */
+        UpdateContact: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Email
+             * @default
+             */
+            email: string;
+            /** Name */
+            name: string;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Status
+             * @default lead
+             * @enum {string}
+             */
+            status: "lead" | "customer" | "archived";
+        };
         /** UpdateProfile */
         UpdateProfile: {
             /** Name */
@@ -12159,6 +13339,75 @@ export interface components {
             /** Expected Version */
             expected_version: number;
         };
+        /** UpdateQuotation */
+        UpdateQuotation: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Customer Name */
+            customer_name: string;
+            /**
+             * Customer Address
+             * @default
+             */
+            customer_address: string;
+            /**
+             * Issued On
+             * Format: date
+             */
+            issued_on: string;
+            /** Valid Until */
+            valid_until?: string | null;
+            /**
+             * Currency
+             * @default INR
+             * @enum {string}
+             */
+            currency: "INR" | "USD" | "EUR" | "GBP";
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Discount
+             * @default 0.00
+             */
+            discount: number | string;
+            /** Lines */
+            lines: components["schemas"]["QuotationLineInput"][];
+        };
+        /** UpdateTask */
+        UpdateTask: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Title */
+            title: string;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "completed" | "cancelled";
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -12171,6 +13420,16 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** VersionCommand */
+        VersionCommand: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Expected Version */
+            expected_version: number;
         };
         /** WebhookAccepted */
         WebhookAccepted: {
@@ -13927,6 +15186,918 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["app__modules__businesses__schemas__PolicyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    card_api_v1_business_tools_organizations__org__profiles__profile_id__card_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardView"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_card_api_v1_business_tools_organizations__org__profiles__profile_id__card_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveCard"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    share_card_api_v1_business_tools_organizations__org__profiles__profile_id__card_sharing_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Sharing"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_card_api_v1_business_tools_organizations__org__profiles__profile_id__card_artifact_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    catalogue_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CataloguePage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    share_catalogue_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_sharing_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Sharing"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogueView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_item_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_items_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCatalogueItem"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogueItemView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_item_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_items__identifier__update_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCatalogueItem"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogueItemView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    item_api_v1_business_tools_organizations__org__profiles__profile_id__catalogue_items__identifier__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogueItemView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quotes_api_v1_business_tools_organizations__org__profiles__profile_id__quotes_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuotationPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateQuotation"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuotationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes__identifier__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuotationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes__identifier__update_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateQuotation"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuotationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    issue_quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes__identifier__issue_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VersionCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuotationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_quote_api_v1_business_tools_organizations__org__profiles__profile_id__quotes__identifier__artifact_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contacts_api_v1_business_tools_organizations__org__profiles__profile_id__contacts_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                status?: ("lead" | "customer" | "archived") | null;
+                search?: string | null;
+            };
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerContactPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_contact_api_v1_business_tools_organizations__org__profiles__profile_id__contacts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateContact"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerContactView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_contact_api_v1_business_tools_organizations__org__profiles__profile_id__contacts__identifier__update_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateContact"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerContactView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contact_api_v1_business_tools_organizations__org__profiles__profile_id__contacts__identifier__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerContactView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    tasks_api_v1_business_tools_organizations__org__profiles__profile_id__tasks_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                contact_id?: string | null;
+                status?: ("pending" | "completed" | "cancelled") | null;
+            };
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerTaskPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_task_api_v1_business_tools_organizations__org__profiles__profile_id__tasks_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTask"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerTaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_task_api_v1_business_tools_organizations__org__profiles__profile_id__tasks__identifier__update_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTask"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerTaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    task_api_v1_business_tools_organizations__org__profiles__profile_id__tasks__identifier__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerTaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    history_api_v1_business_tools_organizations__org__profiles__profile_id__history_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                kind?: ("card" | "catalogue" | "catalogue_item" | "quote" | "contact" | "task") | null;
+                resource_id?: string | null;
+            };
+            header?: never;
+            path: {
+                org: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToolHistoryPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_card_api_v1_public_business_tools_cards__share__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                share: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCard"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_catalogue_api_v1_public_business_tools_catalogues__share__get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                share: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCatalogue"];
                 };
             };
             /** @description Validation Error */
@@ -23208,6 +25379,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HelpdeskFileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mobile_policy_api_v1_public_mobile_policy_get: {
+        parameters: {
+            query: {
+                platform: "android" | "ios" | "web";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MobilePolicy"];
                 };
             };
             /** @description Validation Error */

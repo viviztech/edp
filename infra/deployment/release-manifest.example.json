@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "environment": "staging",
+  "synthetic_only": true,
+  "source_revision": "0000000000000000000000000000000000000000",
+  "source_manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "configuration_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "migration_head": "replace_with_verified_head",
+  "images": {
+    "api": "registry.example.invalid/edp/api@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "web": "registry.example.invalid/edp/web@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "edge": "registry.example.invalid/edp/edge@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "web_origin": "https://staging.example.org",
+  "database_roles": {"migration": "edp_migration", "api": "edp_api", "worker": "edp_worker"},
+  "trusted_proxy_ips": ["172.20.0.2"],
+  "files_enabled": false,
+  "senders_enabled": false,
+  "collection_enabled": false,
+  "gates": {
+    "ci": "deferred", "migration": "deferred", "runtime": "deferred", "restore": "deferred",
+    "security": "deferred", "accessibility": "deferred", "performance": "deferred", "uat": "deferred"
+  }
+}

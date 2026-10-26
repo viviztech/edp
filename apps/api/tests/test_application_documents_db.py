@@ -351,6 +351,69 @@ def test_owner_replay_scope_counts_replacement_and_removal(document_db):
         db.rollback()
 
 
+def test_owner_list_excludes_replaced_and_removed_bindings_before_pagination(document_db):
+    f = document_db
+    with Session(f["engine"]) as db:
+        owner = db.get(User, f["owner"])
+        old = create(db, f)
+        second = create(db, f, requirement=1)
+        replacement = create(db, f, replaces_document_id=old.document.id)
+        expected_ids = sorted([second.document.id, replacement.document.id])
+        first_page = documents.list_documents(db, f["org"], f["app"], owner, limit=1)
+        assert [item.id for item in first_page.items] == expected_ids[:1]
+        assert first_page.next_cursor == expected_ids[0]
+        last_page = documents.list_documents(
+            db, f["org"], f["app"], owner, cursor=first_page.next_cursor, limit=1
+        )
+        assert [item.id for item in last_page.items] == expected_ids[1:]
+        assert last_page.next_cursor is None
+        superseded = documents.get_document(db, f["org"], f["app"], old.document.id, owner)
+        assert superseded.document.removed_at is not None
+        assert superseded.document.replaced_by_id == replacement.document.id
+        with pytest.raises(AuthError, match="invalid_cursor"):
+            documents.list_documents(db, f["org"], f["app"], owner, cursor=old.document.id, limit=1)
+        removed = documents.remove_document(
+            db,
+            f["org"],
+            f["app"],
+            second.document.id,
+            owner,
+            DocumentRemove(expected_version=replacement.application_version),
+            "remove-paginated",
+        )
+        remaining = documents.list_documents(db, f["org"], f["app"], owner, limit=1)
+        assert [item.id for item in remaining.items] == [replacement.document.id]
+        assert remaining.next_cursor is None
+        assert remaining.application_version == removed.application_version
+        with pytest.raises(AuthError, match="invalid_cursor"):
+            documents.list_documents(
+                db, f["org"], f["app"], owner, cursor=second.document.id, limit=1
+            )
+
+    login = f["client"].post(
+        "/api/v1/auth/login", json={"email": "documents-1@example.com", "password": PASSWORD}
+    )
+    headers = {"Authorization": "Bearer " + login.json()["access_token"]}
+    base = f"/api/v1/applications/organizations/{f['org']}/applications/{f['app']}/documents"
+    result = f["client"].get(base, headers=headers, params={"limit": 1})
+    assert result.status_code == 200
+    assert [item["id"] for item in result.json()["items"]] == [str(replacement.document.id)]
+    assert result.json()["next_cursor"] is None
+    assert (
+        f["client"]
+        .get(base, headers=headers, params={"cursor": str(old.document.id), "limit": 1})
+        .status_code
+        == 400
+    )
+    peer_login = f["client"].post(
+        "/api/v1/auth/login", json={"email": "documents-2@example.com", "password": PASSWORD}
+    )
+    peer_headers = {"Authorization": "Bearer " + peer_login.json()["access_token"]}
+    assert f["client"].get(base, headers=peer_headers, params={"limit": 1}).status_code == 404
+    foreign_base = base.replace(str(f["org"]), str(f["other"]))
+    assert f["client"].get(foreign_base, headers=headers, params={"limit": 1}).status_code == 404
+
+
 def test_submit_requires_clean_and_freezes_exact_immutable_evidence(document_db):
     f = document_db
     with Session(f["engine"]) as db:

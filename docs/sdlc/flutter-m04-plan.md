@@ -1,0 +1,13 @@
+# Flutter M04 participant support implementation
+
+Prepared: 2026-10-24 (Asia/Calcutta). This refines the authorized local [Flutter domain plan](flutter-domain-plan.md), slice M04. Real collection, messaging, infrastructure, publication and deployment remain outside this checkpoint.
+
+Implement separate typed repositories and screen-owned state for mentoring, business plans, knowledge/funding and helpdesk. Use only participant endpoints and the existing authenticated transport. Keep staff/private DTO fields out of participant models. Preserve exact organization/object IDs; reject foreign responses. Lists use actual supported cursors, with separate saved/interest/case cursors. State is discarded when account/organization changes.
+
+Consequential writes execute once. Unknown results preserve entered text, pin the intended object/version and require safe read reconciliation before an explicit retry. Ticket creation retains one immutable request UUID/body for exact recovery; changed input requires abandoning the old intent after readback. Plan sections save serially and acknowledged results survive later read failures. Submission requires an explicit confirmation and shows immutable snapshots/review comments.
+
+Knowledge offers public and authenticated catalogs with current locale/kind/query/sector/geography/tag/availability filters. Unavailable saved items render only their redacted marker. Funding actions implement the server transition graph and keep unsent reasons on conflict. External official links require validated HTTP(S) without embedded credentials and no bearer headers.
+
+Helpdesk supports owner-only list/detail/messages/history, permitted close/reopen, notices and preferences. Secure files use current ticket policy, bounded M02 snapshots/transport and `internal:false`; only clean usable staged bindings become selected reply file IDs. Registration/upload/reply remain separate explicit actions. Legacy plain UTF-8 TXT remains bounded to the existing contract. A ticket switch or disposal cleans transient snapshots and cannot transfer a pending reply/file to another ticket.
+
+Acceptance includes meaningful repository/controller/widget tests, English/Tamil small-screen review, and guarded synthetic API checks for private-note exclusion, owner/peer/organization/revocation denial, plan stale/uncertain saves, fixed funding transitions, stable ticket creation and reply/status/notices. Existing PostgreSQL route regression tests supplement mobile transport integration. Native picker/provider, process lifecycle and accessibility evidence remain explicit separate gates.
