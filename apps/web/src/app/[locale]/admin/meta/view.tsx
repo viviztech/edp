@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { RefreshCw } from "lucide-react";
+import { Button } from "../../../../components/ui/button";
+import { Card } from "../../../../components/ui/card";
 import type { components } from "../../../../lib/api-contracts";
 import { metaMessages, type MetaLocale } from "../../../../lib/meta-messages";
 
@@ -126,17 +129,17 @@ export default function MetaWorkspace({ org, permissions, locale }: {
   return <div className="meta-workspace" aria-busy={busy}>
     <p role="status" className="meta-message">{busy ? text.loading : message}</p>
     <section className="meta-pulse" aria-label={text.health}>
-      <div><span>{text.active}</span><strong>{health?.active_integrations ?? "—"}</strong></div>
-      <div><span>{text.queued}</span><strong>{health?.queued ?? "—"}</strong></div>
-      <div><span>{text.retrying}</span><strong>{health?.retrying ?? "—"}</strong></div>
-      <div><span>{text.processing}</span><strong>{health?.processing ?? "—"}</strong></div>
-      <div className="meta-pulse-alert"><span>{text.failed}</span><strong>{health?.failed ?? "—"}</strong></div>
-      <div><span>{text.completed}</span><strong>{health?.completed ?? "—"}</strong></div>
-      <div><span>{text.expired}</span><strong>{health?.expired ?? "—"}</strong></div>
-      <button disabled={busy} onClick={() => run(loadOverview)}>{text.refresh}</button>
+      <Card><span>{text.active}</span><strong>{health?.active_integrations ?? "—"}</strong></Card>
+      <Card><span>{text.queued}</span><strong>{health?.queued ?? "—"}</strong></Card>
+      <Card><span>{text.retrying}</span><strong>{health?.retrying ?? "—"}</strong></Card>
+      <Card><span>{text.processing}</span><strong>{health?.processing ?? "—"}</strong></Card>
+      <Card className="meta-pulse-alert"><span>{text.failed}</span><strong>{health?.failed ?? "—"}</strong></Card>
+      <Card><span>{text.completed}</span><strong>{health?.completed ?? "—"}</strong></Card>
+      <Card><span>{text.expired}</span><strong>{health?.expired ?? "—"}</strong></Card>
+      <Button variant="outline" disabled={busy} onClick={() => run(loadOverview)}><RefreshCw aria-hidden="true" />{text.refresh}</Button>
     </section>
     <div className="meta-grid">
-      <aside className="meta-rail">
+      <Card role="complementary" aria-label={text.integrations} className="meta-rail">
         <h2>{text.integrations}</h2>
         {integrations.length === 0 ? <p>{text.noConnection}</p> : <ul className="meta-connections">{integrations.map((item) =>
           <li key={item.id}><button aria-pressed={selectedId === item.id} onClick={() => { setSelectedId(item.id); setMappingId(""); setMappings([]); setEditName(item.name); }}><strong>{item.name}</strong><small>{item.page_id}</small><span className={`meta-state meta-state-${item.status}`}>{text[item.status]}</span></button></li>
@@ -155,7 +158,7 @@ export default function MetaWorkspace({ org, permissions, locale }: {
           <label>{text.verifyToken}<input required type="password" autoComplete="off" minLength={24} value={draft.verify_token} onChange={(event) => setDraft({ ...draft, verify_token: event.target.value })} /></label>
           <button disabled={busy}>{text.create}</button>
         </form> : null}
-      </aside>
+      </Card>
       <div className="meta-detail">
         {selected ? <>
           <header className="meta-record"><div><p className="eyebrow">{selected.page_id}</p><h2>{selected.name}</h2></div><span className={`meta-state meta-state-${selected.status}`}>{text[selected.status]}</span></header>
@@ -235,7 +238,7 @@ export default function MetaWorkspace({ org, permissions, locale }: {
               setMappings((current) => current.map((item) => item.id === updated.id ? updated : item));
             })}>{selectedMapping.status === "active" ? text.pause : text.resume}</button> : null}
           </section>
-        </> : null}
+        </> : <div className="meta-empty">{integrations.length === 0 ? text.noConnection : (locale === "ta" ? "விவரங்களைக் காண ஒரு இணைப்பைத் தேர்ந்தெடுக்கவும்." : "Select a connection to view its details.")}</div>}
       </div>
     </div>
     <section className="meta-panel meta-events"><div className="meta-section-head"><h2>{text.events}</h2><button disabled={busy} onClick={() => run(loadOverview)}>{text.refresh}</button></div>

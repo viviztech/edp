@@ -5,6 +5,7 @@ import type { components } from "../../../../lib/api-contracts";
 import { isLocale } from "../../../../lib/messages";
 import { serverApi } from "../../../../lib/server-api";
 import MentorPlanReviews from "./view";
+import "./workspace.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -26,8 +27,9 @@ export default async function BusinessPlansAdminPage({ params, searchParams }: {
   return <main className="program-main">
     <StaffModuleNav locale={locale} organization={grant.organization_id}
       permissions={grant.permissions} active="mentoring" />
-    <header className="program-heading"><div><p className="eyebrow">B01</p>
-      <h1>{locale === "ta" ? "வணிகத் திட்ட மதிப்பாய்வுகள்" : "Business plan reviews"}</h1></div>
+    <header className="program-heading"><div><p className="eyebrow">{grant.organization_name}</p>
+      <h1>{locale === "ta" ? "வணிகத் திட்ட மதிப்பாய்வுகள்" : "Business plan reviews"}</h1>
+      <p>{locale === "ta" ? "உங்களுக்கு ஒதுக்கப்பட்ட திட்டங்களை மதிப்பாய்வு செய்து கருத்துகளைப் பதிவு செய்யவும்." : "Review assigned plans and record feedback for participants."}</p></div>
       <Link href={`/${locale}/admin/mentoring?organization=${grant.organization_id}`}>
         {locale === "ta" ? "வழிகாட்டுதல்" : "Mentoring"}</Link>
     </header>

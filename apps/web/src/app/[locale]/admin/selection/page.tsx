@@ -6,6 +6,7 @@ import { isLocale } from "../../../../lib/messages";
 import { selectionMessages } from "../../../../lib/selection-messages";
 import { serverApi } from "../../../../lib/server-api";
 import SelectionWorkspace from "./view";
+import "../programs/workspace.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -25,9 +26,9 @@ export default async function SelectionPage({ params, searchParams }: {
   const grants = profile.grants.filter((grant) => grant.permissions.includes("selection.cycle.view"));
   const grant = grants.find((item) => !requested || item.organization_id === requested);
   if (!grant) return <main><h1>{text.workspace}</h1><p>{text.error}</p><Link href={`/${locale}/admin`}>Admin</Link></main>;
-  return <main className="program-main">
+  return <main id="main" className="program-main admin-design-page">
     <StaffModuleNav locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="selection" />
-    <header className="program-heading"><div><p className="eyebrow">{text.eyebrow}</p><h1>{text.title}</h1><p>{text.intro}</p></div><Link href={`/${locale}/admin?organization=${grant.organization_id}`}>Admin</Link></header>
+    <header className="program-heading"><div><p className="eyebrow">{grant.organization_name} · {text.eyebrow}</p><h1>{text.title}</h1><p>{text.intro}</p></div><Link href={`/${locale}/admin?organization=${grant.organization_id}`}>{locale === "ta" ? "பணியாளர் பணியிடம்" : "Staff workspace"}</Link></header>
     <SelectionWorkspace key={grant.organization_id} org={grant.organization_id} actor={profile.id} locale={locale} permissions={grant.permissions} />
   </main>;
 }

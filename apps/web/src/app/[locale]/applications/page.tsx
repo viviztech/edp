@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { isLocale } from "../../../lib/messages";
 import { serverApi } from "../../../lib/server-api";
+import type { components } from "../../../lib/api-contracts";
+import { ParticipantNavigation } from "../../../components/participant-navigation";
 import ApplicationDraft from "./view";
 
 export const metadata = { robots: { index: false, follow: false } };
@@ -19,5 +21,10 @@ export default async function ApplicationsPage({ params, searchParams }: {
   const response = await serverApi("/auth/me");
   if (response.status === 401) redirect(`/${locale}/account`);
   if (!response.ok) return <main id="main"><p role="alert">The application could not load.</p></main>;
-  return <main id="main" className="application-main"><ApplicationDraft locale={locale} org={organization} /></main>;
+  const profile = await response.json() as components["schemas"]["Profile"];
+  const grant = profile.grants.find((item) => item.organization_id === organization);
+  return <main id="main" className="application-main participant-workspace">
+    <ParticipantNavigation locale={locale} organization={organization} permissions={grant?.permissions ?? []} active="applications" />
+    <ApplicationDraft locale={locale} org={organization} />
+  </main>;
 }

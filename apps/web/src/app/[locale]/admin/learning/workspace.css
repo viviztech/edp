@@ -1,0 +1,51 @@
+/* Course studio and trainer delivery, scoped to the staff learning route. */
+.edp-admin-shell .learning-studio, .edp-admin-shell .trainer-workspace { display: grid; gap: 1rem; min-width: 0; }
+.learning-section-nav { display: flex; flex-wrap: wrap; gap: .5rem; }
+.learning-section-nav a { display: inline-flex; align-items: center; min-height: 2.35rem; padding: .5rem .75rem; border: 1px solid #d9e3ef; border-radius: .5rem; background: #fff; color: #355b82; font-size: .84rem; font-weight: 650; text-decoration: none; }
+.learning-section-nav a:hover { border-color: #a5c4e8; background: #edf5ff; }
+.learning-studio :is(#learning-catalog, #learning-create, #learning-certificates, #learning-eligibility, #learning-pathways) { scroll-margin-top: 5.5rem; }
+.learning-authoring-disclosure { min-width: 0; border: 1px solid #dce5f0; border-radius: .8rem; background: #fff; box-shadow: 0 1px 3px rgb(21 48 79 / 5%); }
+.learning-authoring-disclosure > summary { display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding: 1rem 1.25rem; color: #243a55; cursor: pointer; font: 650 1rem/1.35 var(--admin-body-font); }
+.learning-authoring-disclosure > summary span { display: inline-flex; align-items: center; gap: .6rem; }
+.learning-authoring-disclosure > summary > svg { color: #71839a; transition: transform .15s; }
+.learning-authoring-disclosure[open] > summary > svg { transform: rotate(180deg); }
+.learning-authoring-disclosure > p { margin: 0; padding: 0 1.25rem 1rem; color: #667b94; font-size: .85rem; }
+.edp-admin-shell .learning-authoring { padding: 0 1.25rem 1.25rem; margin: 0; }
+.edp-admin-shell .learning-authoring > form { gap: .75rem; padding: 1.15rem; border: 1px solid #dce5f0; border-radius: .7rem; background: #f9fbfe; box-shadow: none; }
+.edp-admin-shell .learning-authoring h2, .edp-admin-shell .learning-assignment h2 { margin: 0 0 .25rem; color: #243a55; font: 650 1rem/1.35 var(--admin-body-font); }
+.edp-admin-shell .learning-studio :is(.learning-authoring, .learning-assignment) label, .edp-admin-shell .trainer-workspace form label { display: grid; min-width: 0; gap: .35rem; color: #344b65; font-size: .84rem; font-weight: 650; }
+.edp-admin-shell .learning-studio :is(.learning-authoring, .learning-assignment) :is(input:not([type="checkbox"]), select, textarea), .edp-admin-shell .trainer-workspace form :is(input, textarea) { width: 100%; min-width: 0; min-height: 2.7rem; padding: .6rem .7rem; border: 1px solid #c8d7e8; border-radius: .5rem; background: #fff; color: #172d49; font: inherit; }
+.edp-admin-shell .learning-studio .learning-authoring textarea, .edp-admin-shell .trainer-workspace form textarea { min-height: 6rem; resize: vertical; }
+.edp-admin-shell .learning-studio :is(.learning-authoring, .learning-assignment) button, .edp-admin-shell .trainer-workspace button { min-height: 2.7rem; padding: .6rem .9rem; border-radius: .5rem; white-space: normal; }
+.edp-admin-shell .learning-studio :is(.learning-authoring, .learning-assignment) button, .edp-admin-shell .trainer-workspace button[type="submit"] { background: #195da4; color: #fff; }
+.edp-admin-shell .learning-authoring .learning-check { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: .6rem; min-height: 2.75rem; }
+.edp-admin-shell .learning-authoring .learning-check input { flex: none; width: 1.15rem; height: 1.15rem; margin: 0; }
+.edp-admin-shell .learning-catalog-card { gap: 0; padding: 0; border: 1px solid #dce5f0; border-radius: .8rem; background: #fff; box-shadow: 0 1px 3px rgb(21 48 79 / 5%); }
+.edp-admin-shell .learning-catalog { padding: 0; border: 0; background: transparent; }
+.edp-admin-shell .learning-catalog-card [data-slot="card-header"] { gap: .3rem; padding: 1.25rem 1.4rem .85rem; }
+.edp-admin-shell .learning-catalog-card [data-slot="card-title"] { display: flex; align-items: center; gap: .55rem; color: #243a55; font: 650 1.05rem/1.35 var(--admin-body-font); }
+.edp-admin-shell .learning-catalog-card [data-slot="card-title"] svg { color: #7291b4; }
+.edp-admin-shell .learning-catalog-card [data-slot="card-description"] { color: #667b94; font-size: .85rem; }
+.edp-admin-shell .learning-catalog-card [data-slot="card-content"] { padding: 0 1.4rem 1.4rem; }
+.learning-catalog-empty, .edp-admin-shell .trainer-empty { padding: 1.1rem; border: 1px dashed #ccd9e8; border-radius: .6rem; background: #f8fafd; color: #526b88; }
+.learning-catalog-empty { margin: .4rem 0 0; }
+.edp-admin-shell .trainer-empty { display: flex; flex-direction: row; align-items: center; gap: .75rem; box-shadow: none; }
+.trainer-empty svg { flex: none; width: 1.3rem; color: #7291b4; }
+.trainer-empty p { margin: 0; }
+.edp-admin-shell .learning-catalog .learning-spine { gap: 1rem; margin: .4rem 0 0; padding: 0; }
+.edp-admin-shell .learning-catalog .learning-course { border: 1px solid #dce5f0; border-radius: .7rem; box-shadow: none; }
+.edp-admin-shell .learning-assignment { margin: 0; padding: 1.25rem; border: 1px solid #dce5f0; border-radius: .8rem; background: #fff; }
+.edp-admin-shell .learning-assignment > h2 { margin-bottom: 1rem; }
+.edp-admin-shell .learning-assignment form { gap: .75rem; }
+.edp-admin-shell .trainer-course { gap: 0; padding: 0; border: 1px solid #dce5f0; border-radius: .8rem; background: #fff; box-shadow: 0 1px 3px rgb(21 48 79 / 5%); }
+.edp-admin-shell .trainer-course > header { display: flex; align-items: center; gap: .85rem; padding: 1.25rem 1.4rem; border-bottom: 1px solid #edf1f6; }
+.edp-admin-shell .trainer-course h2 { color: #243a55; font: 650 1.15rem/1.35 var(--admin-body-font); }
+.edp-admin-shell .trainer-course .learner-order { display: inline-flex; align-items: center; min-height: 2.2rem; padding: .4rem .65rem; border-radius: .5rem; background: #eaf2ff; color: #195da4; }
+.edp-admin-shell .trainer-course > section { display: grid; gap: .75rem; padding: 1.25rem 1.4rem; }
+.trainer-course > section > h3 { margin: 0; color: #243a55; font: 650 1rem/1.35 var(--admin-body-font); }
+.trainer-course > section > div { padding: 1rem; border: 1px solid #e1e9f3; border-radius: .6rem; background: #fbfcfe; }
+.trainer-course > section form { display: grid; gap: .7rem; padding: 1rem; border: 1px solid #e1e9f3; border-radius: .6rem; background: #fff; }
+.edp-admin-shell .trainer-workspace button:not([type="submit"]) { border: 1px solid #cedbea; background: #fff; color: #355573; }
+.learning-studio :is(a, button, input, select, textarea, summary):focus-visible, .trainer-workspace :is(a, button, input, select, textarea):focus-visible { outline: 3px solid #2874c6; outline-offset: 2px; }
+@media (max-width: 640px) { .learning-section-nav { flex-wrap: nowrap; max-width: 100%; overflow-x: auto; padding-bottom: .35rem; } .learning-section-nav a { flex: none; } .learning-authoring-disclosure > summary { padding-inline: 1rem; } .learning-authoring-disclosure > p { padding-inline: 1rem; } .edp-admin-shell .learning-authoring { padding-inline: 1rem; } .edp-admin-shell .learning-catalog-card [data-slot="card-header"], .edp-admin-shell .trainer-course > header { padding-inline: 1rem; } .edp-admin-shell .learning-catalog-card [data-slot="card-content"], .edp-admin-shell .trainer-course > section { padding-inline: 1rem; } }
+@media (prefers-reduced-motion: reduce) { .learning-authoring-disclosure > summary > svg { transition: none; } }

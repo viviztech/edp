@@ -1,4 +1,8 @@
 "use client";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Textarea } from "../../../components/ui/textarea";
+
 
 import { useEffect, useState } from "react";
 
@@ -114,23 +118,23 @@ function Editor({ entry, org, locale }: { entry: Entry; org: string; locale: Loc
     finally { setBusy(false); }
   }
 
-  return <section className="program-panel business-plan-editor">
+  return <Card className="program-panel business-plan-editor">
     <h2>{text.title}</h2><p>{text.caution}</p>
     <p role="status">{message}</p>
-    {!plan ? <button type="button" disabled={busy} onClick={() => void createPlan()}>{text.create}</button> : <>
+    {!plan ? <Button type="button" disabled={busy} onClick={() => void createPlan()}>{text.create}</Button> : <>
       <p>{plan.completed_sections} / {plan.total_sections} {text.completed}</p>
       <div className="program-grid">{sections.map(([code, en, ta]) => <label key={code}>
         <strong>{locale === "ta" ? ta : en}</strong>
-        <textarea value={drafts[code] ?? ""} maxLength={10000} rows={5}
+        <Textarea value={drafts[code] ?? ""} maxLength={10000} rows={5}
           disabled={!(["draft", "changes_requested"].includes(plan.status))}
           onChange={(event) => setDrafts((current) => ({ ...current, [code]: event.target.value }))} />
       </label>)}</div>
-      {failed && <button type="button" onClick={() => { setFailed(false); setMessage(""); }}>{text.retry}</button>}
+      {failed && <Button type="button" onClick={() => { setFailed(false); setMessage(""); }}>{text.retry}</Button>}
       {["draft", "changes_requested"].includes(plan.status) && <>
         <p>{plan.completed_sections !== plan.total_sections ? text.incomplete : ""}</p>
-        <button type="button" disabled={busy || failed || plan.completed_sections !== plan.total_sections ||
+        <Button type="button" disabled={busy || failed || plan.completed_sections !== plan.total_sections ||
           sections.some(([code]) => (drafts[code] ?? "") !== (plan.sections[code] ?? ""))}
-          onClick={() => void submitPlan()}>{text.submit}</button>
+          onClick={() => void submitPlan()}>{text.submit}</Button>
       </>}
       {plan.status === "submitted" && <p>{text.submitted}</p>}
       {plan.status === "approved" && <p>{text.approved}</p>}
@@ -153,7 +157,7 @@ function Editor({ entry, org, locale }: { entry: Entry; org: string; locale: Loc
         </li>)}
       </ol></details>
     </>}
-  </section>;
+  </Card>;
 }
 
 export default function BusinessPlanView({ org, locale }: { org: string; locale: Locale }) {
@@ -174,7 +178,7 @@ export default function BusinessPlanView({ org, locale }: { org: string; locale:
     })();
     return () => { active = false; };
   }, [org]);
-  return <><header className="program-heading"><div><p className="eyebrow">B01</p>
+  return <><header className="program-heading"><div><p className="eyebrow">{locale === "ta" ? "பங்கேற்பாளர் தளம்" : "Participant workspace"}</p>
     <h1>{text.title}</h1><p>{text.intro}</p></div></header>
     {busy && <p role="status">{text.loading}</p>}
     {error && <p role="alert">{text.error}</p>}

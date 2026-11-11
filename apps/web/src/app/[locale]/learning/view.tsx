@@ -1,4 +1,8 @@
 "use client";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Textarea } from "../../../components/ui/textarea";
+
 
 import Image from "next/image";
 import Link from "next/link";
@@ -122,18 +126,18 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
     <header className="learning-heading">
       <div><p className="eyebrow">{text.eyebrow}</p><h1>{text.learnerTitle}</h1>
         <p>{text.learnerIntro}</p></div>
-      <Link href={`/${locale}/participant?organization=${org}`}>Schedule</Link>
+      <Link href={`/${locale}/participant?organization=${org}`}>{locale === "ta" ? "\u0b85\u0b9f\u0bcd\u0b9f\u0bb5\u0ba3\u0bc8" : "Schedule"}</Link>
     </header>
     <p className="learning-message" role="status">{busy ? text.loading : message}</p>
-    {learning.courses.length === 0 && !busy && <p className="learning-empty">{text.empty}</p>}
+    {learning.courses.length === 0 && !busy && !message && <p className="learning-empty">{text.empty}</p>}
     <ol className="learner-path">
       {learning.courses.map((course) => <li key={course.id}>
-        <article>
+        <Card className="learner-course-card" role="article">
           <header>
             <span className="learner-order">{String(course.position).padStart(2, "0")}</span>
             <div><small>{course.code}</small><h2>{value(course.title_en, course.title_ta)}</h2></div>
             {!course.course_enrollment
-              ? <button disabled={busy} onClick={() => void start(course.id)}>{text.start}</button>
+              ? <Button type="button" disabled={busy} onClick={() => void start(course.id)}>{text.start}</Button>
               : <span className="learning-progress">{course.progress.status === "completed"
                 ? text.completed : text.continue}</span>}
           </header>
@@ -183,18 +187,19 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
                 {lesson.locked && <small className="lesson-state">{text.locked}</small>}
                 {lesson.completed && <small className="lesson-state">{text.completed}</small>}
                 {course.course_enrollment && !lesson.locked && !lesson.completed &&
-                  <button disabled={busy} onClick={() => void complete(course, lesson.id)}>
+                  <Button type="button" disabled={busy} onClick={() => void complete(course, lesson.id)}>
                     {text.markComplete}
-                  </button>}
+                  </Button>}
                 {lesson.materials.map((material) => <p className="learning-private" key={material.id}>
                   <strong>{value(material.label_en, material.label_ta)}</strong>
                   {material.available
-                    ? <button
+                    ? <Button
+                        type="button"
                         disabled={busy}
                         onClick={() => void openMaterial(course.id, material.id)}
                       >
                         {text.openMaterial}
-                      </button>
+                      </Button>
                     : <small>{text.materialUnavailable}</small>}
                 </p>)}
                 {lesson.quizzes.map((quiz) => <form
@@ -224,7 +229,7 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
                   {quiz.passed
                     ? <strong>{text.passed}</strong>
                     : quiz.available && quiz.remaining_attempts > 0
-                      ? <button disabled={busy} type="submit">{text.submitQuiz}</button>
+                      ? <Button disabled={busy} type="submit">{text.submitQuiz}</Button>
                       : <small>{text.quizUnavailable}</small>}
                 </form>)}
                 {lesson.assignments.map((assignment) => <form
@@ -250,8 +255,8 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
                     && (assignment.submissions.length === 0
                       || assignment.submissions.at(-1)?.grade)
                     ? <>
-                      <label>{text.assignmentResponse}<textarea name="response_text" required /></label>
-                      <button disabled={busy} type="submit">{text.submitAssignment}</button>
+                      <label>{text.assignmentResponse}<Textarea name="response_text" required /></label>
+                      <Button disabled={busy} type="submit">{text.submitAssignment}</Button>
                     </>
                     : assignment.remaining_submissions === 0
                       ? <small>{text.submissionLimitReached}</small>
@@ -260,7 +265,7 @@ export default function LearnerWorkspace({ org, locale }: { org: string; locale:
               </li>)}</ol>
             </li>)}
           </ol>
-        </article>
+        </Card>
       </li>)}
     </ol>
   </>;

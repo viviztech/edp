@@ -6,6 +6,7 @@ import { applicationAdminMessages } from "../../../../lib/application-admin-mess
 import { isLocale } from "../../../../lib/messages";
 import { serverApi } from "../../../../lib/server-api";
 import ApplicationDefinitionWorkspace from "./view";
+import "../programs/workspace.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -28,11 +29,11 @@ export default async function ApplicationDefinitionsPage({
   const grants = profile.grants.filter((grant) => grant.permissions.includes("application.form.view"));
   const grant = grants.find((item) => !requested || item.organization_id === requested);
   if (!grant) return <main><h1>{text.workspace}</h1><p>{text.error}</p><Link href={`/${locale}/admin`}>Admin</Link></main>;
-  return <main className="definition-main">
+  return <main id="main" className="definition-main admin-design-page">
     <StaffModuleNav locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="applicationDefinitions" />
     <header className="definition-heading">
-      <div><p className="eyebrow">{text.eyebrow}</p><h1>{text.title}</h1><p>{text.intro}</p></div>
-      <Link href={`/${locale}/admin?organization=${grant.organization_id}`}>Admin</Link>
+      <div><p className="eyebrow">{grant.organization_name} · {text.eyebrow}</p><h1>{text.title}</h1><p>{text.intro}</p></div>
+      <Link href={`/${locale}/admin?organization=${grant.organization_id}`}>{locale === "ta" ? "பணியாளர் பணியிடம்" : "Staff workspace"}</Link>
     </header>
     <ApplicationDefinitionWorkspace
       key={grant.organization_id}

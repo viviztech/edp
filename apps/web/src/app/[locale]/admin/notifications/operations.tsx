@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Card } from "../../../../components/ui/card";
+import { Button } from "../../../../components/ui/button";
+import { Input } from "../../../../components/ui/input";
 import type { components } from "../../../../lib/api-contracts";
 
 type Failure = components["schemas"]["FailureView"];
@@ -71,19 +74,19 @@ export default function NotificationOperations({ org, locale, canReplay }: { org
     setReason("");
     setMessage(t.done);
   }
-  return <section className="notice-preference" aria-labelledby="notification-operations-heading" aria-busy={busy}>
+  return <Card role="region" className="notice-preference notice-operations" aria-labelledby="notification-operations-heading" aria-busy={busy}>
     <div>
       <p className="eyebrow" id="notification-operations-heading">{t.heading}</p>
       <p>{t.description}</p>
       <p role="status">{busy ? t.pending : message}</p>
-      {canReplay && items.length > 0 ? <label>{t.reason}<input value={reason} maxLength={500} onChange={(event) => setReason(event.target.value)} /></label> : null}
+      {canReplay && items.length > 0 ? <label>{t.reason}<Input value={reason} maxLength={500} onChange={(event) => setReason(event.target.value)} /></label> : null}
       {items.length === 0 ? (loaded ? <p>{t.empty}</p> : null) : <ul>{items.map((item) => <li key={item.id}>
         <strong>{item.topic === "followup_due" ? "CRM follow-up" : "Lead assignment"}</strong>
         {" - "}{item.attempt_count} {t.attempts} - {item.error_code}
         {canReplay ? <button type="button" disabled={busy || reason.trim().length < 8} onClick={() => void run(() => replay(item))}>{t.retry}</button> : null}
       </li>)}</ul>}
       {cursor ? <button type="button" disabled={busy} onClick={() => void run(() => load(cursor))}>{t.more}</button> : null}
-      <button type="button" disabled={busy} onClick={() => void run(() => load())}>{t.refresh}</button>
+      <Button variant="outline" type="button" disabled={busy} onClick={() => void run(() => load())}>{t.refresh}</Button>
     </div>
-  </section>;
+  </Card>;
 }

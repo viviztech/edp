@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { authMessages } from "../../lib/auth-messages";
 import { PublicNavigation } from "../../components/public-navigation";
 import { PublicFooter } from "../../components/public-footer";
+import { PublicRouteChrome } from "../../components/public-route-chrome";
 import { isLocale, messages } from "../../lib/messages";
 import {
   publicNavLabels,
@@ -77,6 +78,8 @@ export default async function LocaleLayout({
       className={`${displayFont.variable} ${bodyFont.variable} ${tamilFont.variable}`}
     >
       <body className="public-site-body">
+        <PublicRouteChrome
+          header={<>
         <a className="skip" href="#main">
           {text.skip}
         </a>
@@ -144,8 +147,11 @@ export default async function LocaleLayout({
             />
           </div>
         </header>
+          </>}
+          footer={<PublicFooter locale={locale} />}
+        >
         {children}
-        <PublicFooter locale={locale} />
+        </PublicRouteChrome>
       </body>
     </html>
   );

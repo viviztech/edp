@@ -1,0 +1,22 @@
+.edp-admin-shell .crm-main { --crm-panel-line:#dce6f1; --crm-panel-text:#233c58; }
+.edp-admin-shell .crm-main .crm-workspace { display:grid; grid-template-columns:minmax(15rem,20rem) minmax(0,1fr); align-items:start; gap:1rem; border:0; background:transparent; overflow:visible; }
+.edp-admin-shell .crm-main .crm-queue,.edp-admin-shell .crm-main .crm-record { display:block; min-width:0; padding:1.15rem; border:1px solid var(--crm-panel-line); border-radius:.8rem; background:#fff; box-shadow:0 1px 4px #16385d0d; }
+.edp-admin-shell .crm-main .crm-section-title { display:flex; flex-direction:column; align-items:stretch; gap:.85rem; }
+.edp-admin-shell .crm-main .crm-section-title > div:first-child { display:flex; justify-content:space-between; align-items:center; gap:.75rem; }
+.edp-admin-shell .crm-main .crm-section-title .eyebrow { margin:0; color:#385577; font-size:.8rem; }
+.edp-admin-shell .crm-main .crm-section-title strong { display:grid; place-items:center; min-width:2rem; min-height:2rem; border-radius:.5rem; background:#eef5ff; color:#195da4; font:650 .9rem var(--admin-body-font); }
+.edp-admin-shell .crm-main .crm-section-title .actions { display:flex; flex-wrap:wrap; gap:.4rem; margin:0; }
+.edp-admin-shell .crm-main .crm-section-title .actions button { min-height:2.4rem; padding:.45rem .6rem; border-radius:.5rem; font-size:.78rem; }
+.edp-admin-shell .crm-main .crm-queue-empty { margin:1rem 0 0; padding:1.1rem; border:1px dashed #cddbea; border-radius:.6rem; background:#f7faff; color:#637891; }
+.edp-admin-shell .crm-main .crm-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.7rem; min-height:15rem; padding:2rem; text-align:center; color:#60738c; }
+.edp-admin-shell .crm-main .crm-empty span { display:grid; place-items:center; width:3rem; height:3rem; border-radius:.7rem; background:#edf5ff; color:#3f76b5; }
+.edp-admin-shell .crm-main .crm-empty p { max-width:29rem; margin:0; line-height:1.5; }
+.edp-admin-shell .crm-main .crm-create { padding:1rem; border:1px solid var(--crm-panel-line); border-radius:.65rem; background:#f8fafd; }
+.edp-admin-shell .crm-main .crm-create label { display:grid; gap:.35rem; font-size:.8rem; font-weight:650; }
+.edp-admin-shell .crm-main .crm-leads { margin-top:1rem; }
+.edp-admin-shell .crm-main .crm-leads li button { border-radius:.55rem; }
+.edp-admin-shell .crm-main .crm-record-grid { gap:1rem; }
+.edp-admin-shell .crm-main .crm-record-header { margin-bottom:1rem; }
+.edp-admin-shell .crm-main .crm-export { margin-top:1rem; border-radius:.65rem; }
+.edp-admin-shell .crm-main .crm-form textarea { min-height:6rem; field-sizing:fixed; }
+@media(max-width:850px) { .edp-admin-shell .crm-main .crm-workspace { grid-template-columns:1fr; } .edp-admin-shell .crm-main .crm-empty { min-height:10rem; } }

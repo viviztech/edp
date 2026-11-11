@@ -1,4 +1,9 @@
 "use client";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Textarea } from "../../../components/ui/textarea";
+
 
 import { useEffect, useState } from "react";
 
@@ -82,28 +87,28 @@ function Editor({ entry, org, locale }: { entry: Entry; org: string; locale: "en
       setMessage(t.saved);
     } catch { setMessage(t.error); } finally { setBusy(false); }
   }
-  return <section className="program-panel"><h2>{t.title}</h2><p role="status">{message}</p>
+  return <Card className="program-panel"><h2>{t.title}</h2><p role="status">{message}</p>
     <div className="program-grid">
-      <label>{t.name}<input required maxLength={160} value={fields.name} onChange={(e) => set("name", e.target.value)} /></label>
-      <label>{t.sector}<input required maxLength={120} value={fields.sector} onChange={(e) => set("sector", e.target.value)} /></label>
-      <label>{t.products}<textarea required maxLength={4000} value={fields.products_services} onChange={(e) => set("products_services", e.target.value)} /></label>
+      <label>{t.name}<Input required maxLength={160} value={fields.name} onChange={(e) => set("name", e.target.value)} /></label>
+      <label>{t.sector}<Input required maxLength={120} value={fields.sector} onChange={(e) => set("sector", e.target.value)} /></label>
+      <label>{t.products}<Textarea required maxLength={4000} value={fields.products_services} onChange={(e) => set("products_services", e.target.value)} /></label>
       <label>{t.stage}<select value={fields.stage} onChange={(e) => set("stage", e.target.value)}>
         {["idea", "starting", "operating", "paused", "closed"].map((v) => <option key={v}>{v}</option>)}
       </select></label>
-      <label>{t.registration}<input maxLength={240} value={fields.registration_info ?? ""} onChange={(e) => set("registration_info", e.target.value || null)} /></label>
-      <label>{t.started}<input type="date" value={fields.started_on ?? ""} onChange={(e) => set("started_on", e.target.value || null)} /></label>
-      <label>{t.team}<input type="number" min="0" max="100000" value={fields.team_size} onChange={(e) => set("team_size", Number(e.target.value))} /></label>
+      <label>{t.registration}<Input maxLength={240} value={fields.registration_info ?? ""} onChange={(e) => set("registration_info", e.target.value || null)} /></label>
+      <label>{t.started}<Input type="date" value={fields.started_on ?? ""} onChange={(e) => set("started_on", e.target.value || null)} /></label>
+      <label>{t.team}<Input type="number" min="0" max="100000" value={fields.team_size} onChange={(e) => set("team_size", Number(e.target.value))} /></label>
       <label>{t.investment}<select value={fields.investment_band} onChange={(e) => set("investment_band", e.target.value)}>
         {["none", "under_1l", "1l_to_5l", "5l_to_25l", "over_25l", "undisclosed"].map((v) => <option key={v}>{v}</option>)}</select></label>
       <label>{t.funding}<select value={fields.funding_status} onChange={(e) => set("funding_status", e.target.value)}>
         {["none", "seeking", "applied", "approved", "disbursed"].map((v) => <option key={v}>{v}</option>)}</select></label>
       <label>{t.revenue}<select value={fields.revenue_band} onChange={(e) => set("revenue_band", e.target.value)}>
         {["none", "under_10k", "10k_to_50k", "50k_to_2l", "over_2l", "undisclosed"].map((v) => <option key={v}>{v}</option>)}</select></label>
-      <label>{t.support}<textarea maxLength={4000} value={fields.support_needs ?? ""} onChange={(e) => set("support_needs", e.target.value || null)} /></label>
+      <label>{t.support}<Textarea maxLength={4000} value={fields.support_needs ?? ""} onChange={(e) => set("support_needs", e.target.value || null)} /></label>
     </div>
     <label><input type="checkbox" checked={fields.public_opt_in} onChange={(e) => set("public_opt_in", e.target.checked)} /> {t.public}</label>
-    <p><button type="button" disabled={busy || fields.name.trim().length < 2 || fields.sector.trim().length < 2 || !fields.products_services.trim()}
-      onClick={() => void save()}>{t.save}</button></p>
+    <p><Button type="button" disabled={busy || fields.name.trim().length < 2 || fields.sector.trim().length < 2 || !fields.products_services.trim()}
+      onClick={() => void save()}>{t.save}</Button></p>
     {profile && <><h3>{t.followups}</h3><ol className="program-list">{profile.follow_ups.map((item) =>
       <li key={item.id}><strong>{item.due_on}</strong> · {item.status}
         {item.outcome ? <p>{t.jobs}: {item.outcome.jobs_created}</p> : <details><summary>{t.report}</summary>
@@ -111,21 +116,21 @@ function Editor({ entry, org, locale }: { entry: Entry; org: string; locale: "en
             onChange={(e) => setReport((old) => ({ ...old, business_started: e.target.checked, business_active: e.target.checked ? old.business_active : false }))} /></label>
           <label>{t.active}<input type="checkbox" checked={report.business_active} disabled={!report.business_started}
             onChange={(e) => setReport((old) => ({ ...old, business_active: e.target.checked }))} /></label>
-          <label>{t.jobs}<input type="number" min="0" max="100000" value={report.jobs_created}
+          <label>{t.jobs}<Input type="number" min="0" max="100000" value={report.jobs_created}
             onChange={(e) => setReport((old) => ({ ...old, jobs_created: Number(e.target.value) }))} /></label>
           <label>{t.funding}<select value={report.funding_band} onChange={(e) => setReport((old) => ({ ...old, funding_band: e.target.value }))}>
             {["none", "under_1l", "1l_to_5l", "5l_to_25l", "over_25l", "undisclosed"].map((v) => <option key={v}>{v}</option>)}</select></label>
           <label>{t.revenue}<select value={report.revenue_band} onChange={(e) => setReport((old) => ({ ...old, revenue_band: e.target.value }))}>
             {["none", "under_10k", "10k_to_50k", "50k_to_2l", "over_2l", "undisclosed"].map((v) => <option key={v}>{v}</option>)}</select></label>
           {([ ["challenges", t.challenges], ["support_requested", t.requested], ["mentor_interventions", t.interventions], ["outcomes", t.outcomes] ] as const).map(([key, label]) =>
-            <label key={key}>{label}<textarea maxLength={4000} value={report[key]}
+            <label key={key}>{label}<Textarea maxLength={4000} value={report[key]}
               onChange={(e) => setReport((old) => ({ ...old, [key]: e.target.value }))} /></label>)}</div>
-          <button type="button" disabled={busy} onClick={() => void submit(item.id)}>{t.report}</button>
+          <Button type="button" disabled={busy} onClick={() => void submit(item.id)}>{t.report}</Button>
         </details>}</li>)}</ol>
       <details><summary>{t.history}</summary><ol>{profile.revisions.map((item) =>
         <li key={item.id}>v{item.version} · {new Date(item.created_at).toLocaleString(locale)}</li>)}</ol></details>
     </>}
-  </section>;
+  </Card>;
 }
 
 export default function BusinessTracking({ org, locale }: { org: string; locale: "en" | "ta" }) {
@@ -137,7 +142,7 @@ export default function BusinessTracking({ org, locale }: { org: string; locale:
     .then((data) => { if (active) { setEntries(data.entries); setMessage(""); } })
     .catch(() => { if (active) setMessage(t.error); });
     return () => { active = false; }; }, [org, t.error]);
-  return <><header className="program-heading"><div><p className="eyebrow">B02</p>
+  return <><header className="program-heading"><div><p className="eyebrow">{locale === "ta" ? "பங்கேற்பாளர் தளம்" : "Participant workspace"}</p>
     <h1>{t.title}</h1><p>{t.intro}</p></div></header><p role="status">{message}</p>
     {!message && !entries.length && <p>{t.empty}</p>}
     {entries.map((entry) => <Editor key={entry.enrollment_id} entry={entry} org={org} locale={locale} />)}</>;

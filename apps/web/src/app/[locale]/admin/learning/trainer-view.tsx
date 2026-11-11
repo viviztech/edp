@@ -3,6 +3,11 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../../lib/api-contracts";
 import { learningMessages } from "../../../../lib/learning-messages";
+import { Button } from "../../../../components/ui/button";
+import { Card } from "../../../../components/ui/card";
+import { Input } from "../../../../components/ui/input";
+import { Textarea } from "../../../../components/ui/textarea";
+import { BookOpenCheck } from "lucide-react";
 
 type Locale = "en" | "ta";
 type Delivery = components["schemas"]["TrainerDeliveryView"];
@@ -101,13 +106,12 @@ export default function TrainerLearningWorkspace({
     }
   }
 
-  return <section aria-busy={busy} aria-label={text.trainerTitle}>
-    <p>{text.trainerIntro}</p>
-    <p className="learning-message" role="status">{busy ? text.loading : message}</p>
-    {!busy && delivery.courses.length === 0 && <p className="learning-empty">{text.noAssignments}</p>}
+  return <section className="trainer-workspace" aria-busy={busy} aria-label={text.trainerTitle}>
+    {(busy || message) && <p className="learning-message" role="status">{busy ? text.loading : message}</p>}
+    {!busy && !message && delivery.courses.length === 0 && <Card className="trainer-empty"><BookOpenCheck aria-hidden="true" /><p>{text.noAssignments}</p></Card>}
     <ol className="learner-path">
       {delivery.courses.map((course) => <li key={course.cohort_id + course.course_id}>
-        <article>
+        <Card className="trainer-course" role="article" aria-label={value(course.title_en, course.title_ta)}>
           <header>
             <span className="learner-order">{course.course_code}</span>
             <div>
@@ -125,12 +129,12 @@ export default function TrainerLearningWorkspace({
                 </div>
                 {lesson.materials.map((material) => <p className="learning-private" key={material.id}>
                   <strong>{value(material.label_en, material.label_ta)}</strong>
-                  <button
+                  <Button type="button" variant="outline"
                     disabled={busy || !material.available}
                     onClick={() => void openMaterial(course.course_id, material.id)}
                   >
                     {text.openMaterial}
-                  </button>
+                  </Button>
                 </p>)}
               </li>)}</ol>
             </li>)}
@@ -165,20 +169,20 @@ export default function TrainerLearningWorkspace({
                   : <form onSubmit={(event) => gradeSubmission(
                     event, course.course_id, submission.id,
                   )}>
-                    <label>{text.score}<input
+                    <label>{text.score}<Input
                       name="score_points"
                       type="number"
                       min="0"
                       max={submission.maximum_points}
                       required
                     /></label>
-                    <label>{text.feedback}<textarea name="feedback" required /></label>
-                    <button disabled={busy} type="submit">{text.saveGrade}</button>
+                    <label>{text.feedback}<Textarea name="feedback" required /></label>
+                    <Button disabled={busy} type="submit">{text.saveGrade}</Button>
                   </form>}
               </li>)}</ul>
             </div>)}
           </section>
-        </article>
+        </Card>
       </li>)}
     </ol>
   </section>;

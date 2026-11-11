@@ -1,4 +1,9 @@
 "use client";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Textarea } from "../../../components/ui/textarea";
+
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { components } from "../../../lib/api-contracts";
@@ -80,12 +85,11 @@ export default function ApplicationWorkspace({ locale, org }: { locale: "en" | "
         const first = result.items[0]?.id ?? "";
         setCycleId(first);
         if (first) await loadApplication(first);
-        else setMessage(t.unavailable);
       } catch { if (active) setMessage(t.error); }
       finally { if (active) setBusy(false); }
     })();
     return () => { active = false; };
-  }, [loadApplication, request, root, t.error, t.unavailable]);
+  }, [loadApplication, request, root, t.error]);
 
   async function selectCycle(id: string) {
     setCycleId(id); setBusy(true); setMessage("");
@@ -139,9 +143,9 @@ export default function ApplicationWorkspace({ locale, org }: { locale: "en" | "
     const value = values[field.id] ?? "";
     const disabled = busy || application?.state === "submitted";
     const update = (next: string) => setValues((current) => ({ ...current, [field.id]: next }));
-    if (field.field_type === "textarea") return <label key={field.id}>{label}{field.required ? " *" : ""}<textarea required={field.required} disabled={disabled} value={value} maxLength={5000} onChange={(event) => update(event.target.value)} /></label>;
+    if (field.field_type === "textarea") return <label key={field.id}>{label}{field.required ? " *" : ""}<Textarea required={field.required} disabled={disabled} value={value} maxLength={5000} onChange={(event) => update(event.target.value)} /></label>;
     if (field.field_type === "boolean") return <label key={field.id}>{label}{field.required ? " *" : ""}<select required={field.required} disabled={disabled} value={value} onChange={(event) => update(event.target.value)}><option value="" /><option value="true">{t.yes}</option><option value="false">{t.no}</option></select></label>;
-    return <label key={field.id}>{label}{field.required ? " *" : ""}<input required={field.required} disabled={disabled} type={field.field_type} value={value} maxLength={field.field_type === "text" ? 5000 : undefined} onChange={(event) => update(event.target.value)} /></label>;
+    return <label key={field.id}>{label}{field.required ? " *" : ""}<Input required={field.required} disabled={disabled} type={field.field_type} value={value} maxLength={field.field_type === "text" ? 5000 : undefined} onChange={(event) => update(event.target.value)} /></label>;
   }
 
   return <section className="application-workspace" aria-busy={busy}>
@@ -149,11 +153,11 @@ export default function ApplicationWorkspace({ locale, org }: { locale: "en" | "
     <p role="status" className="application-message">{busy ? t.saving : message}</p>
     {cycles.length ? <div className="application-cycles" aria-label={t.selectCycle}>
       <h2>{t.selectCycle}</h2>{cycles.map((item) => <button type="button" key={item.id} aria-pressed={cycleId === item.id} disabled={busy} onClick={() => void selectCycle(item.id)}><strong>{locale === "ta" ? item.name_ta : item.name_en}</strong><span>{item.code}</span><small>{t.closes}: {new Date(item.closes_at).toLocaleString(locale)}</small></button>)}
-    </div> : !busy ? <p className="application-boundary">{t.unavailable}</p> : null}
-    {cycle && !application ? <div className="application-start"><h2>{locale === "ta" ? cycle.name_ta : cycle.name_en}</h2><button type="button" onClick={() => void start()} disabled={busy}>{t.start}</button></div> : null}
-    {application?.state === "submitted" ? <div className="application-receipt">
+    </div> : !busy && !message ? <p className="application-boundary">{t.unavailable}</p> : null}
+    {cycle && !application ? <Card className="application-start"><h2>{locale === "ta" ? cycle.name_ta : cycle.name_en}</h2><Button type="button" onClick={() => void start()} disabled={busy}>{t.start}</Button></Card> : null}
+    {application?.state === "submitted" ? <Card className="application-receipt">
       <p className="eyebrow">{t.submitted}</p><strong>{t.receipt}: {application.application_number}</strong><p>{t.submittedAt}: {new Date(application.submitted_at).toLocaleString(locale)}</p><p>{t.immutable}</p>
-    </div> : null}
+    </Card> : null}
     {application ? <><div className="application-progress"><strong>{application.completion_percent}%</strong><span>{t.completion}</span><small>{t.version}: {application.version}</small></div>
       <form className="application-form" onSubmit={(event) => { event.preventDefault(); void save(); }}>
         <h2>{locale === "ta" ? application.form.title_ta : application.form.title_en}</h2>
@@ -161,7 +165,7 @@ export default function ApplicationWorkspace({ locale, org }: { locale: "en" | "
         <fieldset className="application-acknowledgements" disabled={busy || application.state === "submitted"}><legend>{t.declarations}</legend>
           {application.form.acknowledgements.map((item) => <label key={item.id}><input type="checkbox" required={item.required} checked={accepted.includes(item.id)} onChange={(event) => setAccepted((current) => event.target.checked ? [...current, item.id] : current.filter((id) => id !== item.id))} /><span>{locale === "ta" ? item.label_ta : item.label_en}{item.required ? ` (${t.required})` : ""}</span></label>)}
         </fieldset>
-        {application.state === "draft" ? <div className="application-actions"><button type="submit" disabled={busy}>{t.save}</button><button className="application-submit" type="button" disabled={busy} onClick={() => void submit()}>{t.submit}</button></div> : null}
+        {application.state === "draft" ? <div className="application-actions"><Button type="submit" disabled={busy}>{t.save}</Button><Button className="application-submit" type="button" disabled={busy} onClick={() => void submit()}>{t.submit}</Button></div> : null}
       </form>
       {application.state === "submitted" ? <div className="application-history"><h2>{t.history}</h2><ol>{application.status_history.map((item) => <li key={`${item.application_version}-${item.created_at}`}><strong>{item.to_state}</strong><time>{new Date(item.created_at).toLocaleString(locale)}</time></li>)}</ol></div> : null}
     </> : null}

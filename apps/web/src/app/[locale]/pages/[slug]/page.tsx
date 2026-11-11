@@ -10,6 +10,7 @@ import {
 } from "../../../../lib/public-site-content";
 import { absoluteUrl } from "../../../../lib/site-url";
 import { publicLaunch, launchCopy } from "../../../../lib/public-launch";
+import { Card } from "../../../../components/ui/card";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 export const dynamic = "force-dynamic";
@@ -179,7 +180,7 @@ export default async function Page({ params }: Props) {
             )}
           </article>
           <aside className="public-side">
-            <div className="public-side-card">
+            <Card className="public-side-card">
               <p>{labels.related}</p>
               {related.map((item) => (
                 <Link
@@ -194,7 +195,7 @@ export default async function Page({ params }: Props) {
                 {labels.all}
                 <ArrowLeft size={17} aria-hidden="true" />
               </Link>
-            </div>
+            </Card>
           </aside>
         </div>
       </div>

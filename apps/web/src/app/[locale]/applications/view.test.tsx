@@ -34,6 +34,16 @@ function response(body: unknown, status = 200) {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe("application final submission", () => {
+  it("shows an empty-cycle message once, and does not show it on request failure", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => response({ items: [] })));
+    const first = render(<ApplicationWorkspace locale="en" org={form.organization_id} />);
+    expect(await screen.findAllByText("No application cycle is open for this organization.")).toHaveLength(1);
+    first.unmount();
+    vi.stubGlobal("fetch", vi.fn(() => response({ error: { code: "unavailable" } }, 500)));
+    render(<ApplicationWorkspace locale="en" org={form.organization_id} />);
+    expect(await screen.findByText("The request could not be completed. Refresh and try again.")).toBeTruthy();
+    expect(screen.queryByText("No application cycle is open for this organization.")).toBeNull();
+  });
   it("saves answers and accepted policy before showing the immutable receipt", async () => {
     const calls: Array<{ url: string; method: string; body?: string }> = [];
     vi.stubGlobal("fetch", vi.fn((input: RequestInfo | URL, init?: RequestInit) => {

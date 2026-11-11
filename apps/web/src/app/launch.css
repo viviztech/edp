@@ -141,6 +141,11 @@
   border-radius: 18px;
   background: white;
 }
+.demo-feature-grid .demo-feature-card { padding: 0; border: 1px solid #e1e7f0; border-radius: 18px; background: #fff; box-shadow: 0 2px 10px #142d4e08; }
+.demo-feature-card [data-slot="card-content"] { padding: 0; }
+.demo-feature-grid .demo-feature-card article { border: 0; background: transparent; }
+.demo-main .launch-form textarea[data-slot="textarea"] { min-height: 7rem; field-sizing: fixed; }
+.demo-main .launch-form [data-slot="button"] { height: auto; white-space: normal; }
 .demo-feature-grid svg {
   color: #2457e8;
   margin-bottom: 15px;
@@ -239,6 +244,19 @@
   font-weight: 600;
   color: #243e60;
 }
+.planner-grid > .planner-question-card {
+  display: block;
+  min-width: 0;
+  padding: 27px;
+  border: 1px solid #e1e7f0;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 2px 10px #142d4e08;
+}
+.planner-question-card [data-slot="card-content"] { padding: 0; }
+.planner-question-card label { display: grid; gap: 8px; color: #243e60; font-size: 13px; font-weight: 600; }
+.planner-grid .planner-question-card textarea { min-height: 8rem; field-sizing: fixed; }
+.planner-actions [data-slot="button"] { height: auto; white-space: normal; }
 .launch-form input:not([type="checkbox"]),
 .launch-form textarea,
 .launch-form select,
@@ -628,7 +646,8 @@ html[lang="ta"] .demo-main h2 {
   }
   .launch-form,
   .demo-panel,
-  .planner-grid > label {
+  .planner-grid > label,
+  .planner-grid > .planner-question-card {
     padding: 23px;
   }
   .demo-notice,
@@ -675,7 +694,8 @@ html[lang="ta"] .demo-main h2 {
   }
   .launch-form,
   .demo-panel,
-  .planner-grid > label {
+  .planner-grid > label,
+  .planner-grid > .planner-question-card {
     padding: 18px;
   }
   .demo-main h1 {

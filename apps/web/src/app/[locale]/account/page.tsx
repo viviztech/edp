@@ -4,6 +4,7 @@ import { isLocale } from "../../../lib/messages";
 import Account from "./view";
 import Link from "next/link";
 import { publicLaunch, launchCopy } from "../../../lib/public-launch";
+import "./account.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";

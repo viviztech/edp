@@ -6,6 +6,7 @@ import { isLocale } from "../../../../lib/messages";
 import { programMessages } from "../../../../lib/program-messages";
 import { serverApi } from "../../../../lib/server-api";
 import ProgramWorkspace from "./view";
+import "./workspace.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -25,9 +26,9 @@ export default async function ProgramsPage({ params, searchParams }: {
   const grants = profile.grants.filter((grant) => grant.permissions.includes("program.view"));
   const grant = grants.find((item) => !requested || item.organization_id === requested);
   if (!grant) return <main><h1>{text.workspace}</h1><p>{text.error}</p><Link href={`/${locale}/admin`}>Admin</Link></main>;
-  return <main className="program-main">
+  return <main id="main" className="program-main admin-design-page">
     <StaffModuleNav locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="programs" />
-    <header className="program-heading"><div><p className="eyebrow">{text.eyebrow}</p><h1>{text.title}</h1><p>{text.intro}</p></div><Link href={`/${locale}/admin?organization=${grant.organization_id}`}>Admin</Link></header>
+    <header className="program-heading"><div><p className="eyebrow">{grant.organization_name} · {text.eyebrow}</p><h1>{text.title}</h1><p>{text.intro}</p></div><Link href={`/${locale}/admin?organization=${grant.organization_id}`}>{locale === "ta" ? "பணியாளர் பணியிடம்" : "Staff workspace"}</Link></header>
     <ProgramWorkspace key={grant.organization_id} org={grant.organization_id} locale={locale} permissions={grant.permissions} />
   </main>;
 }

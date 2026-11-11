@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "../../../../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
+import { Input } from "../../../../components/ui/input";
 
 type Dashboard = { policy: { day_offsets: number[]; version: number }; profiles: {
   profile_id: string; enrollment_id: string; name: string; stage: string;
@@ -50,19 +53,20 @@ export default function BusinessStaff({ org, locale, canManage }: {
       setReason(""); setMessage(t.saved);
     } catch { setMessage(t.error); } finally { setBusy(false); }
   }
-  return <><header className="program-heading"><div><p className="eyebrow">B02</p>
-    <h1>{t.title}</h1><p>{t.intro}</p></div></header><p role="status">{message}</p>
-    {data && <><section className="program-panel"><h2>{t.policy}</h2>
-      {canManage ? <><label>{t.policy}<input value={offsets} onChange={(e) => setOffsets(e.target.value)}
+  return <div className="business-staff-workspace"><header className="program-heading"><div>
+    <h1>{t.title}</h1><p>{t.intro}</p></div></header>{message && <p className="business-staff-message" role="status">{message}</p>}
+    {!data && !message && <p className="business-staff-message" role="status">{locale === "ta" ? "ஏற்றப்படுகிறது…" : "Loading business tracking…"}</p>}
+    {data && <><Card className="business-staff-card"><CardHeader><CardTitle role="heading" aria-level={2}>{t.policy}</CardTitle><CardDescription>{locale === "ta" ? "புதிய தொழில் பதிவுகளுக்கான பின்தொடர்வு அட்டவணை" : "Follow-up schedule for new business profiles"}</CardDescription></CardHeader><CardContent>
+      {canManage ? <div className="business-staff-form"><label>{t.policy}<Input value={offsets} onChange={(e) => setOffsets(e.target.value)}
         aria-describedby="business-schedule-help" /></label>
         <p id="business-schedule-help">{locale === "ta" ? "ஏறுவரிசையில் காற்புள்ளியால் பிரிக்கப்பட்ட நாட்கள்" : "Ascending days separated by commas"}</p>
-        <label>{t.reason}<input value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} /></label>
-        <button type="button" disabled={busy || reason.trim().length < 3} onClick={() => void save()}>{t.save}</button></>
-        : <p>{data.policy.day_offsets.join(", ")}</p>}</section>
-      <section className="program-panel"><h2>{t.title}</h2>
+        <label>{t.reason}<Input value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} /></label>
+        <Button type="button" disabled={busy || reason.trim().length < 3} onClick={() => void save()}>{t.save}</Button></div>
+        : <p>{data.policy.day_offsets.join(", ")}</p>}</CardContent></Card>
+      <Card className="business-staff-card"><CardHeader><CardTitle role="heading" aria-level={2}>{t.title}</CardTitle></CardHeader><CardContent>
         {data.profiles.length ? <ul className="program-list">{data.profiles.map((item) =>
           <li key={item.profile_id}><strong>{item.name}</strong> · {item.stage}
             <p>{t.due}: {item.due_count} · {t.completed}: {item.completed_count}</p></li>)}</ul>
-          : <p>{t.empty}</p>}</section></>}
-  </>;
+          : <p className="business-staff-empty">{t.empty}</p>}</CardContent></Card></>}
+  </div>;
 }

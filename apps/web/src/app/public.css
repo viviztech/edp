@@ -1213,6 +1213,7 @@ html[lang="ta"] .public-site-body {
   border-radius: 16px;
   background: white;
 }
+.public-side-card[data-slot="card"] { display: block; padding: 25px; border: 1px solid var(--public-line); border-radius: 16px; background: white; box-shadow: 0 3px 16px #142d4e08; }
 .public-side-card > p {
   margin: 0 0 12px;
   font-size: 11px;
@@ -1304,6 +1305,7 @@ html[lang="ta"] .public-site-body {
 }
 .public-index-grid a:hover {
   border-color: #9db4f5;
+  box-shadow: 0 4px 18px #142d4e0c;
 }
 .public-index-grid strong {
   font-size: 15px;
@@ -1342,6 +1344,7 @@ html[lang="ta"] .public-site-body {
 }
 .editorial-public-grid a:hover {
   border-color: #9db4f5;
+  box-shadow: 0 4px 18px #142d4e0c;
 }
 .editorial-public-grid h2 {
   font: 550 25px/1.4 var(--public-display-font);
@@ -2193,4 +2196,10 @@ html[lang="ta"] .editorial-public h1 {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Clear keyboard focus across public cards, menus and interactive content. */
+.public-site-body :is(.landing-main, .public-index, .public-detail, .editorial-public, .planner-main, .demo-main, .site-navigation) :is(a, button, input, textarea, select, summary):focus-visible {
+  outline: 3px solid #2457e8;
+  outline-offset: 3px;
 }

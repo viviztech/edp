@@ -1,0 +1,18 @@
+.edp-admin-shell .meta-main .meta-pulse { display:grid; grid-template-columns:repeat(auto-fit,minmax(8rem,1fr)); gap:.65rem; align-items:stretch; border:0; background:transparent; }
+.edp-admin-shell .meta-main .meta-pulse > [data-slot="card"] { display:flex; flex-direction:column; justify-content:center; gap:.35rem; min-height:6rem; padding:.9rem 1rem; border:1px solid #dce6f1; border-radius:.7rem; background:#fff; color:#1e3855; box-shadow:0 1px 4px #16385d0d; }
+.edp-admin-shell .meta-main .meta-pulse > [data-slot="card"] span { color:#657b93; font-size:.73rem; letter-spacing:0; text-transform:none; }
+.edp-admin-shell .meta-main .meta-pulse > [data-slot="card"] strong { margin:0; color:#183b64; font:700 1.7rem/1 var(--admin-body-font); }
+.edp-admin-shell .meta-main .meta-pulse > .meta-pulse-alert strong { color:#9a4027; }
+.edp-admin-shell .meta-main .meta-pulse > button { align-self:center; min-height:2.6rem; padding:.5rem .8rem; border:1px solid #ccdbea; border-radius:.5rem; background:#fff; color:#195da4; }
+.edp-admin-shell .meta-main .meta-grid { grid-template-columns:minmax(16rem,21rem) minmax(0,1fr); gap:1rem; margin-top:1rem; border:0; background:transparent; }
+.edp-admin-shell .meta-main .meta-rail { display:block; padding:1.2rem; border:1px solid #dce6f1; border-radius:.75rem; background:#fff; box-shadow:0 1px 4px #16385d0d; }
+.edp-admin-shell .meta-main .meta-rail h2,.edp-admin-shell .meta-main .meta-events h2 { font:650 1.15rem/1.4 var(--admin-body-font); }
+.edp-admin-shell .meta-main .meta-rail h3 { margin:.5rem 0; font:650 1rem/1.4 var(--admin-body-font); }
+.edp-admin-shell .meta-main .meta-detail { padding:0; }
+.edp-admin-shell .meta-main .meta-empty { display:grid; place-items:center; min-height:13rem; padding:1.5rem; border:1px dashed #cad9e9; border-radius:.75rem; background:#f8fafd; color:#657b93; text-align:center; }
+.edp-admin-shell .meta-main .meta-connections li button { border-radius:.5rem; }
+.edp-admin-shell .meta-main .meta-events { margin-top:1rem; padding:1.2rem; }
+.edp-admin-shell .meta-main .meta-events p { color:#657b93; }
+.edp-admin-shell .meta-main .meta-form input { min-height:2.75rem; }
+.edp-admin-shell .meta-main .meta-form button,.edp-admin-shell .meta-main .meta-secondary { min-height:2.6rem; border-radius:.5rem; }
+@media(max-width:850px) { .edp-admin-shell .meta-main .meta-grid { grid-template-columns:1fr; } .edp-admin-shell .meta-main .meta-empty { min-height:8rem; } }

@@ -1,4 +1,8 @@
 "use client";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Textarea } from "../../../components/ui/textarea";
+
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../lib/api-contracts";
@@ -38,26 +42,27 @@ export default function MyMentoringView({ org, locale }: { org: string; locale: 
     } catch { setMessage(text.error); } finally { setBusy(false); }
   }
   const reviewed = new Set(data.feedback.map((item) => item.session_id));
+  const emptyDetails = locale === "ta" ? "இன்னும் பதிவுகள் இல்லை." : "Nothing to show yet.";
   return <>
     <header className="program-heading"><div><p className="eyebrow">{text.eyebrow}</p><h1>{text.learnerTitle}</h1><p>{text.learnerIntro}</p></div></header>
     <p role="status">{busy ? text.loading : message}</p>
-    {!busy && data.assignments.length === 0 && <p>{text.empty}</p>}
-    <div className="program-grid">{data.assignments.map((item) => <section className="program-panel" key={item.id}>
+    {!busy && !message && data.assignments.length === 0 && <p className="participant-empty">{text.empty}</p>}
+    <div className="program-grid">{data.assignments.map((item) => <Card className="program-panel" key={item.id}>
       <p className="eyebrow">{text.assignments}</p><h2>{item.mentor_name}</h2><p>{item.participant_name}</p>
       <span className={`program-state program-state-${item.state}`}>{item.state}</span>
-    </section>)}</div>
-    <section className="program-panel"><h2>{text.sessions}</h2><ul className="program-list">{data.sessions.map((item) => <li key={item.id}>
+    </Card>)}</div>
+    <Card className="program-panel"><h2>{text.sessions}</h2>{!busy && !message && data.sessions.length === 0 && <p>{locale === "ta" ? "அமர்வுகள் இன்னும் திட்டமிடப்படவில்லை." : "No sessions are scheduled yet."}</p>}<ul className="program-list">{data.sessions.map((item) => <li key={item.id}>
       <strong>{item.topic}</strong><span>{new Date(item.starts_at).toLocaleString(locale)}</span><span>{item.status}</span>
       {item.status === "completed" && !reviewed.has(item.id) && <form onSubmit={(event) => void feedback(event, item.id)}>
         <label>{text.rating}<select name="rating" defaultValue="5">{[5, 4, 3, 2, 1].map((rating) => <option key={rating}>{rating}</option>)}</select></label>
-        <label>{text.feedback}<textarea name="comment" maxLength={2000} /></label><button disabled={busy}>{text.submit}</button>
+        <label>{text.feedback}<Textarea name="comment" maxLength={2000} /></label><Button type="submit" disabled={busy}>{text.submit}</Button>
       </form>}
-    </li>)}</ul></section>
-    <div className="program-grid">
-      <section className="program-panel"><h2>{text.sharedNote}</h2><ul className="program-list">{data.notes.map((item) => <li key={item.id}><p>{item.body}</p><small>{new Date(item.created_at).toLocaleString(locale)}</small></li>)}</ul></section>
-      <section className="program-panel"><h2>{text.goals}</h2><ul className="program-list">{data.goals.map((item) => <li key={item.id}><strong>{item.title}</strong><span>{item.progress_percent}% · {item.state}</span><p>{item.description}</p></li>)}</ul></section>
-      <section className="program-panel"><h2>{text.actions}</h2><ul className="program-list">{data.action_items.map((item) => <li key={item.id}><strong>{item.title}</strong><span>{item.state}</span>{item.due_at && <small>{new Date(item.due_at).toLocaleString(locale)}</small>}</li>)}</ul></section>
-      <section className="program-panel"><h2>{text.followUps}</h2><ul className="program-list">{data.follow_ups.map((item) => <li key={item.id}><strong>{item.purpose}</strong><span>{new Date(item.due_at).toLocaleString(locale)}</span>{item.overdue && <span role="alert">{text.overdue}</span>}</li>)}</ul></section>
+    </li>)}</ul></Card>
+    <div className="program-grid participant-mentoring-details">
+      <Card className="program-panel"><h2>{text.sharedNote}</h2>{!busy && !message && !data.notes.length && <p>{emptyDetails}</p>}<ul className="program-list">{data.notes.map((item) => <li key={item.id}><p>{item.body}</p><small>{new Date(item.created_at).toLocaleString(locale)}</small></li>)}</ul></Card>
+      <Card className="program-panel"><h2>{text.goals}</h2>{!busy && !message && !data.goals.length && <p>{emptyDetails}</p>}<ul className="program-list">{data.goals.map((item) => <li key={item.id}><strong>{item.title}</strong><span>{item.progress_percent}% · {item.state}</span><p>{item.description}</p></li>)}</ul></Card>
+      <Card className="program-panel"><h2>{text.actions}</h2>{!busy && !message && !data.action_items.length && <p>{emptyDetails}</p>}<ul className="program-list">{data.action_items.map((item) => <li key={item.id}><strong>{item.title}</strong><span>{item.state}</span>{item.due_at && <small>{new Date(item.due_at).toLocaleString(locale)}</small>}</li>)}</ul></Card>
+      <Card className="program-panel"><h2>{text.followUps}</h2>{!busy && !message && !data.follow_ups.length && <p>{emptyDetails}</p>}<ul className="program-list">{data.follow_ups.map((item) => <li key={item.id}><strong>{item.purpose}</strong><span>{new Date(item.due_at).toLocaleString(locale)}</span>{item.overdue && <span role="alert">{text.overdue}</span>}</li>)}</ul></Card>
     </div>
   </>;
 }

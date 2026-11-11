@@ -5,6 +5,7 @@ import { mentoringMessages } from "../../../lib/mentoring-messages";
 import { isLocale } from "../../../lib/messages";
 import { serverApi } from "../../../lib/server-api";
 import MyMentoringView from "./view";
+import { ParticipantNavigation } from "../../../components/participant-navigation";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -25,5 +26,5 @@ export default async function MentoringPage({ params, searchParams }: {
     .find((item) => !requested || item.organization_id === requested);
   if (!grant) return <main><h1>{text.learnerTitle}</h1><p>{text.error}</p>
     <Link href={`/${locale}/account`}>Account</Link></main>;
-  return <main className="program-main"><MyMentoringView org={grant.organization_id} locale={locale} /></main>;
+  return <main id="main" className="program-main participant-workspace"><ParticipantNavigation locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="mentoring" /><MyMentoringView org={grant.organization_id} locale={locale} /></main>;
 }

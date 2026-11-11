@@ -5,6 +5,9 @@ import type { components } from "../../../../lib/api-contracts";
 import { learningMessages } from "../../../../lib/learning-messages";
 import { isLocale } from "../../../../lib/messages";
 import { serverApi } from "../../../../lib/server-api";
+import { Card, CardContent } from "../../../../components/ui/card";
+import { BadgeCheck, ShieldAlert, ArrowLeft } from "lucide-react";
+import "./certificate.css";
 
 type Certificate = components["schemas"]["PublicCertificateView"];
 
@@ -26,13 +29,13 @@ export default async function CertificateVerificationPage({
   }
   if (response.status === 404) notFound();
   if (!response.ok) {
-    return <main className="learning-main"><h1>{text.verifyCertificate}</h1>
+    return <main id="main" className="learning-main certificate-verification"><h1>{text.verifyCertificate}</h1>
       <p>{text.error}</p></main>;
   }
   const certificate = await response.json() as Certificate;
   const value = (en: string, ta: string) => locale === "ta" ? ta : en;
-  return <main className="learning-main certificate-verification">
-    <article className="certificate-card">
+  return <main id="main" className="learning-main certificate-verification">
+    <Card className="certificate-card"><CardContent><article className="certificate-detail">
       <Image
         alt={text.certificateQr}
         height="180"
@@ -41,7 +44,7 @@ export default async function CertificateVerificationPage({
         width="180"
       />
       <div>
-        <p className="eyebrow">{text.verifiedCertificate}</p>
+        <p className="certificate-status" data-status={certificate.status}>{certificate.status === "valid" ? <BadgeCheck size={17} aria-hidden="true" /> : <ShieldAlert size={17} aria-hidden="true" />}{certificate.status === "valid" ? text.validCertificate : text.revokedCertificate}</p>
         <h1>{value(certificate.certificate_title_en, certificate.certificate_title_ta)}</h1>
         <h2>{value(certificate.course_title_en, certificate.course_title_ta)}</h2>
         <p>{certificate.issuer_name}</p>
@@ -51,7 +54,7 @@ export default async function CertificateVerificationPage({
           ? text.validCertificate : text.revokedCertificate}</strong>
         <small>{text.verificationCode}: {certificate.verification_code}</small>
       </div>
-    </article>
-    <Link href={`/${locale}`}>{text.backHome}</Link>
+    </article></CardContent></Card>
+    <Link className="certificate-back" href={`/${locale}`}><ArrowLeft size={17} aria-hidden="true" />{text.backHome}</Link>
   </main>;
 }

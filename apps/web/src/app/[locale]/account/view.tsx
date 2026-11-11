@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { components } from "../../../lib/api-contracts";
 import type { AuthMessages } from "../../../lib/auth-messages";
+import { StaffModuleNav } from "../../../components/staff-module-nav";
 
 type Mode =
   | "login"
@@ -14,6 +15,12 @@ type Mode =
 type Profile = components["schemas"]["Profile"];
 type Session =
   components["schemas"]["app__modules__identity__schemas__SessionView"];
+
+const participantPermissions = new Set(["system.access", "participant.self", "lms.learn", "mentoring.view"]);
+function hasStaffWorkspace(permissions: string[]) {
+  return permissions.includes("system.access") &&
+    (!permissions.includes("participant.self") || permissions.some((permission) => !participantPermissions.has(permission)));
+}
 
 export default function Account({
   text,
@@ -30,6 +37,9 @@ export default function Account({
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const labels = locale === "ta"
+    ? { welcome: "உங்கள் பணியிடங்களைத் தேர்ந்தெடுக்கவும்", overview: "கணக்கு மற்றும் அணுகல்", program: "எனது திட்டம்", learning: "எனது கற்றல்", admin: "பணியாளர் பணியிடம்", access: "உங்கள் அணுகல்", devices: "உங்கள் சாதனங்களை நிர்வகிக்கவும்", signIn: "தொடர உங்கள் கணக்கில் உள்நுழைக", choose: "கணக்கு உதவி" }
+    : { welcome: "Choose where you want to go", overview: "Account and access", program: "My program", learning: "My learning", admin: "Staff workspace", access: "Your access", devices: "Manage your signed-in devices", signIn: "Sign in to continue to your workspace", choose: "Account help" };
   const modes: [Mode, string][] = selfServiceEnabled
     ? [
         ["login", text.login],
@@ -161,15 +171,37 @@ export default function Account({
     }
   }
   return (
-    <section aria-busy={loading || busy}>
-      <h1>{text.title}</h1>
-      {message && <p role="status">{message}</p>}
+    <section className="account-workspace" aria-busy={loading || busy}>
+      <div className="account-intro"><p className="account-eyebrow">CSJE · {labels.overview}</p>
+        <h1>{text.title}</h1>
+        <p>{profile ? labels.welcome : labels.signIn}</p></div>
+      {message && <p className="account-message" role="status">{message}</p>}
       {loading ? (
         <p role="status">{text.loading}</p>
       ) : profile ? (
         <>
-          <p>{profile.display_name}</p>
-          <div className="actions">
+          <div className="account-profile"><span aria-hidden="true">{profile.display_name.trim().charAt(0).toUpperCase() || "•"}</span><div><small>{labels.access}</small><strong>{profile.display_name}</strong></div></div>
+          <div className="account-panel"><h2>{text.organizations}</h2>
+          {profile.grants.length === 0 ? (
+            <p>{text.noOrganizations}</p>
+          ) : (
+            <ul className="account-organizations">
+              {profile.grants.map((grant) => (
+                <li key={grant.organization_id}>
+                  <strong>{grant.organization_name}</strong>
+                  <div className="account-workspace-links">
+                    {grant.permissions.includes("participant.self") && <Link href={`/${locale}/participant?organization=${grant.organization_id}`}>{labels.program}</Link>}
+                    {grant.permissions.includes("lms.learn") && <Link href={`/${locale}/learning?organization=${grant.organization_id}`}>{labels.learning}</Link>}
+                    {hasStaffWorkspace(grant.permissions) && <Link href={`/${locale}/admin?organization=${grant.organization_id}`}>{labels.admin}</Link>}
+                    {selfServiceEnabled && <Link href={`/${locale}/applications?organization=${grant.organization_id}`}>{text.application}</Link>}
+                  </div>
+                  {!grant.permissions.includes("system.access") && <StaffModuleNav locale={locale === "ta" ? "ta" : "en"} organization={grant.organization_id} permissions={grant.permissions} />}
+                </li>
+              ))}
+            </ul>
+          )}</div>
+          <div className="account-panel"><h2>{text.sessions}</h2><p className="account-panel-help">{labels.devices}</p>
+          <div className="actions account-actions">
             <button disabled={busy} onClick={() => action("logout")}>
               {text.logout}
             </button>
@@ -177,11 +209,10 @@ export default function Account({
               {text.logoutAll}
             </button>
           </div>
-          <h2>{text.sessions}</h2>
           {sessions.length === 0 ? (
             <p>{text.noSessions}</p>
           ) : (
-            <ul>
+            <ul className="account-devices">
               {sessions.map((device) => (
                 <li key={device.id}>
                   {device.device_name}{" "}
@@ -196,46 +227,11 @@ export default function Account({
               ))}
             </ul>
           )}
-          <h2>{text.organizations}</h2>
-          {profile.grants.filter((grant) =>
-            grant.permissions.includes("system.access"),
-          ).length === 0 ? (
-            <p>{text.noOrganizations}</p>
-          ) : (
-            <ul>
-              {profile.grants
-                .filter((grant) => grant.permissions.includes("system.access"))
-                .map((grant) => (
-                  <li key={grant.organization_id}>
-                    <Link
-                      href={
-                        "/" +
-                        locale +
-                        "/admin?organization=" +
-                        grant.organization_id
-                      }
-                    >
-                      {grant.organization_name}
-                    </Link>
-                    {" ? "}
-                    <Link
-                      href={
-                        "/" +
-                        locale +
-                        "/applications?organization=" +
-                        grant.organization_id
-                      }
-                    >
-                      {text.application}
-                    </Link>
-                  </li>
-                ))}
-            </ul>
-          )}
+          </div>
         </>
       ) : (
         <>
-          <nav className="actions" aria-label={text.title}>
+          {modes.length > 1 && <nav className="actions account-mode-nav" aria-label={labels.choose}>
             {modes.map(([key, label]) => (
               <button
                 type="button"
@@ -250,7 +246,7 @@ export default function Account({
                 {label}
               </button>
             ))}
-          </nav>
+          </nav>}
           <form key={mode} onSubmit={submit} className="account-form">
             {mode === "register" && (
               <label>

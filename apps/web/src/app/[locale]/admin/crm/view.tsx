@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ListFilter, Plus, RefreshCw, UsersRound } from "lucide-react";
+import { Button } from "../../../../components/ui/button";
+import { Card } from "../../../../components/ui/card";
+import { Input } from "../../../../components/ui/input";
 import type { components } from "../../../../lib/api-contracts";
 import { crmMessages, type CrmLocale } from "../../../../lib/crm-messages";
 
@@ -112,23 +116,23 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
   }
 
   return <div className="crm-workspace" aria-busy={busy}>
-    <aside className="crm-queue">
-      <div className="crm-section-title"><div><p className="eyebrow">{text.queue}</p><strong>{items.length}</strong></div><div className="actions"><button aria-pressed={overdueOnly} disabled={busy} onClick={() => { const next = !overdueOnly; setOverdueOnly(next); run(() => loadQueue(false, next)); }}>{overdueOnly ? text.allLeads : text.overdueOnly}</button><button disabled={busy || !allowed("crm.lead.create")} onClick={() => setCreating(true)}>{text.newLead}</button><button disabled={busy} onClick={() => run(() => loadQueue())}>{text.refresh}</button></div></div>
+    <Card role="complementary" aria-label={text.queue} className="crm-queue">
+      <div className="crm-section-title"><div><p className="eyebrow">{text.queue}</p><strong>{items.length}</strong></div><div className="actions"><Button variant="outline" type="button" aria-pressed={overdueOnly} disabled={busy} onClick={() => { const next = !overdueOnly; setOverdueOnly(next); run(() => loadQueue(false, next)); }}><ListFilter aria-hidden="true" />{overdueOnly ? text.allLeads : text.overdueOnly}</Button><Button type="button" disabled={busy || !allowed("crm.lead.create")} onClick={() => setCreating(true)}><Plus aria-hidden="true" />{text.newLead}</Button><Button variant="ghost" type="button" disabled={busy} onClick={() => run(() => loadQueue())}><RefreshCw aria-hidden="true" />{text.refresh}</Button></div></div>
       {creating ? <form className="crm-create" onSubmit={(event) => { event.preventDefault(); run(async () => { const lead = await api<Lead>(`${root}/leads`, "POST", newLead); setItems((current) => [lead, ...current]); setCreating(false); setNewLead({ name: "", email: "", phone: "", source: "manual", campaign: "", notes: "" }); await choose(lead); }); }}>
-        <label>{text.name}<input required maxLength={120} value={newLead.name} onChange={(event) => setNewLead({ ...newLead, name: event.target.value })} /></label>
-        <label>{text.email}<input type="email" maxLength={320} value={newLead.email} onChange={(event) => setNewLead({ ...newLead, email: event.target.value })} /></label>
-        <label>{text.phone}<input maxLength={32} value={newLead.phone} onChange={(event) => setNewLead({ ...newLead, phone: event.target.value })} /></label>
-        <label>{text.source}<input maxLength={80} value={newLead.source} onChange={(event) => setNewLead({ ...newLead, source: event.target.value })} /></label>
-        <label>{text.campaign}<input maxLength={120} value={newLead.campaign} onChange={(event) => setNewLead({ ...newLead, campaign: event.target.value })} /></label>
+        <label>{text.name}<Input required maxLength={120} value={newLead.name} onChange={(event) => setNewLead({ ...newLead, name: event.target.value })} /></label>
+        <label>{text.email}<Input type="email" maxLength={320} value={newLead.email} onChange={(event) => setNewLead({ ...newLead, email: event.target.value })} /></label>
+        <label>{text.phone}<Input maxLength={32} value={newLead.phone} onChange={(event) => setNewLead({ ...newLead, phone: event.target.value })} /></label>
+        <label>{text.source}<Input maxLength={80} value={newLead.source} onChange={(event) => setNewLead({ ...newLead, source: event.target.value })} /></label>
+        <label>{text.campaign}<Input maxLength={120} value={newLead.campaign} onChange={(event) => setNewLead({ ...newLead, campaign: event.target.value })} /></label>
         <div className="actions"><button type="submit" disabled={busy}>{text.create}</button><button type="button" onClick={() => setCreating(false)}>{text.cancel}</button></div>
       </form> : null}
-      {items.length === 0 ? <p>{text.empty}</p> : <ol className="crm-leads">{items.map((lead) => <li key={lead.id}><button aria-pressed={selected?.id === lead.id} disabled={busy} onClick={() => run(() => choose(lead))}><span><strong>{lead.name}</strong><small>{lead.source}{lead.campaign ? ` ? ${lead.campaign}` : ""}</small></span><span className={`crm-status crm-status-${lead.status}`}>{text[lead.status]}</span></button></li>)}</ol>}
+      {items.length === 0 ? <p className="crm-queue-empty">{text.empty}</p> : <ol className="crm-leads">{items.map((lead) => <li key={lead.id}><button aria-pressed={selected?.id === lead.id} disabled={busy} onClick={() => run(() => choose(lead))}><span><strong>{lead.name}</strong><small>{lead.source}{lead.campaign ? ` · ${lead.campaign}` : ""}</small></span><span className={`crm-status crm-status-${lead.status}`}>{text[lead.status]}</span></button></li>)}</ol>}
       {cursor ? <button disabled={busy} onClick={() => run(() => loadQueue(true))}>{text.more}</button> : null}
-    </aside>
+    </Card>
 
-    <section className="crm-record">
+    <Card role="region" aria-label={text.workspace} className="crm-record">
       <p className="crm-message" role="status">{busy ? text.loading : message}</p>
-      {!selected ? <div className="crm-empty"><span aria-hidden="true">?</span><p>{text.queueHint}</p></div> : <>
+      {!selected ? <div className="crm-empty"><span aria-hidden="true"><UsersRound size={24} /></span><p>{text.queueHint}</p></div> : <>
         <header className="crm-record-header"><div><p className="eyebrow">{selected.source}</p><h2>{selected.name}</h2><p>{selected.email || selected.phone || selected.id}</p></div><span className={`crm-status crm-status-${selected.status}`}>{text[selected.status]}</span></header>
         <div className="crm-record-grid">
           <section className="crm-panel"><h3>{text.status}</h3><form className="crm-form" onSubmit={(event) => { event.preventDefault(); run(async () => replaceLead(await api<Lead>(`${root}/leads/${selected.id}`, "PATCH", { status: edit.status, assigned_user_id: edit.assigned_user_id || null, notes: edit.notes, expected_version: selected.version }))); }}>
@@ -165,7 +169,7 @@ export default function CrmWorkspace({ org, permissions, locale }: { org: string
         </div>
       </>}
 
-      {allowed("crm.lead.export") ? <section className="crm-export"><div><p className="eyebrow">{text.exports}</p>{exportJob ? <p>{exportJob.status} ? {exportJob.row_count}</p> : null}</div><div className="actions"><button disabled={busy} onClick={() => run(async () => setExportJob(await api<ExportJob>(`${root}/exports`, "POST", {})))}>{text.requestExport}</button>{exportJob ? <button disabled={busy} onClick={() => run(async () => setExportJob(await api<ExportJob>(`${root}/exports/${exportJob.id}`)))}>{text.checkExport}</button> : null}{exportJob?.status === "completed" ? <a className="crm-download" href={`${root}/exports/${exportJob.id}/download`}>{text.download}</a> : null}</div></section> : null}
-    </section>
+      {allowed("crm.lead.export") ? <section className="crm-export"><div><p className="eyebrow">{text.exports}</p>{exportJob ? <p>{exportJob.status} · {exportJob.row_count}</p> : null}</div><div className="actions"><button disabled={busy} onClick={() => run(async () => setExportJob(await api<ExportJob>(`${root}/exports`, "POST", {})))}>{text.requestExport}</button>{exportJob ? <button disabled={busy} onClick={() => run(async () => setExportJob(await api<ExportJob>(`${root}/exports/${exportJob.id}`)))}>{text.checkExport}</button> : null}{exportJob?.status === "completed" ? <a className="crm-download" href={`${root}/exports/${exportJob.id}/download`}>{text.download}</a> : null}</div></section> : null}
+    </Card>
   </div>;
 }

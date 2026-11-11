@@ -287,7 +287,14 @@ with sync_playwright() as playwright:
         organization_id = organization.id
     page.reload()
     page.wait_for_load_state("domcontentloaded")
-    page.get_by_role("link", name="Synthetic E2E Organization", exact=True).click()
+    organization_card = page.locator(".account-organizations > li").filter(
+        has_text="Synthetic E2E Organization"
+    )
+    staff_link = organization_card.get_by_role("link", name="Staff workspace", exact=True)
+    expect(staff_link).to_have_attribute(
+        "href", f"/en/admin?organization={organization_id}"
+    )
+    staff_link.click()
     expect(page.get_by_role("heading", name="Staff workspace")).to_be_visible()
     expect(page.get_by_text("system.role_granted", exact=False)).to_be_visible()
     assert page.request.get(base + "/api/session/staff/" + str(uuid4())).status == 403
@@ -357,6 +364,7 @@ with sync_playwright() as playwright:
     public.goto(base + "/ta/pages/eligibility")
     expect(public.get_by_role("heading", name="Tamil synthetic title")).to_be_visible()
     expect(public.get_by_role("article")).to_contain_text("Tamil synthetic content")
+    page.locator("details.cms-archive > summary").click()
     page.get_by_label("Archive reason").fill("Synthetic archive")
     page.get_by_role("button", name="Archive", exact=True).click()
     expect(page.locator(".cms-state")).to_contain_text("Archived")
@@ -723,9 +731,8 @@ with sync_playwright() as playwright:
     expect(
         page.get_by_role("heading", name="Attendance control", exact=True)
     ).to_be_visible()
-    attendance_card = page.locator("article").filter(
-        has=page.get_by_role("heading", name="Attendance check-in lab", exact=True)
-    )
+    attendance_card = page.get_by_role("article", name="Attendance check-in lab", exact=True)
+    attendance_card.locator("details.attendance-policy > summary").click()
     policy_form = attendance_card.locator("form").first
     policy_form.locator('input[name="threshold_percent"]').fill("80")
     policy_form.locator('input[name="late_after_minutes"]').fill("10")
@@ -763,6 +770,7 @@ with sync_playwright() as playwright:
     expect(
         page.get_by_role("heading", name="Course studio", exact=True)
     ).to_be_visible()
+    page.get_by_role("link", name="Course structure", exact=True).click()
     course_form = page.locator("form").filter(
         has=page.get_by_role("heading", name="Create course", exact=True)
     )
@@ -1102,7 +1110,10 @@ with sync_playwright() as playwright:
         "button", name="Revoke", exact=True
     ).click()
     expect(page.get_by_role("status")).to_have_text("Change saved.")
-    expect(page.get_by_text("revoked", exact=True)).to_be_visible()
+    expect(
+        page.locator(".program-list li").filter(has_text=coordinator_email)
+        .get_by_text("Revoked", exact=True)
+    ).to_be_visible()
     coordinator_page.reload()
     expect(coordinator_page.locator(".program-message")).to_have_text(
         "The request could not be completed. Check your details and try again."
@@ -1253,7 +1264,7 @@ with sync_playwright() as playwright:
 
     page.goto(base + "/en/admin/mentoring?organization=" + str(organization_id))
     expect(page.get_by_role("heading", name="Mentoring workspace")).to_be_visible()
-    profile_panel = page.locator("section.program-panel").filter(
+    profile_panel = page.locator(".mentor-workspace [data-slot=card].program-panel").filter(
         has=page.get_by_role("heading", name="Create mentor profile", exact=True)
     )
     profile_panel.locator('select[name="user_id"]').select_option(label="Synthetic Mentor")
@@ -1262,7 +1273,7 @@ with sync_playwright() as playwright:
     profile_panel.get_by_role("button", name="Save", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
 
-    assignment_panel = page.locator("section.program-panel").filter(
+    assignment_panel = page.locator(".mentor-workspace [data-slot=card].program-panel").filter(
         has=page.get_by_role("heading", name="Assign mentor", exact=True)
     )
     assignment_panel.locator('select[name="profile"]').select_option(
@@ -1278,7 +1289,7 @@ with sync_playwright() as playwright:
 
     session_start = datetime.now(UTC) + timedelta(days=2)
     session_end = session_start + timedelta(hours=1)
-    schedule_panel = page.locator("section.program-panel").filter(
+    schedule_panel = page.locator(".mentor-workspace [data-slot=card].program-panel").filter(
         has=page.get_by_role("heading", name="Schedule session", exact=True)
     )
     schedule_panel.locator('select[name="assignment"]').select_option(
@@ -1291,7 +1302,7 @@ with sync_playwright() as playwright:
     schedule_panel.get_by_role("button", name="Schedule session", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
 
-    notes_panel = page.locator("section.program-panel").filter(
+    notes_panel = page.locator(".mentor-workspace [data-slot=card].program-panel").filter(
         has=page.get_by_role("heading", name="Notes", exact=True)
     )
     notes_panel.locator('select[name="assignment"]').select_option(
@@ -1306,7 +1317,7 @@ with sync_playwright() as playwright:
     )
     notes_panel.get_by_role("button", name="Save", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
-    notes_panel = page.locator("section.program-panel").filter(
+    notes_panel = page.locator(".mentor-workspace [data-slot=card].program-panel").filter(
         has=page.get_by_role("heading", name="Notes", exact=True)
     )
     notes_panel.locator('select[name="assignment"]').select_option(
@@ -1325,7 +1336,7 @@ with sync_playwright() as playwright:
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
 
     goal_panel = (
-        page.locator("section.program-panel")
+        page.locator(".mentor-workspace [data-slot=card].program-panel")
         .filter(has=page.get_by_role("heading", name="Goals", exact=True))
         .first
     )
@@ -1337,7 +1348,7 @@ with sync_playwright() as playwright:
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
 
     action_panel = (
-        page.locator("section.program-panel")
+        page.locator(".mentor-workspace [data-slot=card].program-panel")
         .filter(has=page.get_by_role("heading", name="Action items", exact=True))
         .first
     )
@@ -1352,7 +1363,7 @@ with sync_playwright() as playwright:
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
 
     reminder_panel = (
-        page.locator("section.program-panel")
+        page.locator(".mentor-workspace [data-slot=card].program-panel")
         .filter(has=page.get_by_role("heading", name="Follow-up reminders", exact=True))
         .first
     )
@@ -1369,7 +1380,7 @@ with sync_playwright() as playwright:
     reminder_panel.get_by_role("button", name="Save", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("Mentoring record saved")
 
-    session_list = page.locator("section.program-panel").filter(
+    session_list = page.locator(".mentor-workspace [data-slot=card].program-panel").filter(
         has=page.get_by_role("heading", name="Sessions", exact=True)
     )
     session_list.get_by_role("button", name="Complete", exact=True).click()
@@ -1553,7 +1564,7 @@ with sync_playwright() as playwright:
 
     assigned = load_business_plan_data(mentor_page, plan_api + "/assigned")
     assert assigned["submissions"][0]["snapshot"] == initial_snapshot
-    first_review_card = mentor_page.locator("section.program-panel").filter(
+    first_review_card = mentor_page.locator(".plan-review-card").filter(
         has=mentor_page.get_by_role("heading", name="Version 1", exact=True)
     )
     expect(first_review_card).to_be_visible()
@@ -1616,7 +1627,7 @@ with sync_playwright() as playwright:
 
     assigned = load_business_plan_data(mentor_page, plan_api + "/assigned")
     assert [item["number"] for item in assigned["submissions"]] == [2, 1]
-    second_review_card = mentor_page.locator("section.program-panel").filter(
+    second_review_card = mentor_page.locator(".plan-review-card").filter(
         has=mentor_page.get_by_role("heading", name="Version 2", exact=True)
     )
     expect(second_review_card.get_by_text(revised_summary, exact=True)).to_be_visible()

@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { components } from "../../../../lib/api-contracts";
 import { applicationAdminMessages } from "../../../../lib/application-admin-messages";
+import { Button } from "../../../../components/ui/button";
+import { Card } from "../../../../components/ui/card";
+import { Input } from "../../../../components/ui/input";
+import { Textarea } from "../../../../components/ui/textarea";
 
 type Definition = components["schemas"]["DefinitionView"];
 type FieldType = components["schemas"]["DefinitionFieldInput"]["field_type"];
@@ -122,10 +126,10 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
 
   return <div className="definition-workspace" aria-busy={busy}>
     <p className="definition-message" role="status">{busy ? text.loading : message}</p>
-    <div className="definition-layout">
+    <Card className="definition-layout">
       <aside className="definition-versions">
         <div className="definition-section-head"><h2>{text.versions}</h2>
-          {canCreate ? <button type="button" disabled={busy || hasDraft} onClick={beginNew}>{text.newDefinition}</button> : null}
+          {canCreate ? <Button type="button" disabled={busy || hasDraft} onClick={beginNew}>{text.newDefinition}</Button> : null}
         </div>
         {items.length === 0 ? <p>{text.noVersions}</p> : <ol>{items.map((item) =>
           <li key={item.id}><button type="button" aria-pressed={selectedId === item.id} onClick={() => edit(item)}>
@@ -154,8 +158,8 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
             });
           }}>
             <div className="definition-title-grid">
-              <label>{text.englishTitle}<input required maxLength={160} disabled={!editable || busy} value={titleEn} onChange={(event) => setTitleEn(event.target.value)} /></label>
-              <label>{text.tamilTitle}<input required maxLength={160} disabled={!editable || busy} value={titleTa} onChange={(event) => setTitleTa(event.target.value)} /></label>
+              <label>{text.englishTitle}<Input required maxLength={160} disabled={!editable || busy} value={titleEn} onChange={(event) => setTitleEn(event.target.value)} /></label>
+              <label>{text.tamilTitle}<Input required maxLength={160} disabled={!editable || busy} value={titleTa} onChange={(event) => setTitleTa(event.target.value)} /></label>
             </div>
             <div className="definition-section-head"><h3>{text.fields}</h3>
               {editable ? <button type="button" disabled={busy || fields.length >= 100} onClick={() => setFields((current) => [...current, newField(current.length + 1)])}>{text.addField}</button> : null}
@@ -169,10 +173,10 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
                 </div> : null}
               </div>
               <div className="definition-field-grid">
-                <label>{text.key}<input required pattern="[a-z][a-z0-9_]*" maxLength={80} disabled={!editable || busy} value={item.key} onChange={(event) => updateField(index, { key: event.target.value })} /></label>
-                <label>{text.section}<input required pattern="[a-z][a-z0-9_]*" maxLength={80} disabled={!editable || busy} value={item.section} onChange={(event) => updateField(index, { section: event.target.value })} /></label>
-                <label>{text.englishLabel}<input required maxLength={200} disabled={!editable || busy} value={item.label_en} onChange={(event) => updateField(index, { label_en: event.target.value })} /></label>
-                <label>{text.tamilLabel}<input required maxLength={200} disabled={!editable || busy} value={item.label_ta} onChange={(event) => updateField(index, { label_ta: event.target.value })} /></label>
+                <label>{text.key}<Input required pattern="[a-z][a-z0-9_]*" maxLength={80} disabled={!editable || busy} value={item.key} onChange={(event) => updateField(index, { key: event.target.value })} /></label>
+                <label>{text.section}<Input required pattern="[a-z][a-z0-9_]*" maxLength={80} disabled={!editable || busy} value={item.section} onChange={(event) => updateField(index, { section: event.target.value })} /></label>
+                <label>{text.englishLabel}<Input required maxLength={200} disabled={!editable || busy} value={item.label_en} onChange={(event) => updateField(index, { label_en: event.target.value })} /></label>
+                <label>{text.tamilLabel}<Input required maxLength={200} disabled={!editable || busy} value={item.label_ta} onChange={(event) => updateField(index, { label_ta: event.target.value })} /></label>
                 <label>{text.type}<select disabled={!editable || busy} value={item.field_type} onChange={(event) => updateField(index, { field_type: event.target.value as FieldType })}>
                   {(["text", "textarea", "number", "date", "boolean"] as FieldType[]).map((type) => <option key={type} value={type}>{text[type]}</option>)}
                 </select></label>
@@ -186,14 +190,14 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
             <ol className="definition-fields">{acknowledgements.map((item, index) => <li key={index}>
               <div className="definition-field-head"><strong>{index + 1}. {item.label_en || item.key}</strong>{editable ? <button type="button" disabled={busy || acknowledgements.length <= 2} onClick={() => setAcknowledgements((current) => current.filter((_, position) => position !== index))}>{text.remove}</button> : null}</div>
               <div className="definition-field-grid">
-                <label>{text.key}<input required pattern="[a-z][a-z0-9_]*" maxLength={80} disabled={!editable || busy} value={item.key} onChange={(event) => updateAcknowledgement(index, { key: event.target.value })} /></label>
+                <label>{text.key}<Input required pattern="[a-z][a-z0-9_]*" maxLength={80} disabled={!editable || busy} value={item.key} onChange={(event) => updateAcknowledgement(index, { key: event.target.value })} /></label>
                 <label>{text.acknowledgementKind}<select disabled={!editable || busy} value={item.kind} onChange={(event) => updateAcknowledgement(index, { kind: event.target.value as DraftAcknowledgement["kind"] })}><option value="declaration">{text.declaration}</option><option value="consent">{text.consent}</option></select></label>
-                <label>{text.englishLabel}<textarea required maxLength={1000} disabled={!editable || busy} value={item.label_en} onChange={(event) => updateAcknowledgement(index, { label_en: event.target.value })} /></label>
-                <label>{text.tamilLabel}<textarea required maxLength={1000} disabled={!editable || busy} value={item.label_ta} onChange={(event) => updateAcknowledgement(index, { label_ta: event.target.value })} /></label>
+                <label>{text.englishLabel}<Textarea required maxLength={1000} disabled={!editable || busy} value={item.label_en} onChange={(event) => updateAcknowledgement(index, { label_en: event.target.value })} /></label>
+                <label>{text.tamilLabel}<Textarea required maxLength={1000} disabled={!editable || busy} value={item.label_ta} onChange={(event) => updateAcknowledgement(index, { label_ta: event.target.value })} /></label>
                 <label className="definition-required"><input type="checkbox" disabled={!editable || busy} checked={item.required} onChange={(event) => updateAcknowledgement(index, { required: event.target.checked })} />{text.required}</label>
               </div>
             </li>)}</ol>
-            {editable ? <button className="definition-primary" disabled={busy}>{text.save}</button> : null}
+            {editable ? <Button type="submit" className="definition-primary" disabled={busy}>{text.save}</Button> : null}
           </form>
           {selected ? <div className="definition-actions">
             {selected.state !== "draft" && canCreate ? <button disabled={busy || hasDraft} onClick={() => run(async () => {
@@ -210,6 +214,6 @@ export default function ApplicationDefinitionWorkspace({ org, locale, permission
           </div> : null}
         </>}
       </section>
-    </div>
+    </Card>
   </div>;
 }

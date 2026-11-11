@@ -1,7 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download, RotateCcw } from "lucide-react";
 import type { Locale } from "../lib/messages";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { Textarea } from "./ui/textarea";
 
 const copy = {
   en: {
@@ -64,7 +67,14 @@ export function IdeaPlanner({ locale }: { locale: Locale }) {
   const t = copy[locale];
   const [answers, setAnswers] = useState<string[]>(Array(6).fill(""));
   const [message, setMessage] = useState("");
+  const [savedAnswers, setSavedAnswers] = useState<string | null>(null);
   const completed = answers.filter((answer) => answer.trim()).length;
+  useEffect(() => {
+    if (!completed || JSON.stringify(answers) === savedAnswers) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [answers, completed, savedAnswers]);
   function download() {
     if (!completed) {
       setMessage(t.empty);
@@ -89,6 +99,7 @@ export function IdeaPlanner({ locale }: { locale: Locale }) {
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setSavedAnswers(JSON.stringify(answers));
     setMessage(t.downloaded);
   }
   return (
@@ -108,11 +119,11 @@ export function IdeaPlanner({ locale }: { locale: Locale }) {
         }}
       >
         {t.labels.map((label, index) => (
-          <label key={label}>
+          <Card key={label} className="planner-question-card"><CardContent><label>
             <span className="planner-number">0{index + 1}</span>
             <strong>{label}</strong>
             <small id={`planner-hint-${index}`}>{t.hints[index]}</small>
-            <textarea
+            <Textarea
               rows={4}
               maxLength={2000}
               value={answers[index]}
@@ -125,14 +136,15 @@ export function IdeaPlanner({ locale }: { locale: Locale }) {
                 )
               }
             />
-          </label>
+          </label></CardContent></Card>
         ))}
         <div className="planner-actions">
-          <button className="public-button public-button-primary" type="submit">
+          <Button className="public-button public-button-primary" type="submit">
             <Download size={18} aria-hidden="true" />
             {t.download}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
             className="public-button public-button-outline"
             type="button"
             onClick={() => {
@@ -144,7 +156,7 @@ export function IdeaPlanner({ locale }: { locale: Locale }) {
           >
             <RotateCcw size={17} aria-hidden="true" />
             {t.reset}
-          </button>
+          </Button>
           <p role="status">{message}</p>
         </div>
       </form>

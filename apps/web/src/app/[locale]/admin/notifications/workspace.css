@@ -1,0 +1,16 @@
+.edp-admin-shell .notice-main .notice-workspace { display:grid; gap:1rem; }
+.edp-admin-shell .notice-main .notice-preference { display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:1rem; padding:1.2rem 1.4rem; border:1px solid #dce6f1; border-radius:.75rem; background:#fff; color:#1e3855; box-shadow:0 1px 4px #16385d0d; }
+.edp-admin-shell .notice-main .notice-preference .eyebrow { display:flex; align-items:center; gap:.5rem; margin:0 0 .45rem; color:#526d8b; font-size:.8rem; letter-spacing:0; text-transform:none; }
+.edp-admin-shell .notice-main .notice-preference strong { font:650 1.05rem/1.4 var(--admin-body-font); }
+.edp-admin-shell .notice-main .notice-preference button { min-height:2.6rem; padding:.5rem .85rem; border:1px solid #ccdbea; border-radius:.5rem; background:#fff; color:#195da4; }
+.edp-admin-shell .notice-main .notice-inbox { display:block; margin:0; padding:1.25rem 1.4rem; border:1px solid #dce6f1; border-radius:.75rem; background:#fff; }
+.edp-admin-shell .notice-main .notice-inbox h2 { font:650 1.15rem/1.4 var(--admin-body-font); }
+.edp-admin-shell .notice-main .notice-section-head button { min-height:2.6rem; padding:.5rem .85rem; }
+.edp-admin-shell .notice-main .notice-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; min-height:9rem; margin:1rem 0 0; padding:1.25rem; border:1px dashed #ccdbea; border-radius:.65rem; background:#f8fafd; color:#667f9b; }
+.edp-admin-shell .notice-main .notice-empty p { margin:0; }
+.edp-admin-shell .notice-main .notice-operations { display:block; margin-top:1rem; }
+.edp-admin-shell .notice-main .notice-operations label { display:grid; gap:.35rem; max-width:30rem; margin:1rem 0; font-size:.85rem; font-weight:650; }
+.edp-admin-shell .notice-main .notice-operations ul { display:grid; gap:.6rem; margin:1rem 0; padding:0; list-style:none; }
+.edp-admin-shell .notice-main .notice-operations li { display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; padding:.8rem; border:1px solid #dce6f1; border-radius:.5rem; }
+.edp-admin-shell .notice-main .notice-actions { gap:.6rem; }
+@media(max-width:600px) { .edp-admin-shell .notice-main .notice-preference { align-items:flex-start; flex-direction:column; padding:1rem; } .edp-admin-shell .notice-main .notice-inbox { padding:1rem; } }

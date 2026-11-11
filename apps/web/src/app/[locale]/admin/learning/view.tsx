@@ -3,6 +3,11 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../../lib/api-contracts";
 import { learningMessages } from "../../../../lib/learning-messages";
+import { Button } from "../../../../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
+import { Input } from "../../../../components/ui/input";
+import { Textarea } from "../../../../components/ui/textarea";
+import { BookOpen, ChevronDown, Plus } from "lucide-react";
 
 type Locale = "en" | "ta";
 type Catalog = components["schemas"]["LearningCatalogView"];
@@ -180,9 +185,19 @@ export default function LearningWorkspace({
   const draftQuestions = draftQuizzes.flatMap(({ course, module, lesson, quiz }) =>
     quiz.questions.map((question) => ({ course, module, lesson, quiz, question })));
 
-  return <div aria-busy={busy}>
-    <p className="learning-message" role="status">{busy ? text.loading : message}</p>
-    {canManage && <section className="learning-authoring" aria-label={text.structure}>
+  return <div className="learning-studio" aria-busy={busy}>
+    {(busy || message) && <p className="learning-message" role="status">{busy ? text.loading : message}</p>}
+    <nav className="learning-section-nav" aria-label={locale === "ta" ? "கற்றல் பிரிவுகள்" : "Learning sections"}>
+      <a href="#learning-catalog">{text.courses}</a>
+      {canManage && <a href="#learning-create" onClick={() => { const details = document.getElementById("learning-create"); if (details instanceof HTMLDetailsElement) details.open = true; }}>{text.structure}</a>}
+      {canAssign && <a href="#learning-pathways">{text.assignments}</a>}
+      {canManageCertificates && <a href="#learning-certificates">{text.certificateTemplates}</a>}
+      {canIssueCertificates && <a href="#learning-eligibility">{text.certificateEligibility}</a>}
+    </nav>
+    {canManage && <details className="learning-authoring-disclosure" id="learning-create">
+      <summary><span><Plus size={18} aria-hidden="true" />{text.structure}</span><ChevronDown size={18} aria-hidden="true" /></summary>
+      <p>{locale === "ta" ? "பாடநெறி, பாடங்கள் மற்றும் மதிப்பீடுகளை இங்கே உருவாக்கவும்." : "Create courses, lessons and assessments here."}</p>
+      <section className="learning-authoring" aria-label={text.structure}>
       <form onSubmit={(event) => submit(event, "", (data) => ({
         ...data,
         completion_rule: data.completion_rule,
@@ -199,7 +214,7 @@ export default function LearningWorkspace({
           <option value="minimum_lessons">{text.minimumLessons}</option>
         </select></label>
         <Field label={text.minimumLessons} name="minimum_lessons" type="number" required={false} />
-        <button disabled={busy}>{text.create}</button>
+        <Button type="submit" disabled={busy}>{text.create}</Button>
       </form>
       <form onSubmit={(event) => submit(event, "/modules", (data) => ({
         ...data,
@@ -215,7 +230,7 @@ export default function LearningWorkspace({
         <Field label={text.position} name="position" type="number" />
         <Field label={text.englishTitle} name="title_en" />
         <Field label={text.tamilTitle} name="title_ta" />
-        <button disabled={busy}>{text.create}</button>
+        <Button type="submit" disabled={busy}>{text.create}</Button>
       </form>
       <form onSubmit={(event) => submit(event, "/lessons", (data) => {
         const key = String(data.module_key).split(":");
@@ -248,7 +263,7 @@ export default function LearningWorkspace({
         <Field label={text.tamilTitle} name="title_ta" />
         <Area label={text.englishBody} name="body_en" />
         <Area label={text.tamilBody} name="body_ta" />
-        <button disabled={busy}>{text.create}</button>
+        <Button type="submit" disabled={busy}>{text.create}</Button>
       </form>
       <form onSubmit={(event) => submit(event, "/prerequisites", (data) => {
         const target = String(data.lesson_key).split(":");
@@ -266,7 +281,7 @@ export default function LearningWorkspace({
             `${course.id}:${lesson.id}`, `${title(course)} / ${title(module)} / ${title(lesson)}`,
           ])} />
         <Field label={text.reason} name="reason" />
-        <button disabled={busy}>{text.create}</button>
+        <Button type="submit" disabled={busy}>{text.create}</Button>
       </form>
       <form onSubmit={(event) => submit(event,
         `/${String(new FormData(event.currentTarget).get("course_id"))}/completion-rule`,
@@ -285,7 +300,7 @@ export default function LearningWorkspace({
         </select></label>
         <Field label={text.minimumLessons} name="minimum_lessons" type="number" required={false} />
         <Field label={text.reason} name="reason" />
-        <button disabled={busy}>{text.saveRule}</button>
+        <Button type="submit" disabled={busy}>{text.saveRule}</Button>
       </form>
       {canAssess && <form onSubmit={(event) => submit(event, "/assignments", (data) => {
         const key = String(data.lesson_key).split(":");
@@ -314,9 +329,9 @@ export default function LearningWorkspace({
         <Area label={text.englishInstructions} name="instructions_en" />
         <Area label={text.tamilInstructions} name="instructions_ta" />
         <Field label={text.maximumPoints} name="maximum_points" type="number" />
-        <label>{text.passingPoints}<input name="passing_points" type="number" min="0" required /></label>
+        <label>{text.passingPoints}<Input name="passing_points" type="number" min="0" required /></label>
         <Field label={text.maxSubmissions} name="max_submissions" type="number" />
-        <button disabled={busy}>{text.create}</button>
+        <Button type="submit" disabled={busy}>{text.create}</Button>
       </form>}
       {canAssess && <form onSubmit={(event) => submit(event, "/quizzes", (data) => {
         const key = String(data.lesson_key).split(":");
@@ -342,9 +357,9 @@ export default function LearningWorkspace({
         <Field label={text.tamilTitle} name="title_ta" />
         <Area label={text.englishInstructions} name="instructions_en" />
         <Area label={text.tamilInstructions} name="instructions_ta" />
-        <label>{text.passingPercent}<input name="passing_percent" type="number" min="0" max="100" required /></label>
-        <label>{text.maxAttempts}<input name="max_attempts" type="number" min="1" max="10" required /></label>
-        <button disabled={busy}>{text.create}</button>
+        <label>{text.passingPercent}<Input name="passing_percent" type="number" min="0" max="100" required /></label>
+        <label>{text.maxAttempts}<Input name="max_attempts" type="number" min="1" max="10" required /></label>
+        <Button type="submit" disabled={busy}>{text.create}</Button>
       </form>}
       {canAssess && <form onSubmit={(event) => submit(event, "/quiz-questions", (data) => {
         const key = String(data.quiz_key).split(":");
@@ -366,7 +381,7 @@ export default function LearningWorkspace({
         <Area label={text.englishQuestion} name="prompt_en" />
         <Area label={text.tamilQuestion} name="prompt_ta" />
         <Field label={text.points} name="points" type="number" />
-        <button disabled={busy}>{text.create}</button>
+        <Button type="submit" disabled={busy}>{text.create}</Button>
       </form>}
       {canAssess && <form onSubmit={(event) => submit(event, "/quiz-choices", (data) => {
         const key = String(data.question_key).split(":");
@@ -389,8 +404,8 @@ export default function LearningWorkspace({
         <Field label={text.position} name="position" type="number" />
         <Field label={text.englishChoice} name="label_en" />
         <Field label={text.tamilChoice} name="label_ta" />
-        <label><input name="is_correct" type="checkbox" /> {text.correctChoice}</label>
-        <button disabled={busy}>{text.create}</button>
+        <label className="learning-check"><input name="is_correct" type="checkbox" /> {text.correctChoice}</label>
+        <Button type="submit" disabled={busy}>{text.create}</Button>
       </form>}
       <form onSubmit={(event) => submit(event, "/materials", (data) => {
         const key = String(data.lesson_key).split(":");
@@ -423,13 +438,13 @@ export default function LearningWorkspace({
         <Field label={text.englishTitle} name="label_en" />
         <Field label={text.tamilTitle} name="label_ta" />
         <Field label={text.providerKey} name="provider_key" />
-        <button disabled={busy}>{text.create}</button>
+        <Button type="submit" disabled={busy}>{text.create}</Button>
       </form>
-    </section>}
+    </section></details>}
 
-    <section className="learning-catalog">
-      <h2>{text.courses}</h2>
-      {catalog.courses.length === 0 && <p>{text.empty}</p>}
+    <section className="learning-catalog" id="learning-catalog">
+      <Card className="learning-catalog-card"><CardHeader><CardTitle role="heading" aria-level={2}><BookOpen size={18} aria-hidden="true" />{text.courses}</CardTitle><CardDescription>{locale === "ta" ? "உங்கள் பாடநெறிகளையும் அவற்றின் நிலைகளையும் பாருங்கள்." : "Review your courses and their publication status."}</CardDescription></CardHeader><CardContent>
+      {catalog.courses.length === 0 && !busy && message !== text.error && <p className="learning-catalog-empty">{text.empty}</p>}
       <ol className="learning-spine">
         {catalog.courses.map((course) => <li key={course.id}>
           <article className="learning-course">
@@ -465,10 +480,10 @@ export default function LearningWorkspace({
               <button disabled={busy} onClick={() => publish(course)}>{text.publish}</button>}
           </article>
         </li>)}
-      </ol>
+      </ol></CardContent></Card>
     </section>
 
-    {canManageCertificates && <section className="learning-assignment">
+    {canManageCertificates && <section className="learning-assignment" id="learning-certificates">
       <h2>{text.certificateTemplates}</h2>
       <form onSubmit={(event) => submit(event, "/certificate-templates", (data) => ({
         course_id: data.course_id,
@@ -487,7 +502,7 @@ export default function LearningWorkspace({
         <Area label={text.englishStatement} name="statement_en" />
         <Area label={text.tamilStatement} name="statement_ta" />
         <Field label={text.issuerName} name="issuer_name" />
-        <button disabled={busy}>{text.createTemplate}</button>
+        <Button type="submit" disabled={busy}>{text.createTemplate}</Button>
       </form>
       <ul>{catalog.certificate_templates.map((template) => <li key={template.id}>
         <strong>{title(template)}</strong>
@@ -499,7 +514,7 @@ export default function LearningWorkspace({
       </li>)}</ul>
     </section>}
 
-    {canIssueCertificates && <section className="learning-assignment">
+    {canIssueCertificates && <section className="learning-assignment" id="learning-eligibility">
       <h2>{text.certificateEligibility}</h2>
       {delivery.courses.flatMap((course) => course.learners.map((learner) => {
         const template = catalog.certificate_templates.find((item) =>
@@ -529,7 +544,7 @@ export default function LearningWorkspace({
       }))}
     </section>}
 
-    {canAssign && <section className="learning-assignment">
+    {canAssign && <section className="learning-assignment" id="learning-pathways">
       <h2>{text.assignments}</h2>
       <form onSubmit={(event) => submit(event, "/cohort-assignments", (data) => ({
         course_id: data.course_id,
@@ -558,7 +573,7 @@ export default function LearningWorkspace({
         />
         <Field label={text.position} name="position" type="number" />
         <Field label={text.reason} name="reason" />
-        <button disabled={busy}>{text.assign}</button>
+        <Button type="submit" disabled={busy}>{text.assign}</Button>
       </form>
       <ul>{catalog.assignments.map((assignment) => {
         const course = catalog.courses.find((item) => item.id === assignment.course_id);
@@ -591,11 +606,11 @@ function Field({
   type?: string;
   required?: boolean;
 }) {
-  return <label>{label}<input name={name} type={type} required={required} min={type === "number" ? 1 : undefined} /></label>;
+  return <label>{label}<Input name={name} type={type} required={required} min={type === "number" ? 1 : undefined} /></label>;
 }
 
 function Area({ label, name }: { label: string; name: string }) {
-  return <label>{label}<textarea name={name} required /></label>;
+  return <label>{label}<Textarea name={name} required /></label>;
 }
 
 function Select({

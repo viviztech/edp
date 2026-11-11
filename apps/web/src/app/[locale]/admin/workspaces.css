@@ -1,0 +1,127 @@
+/* Staff workspaces share the AdminCN shell's visual language. These rules are
+   intentionally scoped so public and participant pages keep their own styles. */
+.edp-admin-shell {
+  --workspace-border: #dce5f0;
+  --workspace-surface: #fff;
+  --workspace-subtle: #f5f8fc;
+  --workspace-ink: #172d49;
+  --workspace-muted: #536a84;
+  --workspace-accent: #1a5ca2;
+}
+
+.edp-admin-shell :is(.program-heading, .learning-heading, .crm-heading, .meta-heading, .definition-heading) {
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0 0 1.5rem;
+  border-bottom: 1px solid var(--workspace-border);
+}
+.edp-admin-shell :is(.program-heading, .learning-heading, .crm-heading, .meta-heading, .definition-heading) h1 {
+  margin: .25rem 0 .45rem;
+}
+.edp-admin-shell :is(.program-heading, .learning-heading, .crm-heading, .meta-heading, .definition-heading) p:not(.eyebrow) {
+  color: var(--workspace-muted);
+  max-width: 58rem;
+  line-height: 1.55;
+}
+.edp-admin-shell :is(.program-heading, .learning-heading, .crm-heading, .meta-heading, .definition-heading) > a {
+  flex: none;
+  padding: .5rem .7rem;
+  border: 1px solid var(--workspace-border);
+  border-radius: .5rem;
+  background: #fff;
+  color: var(--workspace-accent);
+  font-size: .85rem;
+  text-decoration: none;
+}
+
+.edp-admin-shell :is(.program-panel, .learning-course, .learning-assignment, .learning-authoring > form, .crm-panel, .meta-panel, .meta-events, .notice-inbox, .notice-preference, .cms-grid > aside, .cms-grid > section, .definition-layout, .admin-audit) {
+  min-width: 0;
+  border: 1px solid var(--workspace-border);
+  border-radius: .75rem;
+  background: var(--workspace-surface);
+  box-shadow: 0 1px 3px rgb(21 48 79 / 5%);
+}
+.edp-admin-shell :is(.program-panel, .learning-course, .learning-assignment, .crm-panel, .meta-panel, .notice-inbox) {
+  padding: clamp(1rem, 1.6vw, 1.35rem);
+}
+.edp-admin-shell :is(.crm-workspace, .definition-layout, .cms-grid) { overflow: hidden; border-radius: .75rem; }
+.edp-admin-shell :is(.crm-queue, .definition-versions, .meta-rail) { background: var(--workspace-subtle); }
+.edp-admin-shell .notice-preference { color: var(--workspace-ink); }
+.edp-admin-shell .notice-preference .eyebrow { color: var(--workspace-accent); }
+.edp-admin-shell .notice-preference strong { font: 650 1.15rem/1.35 var(--admin-body-font); }
+.edp-admin-shell .notice-preference button { border-color: var(--workspace-border); color: var(--workspace-accent); }
+.edp-admin-shell :is(.program-panel, .learning-course, .learning-assignment, .crm-panel, .meta-panel, .notice-inbox, .definition-layout, .admin-audit) :is(h2, h3, h4) {
+  color: var(--workspace-ink);
+  font-family: var(--admin-body-font);
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+}
+.edp-admin-shell :is(.program-panel, .learning-course, .learning-assignment, .notice-inbox, .admin-audit) h2 { font-size: 1.15rem; }
+.edp-admin-shell :is(.crm-panel, .meta-panel) h3 { font-size: 1rem; }
+.edp-admin-shell :is(.crm-record-header, .meta-record) h2 { font: 650 1.35rem/1.3 var(--admin-body-font); }
+
+.edp-admin-shell :is(.program-form, .crm-create, .learning-modules > li) {
+  border-radius: .65rem;
+  background: var(--workspace-subtle);
+}
+.edp-admin-shell :is(.program-list, .crm-leads, .learning-modules, .notice-inbox ol) { min-width: 0; }
+.edp-admin-shell :is(.program-list, .crm-leads, .learning-modules, .notice-inbox ol) li { overflow-wrap: anywhere; }
+.edp-admin-shell :is(.program-message, .learning-message, .meta-message, .notice-message, .definition-message, .crm-message):empty { display: none; }
+.edp-admin-shell :is(.program-message, .learning-message, .meta-message, .notice-message, .definition-message, .crm-message):not(:empty) {
+  padding: .7rem .9rem;
+  border: 1px solid #cbdcf1;
+  border-radius: .55rem;
+  background: #eef5ff;
+  color: #174b83;
+}
+
+.edp-admin-shell :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  max-width: 100%;
+  min-width: 0;
+  min-height: 2.7rem;
+  border: 1px solid #c8d7e8;
+  border-radius: .5rem;
+  background: #fff;
+  color: var(--workspace-ink);
+  font: inherit;
+}
+.edp-admin-shell textarea { line-height: 1.5; }
+.edp-admin-shell :is(input, select, textarea):disabled { background: #eef2f7; color: #53677c; }
+.edp-admin-shell .learning-authoring .learning-check {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+.edp-admin-shell .learning-authoring .learning-check input[type="checkbox"] {
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--workspace-accent);
+}
+.edp-admin-shell :is(button, input, select, textarea, a):focus-visible {
+  outline: 3px solid #2775c5;
+  outline-offset: 2px;
+}
+.edp-admin-shell button { border-radius: .5rem; line-height: 1.3; }
+.edp-admin-shell button:disabled { cursor: not-allowed; opacity: .6; }
+.edp-admin-shell :is(.program-actions, .notice-actions, .actions) { flex-wrap: wrap; gap: .6rem; }
+
+.admin-section-nav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 1rem 0 1.25rem; }
+.admin-section-nav > span { margin-right: .3rem; color: var(--workspace-muted); font-size: .8rem; font-weight: 700; }
+.admin-section-nav a { display: inline-flex; align-items: center; min-height: 2.1rem; padding: .35rem .65rem; border: 1px solid var(--workspace-border); border-radius: 999px; background: #fff; color: #315c88; font-size: .8rem; font-weight: 600; text-decoration: none; }
+.admin-section-nav a:hover { border-color: #a5c4e8; background: #edf5ff; }
+.edp-admin-shell :is(#programs, #centers, #staff-assignments, #cohorts, #application-cycles, #enrollment-candidates, #participants, #sessions) { scroll-margin-top: 5.5rem; }
+
+@media (max-width: 720px) {
+  .edp-admin-shell :is(.program-heading, .learning-heading, .crm-heading, .meta-heading, .definition-heading) { flex-wrap: wrap; }
+  .edp-admin-shell :is(.program-panel, .learning-course, .learning-assignment, .crm-panel, .meta-panel, .notice-inbox) { padding: 1rem; }
+  .edp-admin-shell :is(.notice-preference, .notice-inbox) { padding: 1rem; }
+  .admin-section-nav { gap: .4rem; }
+  .admin-section-nav > span { flex-basis: 100%; }
+}

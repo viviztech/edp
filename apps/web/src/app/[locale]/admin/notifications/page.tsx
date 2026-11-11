@@ -7,6 +7,7 @@ import { notificationMessages } from "../../../../lib/notification-messages";
 import { serverApi } from "../../../../lib/server-api";
 import NotificationWorkspace from "./view";
 import NotificationOperations from "./operations";
+import "./workspace.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 export default async function NotificationsPage({ params, searchParams }: {

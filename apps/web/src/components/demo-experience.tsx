@@ -15,6 +15,10 @@ import {
 } from "lucide-react";
 import type { Locale } from "../lib/messages";
 import { demoCopy } from "../lib/demo-copy";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
 
 type Step = "intro" | "profile" | "application" | "receipt" | "dashboard";
 const example = {
@@ -176,11 +180,11 @@ export function DemoExperience({ locale }: { locale: Locale }) {
             {t.featureTitles.map((title, index) => {
               const Icon = [Compass, FileText, BookOpen][index];
               return (
-                <article key={title}>
+                <Card className="demo-feature-card" key={title}><CardContent><article>
                   <Icon size={25} aria-hidden="true" />
                   <h2>{title}</h2>
                   <p>{t.featureBodies[index]}</p>
-                </article>
+                </article></CardContent></Card>
               );
             })}
           </div>
@@ -212,7 +216,7 @@ export function DemoExperience({ locale }: { locale: Locale }) {
           >
             <label>
               {t.name}
-              <input
+              <Input
                 required
                 value={name}
                 maxLength={80}
@@ -222,7 +226,7 @@ export function DemoExperience({ locale }: { locale: Locale }) {
             </label>
             <label>
               {t.email}
-              <input
+              <Input
                 value="ananya@example.com"
                 readOnly
                 type="email"
@@ -230,13 +234,13 @@ export function DemoExperience({ locale }: { locale: Locale }) {
               />
             </label>
             <p className="launch-form-hint">{t.accountIntro}</p>
-            <button
+            <Button
               type="submit"
               className="public-button public-button-primary"
             >
               {t.accountAction}
               <ArrowRight size={18} aria-hidden="true" />
-            </button>
+            </Button>
           </form>
         </div>
       ) : step === "application" ? (
@@ -279,7 +283,7 @@ export function DemoExperience({ locale }: { locale: Locale }) {
             )}
             <label>
               {t.city}
-              <input
+              <Input
                 required
                 value={draft.city}
                 maxLength={120}
@@ -306,7 +310,7 @@ export function DemoExperience({ locale }: { locale: Locale }) {
             </label>
             <label>
               {t.idea}
-              <textarea
+              <Textarea
                 required
                 rows={4}
                 maxLength={1200}
@@ -318,7 +322,7 @@ export function DemoExperience({ locale }: { locale: Locale }) {
             </label>
             <label>
               {t.goals}
-              <textarea
+              <Textarea
                 required
                 rows={3}
                 maxLength={1200}
@@ -338,20 +342,21 @@ export function DemoExperience({ locale }: { locale: Locale }) {
               <span>{t.consent}</span>
             </label>
             <div className="public-actions">
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 className="public-button public-button-outline"
                 onClick={() => setMessage(t.saved)}
               >
                 {t.save}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 className="public-button public-button-primary"
               >
                 {t.submit}
                 <ArrowRight size={18} aria-hidden="true" />
-              </button>
+              </Button>
             </div>
           </form>
         </div>

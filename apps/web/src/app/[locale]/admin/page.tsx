@@ -27,6 +27,7 @@ export default async function AdminShell({ params, searchParams }: {
   catch { return <main id="main"><p role="alert">{text.unavailable}</p></main>; }
   if (!access.ok) return <main id="main"><p>{text.denied}</p></main>;
   return <main id="main" className="admin-home">
+    <StaffModuleNav locale={locale} organization={grant.organization_id} permissions={grant.permissions} />
     <div className="admin-home-heading">
       <div><p className="eyebrow">{grant.organization_name}</p><h1>{text.staff}</h1></div>
       <Link href={"/" + locale + "/account"}>{text.back}</Link>

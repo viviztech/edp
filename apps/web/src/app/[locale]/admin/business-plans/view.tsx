@@ -2,6 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { sections } from "../../business-plan/view";
+import { Button } from "../../../../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
+import { Textarea } from "../../../../components/ui/textarea";
 
 type Locale = "en" | "ta";
 type Submission = {
@@ -54,8 +57,9 @@ function ReviewCard({ item, org, locale, onSaved }: {
     } catch { setMessage(labels.error); }
     finally { setBusy(false); }
   }
-  return <section className="program-panel">
-    <h2>{labels.version} {item.number}</h2><small>{new Date(item.created_at).toLocaleString(locale)}</small>
+  return <Card className="plan-review-card">
+    <CardHeader><CardTitle role="heading" aria-level={2}>{labels.version} {item.number}</CardTitle><CardDescription>{new Date(item.created_at).toLocaleString(locale)}</CardDescription></CardHeader>
+    <CardContent>
     <p role="status">{message}</p>
     <ul className="program-list">{Object.entries(item.snapshot).map(([code, body]) =>
       <li key={code}><strong>{sectionLabel(code, locale)}</strong><p>{body}</p></li>)}</ul>
@@ -67,15 +71,16 @@ function ReviewCard({ item, org, locale, onSaved }: {
           <option value="changes_requested">{labels.request}</option>
           <option value="approved">{labels.approve}</option>
         </select></label>
-        <label>{labels.reason}<textarea name="reason" required minLength={3} maxLength={500} /></label>
+        <label>{labels.reason}<Textarea name="reason" required minLength={3} maxLength={500} /></label>
         <details><summary>{labels.comments}</summary>
           {Object.keys(item.snapshot).map((code) => <label key={code}>
-            {sectionLabel(code, locale)}<textarea name={`comment:${code}`} maxLength={2000} />
+            {sectionLabel(code, locale)}<Textarea name={`comment:${code}`} maxLength={2000} />
           </label>)}
         </details>
-        <button disabled={busy}>{labels.submit}</button>
+        <Button type="submit" disabled={busy}>{labels.submit}</Button>
       </form>}
-  </section>;
+    </CardContent>
+  </Card>;
 }
 
 export default function MentorPlanReviews({ org, locale }: { org: string; locale: Locale }) {
@@ -101,10 +106,10 @@ export default function MentorPlanReviews({ org, locale }: { org: string; locale
     })();
     return () => { active = false; };
   }, [org]);
-  return <>
+  return <div className="plan-reviews-workspace">
     {busy && <p role="status">{labels.loading}</p>}
     {error && <p role="alert">{labels.error}</p>}
-    {!busy && !error && items.length === 0 && <p>{labels.empty}</p>}
+    {!busy && !error && items.length === 0 && <p className="plan-reviews-empty">{labels.empty}</p>}
     {items.map((item) => <ReviewCard key={item.id} item={item} org={org} locale={locale} onSaved={load} />)}
-  </>;
+  </div>;
 }

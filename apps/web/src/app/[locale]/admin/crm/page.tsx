@@ -6,6 +6,7 @@ import { crmMessages } from "../../../../lib/crm-messages";
 import { isLocale } from "../../../../lib/messages";
 import { serverApi } from "../../../../lib/server-api";
 import CrmWorkspace from "./view";
+import "./workspace.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 export default async function CrmPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ organization?: string }> }) {

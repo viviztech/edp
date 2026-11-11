@@ -5,6 +5,7 @@ import { learningMessages } from "../../../lib/learning-messages";
 import { isLocale } from "../../../lib/messages";
 import { serverApi } from "../../../lib/server-api";
 import LearnerWorkspace from "./view";
+import { ParticipantNavigation } from "../../../components/participant-navigation";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -35,7 +36,8 @@ export default async function LearningPage({
     return <main><h1>{text.learnerTitle}</h1><p>{text.empty}</p>
       <Link href={`/${locale}/account`}>Account</Link></main>;
   }
-  return <main className="learning-main learner-main">
+  return <main id="main" className="learning-main learner-main participant-workspace">
+    <ParticipantNavigation locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="learning" />
     <LearnerWorkspace org={grant.organization_id} locale={locale} />
   </main>;
 }

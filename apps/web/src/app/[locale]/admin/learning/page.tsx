@@ -7,6 +7,7 @@ import { isLocale } from "../../../../lib/messages";
 import { serverApi } from "../../../../lib/server-api";
 import TrainerLearningWorkspace from "./trainer-view";
 import LearningWorkspace from "./view";
+import "./workspace.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 

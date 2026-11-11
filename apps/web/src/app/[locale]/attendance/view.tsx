@@ -1,4 +1,8 @@
 "use client";
+import { Card } from "../../../components/ui/card";
+import { Input } from "../../../components/ui/input";
+import { Button } from "../../../components/ui/button";
+
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../lib/api-contracts";
@@ -62,12 +66,13 @@ export default function LearnerAttendance({ org, locale, initialToken }: { org: 
   return <>
     <header className="program-heading"><div><p className="eyebrow">{text.eyebrow}</p>
       <h1>{text.learnerTitle}</h1><p>{text.learnerIntro}</p></div></header>
-    <form onSubmit={checkIn}>
-      <label>{text.checkInCode}<input name="token" defaultValue={initialToken} minLength={32} maxLength={160} required /></label>
-      <button disabled={busy} type="submit">{text.checkIn}</button>
+    <form className="participant-check-in program-panel" onSubmit={checkIn}>
+      <label>{text.checkInCode}<Input name="token" defaultValue={initialToken} minLength={32} maxLength={160} required /></label>
+      <Button disabled={busy} type="submit">{text.checkIn}</Button>
     </form>
     <p role="status">{busy ? text.loading : message}</p>
-    <div className="program-grid">{attendance.enrollments.map((enrollment) => <section className="program-panel" key={enrollment.enrollment_id}>
+    {!busy && !message && attendance.enrollments.length === 0 && <p className="participant-empty">{locale === "ta" ? "வருகைப் பதிவுகள் இன்னும் இல்லை." : "Your attendance records will appear here."}</p>}
+    <div className="program-grid">{attendance.enrollments.map((enrollment) => <Card className="program-panel" key={enrollment.enrollment_id}>
       <h2>{label(enrollment.cohort_name_en, enrollment.cohort_name_ta)}</h2>
       <p><strong>{enrollment.summary.percent}%</strong> — {enrollment.summary.attended} {text.attended} / {enrollment.summary.required} {text.required}</p>
       <p role={enrollment.summary.low_attendance ? "alert" : undefined}>{enrollment.summary.low_attendance ? text.lowAttendance : text.onTrack}</p>
@@ -76,6 +81,6 @@ export default function LearnerAttendance({ org, locale, initialToken }: { org: 
         <small>{new Date(session.starts_at).toLocaleString(locale)}</small>
         <span>{session.record ? text[session.record.status] : text.unmarked}</span>
       </li>)}</ul>
-    </section>)}</div>
+    </Card>)}</div>
   </>;
 }

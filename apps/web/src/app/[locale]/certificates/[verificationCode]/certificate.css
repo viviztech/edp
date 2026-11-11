@@ -1,0 +1,17 @@
+.public-site-body .certificate-verification { width: min(100%, 62rem); max-width: 62rem; margin: 0 auto; padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 2.5rem) 5rem; color: var(--public-ink); }
+.public-site-body .certificate-card { padding: 0; border: 1px solid var(--public-line); border-radius: 1rem; background: #fff; box-shadow: 0 4px 22px #142d4e0a; }
+.certificate-card [data-slot="card-content"] { padding: clamp(1.4rem, 4vw, 3rem); }
+.certificate-detail { display: grid; grid-template-columns: minmax(0, 1fr) 180px; align-items: start; gap: clamp(1.5rem, 4vw, 3rem); }
+.certificate-detail > img { grid-column: 2; grid-row: 1; width: 180px; max-width: 100%; height: auto; padding: .5rem; border: 1px solid var(--public-line); border-radius: .75rem; }
+.certificate-detail > div { grid-column: 1; grid-row: 1; min-width: 0; }
+.certificate-status { display: inline-flex; align-items: center; gap: .4rem; margin: 0 0 1rem; padding: .4rem .7rem; border: 1px solid #bfe2d2; border-radius: 999px; background: #ecf9f1; color: #26734e; font-size: .8rem; font-weight: 700; }
+.certificate-status[data-status="revoked"] { border-color: #f0c8bd; background: #fff2ef; color: #98412d; }
+.public-site-body .certificate-detail h1 { max-width: none; margin: 0 0 1rem; font: 650 clamp(1.8rem, 4vw, 2.6rem)/1.25 var(--public-display-font); letter-spacing: -.035em; overflow-wrap: anywhere; }
+.certificate-detail h2 { margin: 0 0 1.25rem; color: #405b79; font: 600 1.15rem/1.5 var(--public-body-font); overflow-wrap: anywhere; }
+.certificate-detail p:not(.certificate-status) { color: #526b86; }
+.certificate-detail strong, .certificate-detail small { display: block; margin-top: .75rem; overflow-wrap: anywhere; }
+.certificate-detail small { color: #71839a; }
+.certificate-back { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1.5rem; color: var(--public-cobalt); font-weight: 650; text-decoration: none; }
+.certificate-back:hover { text-decoration: underline; text-underline-offset: .2em; }
+.certificate-back:focus-visible { outline: 3px solid var(--public-cobalt); outline-offset: 4px; }
+@media (max-width: 580px) { .certificate-detail { grid-template-columns: 1fr; } .certificate-detail > img, .certificate-detail > div { grid-column: 1; grid-row: auto; } .certificate-detail > img { width: 140px; } }

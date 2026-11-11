@@ -26,4 +26,16 @@ describe("private idea planner", () => {
     fireEvent.click(screen.getByRole("button", { name: "Clear answers" }));
     expect(screen.getByRole("progressbar").getAttribute("value")).toBe("0");
   });
+  it("warns on browser navigation while answers are unsaved", () => {
+    render(<IdeaPlanner locale="en" />);
+    fireEvent.change(screen.getByLabelText("What is your idea?", { exact: false }), { target: { value: "Sample idea" } });
+    const event = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    fireEvent.click(screen.getByRole("button", { name: "Clear answers" }));
+    const cleared = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(cleared);
+    expect(cleared.defaultPrevented).toBe(false);
+  });
 });

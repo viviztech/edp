@@ -6,6 +6,7 @@ import { attendanceMessages } from "../../../../lib/attendance-messages";
 import { isLocale } from "../../../../lib/messages";
 import { serverApi } from "../../../../lib/server-api";
 import AttendanceWorkspace from "./view";
+import "./workspace.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 

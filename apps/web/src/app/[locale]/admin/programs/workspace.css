@@ -1,0 +1,45 @@
+/* Scoped design for program setup, selection and application definitions. */
+.edp-admin-shell .admin-design-page { max-width: 96rem; }
+.edp-admin-shell .admin-design-page :is(.program-heading, .definition-heading) { align-items: flex-start; margin: 0 0 1.5rem; padding: 0 0 1.35rem; border-color: #dce5f0; }
+.edp-admin-shell .admin-design-page :is(.program-heading, .definition-heading) h1 { margin: .3rem 0 .45rem; }
+.edp-admin-shell .admin-design-page :is(.program-heading, .definition-heading) p:not(.eyebrow) { max-width: 65ch; margin: 0; color: #667a92; line-height: 1.55; }
+.edp-admin-shell .admin-design-page :is(.program-heading, .definition-heading) .eyebrow { margin: 0; color: #195da4; font: 700 .75rem/1.4 var(--admin-body-font); letter-spacing: .04em; text-transform: uppercase; }
+.edp-admin-shell .admin-design-page :is(.program-heading, .definition-heading) > a { flex: none; padding: .55rem .75rem; border: 1px solid #d8e3ef; border-radius: .5rem; background: #fff; color: #315c88; font-size: .83rem; font-weight: 600; text-decoration: none; }
+.edp-admin-shell .admin-design-page :is(.program-heading, .definition-heading) > a:hover { background: #edf5ff; }
+.edp-admin-shell .admin-section-card { margin: 0 0 1.2rem; padding: 0; border: 1px solid #dce5f0; border-radius: .8rem; background: #fff; box-shadow: 0 1px 3px rgb(21 48 79 / 5%); }
+.edp-admin-shell .admin-section-card [data-slot="card-content"] { padding: .9rem 1.1rem; }
+.edp-admin-shell .admin-section-card .admin-section-nav { gap: .45rem; margin: 0; }
+.edp-admin-shell .admin-section-nav > span { flex-basis: 100%; margin: 0 0 .2rem; color: #667a92; font-size: .75rem; font-weight: 700; letter-spacing: .03em; }
+.edp-admin-shell .admin-section-nav a { min-height: 2.15rem; padding: .4rem .7rem; border: 1px solid #dce5f0; border-radius: .45rem; background: #f8fafd; color: #365a7f; font-size: .78rem; line-height: 1.3; }
+.edp-admin-shell .admin-section-nav a:hover { border-color: #9ec4ec; background: #edf5ff; color: #195da4; }
+.edp-admin-shell .admin-design-page :is(.program-grid, .definition-layout) { min-width: 0; gap: 1rem; }
+.edp-admin-shell .admin-design-page .program-panel { padding: 1.25rem; border: 1px solid #dce5f0; border-radius: .8rem; background: #fff; box-shadow: 0 1px 3px rgb(21 48 79 / 5%); scroll-margin-top: 5.5rem; }
+.edp-admin-shell .admin-design-page .program-panel > h2 { margin: 0 0 1rem; color: #243a55; font: 650 1.04rem/1.4 var(--admin-body-font); }
+.edp-admin-shell .admin-design-page .program-panel > p:last-child { margin: .85rem 0 0; color: #71839a; font-size: .85rem; }
+.edp-admin-shell .admin-design-page .program-form { gap: .8rem; padding: 1rem; border: 1px solid #e8eef5; border-radius: .65rem; background: #f8fafd; }
+.edp-admin-shell .admin-design-page :is(.program-form label, .definition-editor label, .selection-review-editor label, .selection-criterion-editor label) { min-width: 0; gap: .4rem; color: #344b65; font-size: .83rem; font-weight: 650; }
+.edp-admin-shell .admin-design-page :is(.program-form, .definition-editor, .selection-review-editor, .selection-criterion-editor) :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) { width: 100%; min-width: 0; min-height: 2.75rem; padding: .65rem .75rem; border: 1px solid #cad9e9; border-radius: .5rem; background: #fff; color: #1d334f; font: inherit; }
+.edp-admin-shell .admin-design-page :is(.definition-editor, .selection-review-editor, .selection-criterion-editor) textarea { min-height: 6rem; field-sizing: fixed; resize: vertical; line-height: 1.5; }
+.edp-admin-shell .admin-design-page :is(.program-form, .definition-editor, .selection-review-editor, .selection-criterion-editor) :is(input, select, textarea):disabled { background: #f0f4f8; color: #60748a; }
+.edp-admin-shell .admin-design-page :is(input[type="checkbox"], input[type="radio"]) { flex: none; width: 1.15rem; min-width: 1.15rem; height: 1.15rem; min-height: 1.15rem; padding: 0; accent-color: #195da4; }
+.edp-admin-shell .admin-design-page :is(.program-form button, .definition-primary, .definition-publish, .definition-section-head button[data-slot="button"]) { min-height: 2.75rem; padding: .6rem .85rem; border: 1px solid #195da4; border-radius: .5rem; background: #195da4; color: #fff; font-size: .85rem; font-weight: 700; white-space: normal; }
+.edp-admin-shell .admin-design-page :is(.program-form button, .definition-primary, .definition-publish):hover:not(:disabled) { background: #164f8d; }
+.edp-admin-shell .admin-design-page .program-list { gap: .65rem; }
+.edp-admin-shell .admin-design-page .program-list > li { min-width: 0; padding: .9rem 1rem; border: 1px solid #e2eaf3; border-radius: .6rem; background: #fbfcfe; }
+.edp-admin-shell .admin-design-page .program-record strong { overflow-wrap: anywhere; color: #243a55; }
+.edp-admin-shell .admin-design-page .program-list small { overflow-wrap: anywhere; color: #71839a; }
+.edp-admin-shell .admin-design-page .program-actions button { min-height: 2.35rem; padding: .45rem .65rem; border: 1px solid #cfdeed; border-radius: .45rem; background: #fff; color: #315c88; font-size: .8rem; font-weight: 650; }
+.edp-admin-shell .admin-design-page .program-actions button:hover:not(:disabled) { background: #edf5ff; }
+.edp-admin-shell .admin-design-page .definition-layout { display: grid; grid-template-columns: minmax(14rem, 19rem) minmax(0, 1fr); gap: 0; padding: 0; overflow: hidden; border: 1px solid #dce5f0; border-radius: .8rem; background: #fff; box-shadow: 0 1px 3px rgb(21 48 79 / 5%); }
+.edp-admin-shell .admin-design-page .definition-versions { min-width: 0; padding: 1.25rem; border-right: 1px solid #e4ebf3; background: #f8fafd; }
+.edp-admin-shell .admin-design-page .definition-editor { min-width: 0; padding: clamp(1.1rem, 2.5vw, 1.7rem); }
+.edp-admin-shell .admin-design-page :is(.definition-section-head h2, .definition-section-head h3, .definition-record h2) { color: #243a55; font: 650 1.05rem/1.4 var(--admin-body-font); }
+.edp-admin-shell .admin-design-page .definition-record h2 { margin: .3rem 0; font-size: 1.35rem; overflow-wrap: anywhere; }
+.edp-admin-shell .admin-design-page .definition-versions li > button { border-color: #e0e8f2; border-radius: .55rem; }
+.edp-admin-shell .admin-design-page .definition-versions li > button[aria-pressed="true"] { border-color: #a9c8ea; background: #eef5ff; box-shadow: inset 3px 0 #195da4; }
+.edp-admin-shell .admin-design-page .definition-fields > li { min-width: 0; padding: 1rem; border-color: #e2eaf3; border-radius: .65rem; background: #f8fafd; }
+.edp-admin-shell .admin-design-page .definition-boundary { border-left: 3px solid #e2ac66; border-radius: .4rem; background: #fff8ed; color: #765733; font-size: .85rem; }
+.edp-admin-shell .admin-design-page :is(.selection-rubric, .selection-criterion-editor, .selection-review-editor) { min-width: 0; border-color: #e2eaf3; border-radius: .65rem; }
+.edp-admin-shell .admin-design-page :is(button, input, textarea, select, a):focus-visible { outline: 3px solid #2874c6; outline-offset: 2px; }
+@media (max-width: 900px) { .edp-admin-shell .admin-design-page .definition-layout { grid-template-columns: 1fr; } .edp-admin-shell .admin-design-page .definition-versions { border-right: 0; border-bottom: 1px solid #e4ebf3; } }
+@media (max-width: 640px) { .edp-admin-shell .admin-design-page :is(.program-heading, .definition-heading) { flex-wrap: wrap; } .edp-admin-shell .admin-design-page .program-panel, .edp-admin-shell .admin-design-page .definition-editor { padding: 1rem; } .edp-admin-shell .admin-design-page .definition-fields > li { padding: .85rem; } }

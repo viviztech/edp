@@ -5,6 +5,7 @@ import { attendanceMessages } from "../../../lib/attendance-messages";
 import { isLocale } from "../../../lib/messages";
 import { serverApi } from "../../../lib/server-api";
 import LearnerAttendance from "./view";
+import { ParticipantNavigation } from "../../../components/participant-navigation";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -28,7 +29,8 @@ export default async function AttendancePage({
     .filter((item) => item.permissions.includes("participant.self"))
     .find((item) => !query.organization || item.organization_id === query.organization);
   if (!grant) return <main><h1>{text.learnerTitle}</h1><p>{text.error}</p><Link href={`/${locale}/account`}>Account</Link></main>;
-  return <main className="program-main">
+  return <main id="main" className="program-main participant-workspace">
+    <ParticipantNavigation locale={locale} organization={grant.organization_id} permissions={grant.permissions} active="attendance" />
     <LearnerAttendance org={grant.organization_id} locale={locale} initialToken={query.token ?? ""} />
   </main>;
 }

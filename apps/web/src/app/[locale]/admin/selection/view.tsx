@@ -3,6 +3,9 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { components } from "../../../../lib/api-contracts";
 import { selectionMessages } from "../../../../lib/selection-messages";
+import { Button } from "../../../../components/ui/button";
+import { Card, CardContent } from "../../../../components/ui/card";
+import { Input } from "../../../../components/ui/input";
 
 type Workspace = components["schemas"]["SelectionWorkspace"];
 type Cycle = components["schemas"]["SelectionCycleView"];
@@ -178,8 +181,16 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
 
   return <div className="program-workspace selection-workspace" aria-busy={busy}>
     <p role="status" className="program-message">{busy ? text.loading : message}</p>
+    <Card className="admin-section-card"><CardContent><nav className="admin-section-nav" aria-label={locale === "ta" ? "பக்கப் பிரிவுகள்" : "On this page"}>
+      <span>{locale === "ta" ? "பக்கப் பிரிவுகள்" : "On this page"}</span>
+      <a href="#selection-cycles">{text.cycles}</a><a href="#selection-assignments">{text.assignments}</a><a href="#selection-rubrics">{text.rubric}</a>
+      {canAssign && <a href="#selection-aggregates">{text.aggregates}</a>}
+      {(canManageInterview || canScoreInterview) && <a href="#selection-interviews">{text.interviews}</a>}
+      {canAssign && <a href="#selection-decisions">{text.decisionHistory}</a>}
+      {canReview && <a href="#selection-inbox">{text.inbox}</a>}
+    </nav></CardContent></Card>
     <div className="program-grid">
-      <section className="program-panel">
+      <section id="selection-cycles" className="program-panel">
         <h2>{text.cycles}</h2>
         {canManageCycle && <form className="program-form" onSubmit={createCycle}>
           <Field label={text.code} name="code" />
@@ -187,7 +198,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
           <Field label={text.tamilName} name="name_ta" />
           <Select label={text.intake} name="application_cycle_id" choose={text.choose}
             options={eligibleIntakes.map((item) => [item.id, locale === "ta" ? item.name_ta : item.name_en])} />
-          <button disabled={busy}>{text.create}</button>
+          <Button type="submit" disabled={busy}>{text.create}</Button>
         </form>}
         <ul className="program-list">{workspace.cycles.map((item) => {
           const hasPublished = workspace.rubrics.some((rubric) =>
@@ -204,7 +215,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
         {!workspace.cycles.length && <p>{text.empty}</p>}
       </section>
 
-      <section className="program-panel">
+      <section id="selection-assignments" className="program-panel">
         <h2>{text.assignments}</h2>
         {canAssign && <form className="program-form" onSubmit={assign}>
           <Select label={text.cycles} name="selection_cycle_id" choose={text.choose}
@@ -213,7 +224,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
             options={workspace.applications.map((item) => [item.id, item.application_number])} />
           <Select label={text.reviewer} name="reviewer_user_id" choose={text.choose}
             options={workspace.reviewers.map((item) => [item.id, item.display_name])} />
-          <button disabled={busy}>{text.assign}</button>
+          <Button type="submit" disabled={busy}>{text.assign}</Button>
         </form>}
         <ul className="program-list">{workspace.assignments.map((item) =>
           <li key={item.id}>
@@ -231,7 +242,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
         {!workspace.assignments.length && <p>{text.empty}</p>}
       </section>
 
-      <section className="program-panel program-wide">
+      <section id="selection-rubrics" className="program-panel program-wide">
         <h2>{text.rubric}</h2>
         <div className="selection-rubrics">{workspace.rubrics.map((item) =>
           <article className="selection-rubric" key={item.id}>
@@ -256,7 +267,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
         {!workspace.rubrics.length && <p>{text.empty}</p>}
       </section>
 
-      {canAssign && <section className="program-panel program-wide">
+      {canAssign && <section id="selection-aggregates" className="program-panel program-wide">
         <h2>{text.aggregates}</h2>
         <ul className="program-list">{workspace.aggregates.map((item) => <li key={`${item.selection_cycle_id}-${item.application_id}`}>
           <Record name={item.application_number} detail={`${cycleName(item.selection_cycle_id)} Â· ${item.included_reviews}/${item.completed_reviews} ${text.includedReviews}`} state={item.aggregate_score === null ? "pending" : "completed"} />
@@ -277,7 +288,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
         </li>)}</ul>
         {!workspace.aggregates.length && <p>{text.empty}</p>}
       </section>}
-      {(canManageInterview || canScoreInterview) && <section className="program-panel program-wide">
+      {(canManageInterview || canScoreInterview) && <section id="selection-interviews" className="program-panel program-wide">
         <h2>{text.interviews}</h2>
         {canManageInterview && <form className="program-form selection-interview-form" onSubmit={scheduleInterview}>
           <Select label={text.application} name="application_id" choose={text.choose}
@@ -312,7 +323,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
         {!workspace.interviews.length && <p>{text.empty}</p>}
       </section>}
 
-      {canAssign && <section className="program-panel program-wide">
+      {canAssign && <section id="selection-decisions" className="program-panel program-wide">
         <h2>{text.decisionHistory}</h2>
         <ul className="program-list">{workspace.decisions.map((item) => <li key={item.id}>
           <Record name={item.application_number} detail={`${item.from_state} â†’ ${item.to_state}`} state={item.is_override ? "override" : item.to_state} />
@@ -321,7 +332,7 @@ export default function SelectionWorkspace({ org, actor, locale, permissions }: 
         </li>)}</ul>
         {!workspace.decisions.length && <p>{text.empty}</p>}
       </section>}
-      {canReview && <section className="program-panel program-wide">
+      {canReview && <section id="selection-inbox" className="program-panel program-wide">
         <h2>{text.inbox}</h2>
         <ul className="program-list">{workspace.assignments.filter((item) => item.reviewer_user_id === actor).map((item) =>
           <li key={item.id}>
@@ -426,13 +437,13 @@ function RubricEditor({ rubric, locale, busy, onSave, onPublish }: {
 function Field({ label, name, value, onChange, required = true }: {
   label: string; name: string; value?: string; onChange?: (value: string) => void; required?: boolean;
 }) {
-  return <label>{label}<input name={name} required={required} value={value} onChange={onChange ? (event) => onChange(event.target.value) : undefined} /></label>;
+  return <label>{label}<Input name={name} required={required} value={value} onChange={onChange ? (event) => onChange(event.target.value) : undefined} /></label>;
 }
 
 function NumberField({ label, value, min, max, onChange }: {
   label: string; value: number; min: number; max: number; onChange: (value: number) => void;
 }) {
-  return <label>{label}<input type="number" required min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} /></label>;
+  return <label>{label}<Input type="number" required min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} /></label>;
 }
 
 function Select({ label, name, options, choose }: {

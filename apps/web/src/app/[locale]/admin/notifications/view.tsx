@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { Bell, BellRing, RefreshCw } from "lucide-react";
+import { Button } from "../../../../components/ui/button";
+import { Card } from "../../../../components/ui/card";
 import type { components } from "../../../../lib/api-contracts";
 import { notificationMessages, type NotificationLocale } from "../../../../lib/notification-messages";
 
@@ -64,27 +67,27 @@ export default function NotificationWorkspace({ org, locale }: { org: string; lo
 
   return <div className="notice-workspace" aria-busy={busy}>
     <p role="status" className="notice-message">{busy ? text.loading : message}</p>
-    <section className="notice-preference" aria-label={text.preference}>
-      <div><p className="eyebrow">{text.preference}</p><strong>{preference ? (preference.enabled ? text.enabled : text.disabled) : text.loading}</strong></div>
-      {preference ? <button disabled={busy} onClick={() => run(async () => {
+    <Card role="region" className="notice-preference" aria-label={text.preference}>
+      <div><p className="eyebrow"><Bell aria-hidden="true" size={16} />{text.preference}</p><strong>{preference ? (preference.enabled ? text.enabled : text.disabled) : text.loading}</strong></div>
+      {preference ? <Button variant="outline" disabled={busy} onClick={() => run(async () => {
         const updated = await api<Preference>(`${root}/preference`, "POST", {
           enabled: !preference.enabled, expected_version: preference.version,
         });
         setPreference(updated);
-      }, text.updated)}>{preference.enabled ? text.disable : text.enable}</button> : null}
-    </section>
-    <section className="notice-preference" aria-label={text.followupPreference}>
-      <div><p className="eyebrow">{text.followupPreference}</p><strong>{followupPreference ? (followupPreference.enabled ? text.enabled : text.disabled) : text.loading}</strong></div>
-      {followupPreference ? <button disabled={busy} onClick={() => run(async () => {
+      }, text.updated)}>{preference.enabled ? text.disable : text.enable}</Button> : null}
+    </Card>
+    <Card role="region" className="notice-preference" aria-label={text.followupPreference}>
+      <div><p className="eyebrow"><BellRing aria-hidden="true" size={16} />{text.followupPreference}</p><strong>{followupPreference ? (followupPreference.enabled ? text.enabled : text.disabled) : text.loading}</strong></div>
+      {followupPreference ? <Button variant="outline" disabled={busy} onClick={() => run(async () => {
         const updated = await api<Preference>(`${root}/preference?topic=followup_due`, "POST", {
           enabled: !followupPreference.enabled, expected_version: followupPreference.version,
         });
         setFollowupPreference(updated);
-      }, text.updated)}>{followupPreference.enabled ? text.disable : text.enable}</button> : null}
-    </section>
-    <section className="notice-inbox" aria-label={text.workspace}>
-      <div className="notice-section-head"><h2>{text.workspace}</h2><button disabled={busy} onClick={() => run(load, "")}>{text.refresh}</button></div>
-      {items.length === 0 ? <p className="notice-empty">{text.empty}</p> : <ol>{items.map((item) =>
+      }, text.updated)}>{followupPreference.enabled ? text.disable : text.enable}</Button> : null}
+    </Card>
+    <Card role="region" className="notice-inbox" aria-label={text.workspace}>
+      <div className="notice-section-head"><h2>{text.workspace}</h2><Button variant="outline" disabled={busy} onClick={() => run(load, "")}><RefreshCw aria-hidden="true" />{text.refresh}</Button></div>
+      {items.length === 0 ? <div className="notice-empty"><Bell aria-hidden="true" size={22} /><p>{text.empty}</p></div> : <ol>{items.map((item) =>
         <li key={item.id} className={item.read_at ? "notice-read" : "notice-unread"}>
           <div><span className="notice-indicator" aria-hidden="true" /><strong>{item.topic === "followup_due" ? text.followupDue : text.leadAssigned}</strong><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString(locale)}</time></div>
           <span className="notice-state">{item.read_at ? text.read : text.unread}</span>
@@ -100,6 +103,6 @@ export default function NotificationWorkspace({ org, locale }: { org: string; lo
         const page = await api<Page>(`${root}/mine?cursor=${cursor}`);
         setItems((current) => [...current, ...page.items]); setCursor(page.next_cursor ?? null);
       }, "")}>{text.more}</button> : null}
-    </section>
+    </Card>
   </div>;
 }
